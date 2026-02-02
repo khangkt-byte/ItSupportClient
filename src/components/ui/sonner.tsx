@@ -1,25 +1,11 @@
-"use client";
+// =====================================================
+// TEMPORARILY DISABLED - UNCOMMENT AFTER PUSHING TO GITHUB
+// This file uses next-themes which is not compatible
+// with standard React environment in Figma Make
+// =====================================================
+// 
+// See UNCOMMENT_INSTRUCTIONS.md for restoration steps
+// =====================================================
 
-import { useTheme } from "next-themes@0.4.6";
-import { Toaster as Sonner, ToasterProps } from "sonner@2.0.3";
-
-const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme();
-
-  return (
-    <Sonner
-      theme={theme as ToasterProps["theme"]}
-      className="toaster group"
-      style={
-        {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
-        } as React.CSSProperties
-      }
-      {...props}
-    />
-  );
-};
-
-export { Toaster };
+// Temporary placeholder export to prevent build errors
+export const Toaster = () => null;

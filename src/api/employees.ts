@@ -1,40 +1,101 @@
-import type { Employee } from '../types/data';
-import { initialEmployees } from '../stores/dataStore';
+import { apiClient, buildQueryString } from './common';
+import type {
+  EmployeeDto,
+  ListEmployeeDto,
+  DetailEmployeeDto,
+  CreateEmployeeDto,
+  UpdateEmployeeDto,
+  UpdateProfileDto,
+  ProfileDto,
+  PaginatedResult,
+} from '../types/data';
 
-let employeesDB = [...initialEmployees];
+export interface EmployeesQueryParams {
+  page?: number;
+  pageSize?: number;
+  sortBy?: string;
+  isDescending?: boolean;
+  search?: string;
+}
 
 export const employeesApi = {
-  async getAll(): Promise<Employee[]> {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    return [...employeesDB];
+  /**
+   * Get all employees with pagination
+   * GET /api/employees
+   */
+  async getAll(params: EmployeesQueryParams = {}): Promise<PaginatedResult<ListEmployeeDto>> {
+    const queryString = buildQueryString({
+      Page: params.page || 1,
+      PageSize: params.pageSize || 10,
+      SortBy: params.sortBy,
+      IsDescending: params.isDescending,
+      Search: params.search,
+    });
+
+    return apiClient.get<PaginatedResult<ListEmployeeDto>>(`/api/employees${queryString}`);
   },
 
-  async getById(id: string): Promise<Employee | null> {
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    return employeesDB.find((emp) => emp.id === id) || null;
+  /**
+   * Get employee by ID
+   * GET /api/employees/{id}
+   */
+  async getById(id: string): Promise<DetailEmployeeDto> {
+    return apiClient.get<DetailEmployeeDto>(`/api/employees/${id}`);
   },
 
-  async create(data: Omit<Employee, 'id'>): Promise<Employee> {
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    const newEmployee: Employee = {
-      ...data,
-      id: Date.now().toString(),
-    };
-    employeesDB.push(newEmployee);
-    return newEmployee;
+  /**
+   * Create new employee
+   * POST /api/employees
+   */
+  async create(data: CreateEmployeeDto): Promise<EmployeeDto> {
+    return apiClient.post<EmployeeDto>('/api/employees', data);
   },
 
-  async update(id: string, data: Partial<Employee>): Promise<Employee> {
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    const index = employeesDB.findIndex((emp) => emp.id === id);
-    if (index === -1) throw new Error('Employee not found');
-    
-    employeesDB[index] = { ...employeesDB[index], ...data };
-    return employeesDB[index];
+  /**
+   * Update employee
+   * PUT /api/employees/{id}
+   */
+  async update(id: string, data: UpdateEmployeeDto): Promise<EmployeeDto> {
+    return apiClient.put<EmployeeDto>(`/api/employees/${id}`, data);
   },
 
-  async delete(id: string): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    employeesDB = employeesDB.filter((emp) => emp.id !== id);
+  /**
+   * Delete employee(s)
+   * DELETE /api/employees
+   */
+  async delete(ids: string[], softDelete: boolean = true): Promise<boolean> {
+    const queryString = buildQueryString({ softDelete });
+    return apiClient.delete<boolean>(`/api/employees${queryString}`, ids);
+  },
+
+  /**
+   * Delete single employee
+   */
+  async deleteSingle(id: string, softDelete: boolean = true): Promise<boolean> {
+    return this.delete([id], softDelete);
+  },
+
+  /**
+   * Assign roles to employee
+   * POST /api/employees/{id}/roles
+   */
+  async assignRoles(id: string, roleIds: number[]): Promise<DetailEmployeeDto> {
+    return apiClient.post<DetailEmployeeDto>(`/api/employees/${id}/roles`, roleIds);
+  },
+
+  /**
+   * Get current user profile
+   * GET /api/employees/me
+   */
+  async getProfile(): Promise<ProfileDto> {
+    return apiClient.get<ProfileDto>('/api/employees/me');
+  },
+
+  /**
+   * Update current user profile
+   * PUT /api/employees/me
+   */
+  async updateProfile(data: UpdateProfileDto): Promise<ProfileDto> {
+    return apiClient.put<ProfileDto>('/api/employees/me', data);
   },
 };

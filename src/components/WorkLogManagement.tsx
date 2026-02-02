@@ -1,14 +1,25 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, X, ChevronDown, ChevronUp, Loader2, Download, Upload, FileSpreadsheet } from 'lucide-react';
-import type { WorkLog, WorkStatus, Employee, Department, Area } from '../types/data';
+import type { WorkLog, WorkStatus, Employee, Department, Area, ImportValidationResult, DuplicateHandling, IssueSuggestion, CauseSuggestion } from '../types/data';
 import { workLogsApi } from '../api';
 import React from 'react';
 import { SearchableCombobox } from './SearchableCombobox';
 import { MultiSelectCombobox } from './MultiSelectCombobox';
+import { FlexibleMultiSelect } from './FlexibleMultiSelect';
+import { AutocompleteInput, type Suggestion } from './AutocompleteInput';
 import { useDebounce } from '../hooks/useDebounce';
 import { usePagination } from '../hooks/usePagination';
 import { Pagination } from './Pagination';
-import { exportWorkLogsToExcel, importWorkLogsFromExcel, downloadExcelTemplate } from '../utils/excelUtils';
+import { exportWorkLogsToExcel, validateImportedWorkLogs, importWorkLogsFromExcel, downloadExcelTemplate } from '../utils/excelUtils';
+import { ImportValidation } from './ImportValidation';
+import { ImportWizard } from './ImportWizard';
+import { 
+  searchIssues, 
+  searchCauses, 
+  getCausesForIssue,
+  recordIssueUsage,
+  recordCauseUsage
+} from '../utils/knowledgeBase';
 
 interface Props {
   data: WorkLog[];
@@ -30,6 +41,15 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
   const [submitting, setSubmitting] = useState(false);
   const [importing, setImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Import wizard state
+  const [showImportWizard, setShowImportWizard] = useState(false);
+
+  // Old import validation state (keeping for backward compatibility)
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [validationResult, setValidationResult] = useState<ImportValidationResult | null>(null);
+  const [duplicateHandling, setDuplicateHandling] = useState<DuplicateHandling>('Skip');
+  const [currentImportFile, setCurrentImportFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState({
     reportDate: new Date().toISOString().slice(0, 16),
@@ -176,20 +196,172 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
 
     setImporting(true);
     try {
-      const importedLogs = await importWorkLogsFromExcel(file);
-      if (importedLogs && importedLogs.length > 0) {
-        setData([...data, ...importedLogs as WorkLog[]]);
-        alert(`Successfully imported ${importedLogs.length} work log(s)`);
-      } else {
-        alert('No valid work logs found in the file');
-      }
+      // Step 1: Validate the file and detect duplicates
+      const validation = await validateImportedWorkLogs(file, data);
+      setValidationResult(validation);
+      setCurrentImportFile(file);
+      setShowImportDialog(true);
     } catch (error) {
-      alert('Failed to import Excel file: ' + (error as Error).message);
+      alert('Failed to validate Excel file: ' + (error as Error).message);
     } finally {
       setImporting(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+    }
+  };
+
+  const handleConfirmImport = async () => {
+    if (!currentImportFile || !validationResult) return;
+
+    setImporting(true);
+    try {
+      // Step 2: Perform the actual import with the selected duplicate handling
+      const importedLogs = await importWorkLogsFromExcel(
+        currentImportFile,
+        duplicateHandling,
+        validationResult
+      );
+
+      if (importedLogs && importedLogs.length > 0) {
+        // For 'Update' handling, merge with existing data
+        if (duplicateHandling === 'Update') {
+          const updatedData = [...data];
+          importedLogs.forEach(newLog => {
+            const existingIndex = updatedData.findIndex(log => log.id === newLog.id);
+            if (existingIndex >= 0) {
+              updatedData[existingIndex] = { ...updatedData[existingIndex], ...newLog } as WorkLog;
+            } else {
+              updatedData.push(newLog as WorkLog);
+            }
+          });
+          setData(updatedData);
+        } else {
+          // For other handling modes, just append new logs
+          setData([...data, ...importedLogs as WorkLog[]]);
+        }
+
+        alert(`Successfully imported ${importedLogs.length} work log(s)`);
+      } else {
+        alert('No work logs were imported');
+      }
+
+      // Close dialog and reset
+      setShowImportDialog(false);
+      setValidationResult(null);
+      setCurrentImportFile(null);
+      setDuplicateHandling('Skip');
+    } catch (error) {
+      alert('Failed to import Excel file: ' + (error as Error).message);
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const handleCancelImport = () => {
+    setShowImportDialog(false);
+    setValidationResult(null);
+    setCurrentImportFile(null);
+    setDuplicateHandling('Skip');
+  };
+
+  // Autocomplete state for KB suggestions
+  const [issueSuggestions, setIssueSuggestions] = useState<Suggestion[]>([]);
+  const [causeSuggestions, setCauseSuggestions] = useState<Suggestion[]>([]);
+  const [selectedIssue, setSelectedIssue] = useState<Suggestion | null>(null);
+  const [selectedCause, setSelectedCause] = useState<Suggestion | null>(null);
+  const [loadingIssueSuggestions, setLoadingIssueSuggestions] = useState(false);
+  const [loadingCauseSuggestions, setLoadingCauseSuggestions] = useState(false);
+
+  // Search for issue suggestions
+  useEffect(() => {
+    const fetchIssueSuggestions = async () => {
+      if (formData.issue.length < 2) {
+        setIssueSuggestions([]);
+        return;
+      }
+
+      setLoadingIssueSuggestions(true);
+      try {
+        const results = searchIssues(formData.issue);
+        setIssueSuggestions(results.map(issue => ({
+          id: issue.id,
+          name: issue.name,
+          description: issue.description,
+          usageCount: issue.usageCount,
+          metadata: { commonCauses: issue.commonCauses }
+        })));
+      } finally {
+        setLoadingIssueSuggestions(false);
+      }
+    };
+
+    const timeoutId = setTimeout(fetchIssueSuggestions, 300);
+    return () => clearTimeout(timeoutId);
+  }, [formData.issue]);
+
+  // When issue is selected from KB, load its common causes
+  useEffect(() => {
+    const loadCausesForIssue = async () => {
+      if (!selectedIssue) {
+        // If no KB issue selected but user is typing cause, search all causes
+        if (formData.cause.length >= 2) {
+          setLoadingCauseSuggestions(true);
+          try {
+            const results = searchCauses(formData.cause);
+            setCauseSuggestions(results.map(cause => ({
+              id: cause.id,
+              name: cause.name,
+              usageCount: cause.usageCount
+            })));
+          } finally {
+            setLoadingCauseSuggestions(false);
+          }
+        } else {
+          setCauseSuggestions([]);
+        }
+        return;
+      }
+
+      // If KB issue is selected, show its common causes
+      setLoadingCauseSuggestions(true);
+      try {
+        const causes = getCausesForIssue(selectedIssue.id);
+        setCauseSuggestions(causes.map(cause => ({
+          id: cause.id,
+          name: cause.name,
+          usageCount: cause.usageCount
+        })));
+      } finally {
+        setLoadingCauseSuggestions(false);
+      }
+    };
+
+    loadCausesForIssue();
+  }, [selectedIssue, formData.cause]);
+
+  // Handle issue selection
+  const handleIssueSelect = (suggestion: Suggestion | null) => {
+    setSelectedIssue(suggestion);
+    if (suggestion) {
+      recordIssueUsage(suggestion.id);
+      // Auto-load causes for this issue
+      const causes = getCausesForIssue(suggestion.id);
+      setCauseSuggestions(causes.map(cause => ({
+        id: cause.id,
+        name: cause.name,
+        usageCount: cause.usageCount
+      })));
+    } else {
+      setCauseSuggestions([]);
+    }
+  };
+
+  // Handle cause selection
+  const handleCauseSelect = (suggestion: Suggestion | null) => {
+    setSelectedCause(suggestion);
+    if (suggestion) {
+      recordCauseUsage(suggestion.id);
     }
   };
 
@@ -284,22 +456,24 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
                 <div><label className="block text-sm font-medium mb-1">Date *</label><input type="datetime-local" required value={formData.reportDate} onChange={(e) => setFormData({ ...formData, reportDate: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
                 <div><label className="block text-sm font-medium mb-1">Status *</label><select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as WorkStatus })} className="w-full px-3 py-2 border rounded-lg"><option value="pending">Pending</option><option value="in-progress">In Progress</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-1">Operators (IT Department) *</label>
-                  <MultiSelectCombobox 
+                  <FlexibleMultiSelect 
                     options={operatorOptions} 
                     values={formData.operators} 
                     onChange={(values) => setFormData({ ...formData, operators: values })} 
-                    placeholder="Select IT operators..."
+                    placeholder="Select IT operators or type custom name..."
+                    label="Operators (IT Department) *"
                     required
+                    allowCustom={true}
                   />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-1">Requesters (Optional)</label>
-                  <MultiSelectCombobox 
+                  <FlexibleMultiSelect 
                     options={requesterOptions} 
                     values={formData.requesters} 
                     onChange={(values) => setFormData({ ...formData, requesters: values })} 
-                    placeholder="Select requesters (optional)..."
+                    placeholder="Select requesters or type custom name (optional)..."
+                    label="Requesters (Optional)"
+                    allowCustom={true}
                   />
                 </div>
                 <div>
@@ -323,8 +497,30 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
                   />
                 </div>
               </div>
-              <div><label className="block text-sm font-medium mb-1">Issue *</label><textarea required value={formData.issue} onChange={(e) => setFormData({ ...formData, issue: e.target.value })} rows={3} className="w-full px-3 py-2 border rounded-lg" /></div>
-              <div><label className="block text-sm font-medium mb-1">Cause *</label><textarea required value={formData.cause} onChange={(e) => setFormData({ ...formData, cause: e.target.value })} rows={2} className="w-full px-3 py-2 border rounded-lg" /></div>
+              <AutocompleteInput 
+                value={formData.issue} 
+                onChange={(value) => setFormData({ ...formData, issue: value })} 
+                onSelect={handleIssueSelect}
+                selectedSuggestion={selectedIssue}
+                suggestions={issueSuggestions} 
+                loading={loadingIssueSuggestions}
+                label="Issue Description"
+                placeholder="Start typing to see suggestions from knowledge base..."
+                required
+                suggestionHeader=""
+              />
+              <AutocompleteInput 
+                value={formData.cause} 
+                onChange={(value) => setFormData({ ...formData, cause: value })} 
+                onSelect={handleCauseSelect}
+                selectedSuggestion={selectedCause}
+                suggestions={causeSuggestions} 
+                loading={loadingCauseSuggestions}
+                label="Cause"
+                placeholder={selectedIssue ? `Common causes for "${selectedIssue.name}"...` : "Start typing to see suggestions..."}
+                required
+                suggestionHeader={selectedIssue ? `💡 Common Causes for "${selectedIssue.name}"` : "💡 Suggested Causes"}
+              />
               <div><label className="block text-sm font-medium mb-1">Fix Description *</label><textarea required value={formData.fixDescription} onChange={(e) => setFormData({ ...formData, fixDescription: e.target.value })} rows={3} className="w-full px-3 py-2 border rounded-lg" /></div>
               <div><label className="block text-sm font-medium mb-1">Note</label><textarea value={formData.note} onChange={(e) => setFormData({ ...formData, note: e.target.value })} rows={2} className="w-full px-3 py-2 border rounded-lg" /></div>
               <div className="flex gap-3">
@@ -349,7 +545,7 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
             Export to Excel
           </button>
           <button 
-            onClick={() => fileInputRef.current?.click()} 
+            onClick={() => setShowImportWizard(true)} 
             disabled={importing}
             className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -384,6 +580,40 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
           <strong>Note:</strong> The Excel template follows your existing work log format with columns: Report Date, Operators (comma-separated for multiple), Requesters (comma-separated for multiple, optional), Department, Area, Issue Description, Cause, Fix Description, Notes, and Status.
         </p>
       </div>
+
+      {showImportDialog && validationResult && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b flex justify-between sticky top-0 bg-white z-[60]">
+              <h3 className="text-lg font-semibold">Import Validation</h3>
+              <button onClick={handleCancelImport}><X className="w-6 h-6" /></button>
+            </div>
+            <div className="p-6">
+              <ImportValidation 
+                validationResult={validationResult} 
+                duplicateHandling={duplicateHandling} 
+                onDuplicateHandlingChange={setDuplicateHandling} 
+                onConfirm={handleConfirmImport} 
+                onCancel={handleCancelImport} 
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showImportWizard && (
+        <ImportWizard 
+          existingWorkLogs={data}
+          employees={employees}
+          departments={departments}
+          areas={areas}
+          onImportComplete={(logs) => {
+            setData([...data, ...logs]);
+            setShowImportWizard(false);
+          }}
+          onClose={() => setShowImportWizard(false)}
+        />
+      )}
     </div>
   );
 }

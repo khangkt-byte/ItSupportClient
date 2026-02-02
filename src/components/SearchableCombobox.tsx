@@ -84,8 +84,8 @@ export function SearchableCombobox({ options, value, onChange, placeholder = 'Se
                   key={option.value}
                   type="button"
                   onClick={() => handleSelect(option.value)}
-                  className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${
-                    option.value === value ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-900'
+                  className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 ${
+                    option.value === value ? 'bg-blue-100 text-blue-600 font-medium' : 'text-gray-900'
                   }`}
                 >
                   {option.label}

@@ -4,8 +4,6 @@ import type { User } from '../App';
 import { useDataManager } from '../hooks/useDataManager';
 import { WorkLogManagement } from './WorkLogManagement';
 import { EmployeeManagement } from './EmployeeManagement';
-import { DeviceManagement } from './DeviceManagement';
-import { DeviceTypeManagement } from './DeviceTypeManagement';
 import { DepartmentManagement } from './DepartmentManagement';
 import { AreaManagement } from './AreaManagement';
 import { AccountManagement } from './AccountManagement';
@@ -58,11 +56,11 @@ export function AdminDashboard({ user, onLogout, currentView, onNavigate }: Prop
                 </div>
                 <div className="p-4 rounded-lg" style={{ background: 'rgba(34, 197, 94, 0.1)' }}>
                   <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Total Employees</p>
-                  <p className="text-2xl font-bold text-green-600">{dataManager.employees.data.filter(e => !e.deleteDate).length}</p>
+                  <p className="text-2xl font-bold text-green-600">{dataManager.employees.data.length}</p>
                 </div>
                 <div className="p-4 rounded-lg" style={{ background: 'rgba(168, 85, 247, 0.1)' }}>
-                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Total Devices</p>
-                  <p className="text-2xl font-bold text-purple-600">{dataManager.devices.data.length}</p>
+                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Total Areas</p>
+                  <p className="text-2xl font-bold text-purple-600">{dataManager.areas.data.length}</p>
                 </div>
               </div>
             </div>
@@ -86,21 +84,6 @@ export function AdminDashboard({ user, onLogout, currentView, onNavigate }: Prop
             setData={dataManager.employees.setData}
             departments={dataManager.departments.data}
             areas={dataManager.areas.data}
-          />
-        );
-      case 'devices':
-        return (
-          <DeviceManagement
-            data={dataManager.devices.data}
-            setData={dataManager.devices.setData}
-            deviceTypes={dataManager.deviceTypes.data}
-          />
-        );
-      case 'deviceTypes':
-        return (
-          <DeviceTypeManagement
-            data={dataManager.deviceTypes.data}
-            setData={dataManager.deviceTypes.setData}
           />
         );
       case 'departments':

@@ -1,0 +1,233 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Plus } from 'lucide-react';
+
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  options: Option[];
+  values: string[];
+  onChange: (values: string[]) => void;
+  placeholder?: string;
+  label?: string;
+  required?: boolean;
+  allowCustom?: boolean;
+}
+
+export function FlexibleMultiSelect({
+  options,
+  values,
+  onChange,
+  placeholder = 'Select or type...',
+  label,
+  required = false,
+  allowCustom = true
+}: Props) {
+  const [inputValue, setInputValue] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Filter suggestions based on input
+  const filteredOptions = options.filter(
+    opt => 
+      opt.label.toLowerCase().includes(inputValue.toLowerCase()) &&
+      !values.includes(opt.value)
+  );
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(e.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+    setShowSuggestions(true);
+    setHighlightedIndex(-1);
+  };
+
+  const handleSelectOption = (value: string) => {
+    if (!values.includes(value)) {
+      onChange([...values, value]);
+    }
+    setInputValue('');
+    setShowSuggestions(false);
+    setHighlightedIndex(-1);
+    inputRef.current?.focus();
+  };
+
+  const handleRemoveValue = (valueToRemove: string) => {
+    onChange(values.filter(v => v !== valueToRemove));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      
+      if (highlightedIndex >= 0 && filteredOptions[highlightedIndex]) {
+        // Select highlighted option
+        handleSelectOption(filteredOptions[highlightedIndex].value);
+      } else if (inputValue.trim() && allowCustom) {
+        // Add custom value
+        const trimmedValue = inputValue.trim();
+        if (!values.includes(trimmedValue)) {
+          onChange([...values, trimmedValue]);
+        }
+        setInputValue('');
+        setShowSuggestions(false);
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setShowSuggestions(true);
+      setHighlightedIndex(prev => 
+        prev < filteredOptions.length - 1 ? prev + 1 : prev
+      );
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedIndex(prev => (prev > 0 ? prev - 1 : -1));
+    } else if (e.key === 'Escape') {
+      setShowSuggestions(false);
+      setHighlightedIndex(-1);
+    } else if (e.key === 'Backspace' && !inputValue && values.length > 0) {
+      // Remove last value when backspace on empty input
+      onChange(values.slice(0, -1));
+    }
+  };
+
+  const handleFocus = () => {
+    if (filteredOptions.length > 0) {
+      setShowSuggestions(true);
+    }
+  };
+
+  // Scroll highlighted item into view
+  useEffect(() => {
+    if (highlightedIndex >= 0 && dropdownRef.current) {
+      const highlightedElement = dropdownRef.current.children[highlightedIndex];
+      if (highlightedElement) {
+        highlightedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  }, [highlightedIndex]);
+
+  return (
+    <div>
+      {label && (
+        <label className="block text-sm font-medium mb-1">
+          {label}
+          {required && <span className="text-red-500 ml-1">*</span>}
+        </label>
+      )}
+
+      <div className="relative">
+        {/* Selected values + Input */}
+        <div className="w-full min-h-[42px] px-3 py-2 border rounded-lg flex flex-wrap gap-2 items-center focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
+          {values.map((value) => {
+            const option = options.find(opt => opt.value === value);
+            const displayLabel = option ? option.label : value;
+            
+            return (
+              <span
+                key={value}
+                className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded"
+              >
+                {displayLabel}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveValue(value)}
+                  className="hover:text-blue-900"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            );
+          })}
+          
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputValue}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            onFocus={handleFocus}
+            placeholder={values.length === 0 ? placeholder : ''}
+            className="flex-1 min-w-[120px] outline-none"
+          />
+        </div>
+
+        {/* Suggestions Dropdown */}
+        {showSuggestions && (filteredOptions.length > 0 || (allowCustom && inputValue.trim())) && (
+          <div
+            ref={dropdownRef}
+            className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+          >
+            {/* Suggestions from list */}
+            {filteredOptions.map((option, index) => (
+              <div
+                key={option.value}
+                onClick={() => handleSelectOption(option.value)}
+                className={`px-3 py-2 cursor-pointer transition-colors ${
+                  highlightedIndex === index
+                    ? 'bg-blue-100'
+                    : 'hover:bg-gray-100'
+                }`}
+              >
+                <div className="text-sm text-gray-900">{option.label}</div>
+              </div>
+            ))}
+
+            {/* Custom value option */}
+            {allowCustom && inputValue.trim() && !options.some(opt => opt.value.toLowerCase() === inputValue.trim().toLowerCase()) && (
+              <div
+                onClick={() => {
+                  const trimmedValue = inputValue.trim();
+                  if (!values.includes(trimmedValue)) {
+                    onChange([...values, trimmedValue]);
+                  }
+                  setInputValue('');
+                  setShowSuggestions(false);
+                }}
+                className="px-3 py-2 cursor-pointer border-t border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors"
+              >
+                <div className="flex items-center gap-2 text-sm">
+                  <Plus className="w-4 h-4 text-green-600" />
+                  <span className="text-gray-700">
+                    Add custom: <strong>{inputValue.trim()}</strong>
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Empty state */}
+            {filteredOptions.length === 0 && (!allowCustom || !inputValue.trim()) && (
+              <div className="px-3 py-2 text-sm text-gray-500 text-center">
+                No suggestions found
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {allowCustom && (
+        <p className="text-xs text-gray-500 mt-1">
+          Select from list or press Enter to add custom name
+        </p>
+      )}
+    </div>
+  );
+}

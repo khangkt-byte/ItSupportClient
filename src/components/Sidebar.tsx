@@ -60,8 +60,6 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
     { id: 'admin', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'workLogs', label: 'Work Logs', icon: ClipboardList },
     { id: 'employees', label: 'Employees', icon: Users },
-    { id: 'devices', label: 'Devices', icon: Monitor },
-    { id: 'deviceTypes', label: 'Device Types', icon: Monitor },
     { id: 'departments', label: 'Departments', icon: Building2 },
     { id: 'areas', label: 'Areas', icon: MapPin },
     { id: 'accounts', label: 'Accounts', icon: UserCircle },

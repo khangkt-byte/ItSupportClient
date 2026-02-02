@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import type { WorkLog } from '../types/data';
+import type { WorkLog, ImportValidationResult, ImportRowValidation, ValidationWarning, DuplicateHandling } from '../types/data';
 
 export interface ExcelWorkLog {
   'Report Date': string;
@@ -55,7 +55,10 @@ export function exportWorkLogsToExcel(workLogs: WorkLog[], filename: string = 'w
   XLSX.writeFile(workbook, filename);
 }
 
-export function importWorkLogsFromExcel(file: File): Promise<Partial<WorkLog>[]> {
+export function validateImportedWorkLogs(
+  file: File, 
+  existingWorkLogs: WorkLog[]
+): Promise<ImportValidationResult> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -68,42 +71,90 @@ export function importWorkLogsFromExcel(file: File): Promise<Partial<WorkLog>[]>
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
 
-        // Convert to JSON - use any to handle both old and new formats
+        // Convert to JSON
         const jsonData = XLSX.utils.sheet_to_json<any>(worksheet);
 
-        // Transform to WorkLog format
-        const workLogs: Partial<WorkLog>[] = jsonData.map((row, index) => {
-          try {
-            // Handle both old 'Requester' and new 'Requesters' format for backward compatibility
-            let requesters: string[] = [];
-            if (row['Requesters']) {
-              // New format: comma-separated requesters
-              requesters = row['Requesters'].split(',').map((name: string) => name.trim());
-            } else if (row['Requester']) {
-              // Old format: single requester - convert to array
-              requesters = row['Requester'] ? [row['Requester'].trim()] : [];
-            }
-
-            return {
-              id: `import-${Date.now()}-${index}`,
-              reportDate: parseDateFromExcel(row['Report Date']),
-              operators: row['Operators'] ? row['Operators'].split(',').map((name: string) => name.trim()) : [],
-              requesters: requesters,
-              department: row['Department'] || '',
-              area: row['Area'] || '',
-              issue: row['Issue Description'] || '',
-              cause: row['Cause'] || '',
-              fixDescription: row['Fix Description'] || '',
-              note: row['Notes'] || '',
-              status: parseStatus(row['Status']),
-            };
-          } catch (error) {
-            console.error(`Error parsing row ${index + 1}:`, error);
-            return null;
+        // Validate each row
+        const rows: ImportRowValidation[] = jsonData.map((row, index) => {
+          const warnings: ValidationWarning[] = [];
+          
+          // Parse the row data
+          let requesters: string[] = [];
+          if (row['Requesters']) {
+            requesters = row['Requesters'].split(',').map((name: string) => name.trim()).filter(Boolean);
+          } else if (row['Requester']) {
+            requesters = row['Requester'] ? [row['Requester'].trim()] : [];
           }
-        }).filter(Boolean) as Partial<WorkLog>[];
 
-        resolve(workLogs);
+          const operators = row['Operators'] ? row['Operators'].split(',').map((name: string) => name.trim()).filter(Boolean) : [];
+          const issue = row['Issue Description'] || '';
+          const reportDate = parseDateFromExcel(row['Report Date']);
+
+          // Check for required fields
+          if (!reportDate) {
+            warnings.push({
+              field: 'Report Date',
+              message: 'Report Date is required',
+              severity: 'error'
+            });
+          }
+          if (operators.length === 0) {
+            warnings.push({
+              field: 'Operators',
+              message: 'At least one operator is required',
+              severity: 'warning'
+            });
+          }
+          if (!issue) {
+            warnings.push({
+              field: 'Issue Description',
+              message: 'Issue Description is required',
+              severity: 'error'
+            });
+          }
+
+          // Check for duplicates
+          const duplicate = findDuplicate(
+            {
+              issue,
+              reportDate,
+              operators,
+              department: row['Department'] || '',
+              area: row['Area'] || ''
+            },
+            existingWorkLogs
+          );
+
+          if (duplicate) {
+            warnings.push({
+              field: 'duplicate',
+              message: `Similar to existing log: ${duplicate.issue.substring(0, 50)}...`,
+              severity: 'warning'
+            });
+          }
+
+          return {
+            rowNumber: index + 2, // +2 because Excel is 1-indexed and has header row
+            isValid: !warnings.some(w => w.severity === 'error'),
+            duplicateOf: duplicate?.id || null,
+            warnings,
+            previewData: {
+              issueDescription: issue,
+              dateReported: formatDateForExcel(reportDate),
+              operators: operators.join(', '),
+              requesters: requesters.join(', ')
+            }
+          };
+        });
+
+        const validationResult: ImportValidationResult = {
+          totalRows: rows.length,
+          validRows: rows.filter(r => r.isValid).length,
+          duplicateCount: rows.filter(r => r.duplicateOf !== null).length,
+          rows
+        };
+
+        resolve(validationResult);
       } catch (error) {
         reject(new Error('Failed to parse Excel file: ' + (error as Error).message));
       }
@@ -117,9 +168,157 @@ export function importWorkLogsFromExcel(file: File): Promise<Partial<WorkLog>[]>
   });
 }
 
+export function importWorkLogsFromExcel(
+  file: File,
+  duplicateHandling: DuplicateHandling,
+  validationResult: ImportValidationResult
+): Promise<Partial<WorkLog>[]> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      try {
+        const data = e.target?.result;
+        const workbook = XLSX.read(data, { type: 'binary' });
+
+        // Get first sheet
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+
+        // Convert to JSON
+        const jsonData = XLSX.utils.sheet_to_json<any>(worksheet);
+
+        // Transform to WorkLog format based on duplicate handling
+        const workLogs: Partial<WorkLog>[] = [];
+
+        jsonData.forEach((row, index) => {
+          const rowValidation = validationResult.rows[index];
+
+          // Skip invalid rows
+          if (!rowValidation.isValid) {
+            return;
+          }
+
+          // Handle duplicates based on strategy
+          if (rowValidation.duplicateOf) {
+            if (duplicateHandling === 'Skip') {
+              return; // Skip this row
+            } else if (duplicateHandling === 'Fail') {
+              throw new Error(`Duplicate found at row ${rowValidation.rowNumber}. Import cancelled.`);
+            }
+            // For 'Update' and 'CreateNew', we continue processing
+          }
+
+          // Parse row data
+          let requesters: string[] = [];
+          if (row['Requesters']) {
+            requesters = row['Requesters'].split(',').map((name: string) => name.trim()).filter(Boolean);
+          } else if (row['Requester']) {
+            requesters = row['Requester'] ? [row['Requester'].trim()] : [];
+          }
+
+          const workLog: Partial<WorkLog> = {
+            id: rowValidation.duplicateOf && duplicateHandling === 'Update' 
+              ? rowValidation.duplicateOf 
+              : `import-${Date.now()}-${index}`,
+            reportDate: parseDateFromExcel(row['Report Date']),
+            operators: row['Operators'] ? row['Operators'].split(',').map((name: string) => name.trim()).filter(Boolean) : [],
+            requesters,
+            department: row['Department'] || '',
+            area: row['Area'] || '',
+            issue: row['Issue Description'] || '',
+            cause: row['Cause'] || '',
+            fixDescription: row['Fix Description'] || '',
+            note: row['Notes'] || '',
+            status: parseStatus(row['Status']),
+          };
+
+          workLogs.push(workLog);
+        });
+
+        resolve(workLogs);
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    reader.onerror = () => {
+      reject(new Error('Failed to read file'));
+    };
+
+    reader.readAsBinaryString(file);
+  });
+}
+
+// Helper function to find duplicate work logs
+function findDuplicate(
+  newLog: { issue: string; reportDate: string; operators: string[]; department: string; area: string },
+  existingLogs: WorkLog[]
+): WorkLog | null {
+  // Consider it a duplicate if:
+  // 1. Same issue description (case-insensitive, 80% similarity)
+  // 2. Same date (within 24 hours)
+  // 3. At least one operator in common
+  
+  for (const existing of existingLogs) {
+    const issuesSimilar = calculateSimilarity(newLog.issue, existing.issue) > 0.8;
+    const existingDate = new Date(existing.reportDate);
+    const newDate = new Date(newLog.reportDate);
+    const timeDiff = Math.abs(existingDate.getTime() - newDate.getTime());
+    const withinDay = timeDiff < 24 * 60 * 60 * 1000;
+    const hasCommonOperator = newLog.operators.some(op => existing.operators.includes(op));
+    
+    if (issuesSimilar && withinDay && hasCommonOperator) {
+      return existing;
+    }
+  }
+  
+  return null;
+}
+
+// Calculate string similarity (Levenshtein distance based)
+function calculateSimilarity(str1: string, str2: string): number {
+  const s1 = str1.toLowerCase().trim();
+  const s2 = str2.toLowerCase().trim();
+  
+  if (s1 === s2) return 1;
+  if (s1.length === 0 || s2.length === 0) return 0;
+  
+  const maxLength = Math.max(s1.length, s2.length);
+  const distance = levenshteinDistance(s1, s2);
+  
+  return 1 - distance / maxLength;
+}
+
+// Levenshtein distance algorithm
+function levenshteinDistance(str1: string, str2: string): number {
+  const m = str1.length;
+  const n = str2.length;
+  const dp: number[][] = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
+  
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (str1[i - 1] === str2[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1];
+      } else {
+        dp[i][j] = Math.min(
+          dp[i - 1][j] + 1,    // deletion
+          dp[i][j - 1] + 1,    // insertion
+          dp[i - 1][j - 1] + 1 // substitution
+        );
+      }
+    }
+  }
+  
+  return dp[m][n];
+}
+
 // Helper functions
-function formatDateForExcel(date: string): string {
-  const d = new Date(date);
+function formatDateForExcel(date: string | Date): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
@@ -155,9 +354,12 @@ function capitalizeStatus(status: string): string {
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
-function parseStatus(status: string): 'pending' | 'in-progress' | 'completed' {
+function parseStatus(status: string): 'pending' | 'in-progress' | 'completed' | 'cancelled' {
   const normalized = status?.toLowerCase().trim() || 'pending';
   
+  if (normalized.includes('cancel')) {
+    return 'cancelled';
+  }
   if (normalized.includes('progress') || normalized.includes('in-progress')) {
     return 'in-progress';
   }
