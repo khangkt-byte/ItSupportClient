@@ -5,10 +5,11 @@ import { EmployeeDashboard } from './components/EmployeeDashboard';
 import { Sidebar } from './components/Sidebar';
 import { DarkModeStyles } from './components/DarkModeStyles';
 import { authApi } from './api';
+import { useDataLoader } from './hooks/useDataLoader';
 import type { User } from './types/data';
 
 // IT Support Work Log Management System
-// Version: 1.0.9 - Fixed circular dependencies
+// Version: 2.0.0 - API Integration Complete
 // Last updated: February 2, 2026
 
 export default function App() {

@@ -142,8 +142,8 @@ export interface UpdateAreaDto {
 export interface AccountDto {
   accountId: string; // UUID
   username: string;
-  employeeName: string;
-  employeeCode: string | null;
+  empName: string; // Fixed: was employeeName
+  empCode: string | null; // Fixed: was employeeCode
   email: string | null;
   position: string | null;
   isLocked: boolean;
@@ -158,15 +158,15 @@ export interface AccountDto {
 export interface ListAccountDto {
   accountId: string;
   username: string;
-  employeeName: string;
-  employeeCode: string | null;
+  empName: string; // Fixed: was employeeName
+  empCode: string | null; // Fixed: was employeeCode
   isLocked: boolean;
   lastLoginAt: string | null;
   createdAt: string;
 }
 
 export interface CreateAccountDto {
-  employeeId: string; // UUID
+  empId: string; // UUID - Fixed: was employeeId
   username: string;
   password: string;
   roleIds?: number[] | null;
@@ -451,7 +451,15 @@ export type Employee = ListEmployeeDto & {
 };
 
 export type Role = RoleDto & { id: string };
-export type Account = ListAccountDto & { id: string; role: string; password: string; employeeId: string; deleteDate?: string | null };
+export type Account = ListAccountDto & { 
+  id: string; 
+  role: string; 
+  password: string; 
+  employeeId: string; 
+  employeeName: string; // Add for backward compatibility
+  employeeCode: string | null; // Add for backward compatibility
+  deleteDate?: string | null 
+};
 export type Area = AreaDto & { id: string };
 export type Device = { id: string; name: string; brand: string; model: string; serialNumber: string; deviceType: string; description: string };
 export type DeviceType = { id: string; name: string; description: string };
