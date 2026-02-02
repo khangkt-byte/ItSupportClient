@@ -37,7 +37,7 @@ export function EmployeeDashboard({ user, onLogout, currentView, onNavigate }: P
       case 'employee':
         return (
           <div>
-            <h1 className="page-title">Employee Dashboard</h1>
+            <h1 className="text-2xl font-semibold mb-5">Employee Dashboard</h1>
             <div className="bg-white rounded-lg border p-6 shadow-sm">
               <h2 className="text-xl font-semibold mb-4">Welcome, {user.fullName}!</h2>
               <p className="text-gray-600 mb-4">
@@ -72,7 +72,7 @@ export function EmployeeDashboard({ user, onLogout, currentView, onNavigate }: P
       default:
         return (
           <div>
-            <h1 className="page-title">Employee Dashboard</h1>
+            <h1 className="text-2xl font-semibold mb-5">Employee Dashboard</h1>
             <div className="bg-white rounded-lg border p-6 shadow-sm">
               <p className="text-gray-600">Select a menu item to get started.</p>
             </div>

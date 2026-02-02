@@ -43,7 +43,7 @@ export function AdminDashboard({ user, onLogout, currentView, onNavigate }: Prop
       case 'admin':
         return (
           <div>
-            <h1 className="page-title">Admin Dashboard</h1>
+            <h1 className="text-2xl font-semibold mb-5">Admin Dashboard</h1>
             <div style={{ background: 'var(--color-bg-card)', borderColor: 'var(--color-border-hr)' }} className="rounded-lg border p-6 shadow-sm">
               <h2 className="text-xl font-semibold mb-4">Welcome, {user.fullName}!</h2>
               <p style={{ color: 'var(--color-text-secondary)' }} className="mb-4">
@@ -119,7 +119,7 @@ export function AdminDashboard({ user, onLogout, currentView, onNavigate }: Prop
       default:
         return (
           <div>
-            <h1 className="page-title">Admin Dashboard</h1>
+            <h1 className="text-2xl font-semibold mb-5">Admin Dashboard</h1>
             <div style={{ background: 'var(--color-bg-card)', borderColor: 'var(--color-border-hr)' }} className="rounded-lg border p-6 shadow-sm">
               <p style={{ color: 'var(--color-text-secondary)' }}>Select a menu item to get started.</p>
             </div>
