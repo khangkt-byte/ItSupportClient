@@ -5,11 +5,18 @@ import { EmployeeDashboard } from './components/EmployeeDashboard';
 import { Sidebar } from './components/Sidebar';
 import { DarkModeStyles } from './components/DarkModeStyles';
 import { authApi } from './api';
-import type { User } from './types/data';
 
 // IT Support Work Log Management System
-// Version: 1.0.9 - Fixed circular dependencies
+// Version: 1.0.4 - Fixed ValidationWarning type error in excelUtils
 // Last updated: February 2, 2026
+export interface User {
+  id: string;
+  username: string;
+  employeeId: string;
+  fullName: string;
+  role: 'admin' | 'employee';
+  email: string;
+}
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -18,21 +25,16 @@ export default function App() {
   const [currentView, setCurrentView] = useState<string>('');
 
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem('user');
-      const storedToken = localStorage.getItem('accessToken');
-      
-      if (storedUser && storedToken) {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setIsAuthenticated(true);
-        setCurrentView(parsedUser.role === 'admin' ? 'admin' : 'employee');
-      }
-    } catch (error) {
-      console.error('Error loading user session:', error);
-    } finally {
-      setIsLoading(false);
+    const storedUser = localStorage.getItem('user');
+    const storedToken = localStorage.getItem('accessToken');
+    
+    if (storedUser && storedToken) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      setIsAuthenticated(true);
+      setCurrentView(parsedUser.role === 'admin' ? 'admin' : 'employee');
     }
+    setIsLoading(false);
   }, []);
 
   const handleLogin = async (username: string, password: string): Promise<boolean> => {
@@ -59,15 +61,11 @@ export default function App() {
   const handleLogout = async () => {
     try {
       await authApi.logout();
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
       setUser(null);
       setIsAuthenticated(false);
       setCurrentView('');
-      localStorage.removeItem('user');
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+    } catch (error) {
+      console.error('Logout error:', error);
     }
   };
 

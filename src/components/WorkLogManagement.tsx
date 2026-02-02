@@ -1,7 +1,8 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, X, ChevronDown, ChevronUp, Loader2, Download, Upload, FileSpreadsheet } from 'lucide-react';
-import type { WorkLog, WorkStatus, Employee, Department, Area, ImportValidationResult, DuplicateHandling, IssueSuggestion, CauseSuggestion } from '../types/data';
-import { workLogsApi } from '../api';
+import type { WorkLog, WorkStatus, Employee, Department, Area, ImportValidationResult, DuplicateHandling, IssueSuggestionDto, CauseSuggestionDto } from '../types/data';
+import { workLogsApi, issuesApi, causesApi } from '../api';
+import { issueLogToWorkLog, workLogToCreateDto, workLogToUpdateDto, findDepartmentId, findAreaId } from '../utils/workLogAdapter';
 import React from 'react';
 import { SearchableCombobox } from './SearchableCombobox';
 import { MultiSelectCombobox } from './MultiSelectCombobox';
@@ -13,13 +14,6 @@ import { Pagination } from './Pagination';
 import { exportWorkLogsToExcel, validateImportedWorkLogs, importWorkLogsFromExcel, downloadExcelTemplate } from '../utils/excelUtils';
 import { ImportValidation } from './ImportValidation';
 import { ImportWizard } from './ImportWizard';
-import { 
-  searchIssues, 
-  searchCauses, 
-  getCausesForIssue,
-  recordIssueUsage,
-  recordCauseUsage
-} from '../utils/knowledgeBase';
 
 interface Props {
   data: WorkLog[];
@@ -175,8 +169,13 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
 
   const handleDelete = async (id: string) => {
     if (confirm('Delete this work log?')) {
-      await workLogsApi.delete(id);
-      setData(data.filter((l) => l.id !== id));
+      try {
+        await workLogsApi.deleteSingle(id);
+        setData(data.filter((l) => l.id !== id));
+      } catch (error) {
+        console.error('Failed to delete work log:', error);
+        alert('Failed to delete work log: ' + (error as Error).message);
+      }
     }
   };
 
@@ -283,14 +282,16 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
 
       setLoadingIssueSuggestions(true);
       try {
-        const results = searchIssues(formData.issue);
+        const results = await issuesApi.getSuggestions(formData.issue);
         setIssueSuggestions(results.map(issue => ({
-          id: issue.id,
+          id: issue.issId,
           name: issue.name,
-          description: issue.description,
-          usageCount: issue.usageCount,
-          metadata: { commonCauses: issue.commonCauses }
+          description: issue.description || '',
+          usageCount: issue.usageCount
         })));
+      } catch (error) {
+        console.error('Failed to fetch issue suggestions:', error);
+        setIssueSuggestions([]);
       } finally {
         setLoadingIssueSuggestions(false);
       }
@@ -308,12 +309,16 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
         if (formData.cause.length >= 2) {
           setLoadingCauseSuggestions(true);
           try {
-            const results = searchCauses(formData.cause);
+            const results = await causesApi.getSuggestions(undefined, formData.cause);
             setCauseSuggestions(results.map(cause => ({
-              id: cause.id,
+              id: cause.causeId,
               name: cause.name,
+              description: cause.description || '',
               usageCount: cause.usageCount
             })));
+          } catch (error) {
+            console.error('Failed to fetch cause suggestions:', error);
+            setCauseSuggestions([]);
           } finally {
             setLoadingCauseSuggestions(false);
           }
@@ -326,12 +331,16 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
       // If KB issue is selected, show its common causes
       setLoadingCauseSuggestions(true);
       try {
-        const causes = getCausesForIssue(selectedIssue.id);
-        setCauseSuggestions(causes.map(cause => ({
-          id: cause.id,
+        const results = await causesApi.getSuggestions(selectedIssue.id);
+        setCauseSuggestions(results.map(cause => ({
+          id: cause.causeId,
           name: cause.name,
+          description: cause.description || '',
           usageCount: cause.usageCount
         })));
+      } catch (error) {
+        console.error('Failed to fetch cause suggestions:', error);
+        setCauseSuggestions([]);
       } finally {
         setLoadingCauseSuggestions(false);
       }
@@ -341,17 +350,22 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
   }, [selectedIssue, formData.cause]);
 
   // Handle issue selection
-  const handleIssueSelect = (suggestion: Suggestion | null) => {
+  const handleIssueSelect = async (suggestion: Suggestion | null) => {
     setSelectedIssue(suggestion);
     if (suggestion) {
-      recordIssueUsage(suggestion.id);
       // Auto-load causes for this issue
-      const causes = getCausesForIssue(suggestion.id);
-      setCauseSuggestions(causes.map(cause => ({
-        id: cause.id,
-        name: cause.name,
-        usageCount: cause.usageCount
-      })));
+      try {
+        const results = await causesApi.getSuggestions(suggestion.id);
+        setCauseSuggestions(results.map(cause => ({
+          id: cause.causeId,
+          name: cause.name,
+          description: cause.description || '',
+          usageCount: cause.usageCount
+        })));
+      } catch (error) {
+        console.error('Failed to fetch causes for issue:', error);
+        setCauseSuggestions([]);
+      }
     } else {
       setCauseSuggestions([]);
     }
@@ -360,9 +374,6 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
   // Handle cause selection
   const handleCauseSelect = (suggestion: Suggestion | null) => {
     setSelectedCause(suggestion);
-    if (suggestion) {
-      recordCauseUsage(suggestion.id);
-    }
   };
 
   return (

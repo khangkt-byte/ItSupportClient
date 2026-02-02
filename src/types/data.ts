@@ -355,6 +355,16 @@ export interface UpdateIssueLogDto {
 // Import/Export
 export type ErrorSeverity = 0 | 1; // 0 = Warning, 1 = Error
 
+// User Session (for client-side auth)
+export interface User {
+  id: string;
+  username: string;
+  employeeId: string;
+  fullName: string;
+  role: 'admin' | 'employee';
+  email: string;
+}
+
 export interface ImportError {
   field: string;
   message: string;

@@ -1,3 +1,13 @@
+import type { 
+  ListEmployeeDto, 
+  Department, 
+  AreaDto, 
+  ListAccountDto, 
+  RoleDto, 
+  IssueLogDto,
+  PaginatedResult,
+  Area // Added Area type
+} from '../types/data';
 import { useState, useEffect } from 'react';
 import {
   workLogsApi,
@@ -7,16 +17,6 @@ import {
   accountsApi,
   rolesApi,
 } from '../api';
-import type { 
-  ListEmployeeDto, 
-  Department, 
-  AreaDto, 
-  ListAccountDto, 
-  RoleDto, 
-  IssueLogDto,
-  PaginatedResult,
-  Area {/* Added Area type */}
-} from '../types/data';
 
 function useApiData<T>(apiService: any) {
   const [data, setData] = useState<T[]>([]);

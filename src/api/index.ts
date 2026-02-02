@@ -6,6 +6,8 @@ export { areasApi } from './areas';
 export { rolesApi } from './roles';
 export { accountsApi } from './accounts';
 export { departmentsApi } from './departments';
+export { issuesApi } from './issues';
+export { causesApi } from './causes';
 
 // Export API client and utilities
 export { apiClient, API_BASE_URL, buildQueryString } from './common';

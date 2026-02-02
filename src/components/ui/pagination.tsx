@@ -2,11 +2,11 @@ import * as React from "react";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
-  MoreHorizontalIcon,
-} from "lucide-react@0.487.0";
+  DotsHorizontalIcon,
+} from "lucide-react";
 
 import { cn } from "./utils";
-import { Button, buttonVariants } from "./button";
+import { ButtonProps, buttonVariants } from "./button";
 
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   return (
@@ -39,7 +39,7 @@ function PaginationItem({ ...props }: React.ComponentProps<"li">) {
 
 type PaginationLinkProps = {
   isActive?: boolean;
-} & Pick<React.ComponentProps<typeof Button>, "size"> &
+} & Pick<React.ComponentProps<typeof ButtonProps>, "size"> &
   React.ComponentProps<"a">;
 
 function PaginationLink({
@@ -110,7 +110,7 @@ function PaginationEllipsis({
       className={cn("flex size-9 items-center justify-center", className)}
       {...props}
     >
-      <MoreHorizontalIcon className="size-4" />
+      <DotsHorizontalIcon className="size-4" />
       <span className="sr-only">More pages</span>
     </span>
   );

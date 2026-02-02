@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { LogOut } from 'lucide-react';
-import type { User } from '../App';
+import type { User } from '../types/data';
 import { useDataManager } from '../hooks/useDataManager';
 import { WorkLogManagement } from './WorkLogManagement';
 import { EmployeeManagement } from './EmployeeManagement';

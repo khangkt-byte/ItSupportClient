@@ -1,4 +1,5 @@
 // API Base Configuration
+// Update this URL to match your backend server
 export const API_BASE_URL = 'https://localhost:5001';
 
 // API Client with authentication
