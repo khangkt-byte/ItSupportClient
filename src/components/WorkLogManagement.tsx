@@ -106,8 +106,9 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
     return data.filter((log) => {
       const operators = log.operators || [];
       const requesters = log.requesters || [];
+      const issue = log.issue || log.issueDescription || '';
       const matchesSearch =
-        log.issue.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        issue.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         operators.some(op => op.toLowerCase().includes(debouncedSearch.toLowerCase())) ||
         requesters.some(req => req.toLowerCase().includes(debouncedSearch.toLowerCase()));
       const matchesStatus = statusFilter === 'all' || log.status === statusFilter;
