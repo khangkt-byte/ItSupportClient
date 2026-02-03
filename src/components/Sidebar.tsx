@@ -80,7 +80,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
         borderColor: 'var(--color-border-hr)' 
       }}>
         <button 
-          className="h-10 w-10 flex items-center justify-center rounded-lg transition-all duration-300"
+          className="h-10 w-10 flex items-center justify-center rounded-lg transition-all duration-300 cursor-pointer hover:opacity-80"
           style={{ 
             background: 'var(--color-bg-secondary)',
             color: 'var(--color-text-primary)'
@@ -103,8 +103,9 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
       <aside 
         className={`
           sticky top-0 h-screen flex-shrink-0 flex flex-col border-r shadow-md transition-all duration-300 z-20
-          ${collapsed ? 'w-[90px] max-md:-left-[270px]' : 'w-[270px]'}
-          max-md:fixed max-md:top-0 max-md:left-0 max-md:w-[270px] max-md:transition-left
+          ${collapsed ? 'w-[90px]' : 'w-[270px]'}
+          max-md:fixed max-md:top-0 max-md:w-[270px]
+          ${collapsed ? 'max-md:-left-[270px]' : 'max-md:left-0'}
         `}
         style={{ 
           background: 'var(--color-bg-sidebar)', 
@@ -128,7 +129,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
           
           <button 
             className={`
-              h-10 w-10 flex items-center justify-center rounded-lg absolute right-[18px] transition-all duration-300
+              h-10 w-10 flex items-center justify-center rounded-lg absolute right-[18px] transition-all duration-300 cursor-pointer hover:opacity-80
               ${collapsed ? 'translate-x-[-2px] h-12 w-[50px]' : ''}
             `}
             style={{ 
@@ -153,7 +154,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
                   <button
                     onClick={() => onNavigate(item.id)}
                     className={`
-                      w-full flex items-center gap-3 px-[15px] py-3 rounded-lg whitespace-nowrap transition-all duration-300
+                      w-full flex items-center gap-3 px-[15px] py-3 rounded-lg whitespace-nowrap transition-all duration-300 cursor-pointer
                       ${collapsed ? 'justify-center px-0' : 'justify-start'}
                       ${isActive ? 'text-white' : ''}
                     `}
@@ -186,7 +187,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
         {/* Sidebar footer - Theme toggle */}
         <div className="px-[18px] py-5 border-t whitespace-nowrap" style={{ borderColor: 'var(--color-border-hr)' }}>
           <button 
-            className="w-full min-h-[48px] rounded-lg flex items-center px-[15px] transition-all duration-300"
+            className="w-full min-h-[48px] rounded-lg flex items-center px-[15px] transition-all duration-300 cursor-pointer"
             style={{ 
               background: 'var(--color-bg-secondary)',
               color: 'var(--color-text-primary)'

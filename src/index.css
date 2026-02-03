@@ -1734,6 +1734,12 @@
     }
   }
 
+  @media (hover: hover) {
+    .hover\:opacity-80:hover {
+      opacity: .8;
+    }
+  }
+
   .focus\:z-20:focus {
     z-index: 20;
   }
