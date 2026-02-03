@@ -443,7 +443,7 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
     <div className="space-y-6">
       <div className="flex justify-between">
         <div><h2 className="text-2xl font-semibold">Work Log Management</h2></div>
-        <button onClick={() => openForm()} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+        <button onClick={() => openForm()} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 cursor-pointer">
           <Plus className="w-5 h-5" />New Work Log
         </button>
       </div>
@@ -487,13 +487,13 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
                   <td className="px-4 py-3 text-sm">{(log.operators || []).join(', ')}</td>
                   <td className="px-4 py-3 text-sm">{(log.requesters || []).join(', ') || 'None'}</td>
                   <td className="px-4 py-3 text-sm">{log.department}</td>
-                  <td className="px-4 py-3 text-sm"><button onClick={() => toggleRow(log.id)} className="text-left hover:text-blue-600 line-clamp-2">{log.issue}</button></td>
+                  <td className="px-4 py-3 text-sm"><button onClick={() => toggleRow(log.id)} className="text-left hover:text-blue-600 line-clamp-2 cursor-pointer">{log.issue}</button></td>
                   <td className="px-4 py-3 text-sm"><span className={`px-2 py-1 text-xs rounded ${getStatusBadge(log.status)}`}>{log.status}</span></td>
                   <td className="px-4 py-3 text-sm text-right">
                     <div className="inline-flex items-center gap-2">
-                      <button onClick={() => toggleRow(log.id)} className="text-blue-600 inline-flex items-center justify-center">{expandedRows.has(log.id) ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}</button>
-                      <button onClick={() => openForm(log)} className="text-blue-600 inline-flex items-center justify-center"><Edit className="w-4 h-4" /></button>
-                      <button onClick={() => handleDelete(log.id)} className="text-red-600 inline-flex items-center justify-center"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => toggleRow(log.id)} className="text-blue-600 inline-flex items-center justify-center cursor-pointer hover:text-blue-800">{expandedRows.has(log.id) ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}</button>
+                      <button onClick={() => openForm(log)} className="text-blue-600 inline-flex items-center justify-center cursor-pointer hover:text-blue-800"><Edit className="w-4 h-4" /></button>
+                      <button onClick={() => handleDelete(log.id)} className="text-red-600 inline-flex items-center justify-center cursor-pointer hover:text-red-800"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>
                 </tr>
@@ -527,34 +527,55 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b flex justify-between sticky top-0 bg-white z-[60]"><h3 className="text-lg font-semibold">{editing ? 'Edit' : 'New'} Work Log</h3><button onClick={() => setShowForm(false)}><X className="w-6 h-6" /></button></div>
+            <div className="p-6 border-b flex justify-between sticky top-0 bg-white z-[60]"><h3 className="text-lg font-semibold">{editing ? 'Edit' : 'New'} Work Log</h3><button onClick={() => setShowForm(false)} className="cursor-pointer hover:text-gray-600"><X className="w-6 h-6" /></button></div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1">Date *</label><input type="date" required value={formData.reportDate} onChange={(e) => setFormData({ ...formData, reportDate: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
-                <div><label className="block text-sm font-medium mb-1">Status *</label><select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as WorkStatus })} className="w-full px-3 py-2 border rounded-lg"><option value="pending">Pending</option><option value="in-progress">In Progress</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Date <span className="text-red-500">*</span>
+                  </label>
+                  <input type="date" required value={formData.reportDate} onChange={(e) => setFormData({ ...formData, reportDate: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Status <span className="text-red-500">*</span>
+                  </label>
+                  <select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as WorkStatus })} className="w-full px-3 py-2 border rounded-lg">
+                    <option value="pending">Pending</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
                 <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-1">
+                    Operators (IT Department) <span className="text-red-500">*</span>
+                  </label>
                   <FlexibleMultiSelect 
                     options={operatorOptions} 
                     values={formData.operators} 
                     onChange={(values) => setFormData({ ...formData, operators: values })} 
                     placeholder="Select IT operators or type custom name..."
-                    label="Operators (IT Department) *"
+                    label=""
                     required
                     allowCustom={true}
                   />
                 </div>
                 <div className="col-span-2">
+                  <label className="block text-sm font-medium mb-1">Requesters</label>
                   <FlexibleMultiSelect 
                     options={requesterOptions} 
                     values={formData.requesters} 
                     onChange={(values) => setFormData({ ...formData, requesters: values })} 
-                    placeholder="Select requesters or type custom name (optional)..."
-                    label="Requesters (Optional)"
+                    placeholder="Select requesters or type custom name..."
+                    label=""
                     allowCustom={true}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Department *</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Department <span className="text-red-500">*</span>
+                  </label>
                   <SearchableCombobox 
                     options={departmentOptions} 
                     value={formData.department} 
@@ -564,7 +585,9 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Area *</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Area <span className="text-red-500">*</span>
+                  </label>
                   <SearchableCombobox 
                     options={areaOptions} 
                     value={formData.area} 
@@ -581,7 +604,7 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
                 selectedSuggestion={selectedIssue}
                 suggestions={issueSuggestions} 
                 loading={loadingIssueSuggestions}
-                label="Issue Description (Optional)"
+                label="Issue Description"
                 placeholder="Start typing to see suggestions from knowledge base..."
                 suggestionHeader=""
               />
@@ -592,18 +615,27 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
                 selectedSuggestion={selectedCause}
                 suggestions={causeSuggestions} 
                 loading={loadingCauseSuggestions}
-                label="Cause (Optional)"
+                label="Cause"
                 placeholder={selectedIssue ? `Common causes for "${selectedIssue.name}"...` : "Start typing to see suggestions..."}
                 suggestionHeader={selectedIssue ? `💡 Common Causes for "${selectedIssue.name}"` : " Suggested Causes"}
               />
-              <div><label className="block text-sm font-medium mb-1">Fix Description (Optional)</label><textarea value={formData.fixDescription} onChange={(e) => setFormData({ ...formData, fixDescription: e.target.value })} rows={3} className="w-full px-3 py-2 border rounded-lg" /></div>
-              <div><label className="block text-sm font-medium mb-1">Permanent Fix (Optional)</label><textarea value={formData.permanentFix} onChange={(e) => setFormData({ ...formData, permanentFix: e.target.value })} rows={2} className="w-full px-3 py-2 border rounded-lg" /></div>
-              <div><label className="block text-sm font-medium mb-1">Note (Optional)</label><textarea value={formData.note} onChange={(e) => setFormData({ ...formData, note: e.target.value })} rows={2} className="w-full px-3 py-2 border rounded-lg" /></div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Fix Description</label>
+                <textarea value={formData.fixDescription} onChange={(e) => setFormData({ ...formData, fixDescription: e.target.value })} rows={3} className="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Permanent Fix</label>
+                <textarea value={formData.permanentFix} onChange={(e) => setFormData({ ...formData, permanentFix: e.target.value })} rows={2} className="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Note</label>
+                <textarea value={formData.note} onChange={(e) => setFormData({ ...formData, note: e.target.value })} rows={2} className="w-full px-3 py-2 border rounded-lg" />
+              </div>
               <div className="flex gap-3">
-                <button type="submit" className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg">
+                <button type="submit" className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700">
                   {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : editing ? 'Update' : 'Create'}
                 </button>
-                <button type="button" onClick={() => setShowForm(false)} className="flex-1 px-4 py-2 bg-gray-200 rounded-lg">Cancel</button>
+                <button type="button" onClick={() => setShowForm(false)} className="flex-1 px-4 py-2 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300">Cancel</button>
               </div>
             </form>
           </div>
