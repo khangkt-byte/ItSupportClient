@@ -409,10 +409,10 @@ export function ImportWizard({
                           }`}
                         >
                           <td className="px-4 py-3">{row.rowNumber}</td>
-                          <td className="px-4 py-3">{row.previewData.operators}</td>
+                          <td className="px-4 py-3">{row.previewData?.operator || 'N/A'}</td>
                           <td className="px-4 py-3">
                             <div className="flex flex-col gap-1">
-                              <span className="text-gray-500 text-xs">{row.previewData.department}</span>
+                              <span className="text-gray-500 text-xs">{row.previewData?.department || 'N/A'}</span>
                               <span className={row.mappedDepartmentName ? 'font-medium' : 'text-red-600'}>
                                 {row.mappedDepartmentName ? `→ ${row.mappedDepartmentName}` : '❌ Not found'}
                               </span>
@@ -420,14 +420,14 @@ export function ImportWizard({
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex flex-col gap-1">
-                              <span className="text-gray-500 text-xs">{row.previewData.area}</span>
+                              <span className="text-gray-500 text-xs">{row.previewData?.area || 'N/A'}</span>
                               <span className={row.mappedAreaName ? 'font-medium' : 'text-red-600'}>
                                 {row.mappedAreaName ? `→ ${row.mappedAreaName}` : '❌ Not found'}
                               </span>
                             </div>
                           </td>
-                          <td className="px-4 py-3 max-w-xs truncate" title={row.previewData.issueDescription}>
-                            {row.previewData.issueDescription}
+                          <td className="px-4 py-3 max-w-xs truncate" title={row.previewData?.issueDescription || ''}>
+                            {row.previewData?.issueDescription || 'N/A'}
                           </td>
                           <td className="px-4 py-3">
                             {row.hasErrors && <Badge variant="outline" className="bg-red-50 border-red-400 text-red-700">Error</Badge>}

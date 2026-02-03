@@ -156,16 +156,72 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    const logData = { ...formData, reportDate: new Date(formData.reportDate) };
-    if (editing) {
-      await workLogsApi.update(editing.id, logData);
-      setData(data.map((l) => (l.id === editing.id ? { ...l, ...logData } : l)));
-    } else {
-      const newLog = await workLogsApi.create(logData);
-      setData([{ ...newLog, id: Date.now().toString() }, ...data]);
+    
+    try {
+      // Find department and area IDs
+      const dept = departments.find(d => d.name === formData.department);
+      const areaObj = areas.find(a => a.name === formData.area);
+      
+      // Convert formData to CreateIssueLogDto format
+      const createDto = {
+        operator: formData.operators[0] || currentUser, // Use first operator
+        requester: formData.requesters.length > 0 ? formData.requesters[0] : null,
+        departmentId: dept?.departmentId,
+        areaId: areaObj?.areaId,
+        issueDescription: formData.issue,
+        cause: formData.cause || null,
+        resolution: formData.fixDescription || null,
+        notes: formData.note || null,
+        dateReported: new Date(formData.reportDate).toISOString(),
+        status: formData.status
+      };
+
+      if (editing) {
+        // For update, use UpdateIssueLogDto
+        await workLogsApi.update(editing.id, createDto);
+        // Refresh the data by converting the response back to WorkLog
+        const updatedWorkLog: WorkLog = {
+          ...editing,
+          reportDate: createDto.dateReported,
+          operators: formData.operators,
+          requesters: formData.requesters,
+          department: formData.department,
+          area: formData.area,
+          issue: formData.issue,
+          cause: formData.cause,
+          fixDescription: formData.fixDescription,
+          note: formData.note,
+          status: formData.status
+        };
+        setData(data.map((l) => (l.id === editing.id ? updatedWorkLog : l)));
+      } else {
+        // Create new log
+        const newLog = await workLogsApi.create(createDto);
+        // Convert IssueLogDto to WorkLog
+        const newWorkLog: WorkLog = {
+          ...newLog,
+          id: newLog.issLogId,
+          reportDate: newLog.dateReported,
+          operators: formData.operators,
+          requesters: formData.requesters,
+          department: formData.department,
+          area: formData.area,
+          issue: newLog.issueDescription,
+          cause: newLog.cause || '',
+          fixDescription: newLog.resolution || '',
+          note: newLog.notes || '',
+          status: newLog.status as WorkStatus || 'pending'
+        };
+        setData([newWorkLog, ...data]);
+      }
+      
+      setShowForm(false);
+    } catch (error) {
+      console.error('Failed to submit work log:', error);
+      alert('Failed to submit work log: ' + (error as Error).message);
+    } finally {
+      setSubmitting(false);
     }
-    setShowForm(false);
-    setSubmitting(false);
   };
 
   const handleDelete = async (id: string) => {
@@ -531,7 +587,7 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
                 label="Cause"
                 placeholder={selectedIssue ? `Common causes for "${selectedIssue.name}"...` : "Start typing to see suggestions..."}
                 required
-                suggestionHeader={selectedIssue ? `💡 Common Causes for "${selectedIssue.name}"` : "��� Suggested Causes"}
+                suggestionHeader={selectedIssue ? `💡 Common Causes for "${selectedIssue.name}"` : " Suggested Causes"}
               />
               <div><label className="block text-sm font-medium mb-1">Fix Description *</label><textarea required value={formData.fixDescription} onChange={(e) => setFormData({ ...formData, fixDescription: e.target.value })} rows={3} className="w-full px-3 py-2 border rounded-lg" /></div>
               <div><label className="block text-sm font-medium mb-1">Note</label><textarea value={formData.note} onChange={(e) => setFormData({ ...formData, note: e.target.value })} rows={2} className="w-full px-3 py-2 border rounded-lg" /></div>

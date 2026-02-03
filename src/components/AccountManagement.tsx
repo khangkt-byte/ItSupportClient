@@ -22,9 +22,9 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
           id: Date.now().toString(), 
           accountId: Date.now().toString(),
           empName: employee?.fullName || '',
-          empCode: employee?.employeeCode || null,
+          empCode: employee?.empCode || null,
           employeeName: employee?.fullName || '',
-          employeeCode: employee?.employeeCode || null,
+          employeeCode: employee?.empCode || null, // Fixed: use empCode instead of employeeCode
           isLocked: false,
           lastLoginAt: null,
           createdAt: new Date().toISOString(),
