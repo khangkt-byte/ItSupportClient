@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, X, ChevronDown, ChevronUp, Loader2, Download, Upload, FileSpreadsheet } from 'lucide-react';
-import type { WorkLog, WorkStatus, Employee, Department, Area, ImportValidationResult, DuplicateHandling, IssueSuggestionDto, CauseSuggestionDto } from '../types/data';
+import type { WorkLog, WorkStatus, Employee, Department, Area, ImportValidationResult, DuplicateHandling, IssueSuggestionDto, CauseSuggestionDto, IssueLogDto } from '../types/data';
 import { workLogsApi, issuesApi, causesApi } from '../api';
 import { issueLogToWorkLog, workLogToCreateDto, workLogToUpdateDto, findDepartmentId, findAreaId } from '../utils/workLogAdapter';
 import React from 'react';
@@ -196,7 +196,7 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
         setData(data.map((l) => (l.id === editing.id ? updatedWorkLog : l)));
       } else {
         // Create new log
-        const newLog = await workLogsApi.create(createDto);
+        const newLog: IssueLogDto = await workLogsApi.create(createDto);
         // Convert IssueLogDto to WorkLog
         const newWorkLog: WorkLog = {
           ...newLog,

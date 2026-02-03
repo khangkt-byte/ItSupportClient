@@ -20,9 +20,16 @@ export function AreaManagement({ data, setData }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const timestamp = Date.now();
     setData(editing
       ? data.map((i) => (i.id === editing.id ? { ...i, ...formData } : i))
-      : [...data, { ...formData, id: Date.now().toString(), createdAt: new Date().toISOString(), updatedAt: null }]);
+      : [...data, { 
+          ...formData, 
+          id: timestamp.toString(), 
+          areaId: timestamp, // Add areaId
+          createdAt: new Date().toISOString(), 
+          updatedAt: null 
+        }]);
     setShowForm(false);
   };
 

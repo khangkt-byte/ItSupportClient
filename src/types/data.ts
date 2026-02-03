@@ -429,7 +429,7 @@ export type WorkStatus = 'pending' | 'in-progress' | 'completed' | 'cancelled';
 export interface WorkLog extends IssueLogDto {
   // Mapping for backward compatibility
   id: string;
-  reportDate: Date;
+  reportDate: string; // Changed from Date to string (ISO DateTime) to match API
   operators: string[];
   requesters: string[];
   department: string;
@@ -467,6 +467,7 @@ export type DeviceType = { id: string; name: string; description: string };
 // Department - Note: API doesn't have Department endpoint, using inline data
 export interface Department {
   id: number;
+  departmentId: number; // Add for API compatibility
   name: string;
   description: string;
 }

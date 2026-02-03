@@ -10,7 +10,23 @@ export function RoleManagement({ data, setData }: Props) {
   const [formData, setFormData] = useState({ name: '' });
 
   const openForm = (item?: Role) => { setEditing(item || null); setFormData(item ? { name: item.name } : { name: '' }); setShowForm(true); };
-  const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); setData(editing ? data.map((i) => (i.id === editing.id ? { ...i, ...formData } : i)) : [...data, { ...formData, id: Date.now().toString() }]); setShowForm(false); };
+  const handleSubmit = (e: React.FormEvent) => { 
+    e.preventDefault(); 
+    const timestamp = Date.now();
+    setData(editing 
+      ? data.map((i) => (i.id === editing.id ? { ...i, ...formData } : i)) 
+      : [...data, { 
+          ...formData, 
+          id: timestamp.toString(),
+          roleId: timestamp, // Add roleId
+          description: null,
+          createdAt: new Date().toISOString(),
+          updatedAt: null,
+          claims: null
+        }]
+    ); 
+    setShowForm(false); 
+  };
 
   return (
     <div className="space-y-6">
