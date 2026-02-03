@@ -134,7 +134,7 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
       department: log.department,
       area: log.area,
       issue: log.issue,
-      cause: log.cause,
+      cause: log.cause || '', // Fix: convert null to empty string
       fixDescription: log.fixDescription,
       note: log.note,
       status: log.status,
@@ -531,7 +531,7 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
                 label="Cause"
                 placeholder={selectedIssue ? `Common causes for "${selectedIssue.name}"...` : "Start typing to see suggestions..."}
                 required
-                suggestionHeader={selectedIssue ? `💡 Common Causes for "${selectedIssue.name}"` : "💡 Suggested Causes"}
+                suggestionHeader={selectedIssue ? `💡 Common Causes for "${selectedIssue.name}"` : "��� Suggested Causes"}
               />
               <div><label className="block text-sm font-medium mb-1">Fix Description *</label><textarea required value={formData.fixDescription} onChange={(e) => setFormData({ ...formData, fixDescription: e.target.value })} rows={3} className="w-full px-3 py-2 border rounded-lg" /></div>
               <div><label className="block text-sm font-medium mb-1">Note</label><textarea value={formData.note} onChange={(e) => setFormData({ ...formData, note: e.target.value })} rows={2} className="w-full px-3 py-2 border rounded-lg" /></div>
