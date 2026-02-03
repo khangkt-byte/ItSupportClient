@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Check, X } from 'lucide-react';
 
 export interface Suggestion {
-  id: string;
+  id: number; // Changed from string to number to match API
   name: string;
   description?: string;
   usageCount: number;

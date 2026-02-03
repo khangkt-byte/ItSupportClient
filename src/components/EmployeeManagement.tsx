@@ -1,13 +1,13 @@
 import { useState, useMemo } from 'react';
 import { Plus, Search, Edit, Trash2, X } from 'lucide-react';
-import type { ListEmployeeDto, Department, AreaDto } from '../types/data';
+import type { Employee, Department, AreaDto } from '../types/data';
 import { useDebounce } from '../hooks/useDebounce';
 import { usePagination } from '../hooks/usePagination';
 import { Pagination } from './Pagination';
 
 interface Props {
-  data: ListEmployeeDto[];
-  setData: (items: ListEmployeeDto[]) => void;
+  data: Employee[]; // Changed from ListEmployeeDto[] to Employee[]
+  setData: (items: Employee[]) => void; // Changed from ListEmployeeDto[] to Employee[]
   departments: Department[];
   areas: AreaDto[];
 }
@@ -16,7 +16,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 300);
   const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState<ListEmployeeDto | null>(null);
+  const [editing, setEditing] = useState<Employee | null>(null);
   const [formData, setFormData] = useState({
     empCode: '', fullName: '', phoneNumber: '', email: '', position: '',
   });
@@ -32,7 +32,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
 
   const pagination = usePagination({ data: filtered, itemsPerPage: 15 });
 
-  const openForm = (item?: ListEmployeeDto) => {
+  const openForm = (item?: Employee) => {
     setEditing(item || null);
     setFormData(item ? { 
       empCode: item.empCode || '', 

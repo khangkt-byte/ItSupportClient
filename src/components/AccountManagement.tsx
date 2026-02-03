@@ -12,7 +12,27 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
   const getEmployeeName = (empId: string) => employees.find((e) => e.employeeId === empId)?.fullName || 'Unknown';
 
   const openForm = (item?: Account) => { setEditing(item || null); setFormData(item ? { employeeId: item.employeeId, username: item.username, password: item.password, role: item.role } : { employeeId: '', username: '', password: '', role: '' }); setShowForm(true); };
-  const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); setData(editing ? data.map((i) => (i.id === editing.id ? { ...i, ...formData } : i)) : [...data, { ...formData, id: Date.now().toString(), deleteDate: null }]); setShowForm(false); };
+  const handleSubmit = (e: React.FormEvent) => { 
+    e.preventDefault(); 
+    const employee = employees.find((e) => e.employeeId === formData.employeeId);
+    setData(editing 
+      ? data.map((i) => (i.id === editing.id ? { ...i, ...formData } : i)) 
+      : [...data, { 
+          ...formData, 
+          id: Date.now().toString(), 
+          accountId: Date.now().toString(),
+          empName: employee?.fullName || '',
+          empCode: employee?.employeeCode || null,
+          employeeName: employee?.fullName || '',
+          employeeCode: employee?.employeeCode || null,
+          isLocked: false,
+          lastLoginAt: null,
+          createdAt: new Date().toISOString(),
+          deleteDate: null 
+        }]
+    ); 
+    setShowForm(false); 
+  };
 
   return (
     <div className="space-y-6">
