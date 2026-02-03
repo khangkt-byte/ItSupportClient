@@ -46,7 +46,7 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
   const [currentImportFile, setCurrentImportFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState({
-    reportDate: new Date().toISOString().slice(0, 16),
+    reportDate: new Date().toISOString().slice(0, 10),
     operators: [currentUser], // Changed to array
     requesters: [] as string[], // Changed to array
     department: '',
@@ -54,6 +54,7 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
     issue: '',
     cause: '',
     fixDescription: '',
+    permanentFix: '',
     note: '',
     status: 'pending' as WorkStatus,
   });
@@ -128,7 +129,7 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
   const openForm = (log?: WorkLog) => {
     setEditing(log || null);
     setFormData(log ? {
-      reportDate: new Date(log.reportDate).toISOString().slice(0, 16),
+      reportDate: new Date(log.reportDate).toISOString().slice(0, 10),
       operators: log.operators || [currentUser], // Use operators array or default to current user
       requesters: log.requesters || [], // Use requesters array or default to empty array
       department: log.department,
@@ -136,10 +137,11 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
       issue: log.issue,
       cause: log.cause || '', // Fix: convert null to empty string
       fixDescription: log.fixDescription,
+      permanentFix: log.permanentFix || '',
       note: log.note,
       status: log.status,
     } : {
-      reportDate: new Date().toISOString().slice(0, 16),
+      reportDate: new Date().toISOString().slice(0, 10),
       operators: [currentUser],
       requesters: [],
       department: '',
@@ -147,6 +149,7 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
       issue: '',
       cause: '',
       fixDescription: '',
+      permanentFix: '',
       note: '',
       status: 'pending',
     });
@@ -171,6 +174,7 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
         issueDescription: formData.issue,
         cause: formData.cause || null,
         resolution: formData.fixDescription || null,
+        permanentFix: formData.permanentFix || null,
         notes: formData.note || null,
         dateReported: new Date(formData.reportDate).toISOString(),
         status: formData.status
@@ -190,6 +194,7 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
           issue: formData.issue,
           cause: formData.cause,
           fixDescription: formData.fixDescription,
+          permanentFix: formData.permanentFix,
           note: formData.note,
           status: formData.status
         };
@@ -209,6 +214,7 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
           issue: newLog.issueDescription,
           cause: newLog.cause || '',
           fixDescription: newLog.resolution || '',
+          permanentFix: newLog.permanentFix || '',
           note: newLog.notes || '',
           status: newLog.status as WorkStatus || 'pending'
         };
@@ -484,18 +490,21 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
                   <td className="px-4 py-3 text-sm"><button onClick={() => toggleRow(log.id)} className="text-left hover:text-blue-600 line-clamp-2">{log.issue}</button></td>
                   <td className="px-4 py-3 text-sm"><span className={`px-2 py-1 text-xs rounded ${getStatusBadge(log.status)}`}>{log.status}</span></td>
                   <td className="px-4 py-3 text-sm text-right">
-                    <button onClick={() => toggleRow(log.id)} className="text-blue-600 mr-2">{expandedRows.has(log.id) ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}</button>
-                    <button onClick={() => openForm(log)} className="text-blue-600 mr-2"><Edit className="w-4 h-4" /></button>
-                    <button onClick={() => handleDelete(log.id)} className="text-red-600"><Trash2 className="w-4 h-4" /></button>
+                    <div className="inline-flex items-center gap-2">
+                      <button onClick={() => toggleRow(log.id)} className="text-blue-600 inline-flex items-center justify-center">{expandedRows.has(log.id) ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}</button>
+                      <button onClick={() => openForm(log)} className="text-blue-600 inline-flex items-center justify-center"><Edit className="w-4 h-4" /></button>
+                      <button onClick={() => handleDelete(log.id)} className="text-red-600 inline-flex items-center justify-center"><Trash2 className="w-4 h-4" /></button>
+                    </div>
                   </td>
                 </tr>
                 {expandedRows.has(log.id) && (
                   <tr className="bg-gray-50">
                     <td colSpan={7} className="px-4 py-4">
                       <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div><p className="font-medium mb-1">Cause:</p><p className="text-gray-600">{log.cause}</p></div>
-                        <div><p className="font-medium mb-1">Fix:</p><p className="text-gray-600">{log.fixDescription}</p></div>
-                        {log.note && <div className="col-span-2"><p className="font-medium mb-1">Note:</p><p className="text-gray-600">{log.note}</p></div>}
+                        <div><p className="font-medium mb-1">Cause:</p><p className="text-gray-600">{log.cause || 'N/A'}</p></div>
+                        <div><p className="font-medium mb-1">Fix:</p><p className="text-gray-600">{log.fixDescription || 'N/A'}</p></div>
+                        {log.permanentFix && <div><p className="font-medium mb-1">Permanent Fix:</p><p className="text-gray-600">{log.permanentFix}</p></div>}
+                        {log.note && <div><p className="font-medium mb-1">Note:</p><p className="text-gray-600">{log.note}</p></div>}
                       </div>
                     </td>
                   </tr>
@@ -521,7 +530,7 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
             <div className="p-6 border-b flex justify-between sticky top-0 bg-white z-[60]"><h3 className="text-lg font-semibold">{editing ? 'Edit' : 'New'} Work Log</h3><button onClick={() => setShowForm(false)}><X className="w-6 h-6" /></button></div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-sm font-medium mb-1">Date *</label><input type="datetime-local" required value={formData.reportDate} onChange={(e) => setFormData({ ...formData, reportDate: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
+                <div><label className="block text-sm font-medium mb-1">Date *</label><input type="date" required value={formData.reportDate} onChange={(e) => setFormData({ ...formData, reportDate: e.target.value })} className="w-full px-3 py-2 border rounded-lg" /></div>
                 <div><label className="block text-sm font-medium mb-1">Status *</label><select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as WorkStatus })} className="w-full px-3 py-2 border rounded-lg"><option value="pending">Pending</option><option value="in-progress">In Progress</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div>
                 <div className="col-span-2">
                   <FlexibleMultiSelect 
@@ -572,9 +581,8 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
                 selectedSuggestion={selectedIssue}
                 suggestions={issueSuggestions} 
                 loading={loadingIssueSuggestions}
-                label="Issue Description"
+                label="Issue Description (Optional)"
                 placeholder="Start typing to see suggestions from knowledge base..."
-                required
                 suggestionHeader=""
               />
               <AutocompleteInput 
@@ -584,13 +592,13 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
                 selectedSuggestion={selectedCause}
                 suggestions={causeSuggestions} 
                 loading={loadingCauseSuggestions}
-                label="Cause"
+                label="Cause (Optional)"
                 placeholder={selectedIssue ? `Common causes for "${selectedIssue.name}"...` : "Start typing to see suggestions..."}
-                required
                 suggestionHeader={selectedIssue ? `💡 Common Causes for "${selectedIssue.name}"` : " Suggested Causes"}
               />
-              <div><label className="block text-sm font-medium mb-1">Fix Description *</label><textarea required value={formData.fixDescription} onChange={(e) => setFormData({ ...formData, fixDescription: e.target.value })} rows={3} className="w-full px-3 py-2 border rounded-lg" /></div>
-              <div><label className="block text-sm font-medium mb-1">Note</label><textarea value={formData.note} onChange={(e) => setFormData({ ...formData, note: e.target.value })} rows={2} className="w-full px-3 py-2 border rounded-lg" /></div>
+              <div><label className="block text-sm font-medium mb-1">Fix Description (Optional)</label><textarea value={formData.fixDescription} onChange={(e) => setFormData({ ...formData, fixDescription: e.target.value })} rows={3} className="w-full px-3 py-2 border rounded-lg" /></div>
+              <div><label className="block text-sm font-medium mb-1">Permanent Fix (Optional)</label><textarea value={formData.permanentFix} onChange={(e) => setFormData({ ...formData, permanentFix: e.target.value })} rows={2} className="w-full px-3 py-2 border rounded-lg" /></div>
+              <div><label className="block text-sm font-medium mb-1">Note (Optional)</label><textarea value={formData.note} onChange={(e) => setFormData({ ...formData, note: e.target.value })} rows={2} className="w-full px-3 py-2 border rounded-lg" /></div>
               <div className="flex gap-3">
                 <button type="submit" className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg">
                   {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : editing ? 'Update' : 'Create'}
@@ -645,7 +653,7 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
           accept=".xlsx, .xls" 
         />
         <p className="text-sm text-gray-500 mt-4">
-          <strong>Note:</strong> The Excel template follows your existing work log format with columns: Report Date, Operators (comma-separated for multiple), Requesters (comma-separated for multiple, optional), Department, Area, Issue Description, Cause, Fix Description, Notes, and Status.
+          <strong>Note:</strong> The Excel template follows your existing work log format with columns: Report Date, Operators (comma-separated for multiple), Requesters (comma-separated for multiple, optional), Department, Area, Issue Description, Cause, Fix Description, Permanent Fix, Notes, and Status.
         </p>
       </div>
 
