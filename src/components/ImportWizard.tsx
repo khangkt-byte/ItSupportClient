@@ -89,8 +89,7 @@ export function ImportWizard({
         existingWorkLogs,
         employees,
         departments,
-        areas,
-        importOptions.fuzzyMatchThreshold
+        areas
       );
       setValidationResult(result);
       setStep(2);
