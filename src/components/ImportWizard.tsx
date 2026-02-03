@@ -111,6 +111,7 @@ export function ImportWizard({
         file,
         validationResult,
         importOptions,
+        existingWorkLogs,
         employees,
         departments,
         areas
@@ -409,7 +410,7 @@ export function ImportWizard({
                           }`}
                         >
                           <td className="px-4 py-3">{row.rowNumber}</td>
-                          <td className="px-4 py-3">{row.previewData?.operator || 'N/A'}</td>
+                          <td className="px-4 py-3">{row.previewData?.operators || 'N/A'}</td>
                           <td className="px-4 py-3">
                             <div className="flex flex-col gap-1">
                               <span className="text-gray-500 text-xs">{row.previewData?.department || 'N/A'}</span>

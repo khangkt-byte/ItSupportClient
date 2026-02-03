@@ -10,7 +10,19 @@ export function DepartmentManagement({ data, setData }: Props) {
   const [formData, setFormData] = useState({ name: '', description: '' });
 
   const openForm = (item?: Department) => { setEditing(item || null); setFormData(item ? { name: item.name, description: item.description } : { name: '', description: '' }); setShowForm(true); };
-  const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); setData(editing ? data.map((i) => (i.id === editing.id ? { ...i, ...formData } : i)) : [...data, { ...formData, id: Date.now() }]); setShowForm(false); };
+  const handleSubmit = (e: React.FormEvent) => { 
+    e.preventDefault(); 
+    const timestamp = Date.now();
+    setData(editing 
+      ? data.map((i) => (i.id === editing.id ? { ...i, ...formData } : i)) 
+      : [...data, { 
+          ...formData, 
+          id: timestamp,
+          departmentId: timestamp // Add departmentId
+        }]
+    ); 
+    setShowForm(false); 
+  };
 
   return (
     <div className="space-y-6">

@@ -22,7 +22,7 @@ export function ImportValidation({
   if (!validationResult) return null;
 
   const duplicateRows = validationResult.rows.filter(r => r.duplicateOf !== null);
-  const invalidRows = validationResult.rows.filter(r => !r.isValid);
+  const invalidRows = validationResult.rows.filter(r => r.hasErrors); // Changed from r.isValid to r.hasErrors
 
   return (
     <div className="space-y-6">
@@ -198,16 +198,16 @@ export function ImportValidation({
                   <tr key={row.rowNumber} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm">{row.rowNumber}</td>
                     <td className="px-4 py-3 text-sm">
-                      <div className="max-w-md truncate" title={row.previewData.issueDescription}>
-                        {row.previewData.issueDescription}
+                      <div className="max-w-md truncate" title={row.previewData?.issueDescription || ''}>
+                        {row.previewData?.issueDescription || 'N/A'}
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm whitespace-nowrap">
-                      {row.previewData.dateReported}
+                      {row.previewData?.dateReported || 'N/A'}
                     </td>
                     <td className="px-4 py-3 text-sm">
-                      <div className="max-w-xs truncate" title={row.previewData.operators}>
-                        {row.previewData.operators}
+                      <div className="max-w-xs truncate" title={row.previewData?.operator || ''}>
+                        {row.previewData?.operator || 'N/A'}
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm">
@@ -254,8 +254,8 @@ export function ImportValidation({
                   <tr key={row.rowNumber} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm">{row.rowNumber}</td>
                     <td className="px-4 py-3 text-sm">
-                      <div className="max-w-md truncate" title={row.previewData.issueDescription}>
-                        {row.previewData.issueDescription || '(empty)'}
+                      <div className="max-w-md truncate" title={row.previewData?.issueDescription || ''}>
+                        {row.previewData?.issueDescription || '(empty)'}
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm">
@@ -265,7 +265,7 @@ export function ImportValidation({
                             key={idx} 
                             variant="outline" 
                             className={`text-xs ${
-                              warning.severity === 'error' 
+                              warning.severity === 1 // 1 = Error, 0 = Warning
                                 ? 'bg-red-50 border-red-400 text-red-700' 
                                 : 'bg-yellow-50 border-yellow-400 text-yellow-700'
                             }`}
