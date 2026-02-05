@@ -429,6 +429,10 @@
     position: relative;
   }
 
+  .static {
+    position: static;
+  }
+
   .sticky {
     position: sticky;
   }
@@ -1623,6 +1627,10 @@
 
   .ring-inset {
     --tw-ring-inset: inset;
+  }
+
+  .running {
+    animation-play-state: running;
   }
 
   .focus-within\:border-transparent:focus-within {

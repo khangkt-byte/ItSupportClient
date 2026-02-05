@@ -4,55 +4,114 @@ import { AdminDashboard } from './components/AdminDashboard';
 import { EmployeeDashboard } from './components/EmployeeDashboard';
 import { Sidebar } from './components/Sidebar';
 import { DarkModeStyles } from './components/DarkModeStyles';
-import { authApi } from './api';
+import { authApi } from './lib/api/auth';
+import { SecurityValidator } from './lib/utils/securityChecks';
 import { useDataLoader } from './hooks/useDataLoader';
 import type { User } from './types/data';
 
 // IT Support Work Log Management System
-// Version: 2.0.0 - API Integration Complete
-// Last updated: February 2, 2026
+// Version: 3.0.0 - Permission System & Enterprise Security
+// Last updated: February 5, 2026
+
+// ===== SECURITY INITIALIZATION =====
+// Perform security checks before app initialization
+if (typeof window !== 'undefined') {
+  try {
+    SecurityValidator.initialize();
+  } catch (error) {
+    console.error('[Security] Initialization failed:', error);
+    // Show error UI in render
+  }
+}
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentView, setCurrentView] = useState<string>('');
+  const [securityError, setSecurityError] = useState<string | null>(null);
 
   useEffect(() => {
+    initializeApp();
+  }, []);
+
+  const initializeApp = async () => {
     try {
-      const storedUser = localStorage.getItem('user');
-      const storedToken = localStorage.getItem('accessToken');
+      // Check security requirements
+      const securityCheck = SecurityValidator.checkBrowserSecurity();
+      if (securityCheck.errors.length > 0) {
+        setSecurityError(securityCheck.errors.join('\n'));
+        setIsLoading(false);
+        return;
+      }
+
+      // Try to restore authentication session
+      const restored = await authApi.initializeAuth();
       
-      if (storedUser && storedToken) {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
+      if (restored) {
+        // Get user profile from new auth system
+        const profile = await authApi.getProfile();
+        
+        // Convert profile to User format for compatibility
+        const userData: User = {
+          id: profile.accountId,
+          username: profile.username,
+          employeeId: profile.employeeId,
+          fullName: profile.fullName,
+          role: profile.role?.toLowerCase() === 'admin' ? 'admin' : 'employee',
+          email: profile.email || ''
+        };
+
+        setUser(userData);
         setIsAuthenticated(true);
-        setCurrentView(parsedUser.role === 'admin' ? 'admin' : 'employee');
+        setCurrentView(userData.role === 'admin' ? 'admin' : 'employee');
+
+        // Store for compatibility
+        localStorage.setItem('user', JSON.stringify(userData));
+        
+        console.log('[App] ✅ Session restored successfully');
+      } else {
+        console.log('[App] ℹ️ No active session');
       }
     } catch (error) {
-      console.error('Error loading user session:', error);
+      console.error('[App] Error initializing app:', error);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
   const handleLogin = async (username: string, password: string): Promise<boolean> => {
     try {
       const response = await authApi.login({ identifier: username, password });
       
-      if (response.success && response.user && response.token) {
-        setUser(response.user);
+      if (response.success) {
+        // Get user profile
+        const profile = await authApi.getProfile();
+        
+        // Convert to User format
+        const userData: User = {
+          id: profile.accountId,
+          username: profile.username,
+          employeeId: profile.employeeId,
+          fullName: profile.fullName,
+          role: profile.role?.toLowerCase() === 'admin' ? 'admin' : 'employee',
+          email: profile.email || ''
+        };
+
+        setUser(userData);
         setIsAuthenticated(true);
-        setCurrentView(response.user.role === 'admin' ? 'admin' : 'employee');
-        localStorage.setItem('user', JSON.stringify(response.user));
-        localStorage.setItem('accessToken', response.token.accessToken);
-        localStorage.setItem('refreshToken', response.token.refreshToken);
+        setCurrentView(userData.role === 'admin' ? 'admin' : 'employee');
+
+        // Store for compatibility
+        localStorage.setItem('user', JSON.stringify(userData));
+
+        console.log('[App] ✅ Login successful');
         return true;
       }
       
       return false;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('[App] Login error:', error);
       return false;
     }
   };
@@ -61,14 +120,14 @@ export default function App() {
     try {
       await authApi.logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('[App] Logout error:', error);
     } finally {
       setUser(null);
       setIsAuthenticated(false);
       setCurrentView('');
       localStorage.removeItem('user');
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+      
+      console.log('[App] 👋 Logged out');
     }
   };
 
@@ -82,6 +141,17 @@ export default function App() {
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (securityError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-red-500">Security Error:</p>
+          <p className="text-gray-600">{securityError}</p>
         </div>
       </div>
     );
