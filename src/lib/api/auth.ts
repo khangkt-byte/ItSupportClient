@@ -313,10 +313,10 @@ export const authApi = {
 
   /**
    * Get user profile
-   * Backend: GET /api/accounts/profile
+   * Backend: GET /api/employees/me
    */
   async getProfile(): Promise<ProfileDto> {
-    return apiClient.get<ProfileDto>('/api/accounts/profile');
+    return apiClient.get<ProfileDto>('/api/employees/me');
   },
 
   /**

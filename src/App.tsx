@@ -52,13 +52,17 @@ export default function App() {
         // Get user profile from new auth system
         const profile = await authApi.getProfile();
         
+        // Get user permissions to determine role
+        const permissions = await authApi.getMyPermissions();
+        const isAdmin = permissions.includes('Admin');
+        
         // Convert profile to User format for compatibility
         const userData: User = {
-          id: profile.accountId,
-          username: profile.username,
-          employeeId: profile.employeeId,
+          id: profile.empId,
+          username: profile.username || '',
+          employeeId: profile.empId,
           fullName: profile.fullName,
-          role: profile.role?.toLowerCase() === 'admin' ? 'admin' : 'employee',
+          role: isAdmin ? 'admin' : 'employee',
           email: profile.email || ''
         };
 
@@ -88,13 +92,17 @@ export default function App() {
         // Get user profile
         const profile = await authApi.getProfile();
         
+        // Get user permissions to determine role
+        const permissions = await authApi.getMyPermissions();
+        const isAdmin = permissions.includes('Admin');
+        
         // Convert to User format
         const userData: User = {
-          id: profile.accountId,
-          username: profile.username,
-          employeeId: profile.employeeId,
+          id: profile.empId,
+          username: profile.username || '',
+          employeeId: profile.empId,
           fullName: profile.fullName,
-          role: profile.role?.toLowerCase() === 'admin' ? 'admin' : 'employee',
+          role: isAdmin ? 'admin' : 'employee',
           email: profile.email || ''
         };
 
