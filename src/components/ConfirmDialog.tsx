@@ -38,7 +38,7 @@ export function ConfirmDialog({
       case 'delete':
         return <Trash2 className="w-5 h-5 text-red-600" />;
       case 'lock':
-        return <Lock className="w-5 h-5 text-red-600" />;
+        return <Lock className="w-6 h-6 text-orange-600" />;
       case 'unlock':
         return <Unlock className="w-5 h-5 text-green-600" />;
       default:
@@ -51,7 +51,7 @@ export function ConfirmDialog({
       case 'delete':
         return 'bg-red-600 hover:bg-red-700';
       case 'lock':
-        return 'bg-red-600 hover:bg-red-700';
+        return 'bg-orange-600 hover:bg-orange-700';
       case 'unlock':
         return 'bg-green-600 hover:bg-green-700';
       case 'logout':

@@ -72,6 +72,15 @@
     --color-red-700: oklch(.505 .213 27.518);
     --color-red-800: oklch(.444 .177 26.899);
     --color-orange-50: oklch(.98 .016 73.684);
+    --color-orange-100: oklch(.961 .039 74.612);
+    --color-orange-200: oklch(.924 .083 73.684);
+    --color-orange-300: oklch(.87 .133 72.247);
+    --color-orange-400: oklch(.787 .193 66.29);
+    --color-orange-500: oklch(.705 .213 56.155);
+    --color-orange-600: oklch(.648 .206 48.717);
+    --color-orange-700: oklch(.567 .175 44.283);
+    --color-orange-800: oklch(.484 .142 42.196);
+    --color-orange-900: oklch(.426 .119 43.39);
     --color-yellow-50: oklch(.987 .026 102.212);
     --color-yellow-200: oklch(.945 .129 101.54);
     --color-yellow-400: oklch(.852 .199 91.936);
@@ -1187,6 +1196,26 @@
     background-color: var(--color-orange-50);
   }
 
+  .bg-orange-100 {
+    background-color: var(--color-orange-100);
+  }
+
+  .bg-orange-200 {
+    background-color: var(--color-orange-200);
+  }
+
+  .bg-orange-500 {
+    background-color: var(--color-orange-500);
+  }
+
+  .bg-orange-600 {
+    background-color: var(--color-orange-600);
+  }
+
+  .bg-orange-700 {
+    background-color: var(--color-orange-700);
+  }
+
   .bg-primary {
     background-color: oklch(.205 0 0);
   }
@@ -1480,6 +1509,18 @@
     color: var(--color-green-900);
   }
 
+  .text-orange-600 {
+    color: var(--color-orange-600);
+  }
+
+  .text-orange-700 {
+    color: var(--color-orange-700);
+  }
+
+  .text-orange-800 {
+    color: var(--color-orange-800);
+  }
+
   .text-muted-foreground {
     color: oklch(.556 0 0);
   }
@@ -1710,6 +1751,12 @@
   }
 
   @media (hover: hover) {
+    .hover\:bg-orange-700:hover {
+      background-color: var(--color-orange-700);
+    }
+  }
+
+  @media (hover: hover) {
     .hover\:bg-red-100:hover {
       background-color: var(--color-red-100);
     }
@@ -1754,6 +1801,18 @@
   @media (hover: hover) {
     .hover\:text-gray-700:hover {
       color: var(--color-gray-700);
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:text-orange-700:hover {
+      color: var(--color-orange-700);
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:text-orange-800:hover {
+      color: var(--color-orange-800);
     }
   }
 

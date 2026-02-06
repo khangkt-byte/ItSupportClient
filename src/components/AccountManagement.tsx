@@ -417,7 +417,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                           className={`inline-flex items-center justify-center cursor-pointer transition-colors ${
                             item.isLocked
                               ? 'text-green-600 hover:text-green-800'
-                              : 'text-red-600 hover:text-red-800'
+                              : 'text-orange-600 hover:text-orange-800'
                           }`}
                           title={item.isLocked ? 'Unlock account' : 'Lock account'}
                         >
@@ -639,7 +639,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                   {confirmState.action === 'delete' ? (
                     <Trash2 className="w-5 h-5 text-red-600" />
                   ) : confirmState.action === 'lock' ? (
-                    <Lock className="w-5 h-5 text-red-600" />
+                    <Lock className="w-5 h-5 text-orange-600" />
                   ) : (
                     <Unlock className="w-5 h-5 text-green-600" />
                   )}
@@ -678,7 +678,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
               {confirmState.action === 'lock' && (
                 <button
                   onClick={handleConfirmAction}
-                  className="flex-1 px-4 py-2 rounded-lg text-white cursor-pointer transition-colors bg-red-600 hover:bg-red-700"
+                  className="flex-1 px-4 py-2 rounded-lg text-white cursor-pointer transition-colors bg-orange-600 hover:bg-orange-700"
                 >
                   {confirmActionLabel}
                 </button>
