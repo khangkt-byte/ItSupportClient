@@ -6,7 +6,6 @@ import { Sidebar } from './components/Sidebar';
 import { DarkModeStyles } from './components/DarkModeStyles';
 import { authApi } from './lib/api/auth';
 import { SecurityValidator } from './lib/utils/securityChecks';
-import { useDataLoader } from './hooks/useDataLoader';
 import type { User } from './types/data';
 
 // IT Support Work Log Management System

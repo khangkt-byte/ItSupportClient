@@ -8,6 +8,7 @@ import type {
   ImportResultDto,
   IssueSuggestionDto,
   CauseSuggestionDto,
+  BulkDeleteResultDto,
 } from '../types/data';
 
 export interface WorkLogsQueryParams {
@@ -63,9 +64,9 @@ export const workLogsApi = {
    * Delete work log(s)
    * DELETE /api/issue-logs
    */
-  async delete(ids: string[], softDelete: boolean = true): Promise<boolean> {
+  async delete(ids: string[], softDelete: boolean = true): Promise<BulkDeleteResultDto> {
     const queryString = buildQueryString({ softDelete });
-    return apiClient.delete<boolean>(`/api/issue-logs${queryString}`, ids);
+    return apiClient.delete<BulkDeleteResultDto>(`/api/issue-logs${queryString}`, ids);
   },
 
   /**

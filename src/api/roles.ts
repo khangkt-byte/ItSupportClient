@@ -7,6 +7,7 @@ import type {
   AccountRolesDto,
   AssignRolesDto,
   PaginatedResult,
+  BulkDeleteResultDto,
 } from '../types/data';
 
 export interface RolesQueryParams {
@@ -61,16 +62,22 @@ export const rolesApi = {
   /**
    * Delete role(s)
    * DELETE /api/roles
+   * 
+   * Strategy: All-or-nothing (transaction-based)
+   * Business rules:
+   * - Không thể xóa role đang được sử dụng
+   * - Không thể xóa system roles
    */
-  async delete(ids: number[]): Promise<boolean> {
-    return apiClient.delete<boolean>('/api/roles', ids);
+  async delete(ids: number[], softDelete: boolean = true): Promise<BulkDeleteResultDto> {
+    const queryString = buildQueryString({ softDelete });
+    return apiClient.delete<BulkDeleteResultDto>(`/api/roles${queryString}`, ids);
   },
 
   /**
    * Delete single role
    */
-  async deleteSingle(id: number): Promise<boolean> {
-    return this.delete([id]);
+  async deleteSingle(id: number, softDelete: boolean = true): Promise<BulkDeleteResultDto> {
+    return this.delete([id], softDelete);
   },
 
   /**

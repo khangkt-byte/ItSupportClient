@@ -5,7 +5,10 @@ import type {
   CreateAccountDto,
   UpdateAccountDto,
   ResetPasswordResultDto,
+  ChangePasswordDto,
+  LoginHistoryDto,
   PaginatedResult,
+  BulkDeleteResultDto,
 } from '../types/data';
 
 export interface AccountsQueryParams {
@@ -60,16 +63,22 @@ export const accountsApi = {
   /**
    * Delete account(s)
    * DELETE /api/accounts
+   * 
+   * Strategy: All-or-nothing (transaction-based)
+   * Business rules:
+   * - Không thể xóa tài khoản Super Admin
+   * - Không thể tự xóa tài khoản của chính mình
    */
-  async delete(ids: string[]): Promise<boolean> {
-    return apiClient.delete<boolean>('/api/accounts', ids);
+  async delete(ids: string[], softDelete: boolean = true): Promise<BulkDeleteResultDto> {
+    const queryString = buildQueryString({ softDelete });
+    return apiClient.delete<BulkDeleteResultDto>(`/api/accounts${queryString}`, ids);
   },
 
   /**
    * Delete single account
    */
-  async deleteSingle(id: string): Promise<boolean> {
-    return this.delete([id]);
+  async deleteSingle(id: string, softDelete: boolean = true): Promise<BulkDeleteResultDto> {
+    return this.delete([id], softDelete);
   },
 
   /**
@@ -95,4 +104,31 @@ export const accountsApi = {
   async unlock(id: string): Promise<AccountDto> {
     return apiClient.post<AccountDto>(`/api/accounts/${id}/unlock`);
   },
-};
+
+  /**
+   * Get my permissions
+   * GET /api/accounts/my-permissions
+   */
+  async getMyPermissions(): Promise<string[]> {
+    return apiClient.get<string[]>('/api/accounts/my-permissions');
+  },
+
+  /**
+   * Change password (self-service)
+   * POST /api/accounts/me/change-password
+   * 
+   * Allows user to change their own password
+   */
+  async changePassword(data: ChangePasswordDto): Promise<void> {
+    return apiClient.post<void>('/api/accounts/me/change-password', data);
+  },
+
+  /**
+   * Get login history (self-service)
+   * GET /api/accounts/me/login-history
+   * 
+   * Get login history for current user
+   */
+  async getLoginHistory(): Promise<LoginHistoryDto[]> {
+    return apiClient.get<LoginHistoryDto[]>('/api/accounts/me/login-history');
+  },};

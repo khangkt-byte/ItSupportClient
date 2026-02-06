@@ -20,7 +20,6 @@ import type { ProfileDto } from '../../types/data';
 import type {
   LoginDto,
   LoginResponse,
-  TokenResponseDto,
   OtpDto,
   OtpResponseDto,
   OtpSentResponseDto,
@@ -328,7 +327,7 @@ export const authApi = {
 
     // Return cached permissions if still valid
     if (userPermissions.length > 0 &&
-        now - permissionsCacheTime < PERMISSIONS_CACHE_TTL) {
+      now - permissionsCacheTime < PERMISSIONS_CACHE_TTL) {
       return userPermissions;
     }
 

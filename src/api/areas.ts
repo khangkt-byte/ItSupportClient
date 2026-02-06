@@ -4,6 +4,7 @@ import type {
   CreateAreaDto,
   UpdateAreaDto,
   PaginatedResult,
+  BulkDeleteResultDto,
 } from '../types/data';
 
 export interface AreasQueryParams {
@@ -58,16 +59,24 @@ export const areasApi = {
   /**
    * Delete area(s)
    * DELETE /api/areas
+   * 
+   * Strategy: All-or-nothing (transaction-based)
+   * - Nếu TẤT CẢ thành công → 200 OK với summary
+   * - Nếu BẤT KỲ lỗi nào → Rollback, throw error (4xx/5xx)
    */
-  async delete(ids: number[], softDelete: boolean = true): Promise<boolean> {
+  async delete(ids: number[], softDelete: boolean = true): Promise<BulkDeleteResultDto> {
     const queryString = buildQueryString({ softDelete });
-    return apiClient.delete<boolean>(`/api/areas${queryString}`, ids);
+    return apiClient.delete<BulkDeleteResultDto>(`/api/areas${queryString}`, ids);
   },
 
   /**
    * Delete single area
+   * DELETE /api/areas/{id}
+   * 
+   * Business rules:
+   * - Không thể xóa nếu khu vực đang được sử dụng bởi nhân viên (422)
    */
-  async deleteSingle(id: number, softDelete: boolean = true): Promise<boolean> {
+  async deleteSingle(id: number, softDelete: boolean = true): Promise<BulkDeleteResultDto> {
     return this.delete([id], softDelete);
   },
 };

@@ -42,6 +42,17 @@ export interface RefreshTokenRequestDto {
 }
 
 /**
+ * API Error response
+ * Standard: RFC 7807 Problem Details
+ */
+export interface ApiError {
+  error: string;
+  errorCode?: string;
+  message?: string;
+  statusCode?: number;
+}
+
+/**
  * OTP verification DTO
  * Backend: OtpDto.cs
  */
@@ -75,17 +86,6 @@ export interface ResetPasswordDto {
   token: string;
   newPassword: string;
   confirmPassword: string;
-}
-
-/**
- * API Error response
- * Standard: RFC 7807 Problem Details
- */
-export interface ApiError {
-  error: string;
-  errorCode?: string;
-  message?: string;
-  statusCode?: number;
 }
 
 /**

@@ -1,9 +1,9 @@
-import type { 
-  ListEmployeeDto, 
-  Department, 
-  AreaDto, 
-  ListAccountDto, 
-  RoleDto, 
+import type {
+  ListEmployeeDto,
+  Department,
+  AreaDto,
+  ListAccountDto,
+  RoleDto,
   IssueLogDto,
   PaginatedResult,
   Area, // Area type
@@ -106,10 +106,10 @@ export function useDataManager() {
     data: accountsRaw.data.map(acc => ({
       ...acc,
       id: acc.accountId,
-      role: 'employee', // Default role, should be fetched from roles
-      password: '********', // Placeholder
-      employeeId: acc.accountId,
-      employeeName: acc.empName,
+      role: 'employee', // Default role, should be fetched from Auth API
+      password: '********', // Placeholder - never show real password
+      employeeId: acc.empCode || acc.accountId, // Use empCode as fallback
+      employeeName: acc.empName || 'Unknown', // Use empName from API
       employeeCode: acc.empCode,
       deleteDate: null
     } as Account)),

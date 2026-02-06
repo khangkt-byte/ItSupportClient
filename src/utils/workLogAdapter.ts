@@ -3,12 +3,12 @@
  * Converts between UI models and API DTOs
  */
 
-import type { 
-  WorkLog, 
-  IssueLogDto, 
-  CreateIssueLogDto, 
+import type {
+  WorkLog,
+  IssueLogDto,
+  CreateIssueLogDto,
   UpdateIssueLogDto,
-  WorkStatus 
+  WorkStatus
 } from '../types/data';
 
 /**
@@ -19,17 +19,17 @@ export function issueLogToWorkLog(issueLog: IssueLogDto): WorkLog {
     // Map IssueLogDto fields to WorkLog
     id: issueLog.issLogId,
     issLogId: issueLog.issLogId,
-    
+
     // Date mapping
     reportDate: new Date(issueLog.dateReported),
     dateReported: issueLog.dateReported,
-    
+
     // Operators and Requesters (convert single strings to arrays)
     operator: issueLog.operator,
     operators: issueLog.operator ? issueLog.operator.split(',').map(s => s.trim()) : [],
     requester: issueLog.requester,
     requesters: issueLog.requester ? issueLog.requester.split(',').map(s => s.trim()) : [],
-    
+
     // Department and Area
     departmentId: issueLog.departmentId,
     department: issueLog.departmentName,
@@ -37,28 +37,28 @@ export function issueLogToWorkLog(issueLog: IssueLogDto): WorkLog {
     areaId: issueLog.areaId,
     area: issueLog.areaName,
     areaName: issueLog.areaName,
-    
+
     // Issue details
     issueId: issueLog.issueId,
     issueName: issueLog.issueName,
     issue: issueLog.issueDescription,
     issueDescription: issueLog.issueDescription,
-    
+
     // Cause details
     causeId: issueLog.causeId,
     causeName: issueLog.causeName,
     cause: issueLog.cause,
-    
+
     // Resolution
     resolution: issueLog.resolution,
     fixDescription: issueLog.resolution || '',
     permanentFix: issueLog.permanentFix,
-    
+
     // Notes and Status
     notes: issueLog.notes,
     note: issueLog.notes || '',
     status: (issueLog.status?.toLowerCase() || 'pending') as WorkStatus,
-    
+
     // Timestamps
     createdAt: issueLog.createdAt,
     updatedAt: issueLog.updatedAt,
@@ -71,39 +71,39 @@ export function issueLogToWorkLog(issueLog: IssueLogDto): WorkLog {
 export function workLogToCreateDto(workLog: Partial<WorkLog>): CreateIssueLogDto {
   return {
     // Convert operators array to comma-separated string
-    operator: Array.isArray(workLog.operators) 
-      ? workLog.operators.join(', ') 
+    operator: Array.isArray(workLog.operators)
+      ? workLog.operators.join(', ')
       : (workLog.operator || ''),
-    
+
     // Convert requesters array to comma-separated string
-    requester: Array.isArray(workLog.requesters) 
-      ? workLog.requesters.join(', ') 
+    requester: Array.isArray(workLog.requesters)
+      ? workLog.requesters.join(', ')
       : (workLog.requester || null),
-    
-    // Department and Area IDs
-    departmentId: workLog.departmentId,
-    areaId: workLog.areaId,
-    
+
+    // Department and Area IDs - use DptId instead of departmentId for API compatibility
+    DptId: workLog.departmentId,
+    AreaId: workLog.areaId,
+
     // Issue
     issueId: workLog.issueId || null,
     issueDescription: workLog.issue || workLog.issueDescription || '',
-    
+
     // Cause
     causeId: workLog.causeId || null,
     cause: workLog.cause || null,
-    
+
     // Resolution
     resolution: workLog.fixDescription || workLog.resolution || null,
     permanentFix: workLog.permanentFix || null,
-    
+
     // Notes and Status
     notes: workLog.note || workLog.notes || null,
     status: workLog.status || 'pending',
-    
-    // Date
-    dateReported: workLog.reportDate 
-      ? new Date(workLog.reportDate).toISOString() 
-      : new Date().toISOString(),
+
+    // Date - format as YYYY-MM-DD for DateOnly field
+    dateReported: workLog.reportDate
+      ? new Date(workLog.reportDate).toISOString().split('T')[0]
+      : new Date().toISOString().split('T')[0],
   };
 }
 
@@ -112,66 +112,66 @@ export function workLogToCreateDto(workLog: Partial<WorkLog>): CreateIssueLogDto
  */
 export function workLogToUpdateDto(workLog: Partial<WorkLog>): UpdateIssueLogDto {
   const dto: UpdateIssueLogDto = {};
-  
+
   // Only include fields that are present
   if (workLog.operators !== undefined) {
-    dto.operator = Array.isArray(workLog.operators) 
-      ? workLog.operators.join(', ') 
+    dto.operator = Array.isArray(workLog.operators)
+      ? workLog.operators.join(', ')
       : (workLog.operator || null);
   }
-  
+
   if (workLog.requesters !== undefined) {
-    dto.requester = Array.isArray(workLog.requesters) 
-      ? workLog.requesters.join(', ') 
+    dto.requester = Array.isArray(workLog.requesters)
+      ? workLog.requesters.join(', ')
       : (workLog.requester || null);
   }
-  
+
   if (workLog.departmentId !== undefined) {
-    dto.departmentId = workLog.departmentId;
+    dto.DptId = workLog.departmentId;
   }
-  
+
   if (workLog.areaId !== undefined) {
-    dto.areaId = workLog.areaId;
+    dto.AreaId = workLog.areaId;
   }
-  
+
   if (workLog.issueId !== undefined) {
     dto.issueId = workLog.issueId;
   }
-  
+
   if (workLog.issue !== undefined || workLog.issueDescription !== undefined) {
     dto.issueDescription = workLog.issue || workLog.issueDescription || null;
   }
-  
+
   if (workLog.causeId !== undefined) {
     dto.causeId = workLog.causeId;
   }
-  
+
   if (workLog.cause !== undefined) {
     dto.cause = workLog.cause;
   }
-  
+
   if (workLog.fixDescription !== undefined || workLog.resolution !== undefined) {
     dto.resolution = workLog.fixDescription || workLog.resolution || null;
   }
-  
+
   if (workLog.permanentFix !== undefined) {
     dto.permanentFix = workLog.permanentFix;
   }
-  
+
   if (workLog.note !== undefined || workLog.notes !== undefined) {
     dto.notes = workLog.note || workLog.notes || null;
   }
-  
+
   if (workLog.status !== undefined) {
     dto.status = workLog.status;
   }
-  
+
   if (workLog.reportDate !== undefined) {
-    dto.dateReported = workLog.reportDate 
-      ? new Date(workLog.reportDate).toISOString() 
+    dto.dateReported = workLog.reportDate
+      ? new Date(workLog.reportDate).toISOString().split('T')[0]
       : null;
   }
-  
+
   return dto;
 }
 
@@ -187,10 +187,10 @@ export function issueLogsToWorkLogs(issueLogs: IssueLogDto[]): WorkLog[] {
  * This is a fallback when we need to find department ID from name
  */
 export function findDepartmentId(
-  departmentName: string, 
+  departmentName: string,
   departments: Array<{ id: number; name: string }>
 ): number | undefined {
-  const dept = departments.find(d => 
+  const dept = departments.find(d =>
     d.name.toLowerCase() === departmentName.toLowerCase()
   );
   return dept?.id;
@@ -203,7 +203,7 @@ export function findAreaId(
   areaName: string,
   areas: Array<{ id?: number; areaId?: number; name: string }>
 ): number | undefined {
-  const area = areas.find(a => 
+  const area = areas.find(a =>
     a.name.toLowerCase() === areaName.toLowerCase()
   );
   return area?.id || area?.areaId;

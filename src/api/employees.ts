@@ -8,6 +8,7 @@ import type {
   UpdateProfileDto,
   ProfileDto,
   PaginatedResult,
+  BulkDeleteResultDto,
 } from '../types/data';
 
 export interface EmployeesQueryParams {
@@ -62,16 +63,21 @@ export const employeesApi = {
   /**
    * Delete employee(s)
    * DELETE /api/employees
+   * 
+   * Strategy: All-or-nothing (transaction-based)
+   * Business rules:
+   * - Không thể xóa Super_Admin
+   * - Không thể xóa nếu nhân viên có nhật ký sự cố
    */
-  async delete(ids: string[], softDelete: boolean = true): Promise<boolean> {
+  async delete(ids: string[], softDelete: boolean = true): Promise<BulkDeleteResultDto> {
     const queryString = buildQueryString({ softDelete });
-    return apiClient.delete<boolean>(`/api/employees${queryString}`, ids);
+    return apiClient.delete<BulkDeleteResultDto>(`/api/employees${queryString}`, ids);
   },
 
   /**
    * Delete single employee
    */
-  async deleteSingle(id: string, softDelete: boolean = true): Promise<boolean> {
+  async deleteSingle(id: string, softDelete: boolean = true): Promise<BulkDeleteResultDto> {
     return this.delete([id], softDelete);
   },
 

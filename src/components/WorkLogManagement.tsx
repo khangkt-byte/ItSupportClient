@@ -1,11 +1,10 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, X, ChevronDown, ChevronUp, Loader2, Download, Upload, FileSpreadsheet } from 'lucide-react';
-import type { WorkLog, WorkStatus, Employee, Department, Area, ImportValidationResult, DuplicateHandling, IssueSuggestionDto, CauseSuggestionDto, IssueLogDto } from '../types/data';
+import type { WorkLog, WorkStatus, Employee, Department, Area, ImportValidationResult, DuplicateHandling, IssueLogDto } from '../types/data';
 import { workLogsApi, issuesApi, causesApi } from '../api';
-import { issueLogToWorkLog, workLogToCreateDto, workLogToUpdateDto, findDepartmentId, findAreaId } from '../utils/workLogAdapter';
+import { workLogToCreateDto } from '../utils/workLogAdapter';
 import React from 'react';
 import { SearchableCombobox } from './SearchableCombobox';
-import { MultiSelectCombobox } from './MultiSelectCombobox';
 import { FlexibleMultiSelect } from './FlexibleMultiSelect';
 import { AutocompleteInput, type Suggestion } from './AutocompleteInput';
 import { useDebounce } from '../hooks/useDebounce';
@@ -14,6 +13,8 @@ import { Pagination } from './Pagination';
 import { exportWorkLogsToExcel, validateImportedWorkLogs, importWorkLogsFromExcel, downloadExcelTemplate } from '../utils/excelUtils';
 import { ImportValidation } from './ImportValidation';
 import { ImportWizard } from './ImportWizard';
+import { PermissionGuard } from '../lib/components/PermissionGuard';
+import { Permissions } from '../lib/constants/permissions';
 
 interface Props {
   data: WorkLog[];
@@ -25,7 +26,7 @@ interface Props {
   areas: Area[];
 }
 
-export function WorkLogManagement({ data, setData, currentUser, loading = false, employees, departments, areas }: Props) {
+export function WorkLogManagement({ data, setData, currentUser, employees, departments, areas }: Props) {
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 300);
   const [statusFilter, setStatusFilter] = useState<WorkStatus | 'all'>('all');
@@ -165,20 +166,23 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
       const dept = departments.find(d => d.name === formData.department);
       const areaObj = areas.find(a => a.name === formData.area);
       
-      // Convert formData to CreateIssueLogDto format
-      const createDto = {
-        operator: formData.operators[0] || currentUser, // Use first operator
-        requester: formData.requesters.length > 0 ? formData.requesters[0] : null,
+      // Convert formData to WorkLog format first, then to CreateIssueLogDto using adapter
+      const workLogData: Partial<WorkLog> = {
+        operators: [formData.operators[0] || currentUser],
+        requesters: formData.requesters,
         departmentId: dept?.departmentId,
         areaId: areaObj?.areaId,
-        issueDescription: formData.issue,
-        cause: formData.cause || null,
-        resolution: formData.fixDescription || null,
-        permanentFix: formData.permanentFix || null,
-        notes: formData.note || null,
-        dateReported: new Date(formData.reportDate).toISOString(),
-        status: formData.status
+        issue: formData.issue,
+        cause: formData.cause || undefined,
+        fixDescription: formData.fixDescription || undefined,
+        permanentFix: formData.permanentFix || undefined,
+        note: formData.note || undefined,
+        reportDate: formData.reportDate,
+        status: formData.status as WorkStatus
       };
+      
+      // Use adapter to convert to API DTO
+      const createDto = workLogToCreateDto(workLogData);
 
       if (editing) {
         // For update, use UpdateIssueLogDto
@@ -289,7 +293,7 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
         // For 'Update' handling, merge with existing data
         if (duplicateHandling === 'Update') {
           const updatedData = [...data];
-          importedLogs.forEach(newLog => {
+          importedLogs.forEach((newLog: WorkLog) => {
             const existingIndex = updatedData.findIndex(log => log.id === newLog.id);
             if (existingIndex >= 0) {
               updatedData[existingIndex] = { ...updatedData[existingIndex], ...newLog } as WorkLog;
@@ -443,9 +447,18 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
     <div className="space-y-6">
       <div className="flex justify-between">
         <div><h2 className="text-2xl font-semibold">Work Log Management</h2></div>
-        <button onClick={() => openForm()} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 cursor-pointer">
-          <Plus className="w-5 h-5" />New Work Log
-        </button>
+        <PermissionGuard 
+          permission={Permissions.IssueLog.Create}
+          fallback={
+            <button disabled className="px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed opacity-50 flex items-center gap-2">
+              <Plus className="w-5 h-5" />New Work Log
+            </button>
+          }
+        >
+          <button onClick={() => openForm()} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 cursor-pointer">
+            <Plus className="w-5 h-5" />New Work Log
+          </button>
+        </PermissionGuard>
       </div>
 
       <div className="grid grid-cols-4 gap-4">
@@ -492,8 +505,18 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
                   <td className="px-4 py-3 text-sm text-right">
                     <div className="inline-flex items-center gap-2">
                       <button onClick={() => toggleRow(log.id)} className="text-blue-600 inline-flex items-center justify-center cursor-pointer hover:text-blue-800">{expandedRows.has(log.id) ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}</button>
-                      <button onClick={() => openForm(log)} className="text-blue-600 inline-flex items-center justify-center cursor-pointer hover:text-blue-800"><Edit className="w-4 h-4" /></button>
-                      <button onClick={() => handleDelete(log.id)} className="text-red-600 inline-flex items-center justify-center cursor-pointer hover:text-red-800"><Trash2 className="w-4 h-4" /></button>
+                      <PermissionGuard 
+                        permission={Permissions.IssueLog.Edit}
+                        fallback={null}
+                      >
+                        <button onClick={() => openForm(log)} className="text-blue-600 inline-flex items-center justify-center cursor-pointer hover:text-blue-800"><Edit className="w-4 h-4" /></button>
+                      </PermissionGuard>
+                      <PermissionGuard 
+                        permission={Permissions.IssueLog.Delete}
+                        fallback={null}
+                      >
+                        <button onClick={() => handleDelete(log.id)} className="text-red-600 inline-flex items-center justify-center cursor-pointer hover:text-red-800"><Trash2 className="w-4 h-4" /></button>
+                      </PermissionGuard>
                     </div>
                   </td>
                 </tr>
@@ -525,10 +548,22 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b flex justify-between sticky top-0 bg-white z-[60]"><h3 className="text-lg font-semibold">{editing ? 'Edit' : 'New'} Work Log</h3><button onClick={() => setShowForm(false)} className="cursor-pointer hover:text-gray-600"><X className="w-6 h-6" /></button></div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <PermissionGuard 
+          permission={editing ? Permissions.IssueLog.Edit : Permissions.IssueLog.Create}
+          fallback={
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-lg p-6 max-w-sm text-center">
+                <h3 className="text-lg font-semibold text-red-600 mb-2">Access Denied</h3>
+                <p className="text-gray-600 mb-4">You don't have permission to {editing ? 'edit' : 'create'} work logs.</p>
+                <button onClick={() => setShowForm(false)} className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Close</button>
+              </div>
+            </div>
+          }
+        >
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b flex justify-between sticky top-0 bg-white z-[60]"><h3 className="text-lg font-semibold">{editing ? 'Edit' : 'New'} Work Log</h3><button onClick={() => setShowForm(false)} className="cursor-pointer hover:text-gray-600"><X className="w-6 h-6" /></button></div>
+              <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">
@@ -605,6 +640,7 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
                 suggestions={issueSuggestions} 
                 loading={loadingIssueSuggestions}
                 label="Issue Description"
+                required
                 placeholder="Start typing to see suggestions from knowledge base..."
                 suggestionHeader=""
               />
@@ -638,8 +674,9 @@ export function WorkLogManagement({ data, setData, currentUser, loading = false,
                 <button type="button" onClick={() => setShowForm(false)} className="flex-1 px-4 py-2 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300">Cancel</button>
               </div>
             </form>
+            </div>
           </div>
-        </div>
+        </PermissionGuard>
       )}
 
       <div className="bg-white rounded-lg border p-6">

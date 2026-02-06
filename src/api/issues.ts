@@ -5,6 +5,7 @@ import type {
   CreateIssueDto,
   UpdateIssueDto,
   PaginatedResult,
+  BulkDeleteResultDto,
 } from '../types/data';
 
 export interface IssuesQueryParams {
@@ -60,15 +61,16 @@ export const issuesApi = {
    * Delete issue(s)
    * DELETE /api/issues
    */
-  async delete(ids: number[]): Promise<boolean> {
-    return apiClient.delete<boolean>('/api/issues', ids);
+  async delete(ids: number[], softDelete: boolean = true): Promise<BulkDeleteResultDto> {
+    const queryString = buildQueryString({ softDelete });
+    return apiClient.delete<BulkDeleteResultDto>(`/api/issues${queryString}`, ids);
   },
 
   /**
    * Delete single issue
    */
-  async deleteSingle(id: number): Promise<boolean> {
-    return this.delete([id]);
+  async deleteSingle(id: number, softDelete: boolean = true): Promise<BulkDeleteResultDto> {
+    return this.delete([id], softDelete);
   },
 
   /**

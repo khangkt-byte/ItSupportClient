@@ -6,6 +6,7 @@ import type {
   CreateCauseDto,
   UpdateCauseDto,
   PaginatedResult,
+  BulkDeleteResultDto,
 } from '../types/data';
 
 export interface CausesQueryParams {
@@ -63,15 +64,16 @@ export const causesApi = {
    * Delete cause(s)
    * DELETE /api/causes
    */
-  async delete(ids: number[]): Promise<boolean> {
-    return apiClient.delete<boolean>('/api/causes', ids);
+  async delete(ids: number[], softDelete: boolean = true): Promise<BulkDeleteResultDto> {
+    const queryString = buildQueryString({ softDelete });
+    return apiClient.delete<BulkDeleteResultDto>(`/api/causes${queryString}`, ids);
   },
 
   /**
    * Delete single cause
    */
-  async deleteSingle(id: number): Promise<boolean> {
-    return this.delete([id]);
+  async deleteSingle(id: number, softDelete: boolean = true): Promise<BulkDeleteResultDto> {
+    return this.delete([id], softDelete);
   },
 
   /**
@@ -85,9 +87,16 @@ export const causesApi = {
 
   /**
    * Get causes for specific issue
-   * GET /api/causes (filtered by issueId)
+   * GET /api/causes/by-issue/{issId}
    */
-  async getByIssueId(issueId: number): Promise<ListCauseDto[]> {
+  async getByIssueId(issueId: number): Promise<CauseDto[]> {
+    return apiClient.get<CauseDto[]>(`/api/causes/by-issue/${issueId}`);
+  },
+
+  /**
+   * Get causes for specific issue (filtered via getAll)
+   */
+  async getByIssueIdFiltered(issueId: number): Promise<ListCauseDto[]> {
     const result = await this.getAll({ issueId, pageSize: 100 });
     return result.items;
   },

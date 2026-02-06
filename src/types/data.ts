@@ -358,7 +358,7 @@ export interface IssueLogDto {
 export interface CreateIssueLogDto {
   operator: string;
   requester?: string | null;
-  departmentId?: number;
+  dptId?: number;
   areaId?: number;
   issueId?: number | null;
   issueDescription: string;
@@ -367,14 +367,14 @@ export interface CreateIssueLogDto {
   resolution?: string | null;
   permanentFix?: string | null;
   notes?: string | null;
-  dateReported: string; // ISO DateTime
+  dateReported: string; // DateOnly format: YYYY-MM-DD
   status?: string | null;
 }
 
 export interface UpdateIssueLogDto {
   operator?: string | null;
   requester?: string | null;
-  departmentId?: number | null;
+  dptId?: number | null;
   areaId?: number | null;
   issueId?: number | null;
   issueDescription?: string | null;
@@ -476,8 +476,8 @@ export interface WorkLog extends IssueLogDto {
 }
 
 // Type aliases for backward compatibility
-export type Employee = ListEmployeeDto & { 
-  id: string; 
+export type Employee = ListEmployeeDto & {
+  id: string;
   employeeId: string;
   birthday?: string;
   department?: string;
@@ -486,14 +486,14 @@ export type Employee = ListEmployeeDto & {
 };
 
 export type Role = RoleDto & { id: string };
-export type Account = ListAccountDto & { 
-  id: string; 
-  role: string; 
-  password: string; 
-  employeeId: string; 
+export type Account = ListAccountDto & {
+  id: string;
+  role: string;
+  password: string;
+  employeeId: string;
   employeeName: string; // Add for backward compatibility
   employeeCode: string | null; // Add for backward compatibility
-  deleteDate?: string | null 
+  deleteDate?: string | null
 };
 export type Area = AreaDto & { id: string };
 export type Device = { id: string; name: string; brand: string; model: string; serialNumber: string; deviceType: string; description: string };
@@ -505,6 +505,25 @@ export interface Department {
   departmentId: number; // Add for API compatibility
   name: string;
   description: string;
+}
+
+// CSRF Token Management
+export interface CsrfTokenResponse {
+  csrfToken: string;
+}
+
+// Rate Limit Response
+export interface RateLimitResponse {
+  error: string;
+  message: string;
+  retryAfter?: number;
+}
+
+// Authentication related
+export interface ResetPasswordDto {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
 }
 
 // Import types for backward compatibility
