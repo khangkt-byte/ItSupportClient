@@ -60,6 +60,15 @@ export function PermissionEditor({
 
   const groupedClaims = useMemo(() => groupClaimsByCategory(availableClaims), [availableClaims]);
 
+  const roleClaimIds = useMemo(() => {
+    const ids = new Set<number>();
+    selectedRoleIds.forEach(roleId => {
+      const role = availableRoles.find(r => r.roleId === roleId);
+      role?.claims?.forEach(claim => ids.add(claim.claimId));
+    });
+    return ids;
+  }, [selectedRoleIds, availableRoles]);
+
   useEffect(() => {
     if (groupedClaims.length === 0) return;
     setExpandedModules(prev => {
@@ -101,18 +110,87 @@ export function PermissionEditor({
 
   const toggleRole = (roleId: number) => {
     if (readOnly) return;
-    const next = selectedRoleIds.includes(roleId)
-      ? selectedRoleIds.filter(id => id !== roleId)
-      : [...selectedRoleIds, roleId];
-    onRolesChange(next);
+    const isCurrentlySelected = selectedRoleIds.includes(roleId);
+    
+    if (isCurrentlySelected) {
+      // Remove role
+      onRolesChange(selectedRoleIds.filter(id => id !== roleId));
+    } else {
+      // Add role and remove its claims from direct assignments
+      const role = availableRoles.find(r => r.roleId === roleId);
+      const roleClaimIdsToRemove = new Set(role?.claims?.map(c => c.claimId) || []);
+      const nextClaims = selectedClaimIds.filter(id => !roleClaimIdsToRemove.has(id));
+      
+      onRolesChange([...selectedRoleIds, roleId]);
+      if (nextClaims.length !== selectedClaimIds.length) {
+        onClaimsChange(nextClaims);
+      }
+    }
+  };
+
+  const roleHasClaim = (roleId: number, claimId: number): boolean => {
+    const role = availableRoles.find(r => r.roleId === roleId);
+    return Boolean(role?.claims?.some(c => c.claimId === claimId));
   };
 
   const toggleClaim = (claimId: number) => {
     if (readOnly) return;
-    const next = selectedClaimIds.includes(claimId)
-      ? selectedClaimIds.filter(id => id !== claimId)
-      : [...selectedClaimIds, claimId];
-    onClaimsChange(next);
+    
+    const isDirect = selectedClaimIds.includes(claimId);
+    const isInherited = roleClaimIds.has(claimId);
+    const isChecked = isDirect || isInherited;
+
+    console.log('toggleClaim called', { claimId, isDirect, isInherited, isChecked });
+
+    // Unchecking a claim
+    if (isChecked) {
+      // If from role, remove role and preserve other claims
+      if (isInherited) {
+        const rolesToRemove = selectedRoleIds.filter(roleId => roleHasClaim(roleId, claimId));
+        
+        const claimsToPreserve = new Set<number>();
+        rolesToRemove.forEach(roleId => {
+          const role = availableRoles.find(r => r.roleId === roleId);
+          role?.claims?.forEach(claim => {
+            if (claim.claimId !== claimId) {
+              claimsToPreserve.add(claim.claimId);
+            }
+          });
+        });
+        
+        const nextRoles = selectedRoleIds.filter(roleId => !rolesToRemove.includes(roleId));
+        
+        const remainingRoleClaimIds = new Set<number>();
+        nextRoles.forEach(roleId => {
+          const role = availableRoles.find(r => r.roleId === roleId);
+          role?.claims?.forEach(claim => remainingRoleClaimIds.add(claim.claimId));
+        });
+        
+        const preservedNotInRoles = Array.from(claimsToPreserve).filter(id => !remainingRoleClaimIds.has(id));
+        let nextClaims = Array.from(new Set([...selectedClaimIds, ...preservedNotInRoles]));
+        
+        // If it was also a direct claim, remove it
+        if (isDirect) {
+          nextClaims = nextClaims.filter(id => id !== claimId);
+        }
+        
+        console.log('Removing roles:', rolesToRemove, 'Preserving claims:', preservedNotInRoles);
+        onRolesChange(nextRoles);
+        onClaimsChange(nextClaims);
+        return;
+      }
+      
+      // If only direct assignment, remove it
+      if (isDirect) {
+        console.log('Removing direct claim:', claimId);
+        onClaimsChange(selectedClaimIds.filter(id => id !== claimId));
+        return;
+      }
+    }
+
+    // Checking a claim (add to direct)
+    console.log('Adding direct claim:', claimId);
+    onClaimsChange([...selectedClaimIds, claimId]);
   };
 
   const toggleModule = (category: string) => {
@@ -133,11 +211,33 @@ export function PermissionEditor({
     }
   };
 
-  const isClaimInheritedFromRole = (claimValue: string): boolean => {
-    return selectedRoleIds.some(roleId => {
-      const role = availableRoles.find(r => r.roleId === roleId);
-      return role?.claims?.some(c => c.claim === claimValue);
-    });
+  const selectableClaimIds = useMemo(
+    () => availableClaims.filter(c => !roleClaimIds.has(c.claimId)).map(c => c.claimId),
+    [availableClaims, roleClaimIds]
+  );
+
+  const areAllClaimsSelected =
+    selectableClaimIds.length > 0 && selectableClaimIds.every(id => selectedClaimIds.includes(id));
+
+  const toggleSelectAllClaims = () => {
+    if (readOnly) return;
+    if (areAllClaimsSelected) {
+      onClaimsChange([]);
+      return;
+    }
+    onClaimsChange(selectableClaimIds);
+  };
+
+  const toggleSelectAllInGroup = (group: PermissionGroup) => {
+    if (readOnly) return;
+    const groupIds = group.claims.map(c => c.claimId);
+    const selectableGroupIds = groupIds.filter(id => !roleClaimIds.has(id));
+    const areAllSelected =
+      selectableGroupIds.length > 0 && selectableGroupIds.every(id => selectedClaimIds.includes(id));
+    const next = areAllSelected
+      ? selectedClaimIds.filter(id => !selectableGroupIds.includes(id))
+      : Array.from(new Set([...selectedClaimIds, ...selectableGroupIds]));
+    onClaimsChange(next);
   };
 
   const isClaimDirectlyAssigned = (claimId: number): boolean => {
@@ -216,72 +316,111 @@ export function PermissionEditor({
             <Shield className="w-5 h-5 text-green-600" />
             Assign Permissions Directly ({selectedClaimIds.length} selected)
           </h3>
-          <button
-            type="button"
-            onClick={toggleExpandAll}
-            className="px-3 py-1.5 text-xs font-medium rounded-md border border-green-200 text-green-700 hover:bg-green-50 transition-colors cursor-pointer"
-          >
-            {expandedModules.size === 0 ? 'Expand All' : 'Collapse All'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleSelectAllClaims}
+              disabled={readOnly}
+              className={`px-4 py-2 text-sm font-medium rounded-md border border-green-200 text-green-700 transition-colors ${
+                readOnly ? 'opacity-60 cursor-not-allowed' : 'hover:bg-green-50 cursor-pointer'
+              }`}
+            >
+              {areAllClaimsSelected ? 'Deselect All' : 'Select All'}
+            </button>
+            <button
+              type="button"
+              onClick={toggleExpandAll}
+              className="px-4 py-2 text-sm font-medium rounded-md border border-green-200 text-green-700 hover:bg-green-50 transition-colors cursor-pointer"
+            >
+              {expandedModules.size === 0 ? 'Expand All' : 'Collapse All'}
+            </button>
+          </div>
         </div>
 
         <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
           {groupedClaims.map(group => {
             const selectedInGroup = group.claims.filter(c => selectedClaimIds.includes(c.claimId)).length;
             const isExpanded = expandedModules.has(group.category);
+            const selectableGroupIds = group.claims
+              .map(c => c.claimId)
+              .filter(id => !roleClaimIds.has(id));
+            const areAllSelectedInGroup =
+              selectableGroupIds.length > 0 && selectableGroupIds.every(id => selectedClaimIds.includes(id));
 
             return (
               <div key={group.category} className="bg-white border rounded-lg">
-                <button
-                  type="button"
-                  onClick={() => toggleModule(group.category)}
-                  className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-50 transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-green-600" />
-                    <span className="font-semibold text-gray-900 text-sm">{group.category}</span>
+                <div className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors">
+                  <button
+                    type="button"
+                    onClick={() => toggleModule(group.category)}
+                    className="flex items-center gap-2 text-left cursor-pointer"
+                  >
+                    <Shield className="w-5 h-5 text-green-600" />
+                    <span className="font-semibold text-gray-900 text-base">{group.category}</span>
                     <span className="text-xs text-gray-500">
                       ({group.claims.length}){selectedInGroup > 0 ? ` • ${selectedInGroup} selected` : ''}
                     </span>
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => toggleSelectAllInGroup(group)}
+                      disabled={readOnly}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-md border border-green-200 text-green-700 transition-colors ${
+                        readOnly ? 'opacity-60 cursor-not-allowed' : 'hover:bg-green-50 cursor-pointer'
+                      }`}
+                    >
+                      {areAllSelectedInGroup ? 'Deselect All' : 'Select All'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => toggleModule(group.category)}
+                      className="p-1 rounded-md hover:bg-gray-100 cursor-pointer"
+                    >
+                      {isExpanded ? (
+                        <ChevronUp className="w-5 h-5 text-gray-400" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-gray-400" />
+                      )}
+                    </button>
                   </div>
-                  {isExpanded ? (
-                    <ChevronUp className="w-4 h-4 text-gray-400" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-gray-400" />
-                  )}
-                </button>
+                </div>
 
                 {isExpanded && (
-                  <div className="px-4 pb-4">
+                  <div className="px-5 pb-4">
                     <div className="grid grid-cols-4 gap-2">
                       {group.claims.map(claim => {
                         const isDirectlySelected = isClaimDirectlyAssigned(claim.claimId);
-                        const isInherited = isClaimInheritedFromRole(claim.claim);
-                        const permissionName = claim.claim.split('.')[1] || claim.claim;
+                        const isInherited = roleClaimIds.has(claim.claimId);
+                        const isChecked = isDirectlySelected || isInherited;
+                        const permissionLabel = claim.claim || claim.category || 'Unknown.Permission';
 
                         return (
-                          <label
+                          <div
                             key={claim.claimId}
-                            className={`flex items-center justify-center gap-1.5 px-2 py-2 text-xs rounded-md border-2 font-medium cursor-pointer transition-all w-full text-center ${
+                            className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors w-full justify-start ${
                               isDirectlySelected
-                                ? 'bg-green-50 border-green-300 text-green-700 shadow-sm'
+                                ? 'bg-green-50 text-green-700'
                                 : isInherited
-                                ? 'bg-blue-50 border-blue-200 text-blue-600 hover:border-blue-300'
-                                : 'bg-gray-50 border-gray-200 text-gray-600 hover:border-gray-300'
-                            } ${readOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
+                                ? 'bg-blue-50 text-blue-700'
+                                : 'text-gray-700 hover:bg-gray-50'
+                            } ${readOnly ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+                            onClick={() => {
+                              if (!readOnly) {
+                                console.log('Click on permission:', claim.claim);
+                                toggleClaim(claim.claimId);
+                              }
+                            }}
                           >
                             <input
                               type="checkbox"
-                              checked={isDirectlySelected}
-                              onChange={() => toggleClaim(claim.claimId)}
+                              checked={isChecked}
+                              readOnly
                               disabled={readOnly}
-                              className="w-3 h-3 accent-green-600"
+                              className="w-4 h-4 accent-green-600 pointer-events-none"
                             />
-                            <span className="leading-none">{permissionName}</span>
-                            {isDirectlySelected && !isInherited && (
-                              <CheckCircle className="w-3 h-3 flex-shrink-0" />
-                            )}
-                          </label>
+                            <span className="leading-none">{permissionLabel}</span>
+                          </div>
                         );
                       })}
                     </div>
