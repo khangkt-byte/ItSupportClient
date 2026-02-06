@@ -493,6 +493,7 @@ export type Account = ListAccountDto & {
   employeeId: string;
   employeeName: string; // Add for backward compatibility
   employeeCode: string | null; // Add for backward compatibility
+  roles?: RoleDto[] | null;
   deleteDate?: string | null
 };
 export type Area = AreaDto & { id: string };

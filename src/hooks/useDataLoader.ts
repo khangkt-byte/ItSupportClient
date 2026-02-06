@@ -4,20 +4,20 @@
  */
 
 import { useState, useEffect } from 'react';
-import { 
-  workLogsApi, 
-  employeesApi, 
-  areasApi, 
-  accountsApi, 
+import {
+  workLogsApi,
+  employeesApi,
+  areasApi,
+  accountsApi,
   rolesApi,
 } from '../api';
 import { departmentApi } from '../lib/api/departments';
 import { issueLogsToWorkLogs } from '../utils/workLogAdapter';
-import type { 
-  WorkLog, 
-  Employee, 
-  Area, 
-  Account, 
+import type {
+  WorkLog,
+  Employee,
+  Area,
+  Account,
   Role,
   Department,
   ListEmployeeDto,
@@ -78,12 +78,16 @@ export function useDataLoader(): UseDataLoaderReturn {
   // Convert ListAccountDto[] to Account[]
   const mapAccounts = (dtos: ListAccountDto[]): Account[] => {
     return dtos.map(dto => ({
+      ...(dto as { roles?: RoleDto[] | null }),
       ...dto,
       id: dto.accountId,
       employeeId: dto.accountId, // Use accountId as employeeId
       employeeName: dto.empName, // Map for backward compatibility
       employeeCode: dto.empCode,
-      role: 'employee', // Default role, should be determined from roles array
+      role: (dto as { roles?: RoleDto[] | null }).roles?.length
+        ? (dto as { roles?: RoleDto[] | null }).roles!.map(role => role.name).join(', ')
+        : 'No Role',
+      roles: (dto as { roles?: RoleDto[] | null }).roles || null,
       password: '', // Not returned from API
       deleteDate: null,
     }));
@@ -185,7 +189,7 @@ export function useDataLoader(): UseDataLoaderReturn {
     const loadAllData = async () => {
       setLoading(true);
       setError(null);
-      
+
       try {
         await Promise.all([
           fetchWorkLogs(),

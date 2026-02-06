@@ -3,6 +3,7 @@ import { Plus, Edit, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 import type { Department, CreateDepartmentDto, UpdateDepartmentDto } from '../types/data';
 import { departmentApi } from '../lib/api/departments';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface Props { 
   data: Department[]; 
@@ -14,6 +15,7 @@ export function DepartmentManagement({ data, setData }: Props) {
   const [editing, setEditing] = useState<Department | null>(null);
   const [formData, setFormData] = useState({ name: '', description: '' });
   const [loading, setLoading] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<Department | null>(null);
 
   const openForm = (item?: Department) => { 
     setEditing(item || null); 
@@ -83,15 +85,16 @@ export function DepartmentManagement({ data, setData }: Props) {
     }
   };
 
-  const handleDelete = async (item: Department) => {
-    if (!confirm(`Delete department "${item.name}"?`)) return;
+  const handleDelete = async () => {
+    if (!confirmDelete) return;
     
     setLoading(true);
     try {
-      await departmentApi.delete(item.id);
+      await departmentApi.delete(confirmDelete.id);
       
       // Remove from local state
-      setData(data.filter((i) => i.id !== item.id));
+      setData(data.filter((i) => i.id !== confirmDelete.id));
+      setConfirmDelete(null);
       
       toast.success('Department deleted successfully');
     } catch (error: any) {
@@ -115,7 +118,7 @@ export function DepartmentManagement({ data, setData }: Props) {
         <button 
           onClick={() => openForm()} 
           disabled={loading}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           <Plus className="w-5 h-5" />
           Add Department
@@ -138,15 +141,15 @@ export function DepartmentManagement({ data, setData }: Props) {
                 <button 
                   onClick={() => openForm(item)} 
                   disabled={loading}
-                  className="flex-1 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 disabled:opacity-50 flex items-center justify-center gap-1"
+                  className="flex-1 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 disabled:opacity-50 flex items-center justify-center gap-1 cursor-pointer"
                 >
                   <Edit className="w-4 h-4" />
                   Edit
                 </button>
                 <button 
-                  onClick={() => handleDelete(item)} 
+                  onClick={() => setConfirmDelete(item)} 
                   disabled={loading}
-                  className="flex-1 px-3 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 disabled:opacity-50 flex items-center justify-center gap-1"
+                  className="flex-1 px-3 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 disabled:opacity-50 flex items-center justify-center gap-1 cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4" />
                   Delete
@@ -167,7 +170,7 @@ export function DepartmentManagement({ data, setData }: Props) {
               <button 
                 onClick={() => setShowForm(false)} 
                 disabled={loading}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                className="text-gray-400 hover:text-gray-600 disabled:opacity-50 cursor-pointer"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -224,6 +227,15 @@ export function DepartmentManagement({ data, setData }: Props) {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={handleDelete}
+        action="delete"
+        title="Delete department"
+        description={`Are you sure you want to delete "${confirmDelete?.name}"? This department may have employees or issue logs.`}
+      />
     </div>
   );
 }

@@ -179,7 +179,7 @@ export function ImportWizard({
               Step {step} of 3: {step === 1 ? 'Upload File' : step === 2 ? 'Validation & Preview' : 'Import Results'}
             </p>
           </div>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 cursor-pointer">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -233,7 +233,7 @@ export function ImportWizard({
                     </div>
                     <button
                       onClick={() => setFile(null)}
-                      className="text-red-600 hover:text-red-700"
+                      className="text-red-600 hover:text-red-800 cursor-pointer"
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -244,7 +244,7 @@ export function ImportWizard({
               <div className="flex justify-end gap-3">
                 <button
                   onClick={onClose}
-                  className="px-6 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+                  className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -556,7 +556,7 @@ export function ImportWizard({
               <div className="flex justify-end">
                 <button
                   onClick={onClose}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium cursor-pointer"
                 >
                   Done
                 </button>

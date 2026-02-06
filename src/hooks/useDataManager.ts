@@ -104,9 +104,13 @@ export function useDataManager() {
   // Transform ListAccountDto to Account
   const accounts = {
     data: accountsRaw.data.map(acc => ({
+      ...(acc as { roles?: RoleDto[] | null }),
       ...acc,
       id: acc.accountId,
-      role: 'employee', // Default role, should be fetched from Auth API
+      role: (acc as { roles?: RoleDto[] | null }).roles?.length
+        ? (acc as { roles?: RoleDto[] | null }).roles!.map(role => role.name).join(', ')
+        : 'No Role',
+      roles: (acc as { roles?: RoleDto[] | null }).roles || null,
       password: '********', // Placeholder - never show real password
       employeeId: acc.empCode || acc.accountId, // Use empCode as fallback
       employeeName: acc.empName || 'Unknown', // Use empName from API

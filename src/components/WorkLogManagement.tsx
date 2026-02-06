@@ -15,6 +15,7 @@ import { ImportValidation } from './ImportValidation';
 import { ImportWizard } from './ImportWizard';
 import { PermissionGuard } from '../lib/components/PermissionGuard';
 import { Permissions } from '../lib/constants/permissions';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface Props {
   data: WorkLog[];
@@ -36,6 +37,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
   const [submitting, setSubmitting] = useState(false);
   const [importing, setImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   // Import wizard state
   const [showImportWizard, setShowImportWizard] = useState(false);
@@ -234,15 +236,17 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Delete this work log?')) {
-      try {
-        await workLogsApi.deleteSingle(id);
-        setData(data.filter((l) => l.id !== id));
-      } catch (error) {
-        console.error('Failed to delete work log:', error);
-        alert('Failed to delete work log: ' + (error as Error).message);
-      }
+  const handleDelete = async () => {
+    if (!confirmDelete) return;
+    
+    try {
+      await workLogsApi.deleteSingle(confirmDelete);
+      setData(data.filter((l) => l.id !== confirmDelete));
+      setConfirmDelete(null);
+    } catch (error) {
+      console.error('Failed to delete work log:', error);
+      alert('Failed to delete work log: ' + (error as Error).message);
+      setConfirmDelete(null);
     }
   };
 
@@ -515,7 +519,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                         permission={Permissions.IssueLog.Delete}
                         fallback={null}
                       >
-                        <button onClick={() => handleDelete(log.id)} className="text-red-600 inline-flex items-center justify-center cursor-pointer hover:text-red-800"><Trash2 className="w-4 h-4" /></button>
+                        <button onClick={() => setConfirmDelete(log.id)} className="text-red-600 inline-flex items-center justify-center cursor-pointer hover:text-red-800"><Trash2 className="w-4 h-4" /></button>
                       </PermissionGuard>
                     </div>
                   </td>
@@ -555,7 +559,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
               <div className="bg-white rounded-lg p-6 max-w-sm text-center">
                 <h3 className="text-lg font-semibold text-red-600 mb-2">Access Denied</h3>
                 <p className="text-gray-600 mb-4">You don't have permission to {editing ? 'edit' : 'create'} work logs.</p>
-                <button onClick={() => setShowForm(false)} className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Close</button>
+                <button onClick={() => setShowForm(false)} className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 cursor-pointer">Close</button>
               </div>
             </div>
           }
@@ -731,7 +735,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
           <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between sticky top-0 bg-white z-[60]">
               <h3 className="text-lg font-semibold">Import Validation</h3>
-              <button onClick={handleCancelImport}><X className="w-6 h-6" /></button>
+              <button onClick={handleCancelImport} className="cursor-pointer hover:text-gray-600"><X className="w-6 h-6" /></button>
             </div>
             <div className="p-6">
               <ImportValidation 
@@ -759,6 +763,15 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
           onClose={() => setShowImportWizard(false)}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={handleDelete}
+        action="delete"
+        title="Delete work log"
+        description="Are you sure you want to delete this work log? This action cannot be undone."
+      />
     </div>
   );
 }

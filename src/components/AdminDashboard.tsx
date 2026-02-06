@@ -8,6 +8,7 @@ import { DepartmentManagement } from './DepartmentManagement';
 import { AreaManagement } from './AreaManagement';
 import { AccountManagement } from './AccountManagement';
 import { RoleManagement } from './RoleManagement';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface Props {
   user: User;
@@ -18,11 +19,11 @@ interface Props {
 
 export function AdminDashboard({ user, onLogout, currentView, onNavigate }: Props) {
   const dataManager = useDataManager();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = () => {
-    if (confirm('Are you sure you want to logout?')) {
-      onLogout();
-    }
+    onLogout();
+    setShowLogoutConfirm(false);
   };
 
   // Show loading if data is still being fetched
@@ -137,8 +138,8 @@ export function AdminDashboard({ user, onLogout, currentView, onNavigate }: Prop
           <p className="font-medium">{user.fullName} ({user.role})</p>
         </div>
         <button
-          onClick={handleLogout}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+          onClick={() => setShowLogoutConfirm(true)}
+          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2 cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
           Logout
@@ -147,6 +148,16 @@ export function AdminDashboard({ user, onLogout, currentView, onNavigate }: Prop
 
       {/* Main content */}
       {renderContent()}
+
+      <ConfirmDialog
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleLogout}
+        action="logout"
+        title="Logout"
+        description="Are you sure you want to logout?"
+        icon={<LogOut className="w-5 h-5 text-red-600" />}
+      />
     </>
   );
 }

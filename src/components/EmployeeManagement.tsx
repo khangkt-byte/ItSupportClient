@@ -4,6 +4,7 @@ import type { Employee, Department, AreaDto } from '../types/data';
 import { useDebounce } from '../hooks/useDebounce';
 import { usePagination } from '../hooks/usePagination';
 import { Pagination } from './Pagination';
+import { ConfirmDialog } from './ConfirmDialog';
 
 interface Props {
   data: Employee[]; // Changed from ListEmployeeDto[] to Employee[]
@@ -20,6 +21,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
   const [formData, setFormData] = useState({
     empCode: '', fullName: '', phoneNumber: '', email: '', position: '',
   });
+  const [confirmDelete, setConfirmDelete] = useState<Employee | null>(null);
 
   const filtered = useMemo(() => 
     data.filter((emp) =>
@@ -53,11 +55,11 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
     setShowForm(false);
   };
 
-  const handleDelete = (empId: string) => {
-    if (confirm('Are you sure you want to delete this employee?')) {
-      // TODO: Call API to delete employee
-      console.log('Delete employee:', empId);
-    }
+  const handleDelete = () => {
+    if (!confirmDelete) return;
+    // TODO: Call API to delete employee
+    console.log('Delete employee:', confirmDelete.empId);
+    setConfirmDelete(null);
   };
 
   return (
@@ -66,7 +68,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
         <h2 className="text-2xl font-semibold">Employee Management</h2>
         <button 
           onClick={() => openForm()} 
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 cursor-pointer"
         >
           <Plus className="w-5 h-5" />
           Add Employee
@@ -119,14 +121,14 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
                   <td className="px-6 py-4 text-sm text-right">
                     <button 
                       onClick={() => openForm(item)} 
-                      className="text-blue-600 hover:text-blue-800 mr-3"
+                      className="text-blue-600 hover:text-blue-800 mr-3 cursor-pointer"
                       title="Edit"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
                     <button 
-                      onClick={() => handleDelete(item.empId)} 
-                      className="text-red-600 hover:text-red-800"
+                      onClick={() => setConfirmDelete(item)} 
+                      className="text-red-600 hover:text-red-800 cursor-pointer"
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -155,7 +157,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
           <div style={{ background: 'var(--color-bg-card)' }} className="rounded-lg max-w-2xl w-full">
             <div className="p-6 border-b flex justify-between items-center" style={{ borderColor: 'var(--color-border-hr)' }}>
               <h3 className="text-lg font-semibold">{editing ? 'Edit' : 'Add'} Employee</h3>
-              <button onClick={() => setShowForm(false)}>
+              <button onClick={() => setShowForm(false)} className="cursor-pointer hover:text-gray-600">
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -238,6 +240,15 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={handleDelete}
+        action="delete"
+        title="Delete employee"
+        description={`Are you sure you want to delete "${confirmDelete?.fullName}"? This action cannot be undone.`}
+      />
     </div>
   );
 }
