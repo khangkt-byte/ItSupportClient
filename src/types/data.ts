@@ -138,6 +138,41 @@ export interface UpdateAreaDto {
   description?: string | null;
 }
 
+// Department Management
+export interface DepartmentDto {
+  dptId: number;
+  name: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+  employeeCount: number;
+  issueLogCount: number;
+}
+
+export interface DepartmentSuggestionDto {
+  dptId: number;
+  name: string;
+  employeeCount: number;
+}
+
+export interface CreateDepartmentDto {
+  name: string;
+  description?: string | null;
+}
+
+export interface UpdateDepartmentDto {
+  name?: string | null;
+  description?: string | null;
+}
+
+// Bulk Operations
+export interface BulkDeleteResultDto {
+  success: boolean;
+  deletedCount: number;
+  totalRequested: number;
+  message: string;
+}
+
 // Account Management
 export interface AccountDto {
   accountId: string; // UUID

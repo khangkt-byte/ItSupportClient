@@ -5,7 +5,7 @@ export { employeesApi } from './employees';
 export { areasApi } from './areas';
 export { rolesApi } from './roles';
 export { accountsApi } from './accounts';
-export { departmentsApi } from './departments';
+export { departmentApi } from '../lib/api/departments'; // Updated path
 export { issuesApi } from './issues';
 export { causesApi } from './causes';
 

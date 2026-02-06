@@ -10,8 +10,8 @@ import {
   areasApi, 
   accountsApi, 
   rolesApi,
-  departmentsApi
 } from '../api';
+import { departmentApi } from '../lib/api/departments';
 import { issueLogsToWorkLogs } from '../utils/workLogAdapter';
 import type { 
   WorkLog, 
@@ -23,7 +23,8 @@ import type {
   ListEmployeeDto,
   AreaDto,
   ListAccountDto,
-  RoleDto
+  RoleDto,
+  DepartmentDto
 } from '../types/data';
 
 interface UseDataLoaderReturn {
@@ -40,6 +41,7 @@ interface UseDataLoaderReturn {
   refetchAreas: () => Promise<void>;
   refetchAccounts: () => Promise<void>;
   refetchRoles: () => Promise<void>;
+  refetchDepartments: () => Promise<void>;
 }
 
 /**
@@ -92,6 +94,16 @@ export function useDataLoader(): UseDataLoaderReturn {
     return dtos.map(dto => ({
       ...dto,
       id: String(dto.roleId),
+    }));
+  };
+
+  // Convert DepartmentDto[] to Department[]
+  const mapDepartments = (dtos: DepartmentDto[]): Department[] => {
+    return dtos.map(dto => ({
+      id: dto.dptId,
+      departmentId: dto.dptId, // Add for API compatibility
+      name: dto.name,
+      description: dto.description || '',
     }));
   };
 
@@ -155,20 +167,16 @@ export function useDataLoader(): UseDataLoaderReturn {
     }
   };
 
-  // Fetch departments (using hardcoded data since API doesn't provide it)
+  // Fetch departments from API
   const fetchDepartments = async () => {
     try {
-      const depts = await departmentsApi.getAll();
-      setDepartments(depts);
+      const response = await departmentApi.getAll({ pageSize: 100 });
+      const mapped = mapDepartments(response.items);
+      setDepartments(mapped);
     } catch (err: any) {
       console.error('Failed to fetch departments:', err);
-      // Use fallback data
-      setDepartments([
-        { id: 1, name: 'IT Department', description: 'Information Technology' },
-        { id: 2, name: 'HR Department', description: 'Human Resources' },
-        { id: 3, name: 'Finance Department', description: 'Finance' },
-        { id: 4, name: 'Operations', description: 'Operations' },
-      ]);
+      // Don't use fallback - let error propagate
+      throw err;
     }
   };
 
@@ -211,5 +219,6 @@ export function useDataLoader(): UseDataLoaderReturn {
     refetchAreas: fetchAreas,
     refetchAccounts: fetchAccounts,
     refetchRoles: fetchRoles,
+    refetchDepartments: fetchDepartments,
   };
 }

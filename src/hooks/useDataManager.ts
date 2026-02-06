@@ -10,16 +10,17 @@ import type {
   Employee, // Employee type
   Account, // Account type
   Role, // Role type
-  WorkLog // WorkLog type
+  WorkLog, // WorkLog type
+  DepartmentDto
 } from '../types/data';
 import { useState, useEffect } from 'react';
 import {
   workLogsApi,
   employeesApi,
-  departmentsApi,
   areasApi,
   accountsApi,
   rolesApi,
+  departmentApi, // Updated: singular name
 } from '../api';
 
 function useApiData<T>(apiService: any) {
@@ -54,11 +55,25 @@ function useApiData<T>(apiService: any) {
 
 export function useDataManager() {
   const employeesRaw = useApiData<ListEmployeeDto>(employeesApi);
-  const departments = useApiData<Department>(departmentsApi);
+  const departmentsRaw = useApiData<DepartmentDto>(departmentApi);
   const areasRaw = useApiData<AreaDto>(areasApi);
   const accountsRaw = useApiData<ListAccountDto>(accountsApi);
   const rolesRaw = useApiData<RoleDto>(rolesApi);
   const workLogsRaw = useApiData<IssueLogDto>(workLogsApi);
+
+  // Transform DepartmentDto to Department
+  const departments = {
+    data: departmentsRaw.data.map(dept => ({
+      id: dept.dptId,
+      name: dept.name,
+      description: dept.description || '',
+      departmentId: dept.dptId, // Add for API compatibility
+    } as Department)),
+    setData: (newData: Department[]) => {
+      departmentsRaw.setData(newData as unknown as DepartmentDto[]);
+    },
+    loading: departmentsRaw.loading
+  };
 
   // Transform AreaDto to Area (add id field for backward compatibility)
   const areas = {

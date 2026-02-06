@@ -331,10 +331,11 @@ class ApiClient {
   /**
    * HTTP DELETE request
    */
-  async delete<T>(endpoint: string, options?: RequestOptions): Promise<T> {
+  async delete<T>(endpoint: string, data?: any, options?: RequestOptions): Promise<T> {
     return this.request<T>(endpoint, {
       ...options,
-      method: 'DELETE'
+      method: 'DELETE',
+      body: data ? JSON.stringify(data) : undefined
     });
   }
 
