@@ -2,9 +2,11 @@
   import { defineConfig } from 'vite';
   import react from '@vitejs/plugin-react-swc';
   import path from 'path';
+  import basicSsl from '@vitejs/plugin-basic-ssl'
 
   export default defineConfig({
-    plugins: [react()],
+    plugins: [react(),
+    basicSsl()],
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {
@@ -51,7 +53,6 @@
       outDir: 'build',
     },
     server: {
-      port: 3000,
-      open: true,
-    },
+    port: 5173
+  },
   });
