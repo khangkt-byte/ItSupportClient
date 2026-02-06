@@ -81,7 +81,7 @@ export function ConfirmDialog({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
       <div className="bg-white rounded-lg max-w-md w-full">
         {/* Header */}
-        <div className="p-4 border-b flex justify-between items-center">
+        <div className="px-6 py-4 border-b flex justify-between items-center">
           <div>
             <h3 className="text-lg font-semibold flex items-center gap-2">
               {getIcon()}

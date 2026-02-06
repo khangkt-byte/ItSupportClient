@@ -65,7 +65,7 @@ export function AreaManagement({ data, setData }: Props) {
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full">
-            <div className="p-6 border-b flex justify-between">
+            <div className="px-6 py-4 border-b flex justify-between">
               <h3 className="text-lg font-semibold">{editing ? 'Edit' : 'Add'}</h3>
               <button onClick={() => setShowForm(false)} className="cursor-pointer hover:text-gray-600">
                 <X className="w-6 h-6" />

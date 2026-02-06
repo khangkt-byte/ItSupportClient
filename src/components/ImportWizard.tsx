@@ -172,7 +172,7 @@ export function ImportWizard({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="p-6 border-b flex justify-between sticky top-0 bg-white z-10">
+        <div className="px-6 py-4 border-b flex justify-between sticky top-0 bg-white z-10">
           <div>
             <h2 className="text-2xl font-semibold">Import Work Logs from Excel</h2>
             <p className="text-sm text-gray-600 mt-1">

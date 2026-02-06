@@ -163,7 +163,7 @@ export function DepartmentManagement({ data, setData }: Props) {
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full shadow-xl">
-            <div className="p-6 border-b flex justify-between items-center">
+            <div className="px-6 py-4 border-b flex justify-between items-center">
               <h3 className="text-lg font-semibold">
                 {editing ? 'Edit Department' : 'Add Department'}
               </h3>

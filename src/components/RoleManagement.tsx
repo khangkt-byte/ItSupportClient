@@ -22,14 +22,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Plus, Edit, Trash2, X, Shield, Save, AlertCircle, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { rolesApi } from '../api/roles';
-import type { RoleDto, ClaimDto } from '../types/data';
+import type { Role, RoleDto, ClaimDto } from '../types/data';
 import { usePermission } from '../lib/hooks/usePermission';
 import { Permissions } from '../lib/constants/permissions';
 import { ConfirmDialog } from './ConfirmDialog';
 
 interface Props {
-  data: RoleDto[];
-  setData: (items: RoleDto[]) => void;
+  data: Role[];
+  setData: (items: Role[]) => void;
 }
 
 interface RoleFormData {
@@ -276,7 +276,7 @@ export function RoleManagement({ data, setData }: Props) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-lg max-w-4xl w-full my-4 max-h-[90vh] overflow-y-auto">
             {/* Header */}
-            <div className="p-6 border-b flex justify-between items-center">
+            <div className="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <div>
                 <h3 className="text-lg font-semibold flex items-center gap-2">
                   <Shield className="w-5 h-5 text-blue-600" />

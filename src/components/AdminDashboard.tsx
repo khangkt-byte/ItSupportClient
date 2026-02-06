@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { LogOut } from 'lucide-react';
 import type { User } from '../types/data';
 import { useDataManager } from '../hooks/useDataManager';
@@ -17,7 +17,7 @@ interface Props {
   onNavigate: (view: string) => void;
 }
 
-export function AdminDashboard({ user, onLogout, currentView, onNavigate }: Props) {
+export function AdminDashboard({ user, onLogout, currentView }: Props) {
   const dataManager = useDataManager();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 

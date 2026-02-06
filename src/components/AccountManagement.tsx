@@ -460,7 +460,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-lg max-w-6xl w-full my-4 max-h-[90vh] overflow-y-auto">
             {/* Header */}
-            <div className="p-6 border-b flex justify-between items-center">
+            <div className="px-6 py-4 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <div>
                 <h3 className="text-lg font-semibold flex items-center gap-2">
                   <User className="w-5 h-5 text-blue-600" />
@@ -633,7 +633,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-lg max-w-md w-full">
             {/* Header */}
-            <div className="p-4 border-b flex justify-between items-center">
+            <div className="px-6 py-4 border-b flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-semibold flex items-center gap-2">
                   {confirmState.action === 'delete' ? (
