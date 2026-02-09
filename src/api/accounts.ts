@@ -8,16 +8,15 @@ import type {
   ChangePasswordDto,
   LoginHistoryDto,
   PaginatedResult,
+  QueryParams,
   BulkDeleteResultDto,
 } from '../types/data';
 
-export interface AccountsQueryParams {
-  page?: number;
-  pageSize?: number;
-  sortBy?: string;
-  isDescending?: boolean;
-  search?: string;
-}
+/**
+ * Query parameters for accounts list endpoint
+ * Extends the generic QueryParams with accounts-specific filtering
+ */
+export interface AccountsQueryParams extends QueryParams { }
 
 export const accountsApi = {
   /**
@@ -131,4 +130,5 @@ export const accountsApi = {
    */
   async getLoginHistory(): Promise<LoginHistoryDto[]> {
     return apiClient.get<LoginHistoryDto[]>('/api/accounts/me/login-history');
-  },};
+  },
+};

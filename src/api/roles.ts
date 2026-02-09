@@ -8,16 +8,15 @@ import type {
   AssignRolesDto,
   AssignRolesAndClaimsDto,
   PaginatedResult,
+  QueryParams,
   BulkDeleteResultDto,
 } from '../types/data';
 
-export interface RolesQueryParams {
-  page?: number;
-  pageSize?: number;
-  sortBy?: string;
-  isDescending?: boolean;
-  search?: string;
-}
+/**
+ * Query parameters for roles list endpoint
+ * Extends the generic QueryParams with roles-specific filtering
+ */
+export interface RolesQueryParams extends QueryParams { }
 
 export const rolesApi = {
   /**

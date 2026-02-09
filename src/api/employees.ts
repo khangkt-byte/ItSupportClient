@@ -8,16 +8,15 @@ import type {
   UpdateProfileDto,
   ProfileDto,
   PaginatedResult,
+  QueryParams,
   BulkDeleteResultDto,
 } from '../types/data';
 
-export interface EmployeesQueryParams {
-  page?: number;
-  pageSize?: number;
-  sortBy?: string;
-  isDescending?: boolean;
-  search?: string;
-}
+/**
+ * Query parameters for employees list endpoint
+ * Extends the generic QueryParams with employees-specific filtering
+ */
+export interface EmployeesQueryParams extends QueryParams { }
 
 export const employeesApi = {
   /**

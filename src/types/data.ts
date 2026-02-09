@@ -11,6 +11,19 @@ export interface PaginatedResult<T> {
   items: T[];
 }
 
+// Query Parameters (Base)
+/**
+ * Generic query parameters for paginated list endpoints
+ * All paginated endpoints extend this interface
+ */
+export interface QueryParams {
+  page?: number;
+  pageSize?: number;
+  sortBy?: string;
+  isDescending?: boolean;
+  search?: string;
+}
+
 // Role Management
 export interface ClaimDto {
   claimId: number;

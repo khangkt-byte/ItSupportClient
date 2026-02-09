@@ -11,16 +11,15 @@ import type {
   UpdateDepartmentDto,
   DepartmentSuggestionDto,
   PaginatedResult,
+  QueryParams,
   BulkDeleteResultDto
 } from '../../types/data';
 
-export interface DepartmentQueryParams {
-  page?: number;
-  pageSize?: number;
-  sortBy?: string;
-  isDescending?: boolean;
-  search?: string;
-}
+/**
+ * Query parameters for departments list endpoint
+ * Extends the generic QueryParams with departments-specific filtering
+ */
+export interface DepartmentQueryParams extends QueryParams { }
 
 class DepartmentAPI {
   /**
@@ -29,7 +28,7 @@ class DepartmentAPI {
    */
   async getAll(params?: DepartmentQueryParams): Promise<PaginatedResult<DepartmentDto>> {
     const queryParams = new URLSearchParams();
-    
+
     if (params?.page) queryParams.append('Page', params.page.toString());
     if (params?.pageSize) queryParams.append('PageSize', params.pageSize.toString());
     if (params?.sortBy) queryParams.append('SortBy', params.sortBy);
@@ -53,7 +52,7 @@ class DepartmentAPI {
    * Lấy gợi ý phòng ban cho autocomplete/dropdown
    */
   async getSuggestions(search?: string): Promise<DepartmentSuggestionDto[]> {
-    const url = search 
+    const url = search
       ? `/api/departments/suggestions?search=${encodeURIComponent(search)}`
       : '/api/departments/suggestions';
     return apiClient.get<DepartmentSuggestionDto[]>(url);

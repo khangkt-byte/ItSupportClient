@@ -5,16 +5,15 @@ import type {
   CreateIssueDto,
   UpdateIssueDto,
   PaginatedResult,
+  QueryParams,
   BulkDeleteResultDto,
 } from '../types/data';
 
-export interface IssuesQueryParams {
-  page?: number;
-  pageSize?: number;
-  sortBy?: string;
-  isDescending?: boolean;
-  search?: string;
-}
+/**
+ * Query parameters for issues list endpoint
+ * Extends the generic QueryParams with issues-specific filtering
+ */
+export interface IssuesQueryParams extends QueryParams { }
 
 export const issuesApi = {
   /**

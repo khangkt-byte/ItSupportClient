@@ -4,6 +4,7 @@ import type {
   CreateIssueLogDto,
   UpdateIssueLogDto,
   PaginatedResult,
+  QueryParams,
   ImportValidationResultDto,
   ImportResultDto,
   IssueSuggestionDto,
@@ -11,13 +12,11 @@ import type {
   BulkDeleteResultDto,
 } from '../types/data';
 
-export interface WorkLogsQueryParams {
-  page?: number;
-  pageSize?: number;
-  sortBy?: string;
-  isDescending?: boolean;
-  search?: string;
-}
+/**
+ * Query parameters for work logs list endpoint
+ * Extends the generic QueryParams with work logs-specific filtering
+ */
+export interface WorkLogsQueryParams extends QueryParams { }
 
 export const workLogsApi = {
   /**

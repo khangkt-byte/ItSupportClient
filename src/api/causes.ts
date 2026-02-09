@@ -6,15 +6,15 @@ import type {
   CreateCauseDto,
   UpdateCauseDto,
   PaginatedResult,
+  QueryParams,
   BulkDeleteResultDto,
 } from '../types/data';
 
-export interface CausesQueryParams {
-  page?: number;
-  pageSize?: number;
-  sortBy?: string;
-  isDescending?: boolean;
-  search?: string;
+/**
+ * Query parameters for causes list endpoint
+ * Extends the generic QueryParams with causes-specific filtering
+ */
+export interface CausesQueryParams extends QueryParams {
   issueId?: number;
 }
 

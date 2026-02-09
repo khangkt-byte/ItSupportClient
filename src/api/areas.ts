@@ -4,16 +4,15 @@ import type {
   CreateAreaDto,
   UpdateAreaDto,
   PaginatedResult,
+  QueryParams,
   BulkDeleteResultDto,
 } from '../types/data';
 
-export interface AreasQueryParams {
-  page?: number;
-  pageSize?: number;
-  sortBy?: string;
-  isDescending?: boolean;
-  search?: string;
-}
+/**
+ * Query parameters for areas list endpoint
+ * Extends the generic QueryParams with areas-specific filtering
+ */
+export interface AreasQueryParams extends QueryParams { }
 
 export const areasApi = {
   /**
