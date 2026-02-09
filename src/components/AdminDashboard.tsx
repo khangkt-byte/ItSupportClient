@@ -32,7 +32,7 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p style={{ color: 'var(--color-text-secondary)' }}>Loading...</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
         </div>
       </div>
     );
@@ -45,22 +45,22 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
         return (
           <div>
             <h1 className="text-2xl font-semibold mb-5">Admin Dashboard</h1>
-            <div style={{ background: 'var(--color-bg-card)', borderColor: 'var(--color-border-hr)' }} className="rounded-lg border p-6 shadow-sm">
+            <div className="card p-6">
               <h2 className="text-xl font-semibold mb-4">Welcome, {user.fullName}!</h2>
-              <p style={{ color: 'var(--color-text-secondary)' }} className="mb-4">
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
                 You have full administrative access to the IT Support Management System.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-                <div className="p-4 rounded-lg" style={{ background: 'rgba(59, 130, 246, 0.1)' }}>
-                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Total Work Logs</p>
+                <div className="p-4 rounded-lg bg-blue-100 dark:bg-blue-900/20">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Work Logs</p>
                   <p className="text-2xl font-bold text-blue-600">{dataManager.workLogs.data.length}</p>
                 </div>
-                <div className="p-4 rounded-lg" style={{ background: 'rgba(34, 197, 94, 0.1)' }}>
-                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Total Employees</p>
+                <div className="p-4 rounded-lg bg-green-100 dark:bg-green-900/20">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Employees</p>
                   <p className="text-2xl font-bold text-green-600">{dataManager.employees.data.length}</p>
                 </div>
-                <div className="p-4 rounded-lg" style={{ background: 'rgba(168, 85, 247, 0.1)' }}>
-                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Total Areas</p>
+                <div className="p-4 rounded-lg bg-purple-100 dark:bg-purple-900/20">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Areas</p>
                   <p className="text-2xl font-bold text-purple-600">{dataManager.areas.data.length}</p>
                 </div>
               </div>
@@ -121,8 +121,8 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
         return (
           <div>
             <h1 className="text-2xl font-semibold mb-5">Admin Dashboard</h1>
-            <div style={{ background: 'var(--color-bg-card)', borderColor: 'var(--color-border-hr)' }} className="rounded-lg border p-6 shadow-sm">
-              <p style={{ color: 'var(--color-text-secondary)' }}>Select a menu item to get started.</p>
+            <div className="card p-6">
+              <p className="text-gray-600 dark:text-gray-400">Select a menu item to get started.</p>
             </div>
           </div>
         );
@@ -134,7 +134,7 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
       {/* Header with user info and logout */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Logged in as</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Logged in as</p>
           <p className="font-medium">{user.fullName} ({user.role})</p>
         </div>
         <button

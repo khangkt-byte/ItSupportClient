@@ -1,47 +1,69 @@
-/* Hide browser's default password reveal button */
-input[type="password"]::-ms-reveal,
-input[type="password"]::-ms-clear {
-  display: none;
-}
+/**
+ * Global Styles - Legacy Support & Migration Guide
+ * 
+ * IMPORTANT: This file contains legacy CSS variables for backward compatibility.
+ * New components should use Tailwind utility classes instead.
+ * 
+ * Migration Guide:
+ * ================
+ * 
+ * Text Colors:
+ * - var(--color-text-primary) → text-gray-900 dark:text-gray-50  
+ * - var(--color-text-secondary) → text-gray-600 dark:text-gray-400
+ * - var(--color-text-placeholder) → placeholder:text-gray-400
+ * 
+ * Background Colors:
+ * - var(--color-bg-primary) → bg-gray-50 dark:bg-gray-900
+ * - var(--color-bg-secondary) → bg-indigo-50 dark:bg-gray-800
+ * - var(--color-bg-sidebar) → bg-white dark:bg-gray-800
+ * - var(--color-bg-card) → bg-white dark:bg-gray-800
+ * 
+ * Border Colors:
+ * - var(--color-border-hr) → border-gray-200 dark:border-gray-700
+ * 
+ * Hover States:
+ * - var(--color-hover-primary) → hover:bg-blue-600 (use Tailwind's hover:)
+ * - var(--color-hover-secondary) → hover:bg-gray-100 dark:hover:bg-gray-700
+ * 
+ * References:
+ * - Tailwind Dark Mode: https://tailwindcss.com/docs/dark-mode
+ * - Color Palette: https://tailwindcss.com/docs/customizing-colors
+ * - Best Practices: https://tailwindcss.com/docs/reusing-styles
+ * 
+ * Industry Standard: Google Material Design 3
+ * - Color System: https://m3.material.io/styles/color/system/overview
+ */
 
-input[type="password"]::-webkit-contacts-auto-fill-button,
-input[type="password"]::-webkit-credentials-auto-fill-button {
-  visibility: hidden;
-  pointer-events: none;
-  position: absolute;
-  right: 0;
-}
-
-/* Theme CSS Variables */
+/* 
+ * TODO: Remove these CSS variables once all components are migrated
+ * Track progress in MIGRATION.md
+ */
 :root {
-  /* Light theme colors */
-  --color-text-primary: #1F2936;
-  --color-text-secondary: #64748b;
-  --color-text-placeholder: #798EAE;
-  --color-bg-primary: #f9fafb;
-  --color-bg-secondary: #ECECFD;
-  --color-bg-sidebar: #FFFFFF;
-  --color-bg-card: #FFFFFF;
-  --color-border-hr: #E2E8F0;
-  --color-hover-primary: #695CFE;
-  --color-hover-secondary: #e2e2fb;
-  --color-shadow: rgba(0, 0, 0, 0.05);
+  /* Legacy Light theme colors - Map to Tailwind defaults */
+  --color-text-primary: theme('colors.gray.900');
+  --color-text-secondary: theme('colors.gray.600');
+  --color-text-placeholder: theme('colors.gray.400');
+  --color-bg-primary: theme('colors.gray.50');
+  --color-bg-secondary: theme('colors.indigo.50');
+  --color-bg-sidebar: theme('colors.white');
+  --color-bg-card: theme('colors.white');
+  --color-border-hr: theme('colors.gray.200');
+  --color-hover-primary: theme('colors.blue.600');
+  --color-hover-secondary: theme('colors.gray.100');
+  --color-shadow: theme('boxShadow.sm');
 }
 
+.dark,
 body.dark-theme {
-  /* Dark theme colors */
-  --color-text-primary: #F1F5F9;
-  --color-text-secondary: #94a3b8;
-  --color-text-placeholder: #64748b;
-  --color-bg-primary: #0f172a;
-  --color-bg-secondary: #334155;
-  --color-bg-sidebar: #1e293b;
-  --color-bg-card: #1e293b;
-  --color-border-hr: #334155;
-  --color-hover-secondary: #475569;
-  --color-shadow: rgba(0, 0, 0, 0.5);
-}
-
-body {
-  background: var(--color-bg-primary);
+  /* Legacy Dark theme colors - Map to Tailwind dark palette */
+  --color-text-primary: theme('colors.gray.50');
+  --color-text-secondary: theme('colors.gray.400');
+  --color-text-placeholder: theme('colors.gray.500');
+  --color-bg-primary: theme('colors.gray.900');
+  --color-bg-secondary: theme('colors.gray.800');
+  --color-bg-sidebar: theme('colors.gray.800');
+  --color-bg-card: theme('colors.gray.800');
+  --color-border-hr: theme('colors.gray.700');
+  --color-hover-secondary: theme('colors.gray.700');
+  --color-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
 }

@@ -75,16 +75,9 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
   return (
     <>
       {/* Mobile navbar */}
-      <nav className="sticky top-0 hidden max-md:block px-5 py-[15px] border-b z-[5]" style={{ 
-        background: 'var(--color-bg-primary)', 
-        borderColor: 'var(--color-border-hr)' 
-      }}>
+      <nav className="sticky top-0 hidden max-md:block px-5 py-[15px] border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 z-[5]">
         <button 
-          className="h-10 w-10 flex items-center justify-center rounded-lg transition-all duration-300 cursor-pointer hover:opacity-80"
-          style={{ 
-            background: 'var(--color-bg-secondary)',
-            color: 'var(--color-text-primary)'
-          }}
+          className="h-10 w-10 flex items-center justify-center rounded-lg transition-all duration-300 cursor-pointer hover:opacity-80 bg-indigo-50 dark:bg-gray-800 text-gray-900 dark:text-gray-50"
           onClick={toggleSidebar}
         >
           <Menu className="w-6 h-6" />
@@ -102,26 +95,20 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
       {/* Sidebar */}
       <aside 
         className={`
-          sticky top-0 h-screen flex-shrink-0 flex flex-col border-r shadow-md transition-all duration-300 z-20
+          sticky top-0 h-screen flex-shrink-0 flex flex-col border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-md transition-all duration-300 z-20
           ${collapsed ? 'w-[90px]' : 'w-[270px]'}
           max-md:fixed max-md:top-0 max-md:w-[270px]
           ${collapsed ? 'max-md:-left-[270px]' : 'max-md:left-0'}
         `}
-        style={{ 
-          background: 'var(--color-bg-sidebar)', 
-          borderColor: 'var(--color-border-hr)',
-          boxShadow: '0 3px 9px var(--color-shadow)'
-        }}
       >
         {/* Sidebar header */}
-        <div className="px-[18px] py-5 flex items-center justify-between border-b relative" style={{ borderColor: 'var(--color-border-hr)' }}>
+        <div className="px-[18px] py-5 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 relative">
           <div className="flex items-center gap-3">
             <div className={`transition-opacity duration-300 ${collapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
               <Shield className="w-8 h-8 text-blue-600" />
             </div>
             <span 
-              className={`font-semibold text-lg whitespace-nowrap transition-opacity duration-300 ${collapsed ? 'opacity-0 pointer-events-none absolute w-0 overflow-hidden' : 'opacity-100'}`}
-              style={{ color: 'var(--color-text-primary)' }}
+              className={`font-semibold text-lg whitespace-nowrap text-gray-900 dark:text-gray-50 transition-opacity duration-300 ${collapsed ? 'opacity-0 pointer-events-none absolute w-0 overflow-hidden' : 'opacity-100'}`}
             >
               IT Support
             </span>
@@ -129,13 +116,9 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
           
           <button 
             className={`
-              h-10 w-10 flex items-center justify-center rounded-lg absolute right-[18px] transition-all duration-300 cursor-pointer hover:opacity-80
+              h-10 w-10 flex items-center justify-center rounded-lg absolute right-[18px] transition-all duration-300 cursor-pointer hover:opacity-80 bg-indigo-50 dark:bg-gray-800 text-gray-900 dark:text-gray-50
               ${collapsed ? 'translate-x-[-2px] h-12 w-[50px]' : ''}
             `}
-            style={{ 
-              background: 'var(--color-bg-secondary)',
-              color: 'var(--color-text-primary)'
-            }}
             onClick={toggleSidebar}
           >
             <ChevronLeft className={`w-6 h-6 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`} />
@@ -154,24 +137,10 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
                   <button
                     onClick={() => onNavigate(item.id)}
                     className={`
-                      w-full flex items-center gap-3 px-[15px] py-3 rounded-lg whitespace-nowrap transition-all duration-300 cursor-pointer
+                      w-full flex items-center gap-3 px-[15px] py-3 rounded-lg whitespace-nowrap transition-all duration-300 cursor-pointer text-gray-900 dark:text-gray-50 hover:bg-gray-100 dark:hover:bg-gray-700
                       ${collapsed ? 'justify-center px-0' : 'justify-start'}
-                      ${isActive ? 'text-white' : ''}
+                      ${isActive ? 'text-white dark:text-white bg-blue-600 hover:bg-blue-600' : ''}
                     `}
-                    style={{
-                      color: isActive ? '#fff' : 'var(--color-text-primary)',
-                      background: isActive ? 'var(--color-hover-primary)' : 'transparent'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isActive) {
-                        e.currentTarget.style.background = 'var(--color-hover-secondary)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isActive) {
-                        e.currentTarget.style.background = 'transparent';
-                      }
-                    }}
                   >
                     <Icon className="w-5 h-5 flex-shrink-0" />
                     <span className={`transition-opacity duration-300 ${collapsed ? 'opacity-0 pointer-events-none absolute w-0 overflow-hidden' : 'opacity-100'}`}>
@@ -185,20 +154,10 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
         </div>
 
         {/* Sidebar footer - Theme toggle */}
-        <div className="px-[18px] py-5 border-t whitespace-nowrap" style={{ borderColor: 'var(--color-border-hr)' }}>
+        <div className="px-[18px] py-5 border-t border-gray-200 dark:border-gray-700 whitespace-nowrap">
           <button 
-            className="w-full min-h-[48px] rounded-lg flex items-center px-[15px] transition-all duration-300 cursor-pointer"
-            style={{ 
-              background: 'var(--color-bg-secondary)',
-              color: 'var(--color-text-primary)'
-            }}
+            className="w-full min-h-[48px] rounded-lg flex items-center px-[15px] transition-all duration-300 cursor-pointer bg-indigo-50 dark:bg-gray-800 text-gray-900 dark:text-gray-50 hover:bg-gray-100 dark:hover:bg-gray-700"
             onClick={toggleTheme}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'var(--color-hover-secondary)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'var(--color-bg-secondary)';
-            }}
           >
             <div className="flex items-center gap-[10px]">
               {darkTheme ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}

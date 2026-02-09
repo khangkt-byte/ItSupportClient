@@ -76,37 +76,36 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       </div>
 
       {/* Search */}
-      <div style={{ background: 'var(--color-bg-card)', borderColor: 'var(--color-border-hr)' }} className="border p-4 rounded-lg">
+      <div className="card p-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--color-text-secondary)' }} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search employees..."
-            className="w-full pl-10 pr-4 py-2 border rounded-lg"
-            style={{ borderColor: 'var(--color-border-hr)' }}
+            className="input-base pl-10 pr-4 py-2"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div style={{ background: 'var(--color-bg-card)', borderColor: 'var(--color-border-hr)' }} className="border rounded-lg overflow-hidden">
+      <div className="card overflow-hidden">
         <table className="w-full">
-          <thead style={{ background: 'var(--color-bg-secondary)', borderColor: 'var(--color-border-hr)' }} className="border-b">
+          <thead className="border-b bg-indigo-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase" style={{ color: 'var(--color-text-secondary)' }}>Employee ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase" style={{ color: 'var(--color-text-secondary)' }}>Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase" style={{ color: 'var(--color-text-secondary)' }}>Phone</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase" style={{ color: 'var(--color-text-secondary)' }}>Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase" style={{ color: 'var(--color-text-secondary)' }}>Position</th>
-              <th className="px-6 py-3 text-right text-xs font-medium uppercase" style={{ color: 'var(--color-text-secondary)' }}>Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-600 dark:text-gray-400">Employee ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-600 dark:text-gray-400">Name</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-600 dark:text-gray-400">Phone</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-600 dark:text-gray-400">Email</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-600 dark:text-gray-400">Position</th>
+              <th className="px-6 py-3 text-right text-xs font-medium uppercase text-gray-600 dark:text-gray-400">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y" style={{ borderColor: 'var(--color-border-hr)' }}>
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {pagination.paginatedData.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-8 text-center" style={{ color: 'var(--color-text-secondary)' }}>
+                <td colSpan={6} className="px-6 py-8 text-center text-gray-600 dark:text-gray-400">
                   No employees found
                 </td>
               </tr>
@@ -154,8 +153,8 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       {/* Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div style={{ background: 'var(--color-bg-card)' }} className="rounded-lg max-w-2xl w-full">
-            <div className="px-6 py-4 border-b flex justify-between items-center" style={{ borderColor: 'var(--color-border-hr)' }}>
+          <div className="card max-w-2xl w-full">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
               <h3 className="text-lg font-semibold">{editing ? 'Edit' : 'Add'} Employee</h3>
               <button onClick={() => setShowForm(false)} className="cursor-pointer hover:text-gray-600">
                 <X className="w-6 h-6" />
@@ -170,8 +169,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
                     value={formData.empCode}
                     onChange={(e) => setFormData({ ...formData, empCode: e.target.value })}
                     placeholder="EMP001"
-                    className="w-full px-3 py-2 border rounded-lg"
-                    style={{ borderColor: 'var(--color-border-hr)' }}
+                    className="input-base"
                   />
                 </div>
                 <div>
@@ -182,8 +180,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
                     value={formData.fullName}
                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                     placeholder="John Doe"
-                    className="w-full px-3 py-2 border rounded-lg"
-                    style={{ borderColor: 'var(--color-border-hr)' }}
+                    className="input-base"
                   />
                 </div>
                 <div>
@@ -193,8 +190,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
                     value={formData.phoneNumber}
                     onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                     placeholder="081-234-5678"
-                    className="w-full px-3 py-2 border rounded-lg"
-                    style={{ borderColor: 'var(--color-border-hr)' }}
+                    className="input-base"
                   />
                 </div>
                 <div>
@@ -204,8 +200,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="john@company.com"
-                    className="w-full px-3 py-2 border rounded-lg"
-                    style={{ borderColor: 'var(--color-border-hr)' }}
+                    className="input-base"
                   />
                 </div>
                 <div className="col-span-2">
@@ -215,8 +210,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
                     value={formData.position}
                     onChange={(e) => setFormData({ ...formData, position: e.target.value })}
                     placeholder="IT Support"
-                    className="w-full px-3 py-2 border rounded-lg"
-                    style={{ borderColor: 'var(--color-border-hr)' }}
+                    className="input-base"
                   />
                 </div>
               </div>
@@ -230,8 +224,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="flex-1 px-4 py-2 rounded-lg"
-                  style={{ background: 'var(--color-bg-secondary)' }}
+                  className="btn-secondary flex-1 px-4 py-2"
                 >
                   Cancel
                 </button>
