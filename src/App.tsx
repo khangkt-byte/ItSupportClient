@@ -176,7 +176,7 @@ export default function App() {
         onNavigate={handleNavigate} 
         userRole={user.role}
       />
-      <div className="flex-1 p-[30px_20px_30px_30px] max-w-full w-full max-md:p-[30px_20px]" style={{ color: 'var(--color-text-primary)' }}>
+      <div className="flex-1 p-[30px_20px_30px_30px] max-w-full w-full max-md:p-[30px_20px] text-gray-900 dark:text-gray-50">
         {user.role === 'admin' ? (
           <AdminDashboard 
             user={user} 

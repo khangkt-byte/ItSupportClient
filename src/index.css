@@ -177,6 +177,52 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     @apply focus-visible:ring-red-500;
     @apply dark:bg-red-500 dark:hover:bg-red-600;
   }
+
+  .btn-success {
+    @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-green-600 text-white hover:bg-green-700;
+    @apply focus-visible:ring-green-500;
+    @apply dark:bg-green-500 dark:hover:bg-green-600;
+  }
+
+  .btn-warning {
+    @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-orange-600 text-white hover:bg-orange-700;
+    @apply focus-visible:ring-orange-500;
+    @apply dark:bg-orange-500 dark:hover:bg-orange-600;
+  }
+
+  /* Outline button variants */
+  .btn-outline-primary {
+    @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-blue-50 text-blue-600 hover:bg-blue-100;
+    @apply focus-visible:ring-blue-400;
+    @apply dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30;
+  }
+
+  .btn-outline-danger {
+    @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-red-50 text-red-600 hover:bg-red-100;
+    @apply focus-visible:ring-red-400;
+    @apply dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30;
+  }
+
+  .btn-outline-success {
+    @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-green-50 text-green-600 hover:bg-green-100;
+    @apply focus-visible:ring-green-400;
+    @apply dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/30;
+  }
   
   /* Input base styles following Material Design 3 */
   /* Reference: https://m3.material.io/components/text-fields/specs */

@@ -118,7 +118,7 @@ export function DepartmentManagement({ data, setData }: Props) {
         <button 
           onClick={() => openForm()} 
           disabled={loading}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          className="btn-primary px-4 py-2 flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
           Add Department
@@ -132,10 +132,10 @@ export function DepartmentManagement({ data, setData }: Props) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {data.map((item) => (
-            <div key={item.id} className="bg-white border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col min-h-[200px]">
+            <div key={item.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col min-h-[200px]">
               <div className="flex-1">
-                <h3 className="font-semibold text-lg mb-2">{item.name}</h3>
-                <p className="text-sm text-gray-600 line-clamp-2">
+                <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-gray-50">{item.name}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
                   {item.description || 'No description'}
                 </p>
               </div>
@@ -143,7 +143,7 @@ export function DepartmentManagement({ data, setData }: Props) {
                 <button 
                   onClick={() => openForm(item)} 
                   disabled={loading}
-                  className="flex-1 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 disabled:opacity-50 flex items-center justify-center gap-1 cursor-pointer"
+                  className="flex-1 px-3 py-2 text-sm bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-gray-600 disabled:opacity-50 flex items-center justify-center gap-1 cursor-pointer transition-colors"
                 >
                   <Edit className="w-4 h-4" />
                   Edit
@@ -151,7 +151,7 @@ export function DepartmentManagement({ data, setData }: Props) {
                 <button 
                   onClick={() => setConfirmDelete(item)} 
                   disabled={loading}
-                  className="flex-1 px-3 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 disabled:opacity-50 flex items-center justify-center gap-1 cursor-pointer"
+                  className="flex-1 px-3 py-2 text-sm bg-red-50 dark:bg-gray-700 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-gray-600 disabled:opacity-50 flex items-center justify-center gap-1 cursor-pointer transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                   Delete
@@ -164,15 +164,15 @@ export function DepartmentManagement({ data, setData }: Props) {
 
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full shadow-xl">
-            <div className="px-6 py-4 border-b flex justify-between items-center">
-              <h3 className="text-lg font-semibold">
+          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full shadow-xl">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">
                 {editing ? 'Edit Department' : 'Add Department'}
               </h3>
               <button 
                 onClick={() => setShowForm(false)} 
                 disabled={loading}
-                className="text-gray-400 hover:text-gray-600 disabled:opacity-50 cursor-pointer"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50 cursor-pointer transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -180,7 +180,7 @@ export function DepartmentManagement({ data, setData }: Props) {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Name <span className="text-red-500">*</span>
                 </label>
                 <input 
@@ -189,13 +189,13 @@ export function DepartmentManagement({ data, setData }: Props) {
                   value={formData.name} 
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
                   placeholder="e.g., IT Department" 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
                   disabled={loading}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Description
                 </label>
                 <textarea 
@@ -203,7 +203,7 @@ export function DepartmentManagement({ data, setData }: Props) {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })} 
                   placeholder="Optional description" 
                   rows={3} 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 resize-none transition-colors"
                   disabled={loading}
                 />
               </div>
@@ -212,7 +212,7 @@ export function DepartmentManagement({ data, setData }: Props) {
                 <button 
                   type="submit" 
                   disabled={loading}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  className="flex-1 px-4 py-2 bg-blue-600 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
                 >
                   {loading ? 'Saving...' : (editing ? 'Update' : 'Create')}
                 </button>
@@ -220,7 +220,7 @@ export function DepartmentManagement({ data, setData }: Props) {
                   type="button" 
                   onClick={() => setShowForm(false)} 
                   disabled={loading}
-                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 font-medium"
+                  className="btn-secondary flex-1 px-4 py-2"
                 >
                   Cancel
                 </button>

@@ -170,16 +170,16 @@ export function ImportWizard({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="px-6 py-4 border-b flex justify-between sticky top-0 bg-white z-10">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between sticky top-0 bg-white dark:bg-gray-800 z-10">
           <div>
-            <h2 className="text-2xl font-semibold">Import Work Logs from Excel</h2>
-            <p className="text-sm text-gray-600 mt-1">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-50">Import Work Logs from Excel</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               Step {step} of 3: {step === 1 ? 'Upload File' : step === 2 ? 'Validation & Preview' : 'Import Results'}
             </p>
           </div>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 cursor-pointer">
+          <button onClick={onClose} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer transition-colors">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -191,24 +191,24 @@ export function ImportWizard({
               <div
                 className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
                   dragActive 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-300 hover:border-gray-400'
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
                 }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
               >
-                <FileSpreadsheet className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">
+                <FileSpreadsheet className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50 mb-2">
                   {file ? file.name : 'Drag & drop your Excel file here'}
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
                   or click to browse
                 </p>
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer transition-colors"
                 >
                   Choose File
                 </button>
@@ -222,18 +222,18 @@ export function ImportWizard({
               </div>
 
               {file && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
                   <div className="flex items-center gap-3">
-                    <FileSpreadsheet className="w-8 h-8 text-green-600" />
+                    <FileSpreadsheet className="w-8 h-8 text-green-600 dark:text-green-400" />
                     <div className="flex-1">
-                      <p className="font-medium text-green-900">{file.name}</p>
-                      <p className="text-sm text-green-700">
+                      <p className="font-medium text-green-900 dark:text-green-100">{file.name}</p>
+                      <p className="text-sm text-green-700 dark:text-green-300">
                         {(file.size / 1024).toFixed(2)} KB
                       </p>
                     </div>
                     <button
                       onClick={() => setFile(null)}
-                      className="text-red-600 hover:text-red-800 cursor-pointer"
+                      className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 cursor-pointer transition-colors"
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -244,7 +244,7 @@ export function ImportWizard({
               <div className="flex justify-end gap-3">
                 <button
                   onClick={onClose}
-                  className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 cursor-pointer"
+                  className="btn-secondary px-4 py-2"
                 >
                   Cancel
                 </button>
@@ -297,52 +297,52 @@ export function ImportWizard({
 
               {/* Errors & Warnings Table */}
               {rowsWithIssues.length > 0 && (
-                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                  <div className="p-4 bg-gray-50 border-b">
-                    <h3 className="font-semibold">Issues Found</h3>
-                    <p className="text-sm text-gray-600">
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-50">Issues Found</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       Review and fix errors before importing
                     </p>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                      <thead className="bg-gray-50">
+                      <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                         <tr>
-                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Row</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Field</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Original Value</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Suggestion</th>
-                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Action</th>
+                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Row</th>
+                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Field</th>
+                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Original Value</th>
+                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Suggestion</th>
+                          <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Action</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-200">
+                      <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                         {rowsWithIssues.map((row) => (
                           <React.Fragment key={row.rowNumber}>
                             {row.errors.map((error, idx) => (
-                              <tr key={`${row.rowNumber}-error-${idx}`} className="hover:bg-gray-50">
-                                <td className="px-4 py-3 text-sm">{row.rowNumber}</td>
+                              <tr key={`${row.rowNumber}-error-${idx}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-50">{row.rowNumber}</td>
                                 <td className="px-4 py-3 text-sm">
-                                  <Badge variant="outline" className="bg-red-50 border-red-400 text-red-700">
+                                  <Badge variant="outline" className="bg-red-50 dark:bg-red-900/30 border-red-400 dark:border-red-700 text-red-700 dark:text-red-300">
                                     {error.field}
                                   </Badge>
                                 </td>
-                                <td className="px-4 py-3 text-sm text-gray-600">
+                                <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                                   {error.originalValue || '(empty)'}
                                 </td>
                                 <td className="px-4 py-3 text-sm">
                                   {error.suggestedValue ? (
                                     <div>
-                                      <span className="font-medium text-green-700">
+                                      <span className="font-medium text-green-700 dark:text-green-400">
                                         {error.suggestedValue}
                                       </span>
                                       {error.matchScore && (
-                                        <span className="ml-2 text-xs text-gray-500">
+                                        <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
                                           ({calculateMatchScore(error)}% match)
                                         </span>
                                       )}
                                     </div>
                                   ) : (
-                                    <span className="text-gray-400">No suggestion</span>
+                                    <span className="text-gray-400 dark:text-gray-500">No suggestion</span>
                                   )}
                                 </td>
                                 <td className="px-4 py-3 text-sm">
@@ -363,10 +363,10 @@ export function ImportWizard({
                               </tr>
                             ))}
                             {row.warnings.map((warning, idx) => (
-                              <tr key={`${row.rowNumber}-warning-${idx}`} className="hover:bg-gray-50">
-                                <td className="px-4 py-3 text-sm">{row.rowNumber}</td>
+                              <tr key={`${row.rowNumber}-warning-${idx}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-50">{row.rowNumber}</td>
                                 <td className="px-4 py-3 text-sm">
-                                  <Badge variant="outline" className="bg-yellow-50 border-yellow-400 text-yellow-700">
+                                  <Badge variant="outline" className="bg-yellow-50 dark:bg-yellow-900/30 border-yellow-400 dark:border-yellow-700 text-yellow-700 dark:text-yellow-300">
                                     {warning.field}
                                   </Badge>
                                 </td>
@@ -384,36 +384,36 @@ export function ImportWizard({
               )}
 
               {/* Preview Table */}
-              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                <div className="p-4 bg-gray-50 border-b">
-                  <h3 className="font-semibold">Preview (First 10 rows)</h3>
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                <div className="p-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-50">Preview (First 10 rows)</h3>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-gray-50 dark:bg-gray-700">
                       <tr>
-                        <th className="px-4 py-3 text-left font-medium text-gray-700">Row</th>
-                        <th className="px-4 py-3 text-left font-medium text-gray-700">Operators</th>
-                        <th className="px-4 py-3 text-left font-medium text-gray-700">Department</th>
-                        <th className="px-4 py-3 text-left font-medium text-gray-700">Area</th>
-                        <th className="px-4 py-3 text-left font-medium text-gray-700">Issue</th>
-                        <th className="px-4 py-3 text-left font-medium text-gray-700">Status</th>
+                        <th className="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Row</th>
+                        <th className="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Operators</th>
+                        <th className="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Department</th>
+                        <th className="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Area</th>
+                        <th className="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Issue</th>
+                        <th className="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                       {validationResult.rows.slice(0, 10).map((row) => (
                         <tr 
                           key={row.rowNumber}
                           className={`${
-                            row.hasErrors ? 'bg-red-50' : row.hasWarnings ? 'bg-yellow-50' : 'hover:bg-gray-50'
+                            row.hasErrors ? 'bg-red-50 dark:bg-red-900/20' : row.hasWarnings ? 'bg-yellow-50 dark:bg-yellow-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                           }`}
                         >
-                          <td className="px-4 py-3">{row.rowNumber}</td>
-                          <td className="px-4 py-3">{row.previewData?.operators || 'N/A'}</td>
+                          <td className="px-4 py-3 text-gray-900 dark:text-gray-50">{row.rowNumber}</td>
+                          <td className="px-4 py-3 text-gray-900 dark:text-gray-50">{row.previewData?.operators || 'N/A'}</td>
                           <td className="px-4 py-3">
                             <div className="flex flex-col gap-1">
-                              <span className="text-gray-500 text-xs">{row.previewData?.department || 'N/A'}</span>
-                              <span className={row.mappedDepartmentName ? 'font-medium' : 'text-red-600'}>
+                              <span className="text-gray-500 dark:text-gray-400 text-xs">{row.previewData?.department || 'N/A'}</span>
+                              <span className={row.mappedDepartmentName ? 'font-medium text-gray-900 dark:text-gray-50' : 'text-red-600 dark:text-red-400'}>
                                 {row.mappedDepartmentName ? `→ ${row.mappedDepartmentName}` : '❌ Not found'}
                               </span>
                             </div>
@@ -430,8 +430,8 @@ export function ImportWizard({
                             {row.previewData?.issueDescription || 'N/A'}
                           </td>
                           <td className="px-4 py-3">
-                            {row.hasErrors && <Badge variant="outline" className="bg-red-50 border-red-400 text-red-700">Error</Badge>}
-                            {row.hasWarnings && !row.hasErrors && <Badge variant="outline" className="bg-yellow-50 border-yellow-400 text-yellow-700">Warning</Badge>}
+                            {row.hasErrors && <Badge variant="outline" className="bg-red-50 dark:bg-red-900/30 border-red-400 dark:border-red-700 text-red-700 dark:text-red-300">Error</Badge>}
+                            {row.hasWarnings && !row.hasErrors && <Badge variant="outline" className="bg-yellow-50 dark:bg-yellow-900/30 border-yellow-400 dark:border-yellow-700 text-yellow-700 dark:text-yellow-300">Warning</Badge>}
                             {!row.hasErrors && !row.hasWarnings && <Badge variant="outline" className="bg-green-50 border-green-400 text-green-700">Valid</Badge>}
                           </td>
                         </tr>
@@ -442,8 +442,8 @@ export function ImportWizard({
               </div>
 
               {/* Import Options */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 className="font-semibold mb-4">Import Options</h3>
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                <h3 className="font-semibold mb-4 text-gray-900 dark:text-gray-50">Import Options</h3>
                 <div className="space-y-3">
                   <label className="flex items-center gap-2">
                     <input
@@ -519,27 +519,27 @@ export function ImportWizard({
 
               {/* Import Statistics */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <p className="text-sm text-gray-600">Imported</p>
-                  <p className="text-2xl font-semibold text-green-600">{importResult.successCount}</p>
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Imported</p>
+                  <p className="text-2xl font-semibold text-green-600 dark:text-green-400">{importResult.successCount}</p>
                 </div>
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <p className="text-sm text-gray-600">Auto-matched</p>
-                  <p className="text-2xl font-semibold text-blue-600">{importResult.autoMatched}</p>
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Auto-matched</p>
+                  <p className="text-2xl font-semibold text-blue-600 dark:text-blue-400">{importResult.autoMatched}</p>
                 </div>
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <p className="text-sm text-gray-600">Entities Created</p>
-                  <p className="text-2xl font-semibold text-purple-600">{importResult.entitiesCreated}</p>
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Entities Created</p>
+                  <p className="text-2xl font-semibold text-purple-600 dark:text-purple-400">{importResult.entitiesCreated}</p>
                 </div>
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <p className="text-sm text-gray-600">Skipped</p>
-                  <p className="text-2xl font-semibold text-gray-600">{importResult.skippedCount}</p>
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Skipped</p>
+                  <p className="text-2xl font-semibold text-gray-600 dark:text-gray-400">{importResult.skippedCount}</p>
                 </div>
               </div>
 
               {/* Errors */}
               {importResult.errors.length > 0 && (
-                <Alert className="border-red-400 bg-red-50">
+                <Alert className="border-red-400 dark:border-red-700 bg-red-50 dark:bg-red-900/20">
                   <AlertCircle className="size-4 text-red-600" />
                   <AlertDescription className="text-red-800">
                     <strong>Errors encountered:</strong>

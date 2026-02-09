@@ -139,7 +139,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
                     className={`
                       w-full flex items-center gap-3 px-[15px] py-3 rounded-lg whitespace-nowrap transition-all duration-300 cursor-pointer text-gray-900 dark:text-gray-50 hover:bg-gray-100 dark:hover:bg-gray-700
                       ${collapsed ? 'justify-center px-0' : 'justify-start'}
-                      ${isActive ? 'text-white dark:text-white bg-blue-600 hover:bg-blue-600' : ''}
+                      ${isActive ? 'text-white dark:text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600' : ''}
                     `}
                   >
                     <Icon className="w-5 h-5 flex-shrink-0" />

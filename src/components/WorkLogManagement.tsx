@@ -454,27 +454,27 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
         <PermissionGuard 
           permission={Permissions.IssueLog.Create}
           fallback={
-            <button disabled className="px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed opacity-50 flex items-center gap-2">
+            <button disabled className="btn-primary px-4 py-2 flex items-center gap-2 opacity-50">
               <Plus className="w-5 h-5" />New Work Log
             </button>
           }
         >
-          <button onClick={() => openForm()} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 cursor-pointer">
+          <button onClick={() => openForm()} className="btn-primary px-4 py-2 flex items-center gap-2">
             <Plus className="w-5 h-5" />New Work Log
           </button>
         </PermissionGuard>
       </div>
 
       <div className="grid grid-cols-4 gap-4">
-        <div className="bg-white border rounded-lg p-4"><p className="text-sm text-gray-500">Total</p><p className="text-2xl font-semibold">{data.length}</p></div>
-        <div className="bg-white border rounded-lg p-4"><p className="text-sm text-gray-500">Pending</p><p className="text-2xl font-semibold text-yellow-600">{data.filter((l) => l.status === 'pending').length}</p></div>
-        <div className="bg-white border rounded-lg p-4"><p className="text-sm text-gray-500">In Progress</p><p className="text-2xl font-semibold text-blue-600">{data.filter((l) => l.status === 'in-progress').length}</p></div>
-        <div className="bg-white border rounded-lg p-4"><p className="text-sm text-gray-500">Completed</p><p className="text-2xl font-semibold text-green-600">{data.filter((l) => l.status === 'completed').length}</p></div>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Total</p><p className="text-2xl font-semibold text-gray-900 dark:text-gray-50">{data.length}</p></div>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Pending</p><p className="text-2xl font-semibold text-yellow-600 dark:text-yellow-400">{data.filter((l) => l.status === 'pending').length}</p></div>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"><p className="text-sm text-gray-500 dark:text-gray-400">In Progress</p><p className="text-2xl font-semibold text-blue-600 dark:text-blue-400">{data.filter((l) => l.status === 'in-progress').length}</p></div>
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Completed</p><p className="text-2xl font-semibold text-green-600 dark:text-green-400">{data.filter((l) => l.status === 'completed').length}</p></div>
       </div>
 
-      <div className="bg-white rounded-lg border p-4 grid grid-cols-2 gap-4">
-        <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" /><input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search..." className="w-full pl-10 pr-4 py-2 border rounded-lg" /></div>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as WorkStatus | 'all')} className="px-4 py-2 border rounded-lg">
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 grid grid-cols-2 gap-4">
+        <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" /><input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search..." className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500" /></div>
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as WorkStatus | 'all')} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50">
           <option value="all">All Status</option>
           <option value="pending">Pending</option>
           <option value="in-progress">In Progress</option>
@@ -483,28 +483,28 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
         </select>
       </div>
 
-      <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden">
         <table className="w-full">
-          <thead className="bg-gray-50 border-b">
+          <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Operator</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Requester</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Department</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Issue</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Date</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Operator</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Requester</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Department</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Issue</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {pagination.paginatedData.map((log) => (
               <React.Fragment key={log.id}>
-                <tr className="hover:bg-gray-50 border-b">
-                  <td className="px-4 py-3 text-sm">{new Date(log.reportDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
-                  <td className="px-4 py-3 text-sm">{(log.operators || []).join(', ')}</td>
-                  <td className="px-4 py-3 text-sm">{(log.requesters || []).join(', ') || 'None'}</td>
-                  <td className="px-4 py-3 text-sm">{log.department}</td>
-                  <td className="px-4 py-3 text-sm"><button onClick={() => toggleRow(log.id)} className="text-left hover:text-blue-600 line-clamp-2 cursor-pointer">{log.issue}</button></td>
+                <tr className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-50">{new Date(log.reportDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-50">{(log.operators || []).join(', ')}</td>
+                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-50">{(log.requesters || []).join(', ') || 'None'}</td>
+                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-50">{log.department}</td>
+                  <td className="px-4 py-3 text-sm"><button onClick={() => toggleRow(log.id)} className="text-left hover:text-blue-600 dark:hover:text-blue-400 line-clamp-2 cursor-pointer text-gray-900 dark:text-gray-50">{log.issue}</button></td>
                   <td className="px-4 py-3 text-sm"><span className={`px-2 py-1 text-xs rounded ${getStatusBadge(log.status)}`}>{log.status}</span></td>
                   <td className="px-4 py-3 text-sm text-right">
                     <div className="inline-flex items-center gap-2">
@@ -525,13 +525,13 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                   </td>
                 </tr>
                 {expandedRows.has(log.id) && (
-                  <tr className="bg-gray-50">
+                  <tr className="bg-gray-50 dark:bg-gray-700">
                     <td colSpan={7} className="px-4 py-4">
                       <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div><p className="font-medium mb-1">Cause:</p><p className="text-gray-600">{log.cause || 'N/A'}</p></div>
-                        <div><p className="font-medium mb-1">Fix:</p><p className="text-gray-600">{log.fixDescription || 'N/A'}</p></div>
-                        {log.permanentFix && <div><p className="font-medium mb-1">Permanent Fix:</p><p className="text-gray-600">{log.permanentFix}</p></div>}
-                        {log.note && <div><p className="font-medium mb-1">Note:</p><p className="text-gray-600">{log.note}</p></div>}
+                        <div><p className="font-medium mb-1 text-gray-700 dark:text-gray-300">Cause:</p><p className="text-gray-600 dark:text-gray-400">{log.cause || 'N/A'}</p></div>
+                        <div><p className="font-medium mb-1 text-gray-700 dark:text-gray-300">Fix:</p><p className="text-gray-600 dark:text-gray-400">{log.fixDescription || 'N/A'}</p></div>
+                        {log.permanentFix && <div><p className="font-medium mb-1 text-gray-700 dark:text-gray-300">Permanent Fix:</p><p className="text-gray-600 dark:text-gray-400">{log.permanentFix}</p></div>}
+                        {log.note && <div><p className="font-medium mb-1 text-gray-700 dark:text-gray-300">Note:</p><p className="text-gray-600 dark:text-gray-400">{log.note}</p></div>}
                       </div>
                     </td>
                   </tr>
@@ -565,21 +565,21 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
           }
         >
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="px-6 py-4 border-b flex justify-between sticky top-0 bg-white z-[60]"><h3 className="text-lg font-semibold">{editing ? 'Edit' : 'New'} Work Log</h3><button onClick={() => setShowForm(false)} className="cursor-pointer hover:text-gray-600"><X className="w-6 h-6" /></button></div>
+            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between sticky top-0 bg-white dark:bg-gray-800 z-[60]"><h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">{editing ? 'Edit' : 'New'} Work Log</h3><button onClick={() => setShowForm(false)} className="cursor-pointer hover:text-gray-600 dark:hover:text-gray-400"><X className="w-6 h-6" /></button></div>
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                     Date <span className="text-red-500">*</span>
                   </label>
-                  <input type="date" required value={formData.reportDate} onChange={(e) => setFormData({ ...formData, reportDate: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
+                  <input type="date" required value={formData.reportDate} onChange={(e) => setFormData({ ...formData, reportDate: e.target.value })} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                     Status <span className="text-red-500">*</span>
                   </label>
-                  <select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as WorkStatus })} className="w-full px-3 py-2 border rounded-lg">
+                  <select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as WorkStatus })} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
                     <option value="pending">Pending</option>
                     <option value="in-progress">In Progress</option>
                     <option value="completed">Completed</option>
@@ -587,7 +587,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                   </select>
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                     Operators (IT Department) <span className="text-red-500">*</span>
                   </label>
                   <FlexibleMultiSelect 
@@ -601,7 +601,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                   />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-1">Requesters</label>
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Requesters</label>
                   <FlexibleMultiSelect 
                     options={requesterOptions} 
                     values={formData.requesters} 
@@ -612,7 +612,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                     Department <span className="text-red-500">*</span>
                   </label>
                   <SearchableCombobox 
@@ -624,7 +624,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                     Area <span className="text-red-500">*</span>
                   </label>
                   <SearchableCombobox 
@@ -660,22 +660,22 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                 suggestionHeader={selectedIssue ? `💡 Common Causes for "${selectedIssue.name}"` : " Suggested Causes"}
               />
               <div>
-                <label className="block text-sm font-medium mb-1">Fix Description</label>
-                <textarea value={formData.fixDescription} onChange={(e) => setFormData({ ...formData, fixDescription: e.target.value })} rows={3} className="w-full px-3 py-2 border rounded-lg" />
+                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Fix Description</label>
+                <textarea value={formData.fixDescription} onChange={(e) => setFormData({ ...formData, fixDescription: e.target.value })} rows={3} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Permanent Fix</label>
-                <textarea value={formData.permanentFix} onChange={(e) => setFormData({ ...formData, permanentFix: e.target.value })} rows={2} className="w-full px-3 py-2 border rounded-lg" />
+                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Permanent Fix</label>
+                <textarea value={formData.permanentFix} onChange={(e) => setFormData({ ...formData, permanentFix: e.target.value })} rows={2} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Note</label>
-                <textarea value={formData.note} onChange={(e) => setFormData({ ...formData, note: e.target.value })} rows={2} className="w-full px-3 py-2 border rounded-lg" />
+                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Note</label>
+                <textarea value={formData.note} onChange={(e) => setFormData({ ...formData, note: e.target.value })} rows={2} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none" />
               </div>
               <div className="flex gap-3">
-                <button type="submit" className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700">
+                <button type="submit" className="btn-primary flex-1 px-4 py-2">
                   {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : editing ? 'Update' : 'Create'}
                 </button>
-                <button type="button" onClick={() => setShowForm(false)} className="flex-1 px-4 py-2 bg-gray-200 rounded-lg cursor-pointer hover:bg-gray-300">Cancel</button>
+                <button type="button" onClick={() => setShowForm(false)} className="btn-secondary flex-1 px-4 py-2">Cancel</button>
               </div>
             </form>
             </div>
@@ -683,8 +683,8 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
         </PermissionGuard>
       )}
 
-      <div className="bg-white rounded-lg border p-6">
-        <h3 className="text-lg font-semibold mb-4">Excel Import/Export</h3>
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-50">Excel Import/Export</h3>
         <div className="grid grid-cols-3 gap-4">
           <button 
             onClick={() => exportWorkLogsToExcel(data)} 

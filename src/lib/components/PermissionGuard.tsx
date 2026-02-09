@@ -151,17 +151,10 @@ export function AdminOnly({
  */
 export function ForbiddenMessage() {
   return (
-    <div style={{
-      padding: '2rem',
-      textAlign: 'center',
-      color: '#dc2626',
-      background: '#fef2f2',
-      border: '1px solid #fecaca',
-      borderRadius: '8px',
-    }}>
-      <h3 style={{ marginTop: 0 }}>⛔ Access Denied</h3>
-      <p>You don't have permission to access this resource.</p>
-      <p style={{ fontSize: '0.875rem', color: '#991b1b' }}>
+    <div className="p-8 text-center bg-red-50 dark:bg-red-950 border border-red-300 dark:border-red-700 rounded-lg text-red-600 dark:text-red-400">
+      <h3 className="mt-0 font-semibold text-lg">⛔ Access Denied</h3>
+      <p className="mb-0">You don't have permission to access this resource.</p>
+      <p className="text-sm text-red-800 dark:text-red-300 mt-2 mb-0">
         Contact your administrator if you believe this is an error.
       </p>
     </div>

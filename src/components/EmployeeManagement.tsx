@@ -66,9 +66,9 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold">Employee Management</h2>
-        <button 
-          onClick={() => openForm()} 
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 cursor-pointer"
+        <button
+          onClick={() => openForm()}
+          className="btn-primary px-4 py-2 flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
           Add Employee
@@ -92,14 +92,14 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       {/* Table */}
       <div className="card overflow-hidden">
         <table className="w-full">
-          <thead className="border-b bg-indigo-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-600 dark:text-gray-400">Employee ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-600 dark:text-gray-400">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-600 dark:text-gray-400">Phone</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-600 dark:text-gray-400">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-600 dark:text-gray-400">Position</th>
-              <th className="px-6 py-3 text-right text-xs font-medium uppercase text-gray-600 dark:text-gray-400">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Employee ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Name</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Phone</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Email</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Position</th>
+              <th className="px-6 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -111,12 +111,12 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
               </tr>
             ) : (
               pagination.paginatedData.map((item) => (
-                <tr key={item.empId} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <td className="px-6 py-4 text-sm">{item.empCode || 'N/A'}</td>
-                  <td className="px-6 py-4 text-sm font-medium">{item.fullName}</td>
-                  <td className="px-6 py-4 text-sm">{item.phoneNumber || 'N/A'}</td>
-                  <td className="px-6 py-4 text-sm">{item.email || 'N/A'}</td>
-                  <td className="px-6 py-4 text-sm">{item.position || 'N/A'}</td>
+                <tr key={item.empId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-50">{item.empCode || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-50">{item.fullName}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-50">{item.phoneNumber || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-50">{item.email || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-50">{item.position || 'N/A'}</td>
                   <td className="px-6 py-4 text-sm text-right">
                     <button 
                       onClick={() => openForm(item)} 

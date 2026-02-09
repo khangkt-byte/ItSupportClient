@@ -278,9 +278,9 @@ export function PermissionEditor({
           Assign Roles ({selectedRoleIds.length} selected)
         </h3>
 
-        <div className="bg-white border rounded-lg divide-y max-h-40 overflow-y-auto">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg divide-y max-h-40 overflow-y-auto">
           {availableRoles.length === 0 ? (
-            <div className="p-6 text-center text-gray-500">
+            <div className="p-6 text-center text-gray-500 dark:text-gray-400">
               <Shield className="w-12 h-12 mx-auto mb-2 text-gray-300" />
               <p>No roles available</p>
             </div>
@@ -292,7 +292,7 @@ export function PermissionEditor({
               return (
                 <label
                   key={role.roleId}
-                  className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-50 transition-colors ${
+                  className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
                     readOnly ? 'opacity-60 cursor-not-allowed' : ''
                   }`}
                 >
@@ -304,9 +304,9 @@ export function PermissionEditor({
                     className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                   />
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-gray-900">{role.name}</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-50">{role.name}</div>
                     {role.description && (
-                      <div className="text-xs text-gray-500 mt-0.5 line-clamp-1">{role.description}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">{role.description}</div>
                     )}
                   </div>
                   <span className="text-xs text-gray-400 flex-shrink-0">
@@ -361,7 +361,7 @@ export function PermissionEditor({
               selectableGroupIds.length > 0 && selectableGroupIds.every(id => selectedClaimIds.includes(id));
 
             return (
-              <div key={group.category} className="bg-white border rounded-lg">
+              <div key={group.category} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
                 <button
                   type="button"
                   onClick={() => toggleModule(group.category)}

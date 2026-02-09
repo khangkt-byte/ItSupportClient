@@ -114,40 +114,15 @@ export function AdminRoute({
  */
 export function UnauthorizedFallback() {
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '400px',
-      padding: '2rem',
-    }}>
-      <div style={{
-        textAlign: 'center',
-        padding: '2rem',
-        borderRadius: '8px',
-        backgroundColor: '#fef2f2',
-        border: '1px solid #fecaca',
-        maxWidth: '500px',
-      }}>
-        <h2 style={{ 
-          color: '#dc2626', 
-          marginTop: 0,
-          fontSize: '1.5rem' 
-        }}>
+    <div className="flex items-center justify-center min-h-[400px] p-8">
+      <div className="bg-red-50 dark:bg-red-950 border border-red-300 dark:border-red-700 rounded-lg max-w-[500px] p-8 text-center">
+        <h2 className="text-red-600 dark:text-red-400 text-2xl font-semibold mt-0 mb-3">
           🔒 Access Denied
         </h2>
-        <p style={{ 
-          color: '#7f1d1d',
-          marginBottom: 0 
-        }}>
+        <p className="text-red-900 dark:text-red-300 mb-0">
           You don't have permission to access this page.
         </p>
-        <p style={{
-          fontSize: '0.875rem',
-          color: '#991b1b',
-          marginTop: '1rem',
-          marginBottom: 0
-        }}>
+        <p className="text-sm text-red-800 dark:text-red-400 mt-4 mb-0">
           Please contact your administrator if you believe this is an error.
         </p>
       </div>

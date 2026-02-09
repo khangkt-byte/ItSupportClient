@@ -39,20 +39,20 @@ export function EmployeeDashboard({ user, onLogout, currentView, onNavigate }: P
       case 'employee':
         return (
           <div>
-            <h1 className="text-2xl font-semibold mb-5">Employee Dashboard</h1>
-            <div className="bg-white rounded-lg border p-6 shadow-sm">
-              <h2 className="text-xl font-semibold mb-4">Welcome, {user.fullName}!</h2>
-              <p className="text-gray-600 mb-4">
+            <h1 className="text-2xl font-semibold mb-5 text-gray-900 dark:text-gray-50">Employee Dashboard</h1>
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-50">Welcome, {user.fullName}!</h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
                 Use the menu to navigate and manage work logs.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600">Total Work Logs</p>
-                  <p className="text-2xl font-bold text-blue-600">{dataManager.workLogs.data.length}</p>
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Work Logs</p>
+                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{dataManager.workLogs.data.length}</p>
                 </div>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600">Pending Work Logs</p>
-                  <p className="text-2xl font-bold text-green-600">
+                <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Pending Work Logs</p>
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                     {dataManager.workLogs.data.filter(log => log.status === 'pending').length}
                   </p>
                 </div>
@@ -74,9 +74,9 @@ export function EmployeeDashboard({ user, onLogout, currentView, onNavigate }: P
       default:
         return (
           <div>
-            <h1 className="text-2xl font-semibold mb-5">Employee Dashboard</h1>
-            <div className="bg-white rounded-lg border p-6 shadow-sm">
-              <p className="text-gray-600">Select a menu item to get started.</p>
+            <h1 className="text-2xl font-semibold mb-5 text-gray-900 dark:text-gray-50">Employee Dashboard</h1>
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+              <p className="text-gray-600 dark:text-gray-400">Select a menu item to get started.</p>
             </div>
           </div>
         );
