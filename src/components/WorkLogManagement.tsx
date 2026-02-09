@@ -466,13 +466,13 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
       </div>
 
       <div className="grid grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Total</p><p className="text-2xl font-semibold text-gray-900 dark:text-gray-50">{data.length}</p></div>
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Pending</p><p className="text-2xl font-semibold text-yellow-600 dark:text-yellow-400">{data.filter((l) => l.status === 'pending').length}</p></div>
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"><p className="text-sm text-gray-500 dark:text-gray-400">In Progress</p><p className="text-2xl font-semibold text-blue-600 dark:text-blue-400">{data.filter((l) => l.status === 'in-progress').length}</p></div>
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Completed</p><p className="text-2xl font-semibold text-green-600 dark:text-green-400">{data.filter((l) => l.status === 'completed').length}</p></div>
+        <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Total</p><p className="text-2xl font-semibold text-gray-900 dark:text-gray-50">{data.length}</p></div>
+        <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Pending</p><p className="text-2xl font-semibold text-yellow-600 dark:text-yellow-400">{data.filter((l) => l.status === 'pending').length}</p></div>
+        <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">In Progress</p><p className="text-2xl font-semibold text-blue-600 dark:text-blue-400">{data.filter((l) => l.status === 'in-progress').length}</p></div>
+        <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Completed</p><p className="text-2xl font-semibold text-green-600 dark:text-green-400">{data.filter((l) => l.status === 'completed').length}</p></div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 grid grid-cols-2 gap-4">
+      <div className="card p-4 grid grid-cols-2 gap-4">
         <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" /><input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search..." className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500" /></div>
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as WorkStatus | 'all')} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50">
           <option value="all">All Status</option>
@@ -683,7 +683,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
         </PermissionGuard>
       )}
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+      <div className="card p-6">
         <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-50">Excel Import/Export</h3>
         <div className="grid grid-cols-3 gap-4">
           <button 

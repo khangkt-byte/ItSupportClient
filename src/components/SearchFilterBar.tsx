@@ -159,8 +159,8 @@ export function SearchFilterBar<T = any>({
   };
 
   const containerClass = dense
-    ? 'flex flex-col gap-2 md:flex-row md:items-center md:gap-2 p-3'
-    : 'flex flex-col gap-4 md:flex-row md:items-center md:justify-between p-4 bg-gray-50 border-b rounded-t-lg';
+    ? 'flex flex-col gap-2 md:flex-row md:items-center md:gap-2 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm'
+    : 'flex flex-col gap-4 md:flex-row md:items-center md:justify-between p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm';
 
   const inputWrapperClass = dense ? 'flex-1 min-w-[200px]' : 'flex-1 md:flex-none md:w-80';
 
@@ -170,18 +170,18 @@ export function SearchFilterBar<T = any>({
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:flex-1 md:gap-3">
         {/* Search Input */}
         <div className={`relative ${inputWrapperClass}`}>
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
           <input
             type="text"
             value={searchInput}
             onChange={handleSearchChange}
             placeholder={placeholder}
-            className="w-full pl-10 pr-9 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            className="w-full pl-10 pr-9 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           />
           {searchInput && (
             <button
               onClick={handleClearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
               title="Clear search"
             >
               <X className="w-4 h-4" />
@@ -201,7 +201,7 @@ export function SearchFilterBar<T = any>({
                   page: 1, // Reset to page 1 on filter change
                 });
               }}
-              className="appearance-none pr-10 pl-3 py-2 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              className="appearance-none pr-10 pl-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             >
               {filterOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -209,7 +209,7 @@ export function SearchFilterBar<T = any>({
                 </option>
               ))}
             </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" />
           </div>
         )}
 
@@ -218,7 +218,7 @@ export function SearchFilterBar<T = any>({
           <div className="relative">
             <button
               onClick={() => setShowSortDropdown(!showSortDropdown)}
-              className="flex items-center justify-between gap-2 px-3 py-2 border rounded-lg text-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all w-full md:w-auto"
+              className="flex items-center justify-between gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all w-full md:w-auto"
             >
               <span className="flex items-center gap-1">
                 {queryParams.isDescending ? (
@@ -229,22 +229,22 @@ export function SearchFilterBar<T = any>({
                 {sortButtonLabel}
               </span>
               <ChevronDown
-                className={`w-4 h-4 text-gray-400 transition-transform ${
+                className={`w-4 h-4 text-gray-400 dark:text-gray-500 transition-transform ${
                   showSortDropdown ? 'rotate-180' : ''
                 }`}
               />
             </button>
 
             {showSortDropdown && (
-              <div className="absolute z-50 top-full right-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
+              <div className="absolute z-50 top-full right-0 mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
                 {sortOptions.map((option) => (
                   <button
                     key={option.value}
                     onClick={() => handleSortChange(option.value)}
-                    className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors border-b last:border-b-0 ${
+                    className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-200 dark:border-gray-700 last:border-b-0 ${
                       queryParams.sortBy === option.value
-                        ? 'bg-blue-50 text-blue-600 font-medium'
-                        : 'text-gray-700'
+                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium'
+                        : 'text-gray-700 dark:text-gray-300'
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -267,14 +267,14 @@ export function SearchFilterBar<T = any>({
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between text-sm">
         {/* Page size selector */}
         <div className="flex items-center gap-2">
-          <label htmlFor="pageSize" className="text-gray-600">
+          <label htmlFor="pageSize" className="text-gray-600 dark:text-gray-400">
             Show:
           </label>
           <select
             id="pageSize"
             value={queryParams.pageSize || 10}
             onChange={(e) => handlePageSizeChange(parseInt(e.target.value))}
-            className="px-3 py-1.5 border rounded text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="5">5</option>
             <option value="10">10</option>
@@ -282,20 +282,20 @@ export function SearchFilterBar<T = any>({
             <option value="50">50</option>
             <option value="100">100</option>
           </select>
-          <span className="text-gray-600">per page</span>
+          <span className="text-gray-600 dark:text-gray-400">per page</span>
         </div>
 
         {/* Results info */}
         {showResults && paginatedResult && (
-          <div className="text-gray-600">
+          <div className="text-gray-600 dark:text-gray-400">
             {getPaginationInfo()}
           </div>
         )}
 
         {/* Active filters indicator */}
         {(queryParams.search || currentFilter !== 'all') && (
-          <div className="flex items-center gap-1 text-blue-600 text-xs">
-            <span className="px-2 py-1 bg-blue-50 rounded">
+          <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400 text-xs">
+            <span className="px-2 py-1 bg-blue-50 dark:bg-blue-900/20 rounded">
               {queryParams.search ? `Search: "${queryParams.search}"` : ''}
               {queryParams.search && currentFilter !== 'all' && ' • '}
               {currentFilter !== 'all' ? `Filter: ${currentFilter}` : ''}
