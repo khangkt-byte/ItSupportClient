@@ -57,7 +57,7 @@
   
   /* Background colors */
   --color-bg-primary: #f9fafb;             /* gray-50 (#f9fafb) */
-  --color-bg-secondary: #eef2ff;           /* indigo-50 (#eef2ff) */
+  --color-bg-secondary: var(--color-primary-50); /* primary-50 */
   --color-bg-sidebar: #ffffff;             /* white (#ffffff) */
   --color-bg-card: #ffffff;                /* white (#ffffff) */
   
@@ -65,16 +65,16 @@
   --color-border-hr: #e5e7eb;              /* gray-200 (#e5e7eb) */
   
   /* Hover states */
-  --color-hover-primary: #2563eb;          /* blue-600 (#2563eb) */
+  --color-hover-primary: var(--color-primary-600); /* primary-600 */
   --color-hover-secondary: #f3f4f6;        /* gray-100 (#f3f4f6) */
   
   /* Shadows */
   --color-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-/* Dark theme - when body.dark-theme is set */
-body.dark-theme,
-.dark {
+/* Dark theme - when data-theme="dark" is set */
+:root[data-theme="dark"],
+body[data-theme="dark"] {
   /* Text colors */
   --color-text-primary: #f8fafc;           /* gray-50 (#f8fafc) */
   --color-text-secondary: #9ca3af;         /* gray-400 (#9ca3af) */

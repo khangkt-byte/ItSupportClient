@@ -14,16 +14,21 @@ interface MenuItem {
 
 export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
-  const [darkTheme, setDarkTheme] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  const applyTheme = (nextTheme: 'light' | 'dark') => {
+    document.documentElement.setAttribute('data-theme', nextTheme);
+    document.body.setAttribute('data-theme', nextTheme);
+  };
 
   // Initialize theme from localStorage or system preference
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const shouldUseDarkTheme = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
-    
-    setDarkTheme(shouldUseDarkTheme);
-    document.body.classList.toggle('dark-theme', shouldUseDarkTheme);
+    const initialTheme = savedTheme === 'dark' || (!savedTheme && systemPrefersDark) ? 'dark' : 'light';
+
+    setTheme(initialTheme);
+    applyTheme(initialTheme);
   }, []);
 
   // Expand sidebar by default on large screens
@@ -36,10 +41,10 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
   }, []);
 
   const toggleTheme = () => {
-    const newTheme = !darkTheme;
-    setDarkTheme(newTheme);
-    document.body.classList.toggle('dark-theme', newTheme);
-    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    applyTheme(nextTheme);
+    localStorage.setItem('theme', nextTheme);
   };
 
   const toggleSidebar = () => {
@@ -132,13 +137,13 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
             <div 
               className={`ml-auto h-6 w-12 rounded-full relative ${collapsed ? 'opacity-0 w-0' : 'opacity-100'}`}
               style={{ 
-                background: darkTheme ? '#695CFE' : '#c3d1ec',
+                background: theme === 'dark' ? '#695CFE' : '#c3d1ec',
                 transition: collapsed ? 'all 0.2s ease' : 'opacity 0.4s 0.2s ease, background-color 0.3s ease'
               }}
             >
               <div 
                 className="absolute top-[3px] left-[3px] w-[18px] h-[18px] rounded-full bg-white shadow-sm transition-transform duration-300"
-                style={{ transform: darkTheme ? 'translateX(24px)' : 'translateX(0)' }}
+                style={{ transform: theme === 'dark' ? 'translateX(24px)' : 'translateX(0)' }}
               />
             </div>
           </button>

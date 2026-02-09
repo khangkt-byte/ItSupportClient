@@ -2,29 +2,27 @@ import { useEffect } from 'react';
 
 export function DarkModeStyles() {
   useEffect(() => {
-    // Initialize dark mode from localStorage or system preference
-    const initializeDarkMode = () => {
-      const theme = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const isDarkMode = theme ? theme === 'dark' : prefersDark;
-      
-      if (isDarkMode) {
-        document.body.classList.add('dark-theme');
-      } else {
-        document.body.classList.remove('dark-theme');
-      }
+    const applyTheme = (nextTheme: 'light' | 'dark') => {
+      document.documentElement.setAttribute('data-theme', nextTheme);
+      document.body.setAttribute('data-theme', nextTheme);
     };
 
-    initializeDarkMode();
+    // Initialize theme from localStorage or system preference
+    const initializeTheme = () => {
+      const storedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const initialTheme = storedTheme === 'dark' || (!storedTheme && prefersDark) ? 'dark' : 'light';
 
-    // Listen for storage changes (dark mode toggle in another tab)
+      applyTheme(initialTheme);
+    };
+
+    initializeTheme();
+
+    // Listen for storage changes (theme toggle in another tab)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'theme') {
-        if (e.newValue === 'dark') {
-          document.body.classList.add('dark-theme');
-        } else {
-          document.body.classList.remove('dark-theme');
-        }
+        const nextTheme = e.newValue === 'dark' ? 'dark' : 'light';
+        applyTheme(nextTheme);
       }
     };
 

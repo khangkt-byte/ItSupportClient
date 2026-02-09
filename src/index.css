@@ -15,6 +15,8 @@
 
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /**
  * Custom Theme Configuration
  * Using Tailwind v4's @theme directive for type-safe customization
@@ -45,6 +47,42 @@
 
   /* Font Family */
   --font-sans: "Poppins", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+:root[data-theme="brand-red"] {
+  --color-primary-50: #fef2f2;
+  --color-primary-100: #fee2e2;
+  --color-primary-200: #fecaca;
+  --color-primary-300: #fca5a5;
+  --color-primary-400: #f87171;
+  --color-primary-500: #ef4444;
+  --color-primary-600: #dc2626;
+  --color-primary-700: #b91c1c;
+  --color-primary-800: #991b1b;
+  --color-primary-900: #7f1d1d;
+  --color-primary-950: #450a0a;
+}
+
+:root[data-theme="brand-blue"] {
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+  --color-primary-950: #172554;
 }
 
 /**
@@ -94,7 +132,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
-    font-family: "Poppins", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-family: var(--font-sans);
     @apply bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-50;
   }
   
@@ -245,10 +283,10 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   /* Reference: https://m3.material.io/components/text-fields/specs */
   .input-base {
     @apply w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm;
-    @apply placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500;
+    @apply placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500;
     @apply disabled:cursor-not-allowed disabled:opacity-50;
     @apply dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500;
-    @apply dark:focus:border-blue-400 dark:focus:ring-blue-400;
+    @apply dark:focus:border-primary-400 dark:focus:ring-primary-400;
   }
   
   /* Card component following Material Design 3 */
@@ -265,7 +303,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   
   .badge-primary {
     @apply inline-flex items-center rounded px-2 py-1 text-xs font-medium;
-    @apply bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300;
+    @apply bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300;
   }
   
   .badge-success {
@@ -361,15 +399,15 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     --sidebar-color-text-primary: #1F2936;
     --sidebar-color-text-placeholder: #798EAE;
     --sidebar-color-bg-primary: #f9fafb;
-    --sidebar-color-bg-secondary: #ECECFD;
+    --sidebar-color-bg-secondary: var(--color-primary-100);
     --sidebar-color-bg-sidebar: #FFFFFF;
     --sidebar-color-border-hr: #E2E8F0;
-    --sidebar-color-hover-primary: #695CFE;
+    --sidebar-color-hover-primary: var(--color-primary-500);
     --sidebar-color-hover-secondary: #e2e2fb;
     --sidebar-color-shadow: rgba(0, 0, 0, 0.05);
   }
 
-  body.dark-theme {
+  :root[data-theme="dark"] {
     --sidebar-color-text-primary: #F1F5F9;
     --sidebar-color-text-placeholder: #A6B7D2;
     --sidebar-color-bg-primary: #111827;
