@@ -18,12 +18,13 @@
  * - GET /api/roles/claims - Get all available claims
  */
 
-import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, X, Lock, Unlock, Shield, User, Save, AlertCircle } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, Edit, Trash2, X, Lock, Unlock, Shield, User, Save, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { PermissionEditor } from './PermissionEditor';
+import { SearchFilterBar } from './SearchFilterBar';
 import { accountsApi } from '../api/accounts';
 import { rolesApi } from '../api/roles';
-import type { Account, Employee, RoleDto, ClaimDto } from '../types/data';
+import type { Account, Employee, RoleDto, ClaimDto, QueryParams, PaginatedResult, ListAccountDto } from '../types/data';
 import { usePermission } from '../lib/hooks/usePermission';
 import { Permissions } from '../lib/constants/permissions';
 
@@ -46,6 +47,22 @@ type ConfirmAction = 'delete' | 'lock' | 'unlock';
 type ConfirmState = { action: ConfirmAction; account: Account } | null;
 
 export function AccountManagement({ data, setData, employees, roles }: Props) {
+  // Query Parameters state
+  const [queryParams, setQueryParams] = useState<QueryParams>({
+    page: 1,
+    pageSize: 10,
+    search: '',
+    sortBy: 'username',
+    isDescending: false,
+  });
+
+  // Paginated result state
+  const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<ListAccountDto> | null>(null);
+
+  // Filter state
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  // Form states
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Account | null>(null);
   const [formStep, setFormStep] = useState<'basic' | 'permissions'>('basic');
@@ -63,6 +80,48 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
   const [confirmState, setConfirmState] = useState<ConfirmState>(null);
 
   const { hasPermission } = usePermission();
+
+  // Fetch accounts with current query parameters
+  const fetchAccounts = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Build the actual query params for the API
+      const apiParams = { ...queryParams };
+      
+      // Add status filter if not 'all'
+      if (statusFilter !== 'all') {
+        // This would be sent to backend if needed
+        // For now, we'll filter locally
+      }
+
+      const result = await accountsApi.getAll(apiParams);
+      setPaginatedResult(result);
+      
+      // If backend doesn't filter status, filter locally
+      if (statusFilter !== 'all') {
+        const filtered = {
+          ...result,
+          items: result.items.filter(item =>
+            statusFilter === 'active' ? !item.isLocked : item.isLocked
+          ),
+        };
+        setPaginatedResult(filtered);
+      }
+    } catch (err) {
+      console.error('Failed to fetch accounts:', err);
+      setError('Failed to load accounts');
+      setPaginatedResult(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [queryParams, statusFilter]);
+
+  // Fetch accounts when query parameters or status filter changes
+  useEffect(() => {
+    fetchAccounts();
+  }, [fetchAccounts]);
 
   // Load available claims when form opens
   useEffect(() => {
@@ -346,116 +405,218 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
         )}
       </div>
 
+      {/* Search, Filter & Sort Bar */}
+      <SearchFilterBar
+        queryParams={queryParams}
+        onQueryChange={setQueryParams}
+        paginatedResult={paginatedResult || undefined}
+        filterOptions={[
+          { label: 'All Status', value: 'all' },
+          { label: 'Active', value: 'active' },
+          { label: 'Locked', value: 'locked' },
+        ]}
+        currentFilter={statusFilter}
+        onFilterChange={setStatusFilter}
+        sortOptions={[
+          { label: 'Username', value: 'username' },
+          { label: 'Employee Name', value: 'employeeName' },
+          { label: 'Created Date', value: 'createdAt' },
+        ]}
+        placeholder="Search by username, email, or employee name..."
+        showResults={true}
+      />
+
       {/* Accounts Table */}
       <div className="bg-white border rounded-lg overflow-hidden shadow-sm">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Employee
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Employee Code
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Username
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Roles
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {data.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 text-sm font-medium">{getEmployeeName(item)}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">
-                  {item.employeeCode || 'N/A'}
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-gray-400" />
-                    {item.username}
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  {item.isLocked ? (
-                    <span className="px-2 py-1 text-xs rounded bg-red-100 text-red-700 font-medium flex items-center gap-1 w-fit">
-                      <Lock className="w-3 h-3" />
-                      Locked
-                    </span>
-                  ) : (
-                    <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-700 font-medium flex items-center gap-1 w-fit">
-                      <Unlock className="w-3 h-3" />
-                      Active
-                    </span>
-                  )}
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  <span className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700 flex items-center gap-1 w-fit">
-                    <Shield className="w-3 h-3" />
-                    {getRoleDisplay(item)}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-sm text-right">
-                  <div className="inline-flex items-center gap-2">
-                    {hasPermission(Permissions.Account.Edit) && (
-                      <>
-                        <button
-                          onClick={() => openForm(item)}
-                          className="text-blue-600 inline-flex items-center justify-center cursor-pointer hover:text-blue-800 transition-colors"
-                          title="Edit account"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => openConfirm(item.isLocked ? 'unlock' : 'lock', item)}
-                          className={`inline-flex items-center justify-center cursor-pointer transition-colors ${
-                            item.isLocked
-                              ? 'text-green-600 hover:text-green-800'
-                              : 'text-orange-600 hover:text-orange-800'
-                          }`}
-                          title={item.isLocked ? 'Unlock account' : 'Lock account'}
-                        >
-                          {item.isLocked ? (
-                            <Unlock className="w-4 h-4" />
-                          ) : (
-                            <Lock className="w-4 h-4" />
-                          )}
-                        </button>
-                      </>
-                    )}
-                    {hasPermission(Permissions.Account.Delete) && (
-                      <button
-                        onClick={() => openConfirm('delete', item)}
-                        className="text-red-600 inline-flex items-center justify-center cursor-pointer hover:text-red-800 transition-colors"
-                        title="Delete account"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {data.length === 0 && (
+        {/* Loading indicator */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+              <p className="text-gray-600">Loading accounts...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error state */}
+        {error && !isLoading && (
+          <div className="p-4 bg-red-50 border border-red-200 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium text-red-900">Error</p>
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Table */}
+        {!isLoading && !error && (
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b">
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                  <User className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p className="text-lg font-medium">No accounts found</p>
-                  <p className="text-sm mt-1">Create your first account to get started</p>
-                </td>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Employee
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Employee Code
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Username
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Roles
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                  Actions
+                </th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y">
+              {(paginatedResult?.items || []).length > 0 ? (
+                (paginatedResult?.items || []).map((item) => (
+                  <tr key={item.accountId} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 text-sm font-medium">{item.employeeName || 'Unknown'}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {item.employeeCode || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4 text-gray-400" />
+                        {item.username}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      {item.isLocked ? (
+                        <span className="px-2 py-1 text-xs rounded bg-red-100 text-red-700 font-medium flex items-center gap-1 w-fit">
+                          <Lock className="w-3 h-3" />
+                          Locked
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-700 font-medium flex items-center gap-1 w-fit">
+                          <Unlock className="w-3 h-3" />
+                          Active
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700 flex items-center gap-1 w-fit">
+                        <Shield className="w-3 h-3" />
+                        {item.roleCount || 0} roles
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-right">
+                      <div className="inline-flex items-center gap-2">
+                        {hasPermission(Permissions.Account.Edit) && (
+                          <>
+                            <button
+                              onClick={() => openForm(item as any)}
+                              className="text-blue-600 inline-flex items-center justify-center cursor-pointer hover:text-blue-800 transition-colors"
+                              title="Edit account"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => openConfirm(item.isLocked ? 'unlock' : 'lock', item as any)}
+                              className={`inline-flex items-center justify-center cursor-pointer transition-colors ${
+                                item.isLocked
+                                  ? 'text-green-600 hover:text-green-800'
+                                  : 'text-orange-600 hover:text-orange-800'
+                              }`}
+                              title={item.isLocked ? 'Unlock account' : 'Lock account'}
+                            >
+                              {item.isLocked ? (
+                                <Unlock className="w-4 h-4" />
+                              ) : (
+                                <Lock className="w-4 h-4" />
+                              )}
+                            </button>
+                          </>
+                        )}
+                        {hasPermission(Permissions.Account.Delete) && (
+                          <button
+                            onClick={() => openConfirm('delete', item as any)}
+                            className="text-red-600 inline-flex items-center justify-center cursor-pointer hover:text-red-800 transition-colors"
+                            title="Delete account"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                    <User className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                    <p className="text-lg font-medium">No accounts found</p>
+                    <p className="text-sm mt-1">Create your first account to get started</p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
+
+      {/* Pagination Controls */}
+      {paginatedResult && !isLoading && (
+        <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50">
+          <div className="text-sm text-gray-600">
+            Page <span className="font-medium">{paginatedResult.page}</span> of{' '}
+            <span className="font-medium">{paginatedResult.totalPages}</span> ({' '}
+            <span className="font-medium">{paginatedResult.totalCount}</span> total items)
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() =>
+                setQueryParams({
+                  ...queryParams,
+                  page: Math.max(1, queryParams.page! - 1),
+                })
+              }
+              disabled={!paginatedResult.hasPreviousPage}
+              className="flex items-center gap-1 px-3 py-2 border rounded-lg bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Previous</span>
+            </button>
+            
+            {/* Page indicator */}
+            <input
+              type="number"
+              min="1"
+              max={paginatedResult.totalPages}
+              value={queryParams.page || 1}
+              onChange={(e) => {
+                const pageNum = Math.min(
+                  Math.max(1, parseInt(e.target.value) || 1),
+                  paginatedResult.totalPages
+                );
+                setQueryParams({ ...queryParams, page: pageNum });
+              }}
+              className="w-12 px-2 py-2 border rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            
+            <button
+              onClick={() =>
+                setQueryParams({
+                  ...queryParams,
+                  page: Math.min(paginatedResult.totalPages, queryParams.page! + 1),
+                })
+              }
+              disabled={!paginatedResult.hasNextPage}
+              className="flex items-center gap-1 px-3 py-2 border rounded-lg bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <span>Next</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Form Dialog - Multi-step */}
       {showForm && (
