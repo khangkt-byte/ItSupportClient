@@ -187,11 +187,12 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
           ...(formData.password && { password: formData.password })
         });
 
-        // Assign roles
-        if (formData.selectedRoleIds.length > 0) {
-          await rolesApi.assignRoles({
+        // Assign roles and claims
+        if (formData.selectedRoleIds.length > 0 || formData.selectedClaimIds.length > 0) {
+          await rolesApi.assignRolesAndClaims({
             accountId: editing.accountId,
-            roleIds: formData.selectedRoleIds
+            roleIds: formData.selectedRoleIds,
+            claimIds: formData.selectedClaimIds
           });
         }
 
@@ -211,11 +212,12 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
           password: formData.password
         });
 
-        // Assign roles
-        if (formData.selectedRoleIds.length > 0) {
-          await rolesApi.assignRoles({
+        // Assign roles and claims
+        if (formData.selectedRoleIds.length > 0 || formData.selectedClaimIds.length > 0) {
+          await rolesApi.assignRolesAndClaims({
             accountId: created.accountId,
-            roleIds: formData.selectedRoleIds
+            roleIds: formData.selectedRoleIds,
+            claimIds: formData.selectedClaimIds
           });
         }
 

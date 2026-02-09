@@ -51,6 +51,12 @@ export interface AssignRolesDto {
   roleIds: number[];
 }
 
+export interface AssignRolesAndClaimsDto {
+  accountId: string; // UUID
+  roleIds: number[];
+  claimIds: number[];
+}
+
 // Employee Management
 export interface EmployeeDto {
   empId: string; // UUID

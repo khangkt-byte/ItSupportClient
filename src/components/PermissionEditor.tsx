@@ -114,17 +114,22 @@ export function PermissionEditor({
     
     if (isCurrentlySelected) {
       // Remove role
-      onRolesChange(selectedRoleIds.filter(id => id !== roleId));
+      const newRoles = selectedRoleIds.filter(id => id !== roleId);
+      onRolesChange(newRoles);
+      console.log('Role removed:', roleId, 'New roles:', newRoles);
     } else {
       // Add role and remove its claims from direct assignments
       const role = availableRoles.find(r => r.roleId === roleId);
       const roleClaimIdsToRemove = new Set(role?.claims?.map(c => c.claimId) || []);
       const nextClaims = selectedClaimIds.filter(id => !roleClaimIdsToRemove.has(id));
       
-      onRolesChange([...selectedRoleIds, roleId]);
-      if (nextClaims.length !== selectedClaimIds.length) {
-        onClaimsChange(nextClaims);
-      }
+      const newRoles = [...selectedRoleIds, roleId];
+      onRolesChange(newRoles);
+      
+      // ALWAYS call onClaimsChange when adding a role, even if nothing to remove
+      // This ensures any overlapping claims are cleared
+      onClaimsChange(nextClaims);
+      console.log('Role added:', roleId, 'Removed claims:', Array.from(roleClaimIdsToRemove), 'New claims:', nextClaims);
     }
   };
 
@@ -140,13 +145,21 @@ export function PermissionEditor({
     const isInherited = roleClaimIds.has(claimId);
     const isChecked = isDirect || isInherited;
 
-    console.log('toggleClaim called', { claimId, isDirect, isInherited, isChecked });
+    console.log('=== toggleClaim ===', { 
+      claimId, 
+      isDirect, 
+      isInherited, 
+      isChecked,
+      currentRoles: selectedRoleIds,
+      currentDirectClaims: selectedClaimIds 
+    });
 
     // Unchecking a claim
     if (isChecked) {
-      // If from role, remove role and preserve other claims
+      // If from role, remove role and preserve other claims as direct
       if (isInherited) {
         const rolesToRemove = selectedRoleIds.filter(roleId => roleHasClaim(roleId, claimId));
+        console.log('ClaimId', claimId, 'is inherited from roles:', rolesToRemove);
         
         const claimsToPreserve = new Set<number>();
         rolesToRemove.forEach(roleId => {
@@ -174,7 +187,7 @@ export function PermissionEditor({
           nextClaims = nextClaims.filter(id => id !== claimId);
         }
         
-        console.log('Removing roles:', rolesToRemove, 'Preserving claims:', preservedNotInRoles);
+        console.log('Removing roles:', rolesToRemove, 'Preserving claims:', preservedNotInRoles, 'Final claims:', nextClaims);
         onRolesChange(nextRoles);
         onClaimsChange(nextClaims);
         return;
@@ -388,7 +401,7 @@ export function PermissionEditor({
 
                 {isExpanded && (
                   <div className="px-5 pb-4">
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-4 gap-2 py-2">
                       {group.claims.map(claim => {
                         const isDirectlySelected = isClaimDirectlyAssigned(claim.claimId);
                         const isInherited = roleClaimIds.has(claim.claimId);

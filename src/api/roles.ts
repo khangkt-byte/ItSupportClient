@@ -6,6 +6,7 @@ import type {
   ClaimDto,
   AccountRolesDto,
   AssignRolesDto,
+  AssignRolesAndClaimsDto,
   PaginatedResult,
   BulkDeleteResultDto,
 } from '../types/data';
@@ -94,5 +95,16 @@ export const rolesApi = {
    */
   async assignRoles(data: AssignRolesDto): Promise<AccountRolesDto> {
     return apiClient.post<AccountRolesDto>('/api/roles/assign', data);
+  },
+
+  /**
+   * Assign roles and direct claims to account
+   * POST /api/roles/assign-with-claims
+   * 
+   * Assigns both roles and direct claim permissions to an account.
+   * Direct claims should only include permissions NOT in any of the selected roles.
+   */
+  async assignRolesAndClaims(data: AssignRolesAndClaimsDto): Promise<AccountRolesDto> {
+    return apiClient.post<AccountRolesDto>('/api/roles/assign-with-claims', data);
   },
 };
