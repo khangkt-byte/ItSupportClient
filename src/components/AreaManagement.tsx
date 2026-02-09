@@ -52,10 +52,12 @@ export function AreaManagement({ data, setData }: Props) {
       </div>
       <div className="grid grid-cols-3 gap-4">
         {data.map((item) => (
-          <div key={item.id} className="bg-white border rounded-lg p-6">
-            <h3 className="font-semibold text-lg mb-2">{item.name}</h3>
-            <p className="text-sm text-gray-600 mb-4">{item.description}</p>
-            <div className="flex gap-2">
+          <div key={item.id} className="bg-white border rounded-lg p-6 flex flex-col min-h-[180px]">
+            <div className="flex-1">
+              <h3 className="font-semibold text-lg mb-2">{item.name}</h3>
+              <p className="text-sm text-gray-600">{item.description}</p>
+            </div>
+            <div className="flex gap-2 mt-4">
               <button onClick={() => openForm(item)} className="flex-1 px-3 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg cursor-pointer hover:bg-blue-100">Edit</button>
               <button onClick={() => setConfirmDelete(item)} className="flex-1 px-3 py-2 text-sm bg-red-50 text-red-600 rounded-lg cursor-pointer hover:bg-red-100">Delete</button>
             </div>

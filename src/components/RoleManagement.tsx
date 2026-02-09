@@ -224,21 +224,23 @@ export function RoleManagement({ data, setData }: Props) {
         {data.map((item) => {
           const claimCount = item.claims?.length || 0;
           return (
-            <div key={item.id} className="bg-white border rounded-lg p-6 hover:shadow-md transition-shadow">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                <Shield className="w-6 h-6 text-blue-600" />
-              </div>
-              <h3 className="font-semibold text-lg mb-2">{item.name}</h3>
-              {item.description && (
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{item.description}</p>
-              )}
-              <div className="flex items-center gap-2 mb-4">
-                <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-medium">
-                  {claimCount} {claimCount !== 1 ? 'permissions' : 'permission'}
-                </span>
+            <div key={item.id} className="bg-white border rounded-lg p-6 hover:shadow-md transition-shadow flex flex-col min-h-[240px]">
+              <div>
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                  <Shield className="w-6 h-6 text-blue-600" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">{item.name}</h3>
+                {item.description && (
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">{item.description}</p>
+                )}
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-medium">
+                    {claimCount} {claimCount !== 1 ? 'permissions' : 'permission'}
+                  </span>
+                </div>
               </div>
               {(hasPermission(Permissions.Role.Edit) || hasPermission(Permissions.Role.Delete)) && (
-                <div className="flex gap-2">
+                <div className="flex gap-2 mt-auto">
                   {hasPermission(Permissions.Role.Edit) && (
                     <button
                       onClick={() => openForm(item)}

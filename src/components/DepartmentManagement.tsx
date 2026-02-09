@@ -132,12 +132,14 @@ export function DepartmentManagement({ data, setData }: Props) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {data.map((item) => (
-            <div key={item.id} className="bg-white border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-              <h3 className="font-semibold text-lg mb-2">{item.name}</h3>
-              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                {item.description || 'No description'}
-              </p>
-              <div className="flex gap-2">
+            <div key={item.id} className="bg-white border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col min-h-[200px]">
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg mb-2">{item.name}</h3>
+                <p className="text-sm text-gray-600 line-clamp-2">
+                  {item.description || 'No description'}
+                </p>
+              </div>
+              <div className="flex gap-2 mt-4">
                 <button 
                   onClick={() => openForm(item)} 
                   disabled={loading}
