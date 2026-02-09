@@ -58,7 +58,7 @@ export function AreaManagement({ data, setData }: Props) {
               <p className="text-sm text-gray-600 dark:text-gray-400">{item.description}</p>
             </div>
             <div className="flex gap-2 mt-4">
-              <button onClick={() => openForm(item)} className="flex-1 px-3 py-2 text-sm bg-blue-50 dark:bg-gray-700 text-blue-600 dark:text-blue-400 rounded-lg cursor-pointer hover:bg-blue-100 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1">
+              <button onClick={() => openForm(item)} className="flex-1 px-3 py-2 text-sm bg-primary-50 dark:bg-gray-700 text-primary-600 dark:text-primary-400 rounded-lg cursor-pointer hover:bg-primary-100 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1">
                 <Edit className="w-4 h-4" />
                 Edit
               </button>
@@ -86,14 +86,14 @@ export function AreaManagement({ data, setData }: Props) {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Name *"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
               />
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Description"
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
               />
               <div className="flex gap-3">
                 <button type="submit" className="btn-primary flex-1 px-4 py-2">

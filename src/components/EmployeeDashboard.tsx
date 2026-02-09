@@ -26,7 +26,7 @@ export function EmployeeDashboard({ user, onLogout, currentView, onNavigate }: P
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
@@ -46,9 +46,9 @@ export function EmployeeDashboard({ user, onLogout, currentView, onNavigate }: P
                 Use the menu to navigate and manage work logs.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="bg-primary-50 dark:bg-primary-900/20 p-4 rounded-lg border border-primary-200 dark:border-primary-800">
                   <p className="text-sm text-gray-600 dark:text-gray-400">Total Work Logs</p>
-                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{dataManager.workLogs.data.length}</p>
+                  <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">{dataManager.workLogs.data.length}</p>
                 </div>
                 <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
                   <p className="text-sm text-gray-600 dark:text-gray-400">Pending Work Logs</p>

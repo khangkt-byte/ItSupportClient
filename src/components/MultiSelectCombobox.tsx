@@ -63,7 +63,7 @@ export function MultiSelectCombobox({ options, values, onChange, placeholder = '
           }
         }}
         className={`w-full px-3 py-2 border rounded-lg cursor-pointer bg-white min-h-[42px] flex flex-wrap items-center gap-1 ${
-          isOpen ? 'ring-2 ring-blue-500 border-blue-500' : 'border-gray-300'
+          isOpen ? 'ring-2 ring-primary-500 border-primary-500' : 'border-gray-300'
         }`}
       >
         {values.length === 0 ? (
@@ -73,13 +73,13 @@ export function MultiSelectCombobox({ options, values, onChange, placeholder = '
             {getSelectedLabels().map((label, idx) => (
               <span
                 key={values[idx]}
-                className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-sm"
+                className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-100 text-primary-700 rounded text-sm"
               >
                 {label}
                 <button
                   type="button"
                   onClick={(e) => removeValue(values[idx], e)}
-                  className="hover:bg-blue-200 rounded-full p-0.5"
+                  className="hover:bg-primary-200 rounded-full p-0.5"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -99,7 +99,7 @@ export function MultiSelectCombobox({ options, values, onChange, placeholder = '
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search..."
-              className="w-full px-3 py-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               onClick={(e) => e.stopPropagation()}
             />
           </div>
@@ -114,11 +114,11 @@ export function MultiSelectCombobox({ options, values, onChange, placeholder = '
                     key={option.value}
                     onClick={() => toggleOption(option.value)}
                     className={`px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-center justify-between ${
-                      isSelected ? 'bg-blue-50' : ''
+                      isSelected ? 'bg-primary-50' : ''
                     }`}
                   >
                     <span className="text-sm">{option.label}</span>
-                    {isSelected && <Check className="w-4 h-4 text-blue-600" />}
+                    {isSelected && <Check className="w-4 h-4 text-primary-600" />}
                   </div>
                 );
               })

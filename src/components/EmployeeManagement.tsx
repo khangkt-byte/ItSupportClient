@@ -120,7 +120,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
                   <td className="px-6 py-4 text-sm text-right">
                     <button 
                       onClick={() => openForm(item)} 
-                      className="text-blue-600 hover:text-blue-800 mr-3 cursor-pointer"
+                      className="text-primary-600 hover:text-primary-800 mr-3 cursor-pointer"
                       title="Edit"
                     >
                       <Edit className="w-4 h-4" />
@@ -217,7 +217,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
                 >
                   {editing ? 'Update' : 'Create'} Employee
                 </button>

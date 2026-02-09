@@ -176,7 +176,7 @@ export function SearchFilterBar<T = any>({
             value={searchInput}
             onChange={handleSearchChange}
             placeholder={placeholder}
-            className="w-full pl-10 pr-9 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            className="w-full pl-10 pr-9 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
           />
           {searchInput && (
             <button
@@ -201,7 +201,7 @@ export function SearchFilterBar<T = any>({
                   page: 1, // Reset to page 1 on filter change
                 });
               }}
-              className="appearance-none pr-10 pl-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              className="appearance-none pr-10 pl-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
             >
               {filterOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -218,7 +218,7 @@ export function SearchFilterBar<T = any>({
           <div className="relative">
             <button
               onClick={() => setShowSortDropdown(!showSortDropdown)}
-              className="flex items-center justify-between gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all w-full md:w-auto"
+              className="flex items-center justify-between gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all w-full md:w-auto"
             >
               <span className="flex items-center gap-1">
                 {queryParams.isDescending ? (
@@ -243,7 +243,7 @@ export function SearchFilterBar<T = any>({
                     onClick={() => handleSortChange(option.value)}
                     className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-200 dark:border-gray-700 last:border-b-0 ${
                       queryParams.sortBy === option.value
-                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium'
+                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-medium'
                         : 'text-gray-700 dark:text-gray-300'
                     }`}
                   >
@@ -274,7 +274,7 @@ export function SearchFilterBar<T = any>({
             id="pageSize"
             value={queryParams.pageSize || 10}
             onChange={(e) => handlePageSizeChange(parseInt(e.target.value))}
-            className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             <option value="5">5</option>
             <option value="10">10</option>
@@ -294,8 +294,8 @@ export function SearchFilterBar<T = any>({
 
         {/* Active filters indicator */}
         {(queryParams.search || currentFilter !== 'all') && (
-          <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400 text-xs">
-            <span className="px-2 py-1 bg-blue-50 dark:bg-blue-900/20 rounded">
+          <div className="flex items-center gap-1 text-primary-600 dark:text-primary-400 text-xs">
+            <span className="px-2 py-1 bg-primary-50 dark:bg-primary-900/20 rounded">
               {queryParams.search ? `Search: "${queryParams.search}"` : ''}
               {queryParams.search && currentFilter !== 'all' && ' • '}
               {currentFilter !== 'all' ? `Filter: ${currentFilter}` : ''}

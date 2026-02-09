@@ -29,6 +29,22 @@
   --z-modal: 1000;
   --z-popover: 1100;
   --z-tooltip: 2000;
+
+  /* Primary Color Theme */
+  --color-primary-50: #f5f3ff;
+  --color-primary-100: #ede9fe;
+  --color-primary-200: #ddd6fe;
+  --color-primary-300: #c4b5fd;
+  --color-primary-400: #a78bfa;
+  --color-primary-500: #695CFE;
+  --color-primary-600: #5b4ee6;
+  --color-primary-700: #4c3fd9;
+  --color-primary-800: #4338ca;
+  --color-primary-900: #3730a3;
+  --color-primary-950: #1e1b4b;
+
+  /* Font Family */
+  --font-sans: "Poppins", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /**
@@ -78,6 +94,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    font-family: "Poppins", ui-sans-serif, system-ui, -apple-system, sans-serif;
     @apply bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-50;
   }
   
@@ -140,7 +157,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   /* Focus visible outline for accessibility (WCAG 2.1 Level AA) */
   /* Reference: https://www.w3.org/WAI/WCAG21/Understanding/focus-visible.html */
   .focus-outline {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-blue-400;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-primary-400;
   }
   
   /* Button styles following Material Design 3 */
@@ -155,9 +172,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    @apply bg-blue-600 text-white hover:bg-blue-700;
-    @apply focus-visible:ring-blue-500;
-    @apply dark:bg-blue-500 dark:hover:bg-blue-600;
+    @apply bg-primary-600 text-white hover:bg-primary-700;
+    @apply focus-visible:ring-primary-500;
+    @apply dark:bg-primary-500 dark:hover:bg-primary-600;
   }
   
   .btn-secondary {
@@ -201,9 +218,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    @apply bg-blue-50 text-blue-600 hover:bg-blue-100;
-    @apply focus-visible:ring-blue-400;
-    @apply dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30;
+    @apply bg-primary-50 text-primary-600 hover:bg-primary-100;
+    @apply focus-visible:ring-primary-400;
+    @apply dark:bg-primary-900/20 dark:text-primary-400 dark:hover:bg-primary-900/30;
   }
 
   .btn-outline-danger {

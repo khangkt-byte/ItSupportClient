@@ -83,7 +83,7 @@ export function ImportValidation({
       {validationResult.duplicateCount > 0 && (
         <div className="bg-white p-6 rounded-lg border border-gray-200">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <AlertCircle className="size-5 text-blue-600" />
+            <AlertCircle className="size-5 text-primary-600" />
             How to handle duplicates?
           </h3>
           
@@ -101,7 +101,7 @@ export function ImportValidation({
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-2xl">⏭️</span>
                   <strong className="text-gray-900">Skip duplicates</strong>
-                  <Badge variant="outline" className="text-xs bg-blue-50 border-blue-300 text-blue-700">Recommended</Badge>
+                  <Badge variant="outline" className="text-xs bg-primary-50 border-blue-300 text-primary-700">Recommended</Badge>
                 </div>
                 <p className="text-sm text-gray-600">
                   Skip importing rows that match existing work logs. Best for re-importing the same file.
@@ -292,7 +292,7 @@ export function ImportValidation({
           Cancel
         </button>
         <button
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+          className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg transition-colors"
           onClick={onConfirm}
         >
           Confirm Import

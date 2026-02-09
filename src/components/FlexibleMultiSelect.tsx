@@ -136,7 +136,7 @@ export function FlexibleMultiSelect({
 
       <div className="relative">
         {/* Selected values + Input */}
-        <div className="w-full min-h-[42px] px-3 py-2 border rounded-lg flex flex-wrap gap-2 items-center focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
+        <div className="w-full min-h-[42px] px-3 py-2 border rounded-lg flex flex-wrap gap-2 items-center focus-within:ring-2 focus-within:ring-primary-500 focus-within:border-transparent">
           {values.map((value) => {
             const option = options.find(opt => opt.value === value);
             const displayLabel = option ? option.label : value;
@@ -144,13 +144,13 @@ export function FlexibleMultiSelect({
             return (
               <span
                 key={value}
-                className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded"
+                className="inline-flex items-center gap-1 px-2 py-1 bg-primary-100 text-primary-800 text-sm rounded"
               >
                 {displayLabel}
                 <button
                   type="button"
                   onClick={() => handleRemoveValue(value)}
-                  className="hover:text-blue-900"
+                  className="hover:text-primary-900"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -183,7 +183,7 @@ export function FlexibleMultiSelect({
                 onClick={() => handleSelectOption(option.value)}
                 className={`px-3 py-2 cursor-pointer transition-colors ${
                   highlightedIndex === index
-                    ? 'bg-blue-100'
+                    ? 'bg-primary-100'
                     : 'hover:bg-gray-100'
                 }`}
               >

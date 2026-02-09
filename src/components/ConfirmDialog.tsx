@@ -42,7 +42,7 @@ export function ConfirmDialog({
       case 'unlock':
         return <Unlock className="w-5 h-5 text-green-600" />;
       default:
-        return <AlertCircle className="w-5 h-5 text-blue-600" />;
+        return <AlertCircle className="w-5 h-5 text-primary-600" />;
     }
   };
 
@@ -57,7 +57,7 @@ export function ConfirmDialog({
       case 'logout':
         return 'bg-red-600 dark:bg-red-600 hover:bg-red-700 dark:hover:bg-red-700';
       default:
-        return 'bg-blue-600 dark:bg-blue-600 hover:bg-blue-700 dark:hover:bg-blue-700';
+        return 'bg-primary-600 dark:bg-primary-600 hover:bg-primary-700 dark:hover:bg-primary-700';
     }
   };
 

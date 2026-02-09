@@ -259,12 +259,12 @@ export function PermissionEditor({
 
   return (
     <div className="space-y-6">
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
         <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <Info className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" />
           <div className="flex-1 text-sm">
-            <p className="font-medium text-blue-900 mb-1">Hybrid Permission Model (RBAC + Direct Assignment)</p>
-            <p className="text-blue-700">
+            <p className="font-medium text-primary-900 mb-1">Hybrid Permission Model (RBAC + Direct Assignment)</p>
+            <p className="text-primary-700">
               <strong>Effective Permissions</strong> = Permissions from Roles + Direct Claims.
             </p>
           </div>
@@ -274,7 +274,7 @@ export function PermissionEditor({
       {/* Roles Section */}
       <div className="space-y-3">
         <h3 className="font-semibold text-lg flex items-center gap-2">
-          <Shield className="w-5 h-5 text-blue-600" />
+          <Shield className="w-5 h-5 text-primary-600" />
           Assign Roles ({selectedRoleIds.length} selected)
         </h3>
 
@@ -301,7 +301,7 @@ export function PermissionEditor({
                     checked={isSelected}
                     onChange={() => toggleRole(role.roleId)}
                     disabled={readOnly}
-                    className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                    className="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
                   />
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-gray-900 dark:text-gray-50">{role.name}</div>
@@ -313,7 +313,7 @@ export function PermissionEditor({
                     {claimCount} perms
                   </span>
                   {isSelected && (
-                    <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                    <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0" />
                   )}
                 </label>
               );
@@ -412,7 +412,7 @@ export function PermissionEditor({
                               isDirectlySelected
                                 ? 'bg-green-50 text-green-700'
                                 : isInherited
-                                ? 'bg-blue-50 text-blue-700'
+                                ? 'bg-primary-50 text-primary-700'
                                 : 'text-gray-700 hover:bg-gray-50'
                             } ${readOnly ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                             onClick={() => {
@@ -443,9 +443,9 @@ export function PermissionEditor({
       </div>
 
       {/* Effective Permissions Summary */}
-      <div className="bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg p-4">
+      <div className="bg-gradient-to-r from-primary-50 to-green-50 border border-primary-200 rounded-lg p-4">
         <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2 text-sm">
-          <CheckCircle className="w-5 h-5 text-blue-600" />
+          <CheckCircle className="w-5 h-5 text-primary-600" />
           Effective Permissions ({effectivePermissions.permissions.length} total)
         </h4>
         <div className="flex flex-wrap gap-2">
@@ -459,7 +459,7 @@ export function PermissionEditor({
                   key={permission}
                   className={`px-2 py-1 text-xs rounded-full font-medium ${
                     source === 'role'
-                      ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                      ? 'bg-primary-100 text-primary-700 border border-primary-200'
                       : source === 'direct'
                       ? 'bg-green-100 text-green-700 border border-green-200'
                       : 'bg-purple-100 text-purple-700 border border-purple-200'

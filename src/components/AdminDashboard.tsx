@@ -31,7 +31,7 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Loading...</p>
         </div>
       </div>
@@ -51,9 +51,9 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
                 You have full administrative access to the IT Support Management System.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-                <div className="p-4 rounded-lg bg-blue-100 dark:bg-blue-900/20">
+                <div className="p-4 rounded-lg bg-primary-100 dark:bg-primary-900/20">
                   <p className="text-sm text-gray-600 dark:text-gray-400">Total Work Logs</p>
-                  <p className="text-2xl font-bold text-blue-600">{dataManager.workLogs.data.length}</p>
+                  <p className="text-2xl font-bold text-primary-600">{dataManager.workLogs.data.length}</p>
                 </div>
                 <div className="p-4 rounded-lg bg-green-100 dark:bg-green-900/20">
                   <p className="text-sm text-gray-600 dark:text-gray-400">Total Employees</p>

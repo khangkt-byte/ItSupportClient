@@ -253,7 +253,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
   const getStatusBadge = (status: WorkStatus) => {
     const styles = {
       pending: 'bg-yellow-50 text-yellow-700',
-      'in-progress': 'bg-blue-50 text-blue-700',
+      'in-progress': 'bg-primary-50 text-primary-700',
       completed: 'bg-green-50 text-green-700',
       cancelled: 'bg-gray-50 text-gray-700',
     };
@@ -468,7 +468,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
       <div className="grid grid-cols-4 gap-4">
         <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Total</p><p className="text-2xl font-semibold text-gray-900 dark:text-gray-50">{data.length}</p></div>
         <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Pending</p><p className="text-2xl font-semibold text-yellow-600 dark:text-yellow-400">{data.filter((l) => l.status === 'pending').length}</p></div>
-        <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">In Progress</p><p className="text-2xl font-semibold text-blue-600 dark:text-blue-400">{data.filter((l) => l.status === 'in-progress').length}</p></div>
+        <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">In Progress</p><p className="text-2xl font-semibold text-primary-600 dark:text-primary-400">{data.filter((l) => l.status === 'in-progress').length}</p></div>
         <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Completed</p><p className="text-2xl font-semibold text-green-600 dark:text-green-400">{data.filter((l) => l.status === 'completed').length}</p></div>
       </div>
 
@@ -504,16 +504,16 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                   <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-50">{(log.operators || []).join(', ')}</td>
                   <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-50">{(log.requesters || []).join(', ') || 'None'}</td>
                   <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-50">{log.department}</td>
-                  <td className="px-4 py-3 text-sm"><button onClick={() => toggleRow(log.id)} className="text-left hover:text-blue-600 dark:hover:text-blue-400 line-clamp-2 cursor-pointer text-gray-900 dark:text-gray-50">{log.issue}</button></td>
+                  <td className="px-4 py-3 text-sm"><button onClick={() => toggleRow(log.id)} className="text-left hover:text-primary-600 dark:hover:text-primary-400 line-clamp-2 cursor-pointer text-gray-900 dark:text-gray-50">{log.issue}</button></td>
                   <td className="px-4 py-3 text-sm"><span className={`px-2 py-1 text-xs rounded ${getStatusBadge(log.status)}`}>{log.status}</span></td>
                   <td className="px-4 py-3 text-sm text-right">
                     <div className="inline-flex items-center gap-2">
-                      <button onClick={() => toggleRow(log.id)} className="text-blue-600 inline-flex items-center justify-center cursor-pointer hover:text-blue-800">{expandedRows.has(log.id) ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}</button>
+                      <button onClick={() => toggleRow(log.id)} className="text-primary-600 inline-flex items-center justify-center cursor-pointer hover:text-primary-800">{expandedRows.has(log.id) ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}</button>
                       <PermissionGuard 
                         permission={Permissions.IssueLog.Edit}
                         fallback={null}
                       >
-                        <button onClick={() => openForm(log)} className="text-blue-600 inline-flex items-center justify-center cursor-pointer hover:text-blue-800"><Edit className="w-4 h-4" /></button>
+                        <button onClick={() => openForm(log)} className="text-primary-600 inline-flex items-center justify-center cursor-pointer hover:text-primary-800"><Edit className="w-4 h-4" /></button>
                       </PermissionGuard>
                       <PermissionGuard 
                         permission={Permissions.IssueLog.Delete}
@@ -573,13 +573,13 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                   <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                     Date <span className="text-red-500">*</span>
                   </label>
-                  <input type="date" required value={formData.reportDate} onChange={(e) => setFormData({ ...formData, reportDate: e.target.value })} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors" />
+                  <input type="date" required value={formData.reportDate} onChange={(e) => setFormData({ ...formData, reportDate: e.target.value })} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                     Status <span className="text-red-500">*</span>
                   </label>
-                  <select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as WorkStatus })} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
+                  <select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as WorkStatus })} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors">
                     <option value="pending">Pending</option>
                     <option value="in-progress">In Progress</option>
                     <option value="completed">Completed</option>
@@ -661,15 +661,15 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
               />
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Fix Description</label>
-                <textarea value={formData.fixDescription} onChange={(e) => setFormData({ ...formData, fixDescription: e.target.value })} rows={3} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none" />
+                <textarea value={formData.fixDescription} onChange={(e) => setFormData({ ...formData, fixDescription: e.target.value })} rows={3} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Permanent Fix</label>
-                <textarea value={formData.permanentFix} onChange={(e) => setFormData({ ...formData, permanentFix: e.target.value })} rows={2} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none" />
+                <textarea value={formData.permanentFix} onChange={(e) => setFormData({ ...formData, permanentFix: e.target.value })} rows={2} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Note</label>
-                <textarea value={formData.note} onChange={(e) => setFormData({ ...formData, note: e.target.value })} rows={2} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none" />
+                <textarea value={formData.note} onChange={(e) => setFormData({ ...formData, note: e.target.value })} rows={2} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none" />
               </div>
               <div className="flex gap-3">
                 <button type="submit" className="btn-primary flex-1 px-4 py-2">
@@ -696,7 +696,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
           <button 
             onClick={() => setShowImportWizard(true)} 
             disabled={importing}
-            className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {importing ? (
               <>

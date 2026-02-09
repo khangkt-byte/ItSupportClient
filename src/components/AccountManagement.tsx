@@ -387,7 +387,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-semibold flex items-center gap-2">
-            <User className="w-7 h-7 text-blue-600" />
+            <User className="w-7 h-7 text-primary-600" />
             Account Management
           </h2>
           <p className="text-sm text-gray-500 mt-1">
@@ -432,7 +432,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
         {isLoading && (
           <div className="flex items-center justify-center py-12">
             <div className="flex flex-col items-center gap-2">
-              <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+              <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
               <p className="text-gray-600 dark:text-gray-400">Loading accounts...</p>
             </div>
           </div>
@@ -502,7 +502,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                       )}
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      <span className="px-2 py-1 text-xs rounded bg-blue-100 text-blue-700 flex items-center gap-1 w-fit">
+                      <span className="px-2 py-1 text-xs rounded bg-primary-100 text-primary-700 flex items-center gap-1 w-fit">
                         <Shield className="w-3 h-3" />
                         {item.roleCount || 0} roles
                       </span>
@@ -513,7 +513,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                           <>
                             <button
                               onClick={() => openForm(item as any)}
-                              className="text-blue-600 inline-flex items-center justify-center cursor-pointer hover:text-blue-800 transition-colors"
+                              className="text-primary-600 inline-flex items-center justify-center cursor-pointer hover:text-primary-800 transition-colors"
                               title="Edit account"
                             >
                               <Edit className="w-4 h-4" />
@@ -598,7 +598,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                 );
                 setQueryParams({ ...queryParams, page: pageNum });
               }}
-              className="w-12 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50"
+              className="w-12 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50"
             />
             
             <button
@@ -626,7 +626,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800 z-10">
               <div>
                 <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-50">
-                  <User className="w-5 h-5 text-blue-600" />
+                  <User className="w-5 h-5 text-primary-600" />
                   {editing ? 'Edit Account' : 'Create New Account'}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
@@ -673,7 +673,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                     onChange={(e) =>
                       setFormData({ ...formData, employeeId: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
                     disabled={!!editing}
                   >
                     <option value="">Select employee...</option>
@@ -700,7 +700,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                       setFormData({ ...formData, username: e.target.value })
                     }
                     placeholder="Enter username"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
                   />
                 </div>
 
@@ -716,7 +716,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                       setFormData({ ...formData, password: e.target.value })
                     }
                     placeholder={editing ? 'Leave empty to keep current password' : 'Enter password'}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
                   />
                   {editing && (
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">

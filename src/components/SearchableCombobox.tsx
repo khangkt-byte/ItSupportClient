@@ -70,7 +70,7 @@ export function SearchableCombobox({ options, value, onChange, placeholder = 'Se
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
-                className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                 autoFocus
               />
             </div>
@@ -85,7 +85,7 @@ export function SearchableCombobox({ options, value, onChange, placeholder = 'Se
                   type="button"
                   onClick={() => handleSelect(option.value)}
                   className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 ${
-                    option.value === value ? 'bg-blue-100 text-blue-600 font-medium' : 'text-gray-900'
+                    option.value === value ? 'bg-primary-100 text-primary-600 font-medium' : 'text-gray-900'
                   }`}
                 >
                   {option.label}

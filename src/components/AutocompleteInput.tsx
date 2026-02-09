@@ -151,7 +151,7 @@ export function AutocompleteInput({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           required={required}
-          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         />
 
         {/* Suggestions Dropdown */}
@@ -174,7 +174,7 @@ export function AutocompleteInput({
                 onClick={() => handleSelectSuggestion(suggestion)}
                 className={`px-3 py-2.5 cursor-pointer border-b border-gray-100 transition-colors ${
                   highlightedIndex === index
-                    ? 'bg-blue-100'
+                    ? 'bg-primary-100'
                     : 'hover:bg-gray-100'
                 }`}
               >
@@ -182,7 +182,7 @@ export function AutocompleteInput({
                   {suggestion.name}
                 </div>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded">
+                  <span className="px-2 py-0.5 bg-primary-50 text-primary-700 text-xs rounded">
                     {suggestion.usageCount} times used
                   </span>
                   {suggestion.description && (
@@ -204,7 +204,7 @@ export function AutocompleteInput({
         {/* Loading indicator */}
         {loading && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
           </div>
         )}
       </div>
@@ -222,7 +222,7 @@ export function AutocompleteInput({
             <button
               type="button"
               onClick={handleClearKbLink}
-              className="text-blue-600 hover:text-blue-700 underline text-xs"
+              className="text-primary-600 hover:text-primary-700 underline text-xs"
             >
               Clear KB link
             </button>
