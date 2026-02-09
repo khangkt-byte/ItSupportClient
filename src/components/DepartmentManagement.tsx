@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import type { Department, CreateDepartmentDto, UpdateDepartmentDto } from '../types/data';
 import { departmentApi } from '../lib/api/departments';
 import { ConfirmDialog } from './ConfirmDialog';
