@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog';
 import { Sun, Moon, Palette, Check } from 'lucide-react';
 
 interface SidebarProps {
@@ -38,6 +38,7 @@ const themeOptions: ThemeOption[] = [
 export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [theme, setTheme] = useState<Theme>('light');
+  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
 
   const applyTheme = (nextTheme: Theme) => {
     document.documentElement.setAttribute('data-theme', nextTheme);
@@ -73,6 +74,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
     setTheme(newTheme);
     applyTheme(newTheme);
     localStorage.setItem('theme', newTheme);
+    setIsThemeModalOpen(false);
   };
 
   const currentThemeOption = themeOptions.find(opt => opt.value === theme) || themeOptions[0];
@@ -156,35 +158,46 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
 
         {/* Sidebar Footer */}
         <div className="py-5 px-[18px] whitespace-nowrap border-t border-[var(--sidebar-color-border-hr)]">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button 
-                className="w-full min-h-[48px] rounded-lg flex items-center cursor-pointer border-none px-[15px] whitespace-nowrap transition-all duration-300 hover:bg-[var(--sidebar-color-hover-secondary)] bg-[var(--sidebar-color-bg-secondary)] text-[var(--sidebar-color-text-primary)]"
-              >
-                <div className="flex gap-[10px] items-center">
-                  <span className="material-symbols-rounded">{currentThemeOption.materialIcon}</span>
-                  <span className={`text-base ${collapsed ? 'opacity-0 w-0' : 'opacity-100'}`} style={{ transition: collapsed ? 'all 0.2s ease' : 'opacity 0.4s 0.2s ease' }}>{currentThemeOption.label}</span>
-                </div>
-                <span className={`material-symbols-rounded ml-auto ${collapsed ? 'opacity-0 w-0' : 'opacity-100'}`} style={{ transition: collapsed ? 'all 0.2s ease' : 'opacity 0.4s 0.2s ease' }}>expand_more</span>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" side="top" className="min-w-[200px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
+          <button 
+            onClick={() => setIsThemeModalOpen(true)}
+            className="w-full min-h-[48px] rounded-lg flex items-center cursor-pointer border-none px-[15px] whitespace-nowrap transition-all duration-300 hover:bg-[var(--sidebar-color-hover-secondary)] bg-[var(--sidebar-color-bg-secondary)] text-[var(--sidebar-color-text-primary)]"
+          >
+            <div className="flex gap-[10px] items-center">
+              <span className="material-symbols-rounded">{currentThemeOption.materialIcon}</span>
+              <span className={`text-base ${collapsed ? 'opacity-0 w-0' : 'opacity-100'}`} style={{ transition: collapsed ? 'all 0.2s ease' : 'opacity 0.4s 0.2s ease' }}>{currentThemeOption.label}</span>
+            </div>
+          </button>
+        </div>
+
+        {/* Theme Modal */}
+        <Dialog open={isThemeModalOpen} onOpenChange={setIsThemeModalOpen}>
+          <DialogContent className="sm:max-w-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-gray-50">Choose Theme</DialogTitle>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-4 py-4">
               {themeOptions.map((option) => (
-                <DropdownMenuItem
+                <button
                   key={option.value}
                   onClick={() => changeTheme(option.value)}
-                  className="flex items-center gap-3 cursor-pointer px-3 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                  className={`flex flex-col items-center justify-center gap-3 p-4 rounded-lg border-2 transition-all ${
+                    theme === option.value
+                      ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
+                      : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/10'
+                  }`}
                 >
-                  <span className="flex-shrink-0">{option.icon}</span>
-                  <span className="flex-1 text-sm font-medium">{option.label}</span>
+                  <div className="text-3xl">{option.icon}</div>
+                  <div className="font-medium text-gray-900 dark:text-gray-50">{option.label}</div>
                   {theme === option.value && (
-                    <Check className="w-4 h-4 text-primary-600 dark:text-primary-400 flex-shrink-0" />
+                    <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary-600">
+                      <Check className="w-3 h-3 text-white" />
+                    </div>
                   )}
-                </DropdownMenuItem>
+                </button>
               ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </aside>
     </>
   );
