@@ -6,6 +6,7 @@ import {
   DialogTitle,
 } from './ui/dialog';
 import { Sun, Moon, Palette, Check } from 'lucide-react';
+import { BrandTheme, palettes } from '../lib/constants/palettes';
 
 interface SidebarProps {
   currentView: string;
@@ -19,20 +20,29 @@ interface MenuItem {
   icon: string; // Material Symbols icon name
 }
 
-type Theme = 'light' | 'dark' | 'brand-red' | 'brand-blue';
+type Theme = 'light' | 'dark' | BrandTheme;
 
 interface ThemeOption {
   value: Theme;
   label: string;
   icon: React.ReactNode;
   materialIcon: string;
+  color?: string;
 }
 
 const themeOptions: ThemeOption[] = [
   { value: 'light', label: 'Light', icon: <Sun className="w-4 h-4" />, materialIcon: 'light_mode' },
   { value: 'dark', label: 'Dark', icon: <Moon className="w-4 h-4" />, materialIcon: 'dark_mode' },
-  { value: 'brand-red', label: 'Red Theme', icon: <Palette className="w-4 h-4 text-red-500" />, materialIcon: 'palette' },
-  { value: 'brand-blue', label: 'Blue Theme', icon: <Palette className="w-4 h-4 text-blue-500" />, materialIcon: 'palette' },
+  { value: 'brand-purple', label: 'Purple', icon: <Palette className="w-4 h-4 text-purple-500" />, materialIcon: 'palette', color: '#695CFE' },
+  { value: 'brand-red', label: 'Red', icon: <Palette className="w-4 h-4 text-red-500" />, materialIcon: 'palette', color: '#ef4444' },
+  { value: 'brand-blue', label: 'Blue', icon: <Palette className="w-4 h-4 text-blue-500" />, materialIcon: 'palette', color: '#3b82f6' },
+  { value: 'brand-green', label: 'Green', icon: <Palette className="w-4 h-4 text-green-500" />, materialIcon: 'palette', color: '#22c55e' },
+  { value: 'brand-orange', label: 'Orange', icon: <Palette className="w-4 h-4 text-orange-500" />, materialIcon: 'palette', color: '#ea580c' },
+  { value: 'brand-teal', label: 'Teal', icon: <Palette className="w-4 h-4 text-teal-500" />, materialIcon: 'palette', color: '#14b8a6' },
+  { value: 'brand-indigo', label: 'Indigo', icon: <Palette className="w-4 h-4 text-indigo-500" />, materialIcon: 'palette', color: '#6366f1' },
+  { value: 'brand-violet', label: 'Violet', icon: <Palette className="w-4 h-4 text-violet-500" />, materialIcon: 'palette', color: '#a855f7' },
+  { value: 'brand-pink', label: 'Pink', icon: <Palette className="w-4 h-4 text-pink-500" />, materialIcon: 'palette', color: '#ec4899' },
+  { value: 'brand-cyan', label: 'Cyan', icon: <Palette className="w-4 h-4 text-cyan-500" />, materialIcon: 'palette', color: '#1e88ff' },
 ];
 
 export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
@@ -171,26 +181,32 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
 
         {/* Theme Modal */}
         <Dialog open={isThemeModalOpen} onOpenChange={setIsThemeModalOpen}>
-          <DialogContent className="sm:max-w-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <DialogContent className="max-w-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-gray-50">Choose Theme</DialogTitle>
             </DialogHeader>
-            <div className="grid grid-cols-2 gap-4 py-4">
+            <div className="grid grid-cols-3 gap-4 py-4 max-h-96 overflow-y-auto">
               {themeOptions.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => changeTheme(option.value)}
-                  className={`flex flex-col items-center justify-center gap-3 p-4 rounded-lg border-2 transition-all ${
+                  className={`flex flex-col items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all ${
                     theme === option.value
                       ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
-                      : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/10'
+                      : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 hover:border-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600'
                   }`}
                 >
-                  <div className="text-3xl">{option.icon}</div>
-                  <div className="font-medium text-gray-900 dark:text-gray-50">{option.label}</div>
+                  <div className="text-2xl">{option.icon}</div>
+                  <div className="font-medium text-sm text-gray-900 dark:text-gray-50 text-center">{option.label}</div>
+                  {option.color && (
+                    <div 
+                      className="w-6 h-6 rounded-full border-2 border-gray-300 dark:border-gray-600"
+                      style={{ backgroundColor: option.color }}
+                    />
+                  )}
                   {theme === option.value && (
-                    <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary-600">
-                      <Check className="w-3 h-3 text-white" />
+                    <div className="flex items-center justify-center w-4 h-4 rounded-full bg-primary-600 -mt-1">
+                      <Check className="w-2.5 h-2.5 text-white" />
                     </div>
                   )}
                 </button>

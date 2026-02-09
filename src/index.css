@@ -85,6 +85,104 @@
   --color-primary-950: #172554;
 }
 
+:root[data-theme="brand-green"] {
+  --color-primary-50: #f0fdf4;
+  --color-primary-100: #dcfce7;
+  --color-primary-200: #bbf7d0;
+  --color-primary-300: #86efac;
+  --color-primary-400: #4ade80;
+  --color-primary-500: #22c55e;
+  --color-primary-600: #16a34a;
+  --color-primary-700: #15803d;
+  --color-primary-800: #166534;
+  --color-primary-900: #145231;
+  --color-primary-950: #0a3622;
+}
+
+:root[data-theme="brand-orange"] {
+  --color-primary-50: #fff7ed;
+  --color-primary-100: #fed7aa;
+  --color-primary-200: #fdba74;
+  --color-primary-300: #fb923c;
+  --color-primary-400: #f97316;
+  --color-primary-500: #ea580c;
+  --color-primary-600: #c2410c;
+  --color-primary-700: #9a3412;
+  --color-primary-800: #7c2d12;
+  --color-primary-900: #431407;
+  --color-primary-950: #2c0f04;
+}
+
+:root[data-theme="brand-teal"] {
+  --color-primary-50: #f0fdfa;
+  --color-primary-100: #ccfbf1;
+  --color-primary-200: #99f6e4;
+  --color-primary-300: #5eead4;
+  --color-primary-400: #2dd4bf;
+  --color-primary-500: #14b8a6;
+  --color-primary-600: #0d9488;
+  --color-primary-700: #0f766e;
+  --color-primary-800: #115e59;
+  --color-primary-900: #134e4a;
+  --color-primary-950: #0d3331;
+}
+
+:root[data-theme="brand-indigo"] {
+  --color-primary-50: #eef2ff;
+  --color-primary-100: #e0e7ff;
+  --color-primary-200: #c7d2fe;
+  --color-primary-300: #a5b4fc;
+  --color-primary-400: #818cf8;
+  --color-primary-500: #6366f1;
+  --color-primary-600: #4f46e5;
+  --color-primary-700: #4338ca;
+  --color-primary-800: #3730a3;
+  --color-primary-900: #312e81;
+  --color-primary-950: #1e1b4b;
+}
+
+:root[data-theme="brand-violet"] {
+  --color-primary-50: #faf5ff;
+  --color-primary-100: #f3e8ff;
+  --color-primary-200: #e9d5ff;
+  --color-primary-300: #d8b4fe;
+  --color-primary-400: #c084fc;
+  --color-primary-500: #a855f7;
+  --color-primary-600: #9333ea;
+  --color-primary-700: #7e22ce;
+  --color-primary-800: #6b21a8;
+  --color-primary-900: #581c87;
+  --color-primary-950: #3f0f5c;
+}
+
+:root[data-theme="brand-pink"] {
+  --color-primary-50: #fdf2f8;
+  --color-primary-100: #fce7f3;
+  --color-primary-200: #fbcfe8;
+  --color-primary-300: #f8b4d8;
+  --color-primary-400: #f472b6;
+  --color-primary-500: #ec4899;
+  --color-primary-600: #db2777;
+  --color-primary-700: #be185d;
+  --color-primary-800: #9d174d;
+  --color-primary-900: #831843;
+  --color-primary-950: #500724;
+}
+
+:root[data-theme="brand-cyan"] {
+  --color-primary-50: #ecf8ff;
+  --color-primary-100: #d9f0ff;
+  --color-primary-200: #b3e0ff;
+  --color-primary-300: #7ecbff;
+  --color-primary-400: #4ca8ff;
+  --color-primary-500: #1e88ff;
+  --color-primary-600: #1565c0;
+  --color-primary-700: #0d47a1;
+  --color-primary-800: #09369e;
+  --color-primary-900: #07287f;
+  --color-primary-950: #051957;
+}
+
 /**
  * Browser-Specific Styles
  * These cannot be replaced by Tailwind utilities
