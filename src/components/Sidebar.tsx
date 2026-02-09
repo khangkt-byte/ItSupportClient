@@ -5,6 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
+import { Sun, Moon, Palette, Check } from 'lucide-react';
 
 interface SidebarProps {
   currentView: string;
@@ -23,14 +24,15 @@ type Theme = 'light' | 'dark' | 'brand-red' | 'brand-blue';
 interface ThemeOption {
   value: Theme;
   label: string;
-  icon: string;
+  icon: React.ReactNode;
+  materialIcon: string;
 }
 
 const themeOptions: ThemeOption[] = [
-  { value: 'light', label: 'Light', icon: 'light_mode' },
-  { value: 'dark', label: 'Dark', icon: 'dark_mode' },
-  { value: 'brand-red', label: 'Red Theme', icon: 'palette' },
-  { value: 'brand-blue', label: 'Blue Theme', icon: 'palette' },
+  { value: 'light', label: 'Light', icon: <Sun className="w-4 h-4" />, materialIcon: 'light_mode' },
+  { value: 'dark', label: 'Dark', icon: <Moon className="w-4 h-4" />, materialIcon: 'dark_mode' },
+  { value: 'brand-red', label: 'Red Theme', icon: <Palette className="w-4 h-4 text-red-500" />, materialIcon: 'palette' },
+  { value: 'brand-blue', label: 'Blue Theme', icon: <Palette className="w-4 h-4 text-blue-500" />, materialIcon: 'palette' },
 ];
 
 export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
@@ -160,23 +162,23 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
                 className="w-full min-h-[48px] rounded-lg flex items-center cursor-pointer border-none px-[15px] whitespace-nowrap transition-all duration-300 hover:bg-[var(--sidebar-color-hover-secondary)] bg-[var(--sidebar-color-bg-secondary)] text-[var(--sidebar-color-text-primary)]"
               >
                 <div className="flex gap-[10px] items-center">
-                  <span className="material-symbols-rounded">{currentThemeOption.icon}</span>
+                  <span className="material-symbols-rounded">{currentThemeOption.materialIcon}</span>
                   <span className={`text-base ${collapsed ? 'opacity-0 w-0' : 'opacity-100'}`} style={{ transition: collapsed ? 'all 0.2s ease' : 'opacity 0.4s 0.2s ease' }}>{currentThemeOption.label}</span>
                 </div>
                 <span className={`material-symbols-rounded ml-auto ${collapsed ? 'opacity-0 w-0' : 'opacity-100'}`} style={{ transition: collapsed ? 'all 0.2s ease' : 'opacity 0.4s 0.2s ease' }}>expand_more</span>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" side="top" className="min-w-[180px]">
+            <DropdownMenuContent align="end" side="top" className="min-w-[200px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
               {themeOptions.map((option) => (
                 <DropdownMenuItem
                   key={option.value}
                   onClick={() => changeTheme(option.value)}
-                  className="flex items-center gap-2 cursor-pointer"
+                  className="flex items-center gap-3 cursor-pointer px-3 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
                 >
-                  <span className="material-symbols-rounded text-[1.25rem]">{option.icon}</span>
-                  <span>{option.label}</span>
+                  <span className="flex-shrink-0">{option.icon}</span>
+                  <span className="flex-1 text-sm font-medium">{option.label}</span>
                   {theme === option.value && (
-                    <span className="material-symbols-rounded ml-auto text-[1.25rem]">check</span>
+                    <Check className="w-4 h-4 text-primary-600 dark:text-primary-400 flex-shrink-0" />
                   )}
                 </DropdownMenuItem>
               ))}
