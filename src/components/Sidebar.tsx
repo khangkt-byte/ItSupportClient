@@ -1,4 +1,10 @@
 import { useState, useEffect } from 'react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 
 interface SidebarProps {
   currentView: string;
@@ -12,20 +18,41 @@ interface MenuItem {
   icon: string; // Material Symbols icon name
 }
 
+type Theme = 'light' | 'dark' | 'brand-red' | 'brand-blue';
+
+interface ThemeOption {
+  value: Theme;
+  label: string;
+  icon: string;
+}
+
+const themeOptions: ThemeOption[] = [
+  { value: 'light', label: 'Light', icon: 'light_mode' },
+  { value: 'dark', label: 'Dark', icon: 'dark_mode' },
+  { value: 'brand-red', label: 'Red Theme', icon: 'palette' },
+  { value: 'brand-blue', label: 'Blue Theme', icon: 'palette' },
+];
+
 export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<Theme>('light');
 
-  const applyTheme = (nextTheme: 'light' | 'dark') => {
+  const applyTheme = (nextTheme: Theme) => {
     document.documentElement.setAttribute('data-theme', nextTheme);
     document.body.setAttribute('data-theme', nextTheme);
   };
 
   // Initialize theme from localStorage or system preference
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
+    const savedTheme = localStorage.getItem('theme') as Theme | null;
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = savedTheme === 'dark' || (!savedTheme && systemPrefersDark) ? 'dark' : 'light';
+    
+    let initialTheme: Theme = 'light';
+    if (savedTheme && themeOptions.some(opt => opt.value === savedTheme)) {
+      initialTheme = savedTheme;
+    } else if (systemPrefersDark) {
+      initialTheme = 'dark';
+    }
 
     setTheme(initialTheme);
     applyTheme(initialTheme);
@@ -40,12 +67,13 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
     }
   }, []);
 
-  const toggleTheme = () => {
-    const nextTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(nextTheme);
-    applyTheme(nextTheme);
-    localStorage.setItem('theme', nextTheme);
+  const changeTheme = (newTheme: Theme) => {
+    setTheme(newTheme);
+    applyTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
   };
+
+  const currentThemeOption = themeOptions.find(opt => opt.value === theme) || themeOptions[0];
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -126,27 +154,34 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
 
         {/* Sidebar Footer */}
         <div className="py-5 px-[18px] whitespace-nowrap border-t border-[var(--sidebar-color-border-hr)]">
-          <button 
-            className="w-full min-h-[48px] rounded-lg flex items-center cursor-pointer border-none px-[15px] whitespace-nowrap transition-all duration-300 hover:bg-[var(--sidebar-color-hover-secondary)] bg-[var(--sidebar-color-bg-secondary)] text-[var(--sidebar-color-text-primary)]"
-            onClick={toggleTheme}
-          >
-            <div className="flex gap-[10px] items-center">
-              <span className="material-symbols-rounded">dark_mode</span>
-              <span className={`text-base ${collapsed ? 'opacity-0 w-0' : 'opacity-100'}`} style={{ transition: collapsed ? 'all 0.2s ease' : 'opacity 0.4s 0.2s ease' }}>Dark Mode</span>
-            </div>
-            <div 
-              className={`ml-auto h-6 w-12 rounded-full relative ${collapsed ? 'opacity-0 w-0' : 'opacity-100'}`}
-              style={{ 
-                background: theme === 'dark' ? '#695CFE' : '#c3d1ec',
-                transition: collapsed ? 'all 0.2s ease' : 'opacity 0.4s 0.2s ease, background-color 0.3s ease'
-              }}
-            >
-              <div 
-                className="absolute top-[3px] left-[3px] w-[18px] h-[18px] rounded-full bg-white shadow-sm transition-transform duration-300"
-                style={{ transform: theme === 'dark' ? 'translateX(24px)' : 'translateX(0)' }}
-              />
-            </div>
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button 
+                className="w-full min-h-[48px] rounded-lg flex items-center cursor-pointer border-none px-[15px] whitespace-nowrap transition-all duration-300 hover:bg-[var(--sidebar-color-hover-secondary)] bg-[var(--sidebar-color-bg-secondary)] text-[var(--sidebar-color-text-primary)]"
+              >
+                <div className="flex gap-[10px] items-center">
+                  <span className="material-symbols-rounded">{currentThemeOption.icon}</span>
+                  <span className={`text-base ${collapsed ? 'opacity-0 w-0' : 'opacity-100'}`} style={{ transition: collapsed ? 'all 0.2s ease' : 'opacity 0.4s 0.2s ease' }}>{currentThemeOption.label}</span>
+                </div>
+                <span className={`material-symbols-rounded ml-auto ${collapsed ? 'opacity-0 w-0' : 'opacity-100'}`} style={{ transition: collapsed ? 'all 0.2s ease' : 'opacity 0.4s 0.2s ease' }}>expand_more</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" side="top" className="min-w-[180px]">
+              {themeOptions.map((option) => (
+                <DropdownMenuItem
+                  key={option.value}
+                  onClick={() => changeTheme(option.value)}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <span className="material-symbols-rounded text-[1.25rem]">{option.icon}</span>
+                  <span>{option.label}</span>
+                  {theme === option.value && (
+                    <span className="material-symbols-rounded ml-auto text-[1.25rem]">check</span>
+                  )}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </aside>
     </>
