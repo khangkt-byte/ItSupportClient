@@ -334,7 +334,7 @@ export function PermissionEditor({
               type="button"
               onClick={toggleSelectAllClaims}
               disabled={readOnly}
-              className={`px-4 py-2 text-sm font-medium rounded-md border border-green-200 text-green-700 transition-colors ${
+              className={`px-3 py-1 text-sm font-medium rounded-md border border-green-200 text-green-700 transition-colors ${
                 readOnly ? 'opacity-60 cursor-not-allowed' : 'hover:bg-green-50 cursor-pointer'
               }`}
             >
@@ -343,7 +343,7 @@ export function PermissionEditor({
             <button
               type="button"
               onClick={toggleExpandAll}
-              className="px-4 py-2 text-sm font-medium rounded-md border border-green-200 text-green-700 hover:bg-green-50 transition-colors cursor-pointer"
+              className="px-3 py-1 text-sm font-medium rounded-md border border-green-200 text-green-700 hover:bg-green-50 transition-colors cursor-pointer"
             >
               {expandedModules.size === 0 ? 'Expand All' : 'Collapse All'}
             </button>
@@ -362,42 +362,39 @@ export function PermissionEditor({
 
             return (
               <div key={group.category} className="bg-white border rounded-lg">
-                <div className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors">
-                  <button
-                    type="button"
-                    onClick={() => toggleModule(group.category)}
-                    className="flex items-center gap-2 text-left cursor-pointer"
-                  >
-                    <Shield className="w-5 h-5 text-green-600" />
+                <button
+                  type="button"
+                  onClick={() => toggleModule(group.category)}
+                  className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors text-left cursor-pointer"
+                >
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <Shield className="w-5 h-5 text-green-600 flex-shrink-0" />
                     <span className="font-semibold text-gray-900 text-base">{group.category}</span>
                     <span className="text-xs text-gray-500">
                       ({group.claims.length}){selectedInGroup > 0 ? ` • ${selectedInGroup} selected` : ''}
                     </span>
-                  </button>
-                  <div className="flex items-center gap-2">
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       type="button"
-                      onClick={() => toggleSelectAllInGroup(group)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleSelectAllInGroup(group);
+                      }}
                       disabled={readOnly}
-                      className={`px-3 py-1.5 text-xs font-medium rounded-md border border-green-200 text-green-700 transition-colors ${
+                      className={`px-3 py-1 text-xs font-medium rounded-md border border-green-200 text-green-700 transition-colors ${
                         readOnly ? 'opacity-60 cursor-not-allowed' : 'hover:bg-green-50 cursor-pointer'
                       }`}
                     >
                       {areAllSelectedInGroup ? 'Deselect All' : 'Select All'}
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => toggleModule(group.category)}
-                      className="p-1 rounded-md hover:bg-gray-100 cursor-pointer"
-                    >
-                      {isExpanded ? (
-                        <ChevronUp className="w-5 h-5 text-gray-400" />
-                      ) : (
-                        <ChevronDown className="w-5 h-5 text-gray-400" />
-                      )}
-                    </button>
+                    {isExpanded ? (
+                      <ChevronUp className="w-5 h-5 text-gray-400" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                    )}
                   </div>
-                </div>
+                </button>
 
                 {isExpanded && (
                   <div className="px-5 pb-4">
@@ -451,7 +448,7 @@ export function PermissionEditor({
           <CheckCircle className="w-5 h-5 text-blue-600" />
           Effective Permissions ({effectivePermissions.permissions.length} total)
         </h4>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-2">
           {effectivePermissions.permissions.length === 0 ? (
             <p className="text-xs text-gray-500 italic">No permissions assigned</p>
           ) : (
