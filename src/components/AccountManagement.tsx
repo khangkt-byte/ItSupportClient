@@ -452,24 +452,24 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
         {/* Table */}
         {!isLoading && !error && (
           <table className="w-full">
-            <thead className="bg-indigo-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                   Employee
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                   Employee Code
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                   Username
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                   Roles
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-600 dark:text-gray-400 uppercase">
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                   Actions
                 </th>
               </tr>
@@ -477,7 +477,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {(paginatedResult?.items || []).length > 0 ? (
                 (paginatedResult?.items || []).map((item) => (
-                  <tr key={item.accountId} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  <tr key={item.accountId} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-50">{item.empName || 'Unknown'}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                       {item.empCode || 'N/A'}
@@ -550,8 +550,8 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                    <User className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                    <User className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
                     <p className="text-lg font-medium">No accounts found</p>
                     <p className="text-sm mt-1">Create your first account to get started</p>
                   </td>
