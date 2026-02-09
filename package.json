@@ -46,11 +46,14 @@
             "vaul": "^1.1.2"
       },
       "devDependencies": {
+            "@tailwindcss/postcss": "^4.1.18",
             "@types/node": "^20.10.0",
             "@types/react": "^19.2.13",
             "@types/react-dom": "^19.2.3",
             "@vitejs/plugin-basic-ssl": "^2.1.4",
             "@vitejs/plugin-react-swc": "^3.10.2",
+            "autoprefixer": "^10.4.24",
+            "tailwindcss": "^4.1.18",
             "vite": "6.3.5"
       },
       "scripts": {
