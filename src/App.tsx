@@ -169,14 +169,14 @@ export default function App() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="container">
       <DarkModeStyles />
       <Sidebar 
         currentView={currentView} 
         onNavigate={handleNavigate} 
         userRole={user.role}
       />
-      <div className="flex-1 p-[30px_20px_30px_30px] max-w-full w-full max-md:p-[30px_20px] text-gray-900 dark:text-gray-50">
+      <div className="main-content">
         {user.role === 'admin' ? (
           <AdminDashboard 
             user={user} 
