@@ -11,11 +11,60 @@
  * - Google HTML/CSS Style Guide: https://google.github.io/styleguide/htmlcssguide.html
  * - Microsoft Fluent Design System: https://developer.microsoft.com/en-us/fluentui
  * - Material Design 3: https://m3.material.io/
+ * - WCAG 2.1 Accessibility: https://www.w3.org/WAI/WCAG21/quickref/
+ * - prefers-reduced-motion: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion
  */
 
 @import "tailwindcss";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/**
+ * Theme Transition Support
+ * Smooth color transitions when theme changes, unless user prefers reduced motion
+ * @reference https://www.w3.org/TR/WCAG21/#animation-from-interactions
+ */
+html.theme-transition,
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition: background-color 300ms ease, color 300ms ease, border-color 300ms ease !important;
+}
+
+/**
+ * Respect user's motion preferences per WCAG 2.1
+ * @reference https://www.w3.org/WAI/WCAG21/Understanding/animation-from-interactions.html
+ */
+@media (prefers-reduced-motion: reduce) {
+  html.theme-transition,
+  html.theme-transition *,
+  html.theme-transition *::before,
+  html.theme-transition *::after {
+    transition-duration: 0ms !important;
+  }
+}
+
+/**
+ * High Contrast Support
+ * Enhanced contrast for users with visual impairments
+ * @reference https://www.w3.org/WAI/WCAG21/Understanding/contrast-enhanced.html
+ */
+@media (prefers-contrast: more) {
+  html[data-a11y="highContrast"] {
+    --color-primary-50: #ffffff;
+    --color-primary-100: #f0f0f0;
+    --color-primary-200: #d0d0d0;
+    --color-primary-300: #a0a0a0;
+    --color-primary-400: #707070;
+    --color-primary-500: #000000;
+    --color-primary-600: #000000;
+    --color-primary-700: #000000;
+    --color-primary-800: #000000;
+    --color-primary-900: #000000;
+    --color-primary-950: #000000;
+  }
+}
 
 /**
  * Custom Theme Configuration

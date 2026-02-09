@@ -3,7 +3,6 @@ import { LoginPage } from './components/LoginPage';
 import { AdminDashboard } from './components/AdminDashboard';
 import { EmployeeDashboard } from './components/EmployeeDashboard';
 import { Sidebar } from './components/Sidebar';
-import { DarkModeStyles } from './components/DarkModeStyles';
 import { authApi } from './lib/api/auth';
 import { SecurityValidator } from './lib/utils/securityChecks';
 import type { User } from './types/data';
@@ -170,7 +169,6 @@ export default function App() {
 
   return (
     <div className="container">
-      <DarkModeStyles />
       <Sidebar 
         currentView={currentView} 
         onNavigate={handleNavigate} 

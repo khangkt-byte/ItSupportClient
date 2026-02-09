@@ -7,6 +7,8 @@ import {
 } from './ui/dialog';
 import { Sun, Moon, Palette, Check } from 'lucide-react';
 import { BrandTheme, palettes } from '../lib/constants/palettes';
+import { useTheme } from '../lib/hooks/useTheme';
+import type { Theme } from '../lib/hooks/useTheme';
 
 interface SidebarProps {
   currentView: string;
@@ -19,8 +21,6 @@ interface MenuItem {
   label: string;
   icon: string; // Material Symbols icon name
 }
-
-type Theme = 'light' | 'dark' | BrandTheme;
 
 interface ThemeOption {
   value: Theme;
@@ -47,29 +47,8 @@ const themeOptions: ThemeOption[] = [
 
 export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
-  const [theme, setTheme] = useState<Theme>('light');
+  const { theme, changeTheme, accessibilityMode, setAccessibilityMode, prefersReducedMotion } = useTheme();
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
-
-  const applyTheme = (nextTheme: Theme) => {
-    document.documentElement.setAttribute('data-theme', nextTheme);
-    document.body.setAttribute('data-theme', nextTheme);
-  };
-
-  // Initialize theme from localStorage or system preference
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as Theme | null;
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    let initialTheme: Theme = 'light';
-    if (savedTheme && themeOptions.some(opt => opt.value === savedTheme)) {
-      initialTheme = savedTheme;
-    } else if (systemPrefersDark) {
-      initialTheme = 'dark';
-    }
-
-    setTheme(initialTheme);
-    applyTheme(initialTheme);
-  }, []);
 
   // Expand sidebar by default on large screens
   useEffect(() => {
@@ -79,13 +58,6 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
       setCollapsed(true);
     }
   }, []);
-
-  const changeTheme = (newTheme: Theme) => {
-    setTheme(newTheme);
-    applyTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    setIsThemeModalOpen(false);
-  };
 
   const currentThemeOption = themeOptions.find(opt => opt.value === theme) || themeOptions[0];
 
@@ -123,25 +95,31 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
       </nav>
 
       {/* Sidebar */}
-      <aside className={`sticky top-0 h-screen flex flex-shrink-0 flex-col bg-[var(--sidebar-color-bg-sidebar)] border-r border-[var(--sidebar-color-border-hr)] transition-[width] duration-[400ms] ${collapsed ? 'w-[90px]' : 'w-[270px]'} sidebar-container ${collapsed ? 'collapsed' : ''}`} style={{ boxShadow: '0 3px 9px var(--sidebar-color-shadow)' }}>
+      <aside 
+        className={`sticky top-0 h-screen flex flex-shrink-0 flex-col bg-[var(--sidebar-color-bg-sidebar)] border-r border-[var(--sidebar-color-border-hr)] transition-[width] duration-[400ms] ${collapsed ? 'w-[90px]' : 'w-[270px]'} sidebar-container ${collapsed ? 'collapsed' : ''}`} 
+        style={{ 
+          boxShadow: '0 3px 9px var(--sidebar-color-shadow)',
+          transitionDuration: prefersReducedMotion ? '0ms' : '400ms'
+        }}
+      >
         {/* Sidebar header */}
         <div className="py-5 px-[18px] flex relative items-center justify-between border-b border-[var(--sidebar-color-border-hr)]">
           <div className="flex items-center gap-3">
             <span 
-              className={`material-symbols-rounded block object-contain rounded-full transition-opacity duration-[400ms] ${collapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+              className={`material-symbols-rounded block object-contain rounded-full transition-opacity ${prefersReducedMotion ? 'duration-0' : 'duration-[400ms]'} ${collapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
               style={{ color: '#695CFE', fontSize: '46px', width: '46px', height: '46px' }}
             >
               headset_mic
             </span>
-            <span className={`font-semibold text-lg whitespace-nowrap transition-opacity duration-300 text-[var(--sidebar-color-text-primary)] ${collapsed ? 'opacity-0 pointer-events-none absolute w-0 overflow-hidden' : 'opacity-100'}`}>
+            <span className={`font-semibold text-lg whitespace-nowrap transition-opacity ${prefersReducedMotion ? 'duration-0' : 'duration-300'} text-[var(--sidebar-color-text-primary)] ${collapsed ? 'opacity-0 pointer-events-none absolute w-0 overflow-hidden' : 'opacity-100'}`}>
               IT Support
             </span>
           </div>
           <button 
-            className={`h-10 w-10 border-none cursor-pointer flex absolute right-[18px] items-center justify-center rounded-lg transition-all duration-[400ms] hover:bg-[var(--sidebar-color-hover-secondary)] bg-[var(--sidebar-color-bg-secondary)] text-[var(--sidebar-color-text-primary)] ${collapsed ? '-translate-x-0.5 h-12 w-[50px]' : ''} sidebar-toggle-btn`}
+            className={`h-10 w-10 border-none cursor-pointer flex absolute right-[18px] items-center justify-center rounded-lg transition-all ${prefersReducedMotion ? 'duration-0' : 'duration-[400ms]'} hover:bg-[var(--sidebar-color-hover-secondary)] bg-[var(--sidebar-color-bg-secondary)] text-[var(--sidebar-color-text-primary)] ${collapsed ? '-translate-x-0.5 h-12 w-[50px]' : ''} sidebar-toggle-btn`}
             onClick={toggleSidebar}
           >
-            <span className={`material-symbols-rounded text-[1.75rem] transition-transform duration-[400ms] ${collapsed ? 'rotate-180' : ''}`}>chevron_left</span>
+            <span className={`material-symbols-rounded text-[1.75rem] transition-transform ${prefersReducedMotion ? 'duration-0' : 'duration-[400ms]'} ${collapsed ? 'rotate-180' : ''}`}>chevron_left</span>
           </button>
         </div>
 
@@ -185,32 +163,71 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-gray-50">Choose Theme</DialogTitle>
             </DialogHeader>
-            <div className="grid grid-cols-3 gap-4 py-4 max-h-96 overflow-y-auto">
-              {themeOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => changeTheme(option.value)}
-                  className={`flex flex-col items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all ${
-                    theme === option.value
-                      ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
-                      : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 hover:border-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600'
-                  }`}
-                >
-                  <div className="text-2xl">{option.icon}</div>
-                  <div className="font-medium text-sm text-gray-900 dark:text-gray-50 text-center">{option.label}</div>
-                  {option.color && (
-                    <div 
-                      className="w-6 h-6 rounded-full border-2 border-gray-300 dark:border-gray-600"
-                      style={{ backgroundColor: option.color }}
-                    />
-                  )}
-                  {theme === option.value && (
-                    <div className="flex items-center justify-center w-4 h-4 rounded-full bg-primary-600 -mt-1">
-                      <Check className="w-2.5 h-2.5 text-white" />
-                    </div>
-                  )}
-                </button>
-              ))}
+            <div className="space-y-4 py-4">
+              {/* Accessibility Mode Section */}
+              <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50 mb-3">Accessibility</h3>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setAccessibilityMode('default')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      accessibilityMode === 'default'
+                        ? 'bg-primary-600 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-50 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    Normal Contrast
+                  </button>
+                  <button
+                    onClick={() => setAccessibilityMode('highContrast')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      accessibilityMode === 'highContrast'
+                        ? 'bg-primary-600 text-white'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-50 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    High Contrast
+                  </button>
+                </div>
+                {prefersReducedMotion && (
+                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">✓ Reduced motion is enabled in system settings</p>
+                )}
+              </div>
+
+              {/* Theme Selection Grid */}
+              <div className="max-h-96 overflow-y-auto">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50 mb-3">Color Themes</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  {themeOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        changeTheme(option.value);
+                        setIsThemeModalOpen(false);
+                      }}
+                      className={`flex flex-col items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all ${
+                        theme === option.value
+                          ? 'border-primary-600 bg-primary-50 dark:bg-primary-900/20'
+                          : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 hover:border-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      <div className="text-2xl">{option.icon}</div>
+                      <div className="font-medium text-sm text-gray-900 dark:text-gray-50 text-center">{option.label}</div>
+                      {option.color && (
+                        <div 
+                          className="w-6 h-6 rounded-full border-2 border-gray-300 dark:border-gray-600"
+                          style={{ backgroundColor: option.color }}
+                        />
+                      )}
+                      {theme === option.value && (
+                        <div className="flex items-center justify-center w-4 h-4 rounded-full bg-primary-600 -mt-1">
+                          <Check className="w-2.5 h-2.5 text-white" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
