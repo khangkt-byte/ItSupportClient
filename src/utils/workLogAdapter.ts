@@ -57,7 +57,7 @@ export function issueLogToWorkLog(issueLog: IssueLogDto): WorkLog {
     // Notes and Status
     notes: issueLog.notes,
     note: issueLog.notes || '',
-    status: (issueLog.status?.toLowerCase() || 'pending') as WorkStatus,
+    status: (issueLog.status?.toLowerCase().replace(/\s+/g, '-') || 'pending') as WorkStatus,
 
     // Timestamps
     createdAt: issueLog.createdAt,

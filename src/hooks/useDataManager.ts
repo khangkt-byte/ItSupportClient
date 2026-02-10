@@ -149,7 +149,7 @@ export function useDataManager() {
       cause: log.cause || '',
       fixDescription: log.resolution || '',
       note: log.notes || '',
-      status: log.status as any // Assuming IssueLogDto.status is compatible
+      status: normalizeWorkStatus(log.status) // Normalize "In Progress" to "in-progress"
     } as WorkLog)),
     setData: (newData: WorkLog[]) => {
       workLogsRaw.setData(newData as unknown as IssueLogDto[]);
@@ -165,4 +165,15 @@ export function useDataManager() {
     roles,
     workLogs,
   };
+}
+
+// Normalize status from API format to UI format
+// API: "In Progress", "Resolved", etc.
+// UI: "in-progress", "resolved", etc.
+function normalizeWorkStatus(status: string | null | undefined): any {
+  if (!status) return 'pending';
+  return status
+    .toLowerCase()
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .trim();
 }

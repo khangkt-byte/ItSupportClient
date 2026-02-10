@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: ['selector', '[data-theme="dark"]'],
+  darkMode: ['selector', '[data-theme="dark"]'], // Match HTML data-theme attribute
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -10,26 +10,27 @@ module.exports = {
       // Semantic color tokens - Material Design 3 pattern
       // Reference: https://m3.material.io/styles/color/system/overview
       colors: {
-        // Semantic status colors (themeable via CSS variables)
-        success: 'var(--color-success)',
-        'success-foreground': 'var(--color-success-foreground)',
-        'success-background': 'var(--color-success-background)',
-        'success-border': 'var(--color-success-border)',
+        // Semantic status colors (with CSS variable fallbacks)
+        // Light mode defaults shown as fallbacks
+        success: 'var(--color-success, #22c55e)',
+        'success-foreground': 'var(--color-success-foreground, #166534)',
+        'success-background': 'var(--color-success-background, #f0fdf4)',
+        'success-border': 'var(--color-success-border, #bbf7d0)',
         
-        warning: 'var(--color-warning)',
-        'warning-foreground': 'var(--color-warning-foreground)',
-        'warning-background': 'var(--color-warning-background)',
-        'warning-border': 'var(--color-warning-border)',
+        warning: 'var(--color-warning, #f59e0b)',
+        'warning-foreground': 'var(--color-warning-foreground, #92400e)',
+        'warning-background': 'var(--color-warning-background, #fffbeb)',
+        'warning-border': 'var(--color-warning-border, #fde68a)',
         
-        error: 'var(--color-error)',
-        'error-foreground': 'var(--color-error-foreground)',
-        'error-background': 'var(--color-error-background)',
-        'error-border': 'var(--color-error-border)',
+        error: 'var(--color-error, #ef4444)',
+        'error-foreground': 'var(--color-error-foreground, #991b1b)',
+        'error-background': 'var(--color-error-background, #fef2f2)',
+        'error-border': 'var(--color-error-border, #fecaca)',
         
-        info: 'var(--color-info)',
-        'info-foreground': 'var(--color-info-foreground)',
-        'info-background': 'var(--color-info-background)',
-        'info-border': 'var(--color-info-border)',
+        info: 'var(--color-info, #3b82f6)',
+        'info-foreground': 'var(--color-info-foreground, #1e40af)',
+        'info-background': 'var(--color-info-background, #eff6ff)',
+        'info-border': 'var(--color-info-border, #bfdbfe)',
         
         // Keep the existing Tailwind default color palette
       },
@@ -82,6 +83,20 @@ module.exports = {
     'inline-flex', 'items-center', 'gap-1', 'rounded-md', 'px-2', 'py-1', 'text-xs', 'font-medium', 'leading-4', 'tracking-wide', 'transition-colors',
     'ring-1', 'ring-inset',
     
+    // ===== SEMANTIC TOKEN CLASSES (Theme-aware) =====
+    // Success token colors (light mode)
+    'bg-success-background', 'text-success-foreground', 'ring-success-border',
+    
+    // Warning token colors (light mode)
+    'bg-warning-background', 'text-warning-foreground', 'ring-warning-border',
+    
+    // Info token colors (light mode)
+    'bg-info-background', 'text-info-foreground', 'ring-info-border',
+    
+    // Error token colors (light mode)
+    'bg-error-background', 'text-error-foreground', 'ring-error-border',
+    
+    // ===== FALLBACK HARDCODED COLORS (Light mode) =====
     // PENDING/Warning badge colors
     'bg-amber-50', 'text-amber-800', 'ring-amber-600/20',
     'dark:bg-amber-400/10', 'dark:text-amber-400', 'dark:ring-amber-400/30',
