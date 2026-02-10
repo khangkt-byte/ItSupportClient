@@ -278,7 +278,7 @@ export function PermissionEditor({
           Assign Roles ({selectedRoleIds.length} selected)
         </h3>
 
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg divide-y max-h-40 overflow-y-auto">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
           {availableRoles.length === 0 ? (
             <div className="p-6 text-center text-gray-500 dark:text-gray-400">
               <Shield className="w-12 h-12 mx-auto mb-2 text-gray-300" />
@@ -350,7 +350,7 @@ export function PermissionEditor({
           </div>
         </div>
 
-        <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+        <div className="space-y-3">
           {groupedClaims.map(group => {
             const selectedInGroup = group.claims.filter(c => selectedClaimIds.includes(c.claimId)).length;
             const isExpanded = expandedModules.has(group.category);
@@ -397,8 +397,8 @@ export function PermissionEditor({
                 </button>
 
                 {isExpanded && (
-                  <div className="px-5 pb-4">
-                    <div className="grid grid-cols-4 gap-2 py-2">
+                  <div className="px-5">
+                    <div className="grid grid-cols-4 gap-2 pt-2 pb-3">
                       {group.claims.map(claim => {
                         const isDirectlySelected = isClaimDirectlyAssigned(claim.claimId);
                         const isInherited = roleClaimIds.has(claim.claimId);
@@ -410,9 +410,9 @@ export function PermissionEditor({
                             key={claim.claimId}
                             className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors w-full justify-start ${
                               isDirectlySelected
-                                ? 'bg-success-background text-success-foreground border border-success-border'
+                                ? 'bg-success-background text-success-foreground'
                                 : isInherited
-                                ? 'bg-info-background text-info-foreground border border-info-border'
+                                ? 'bg-info-background text-info-foreground'
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                             } ${readOnly ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                             onClick={() => {
