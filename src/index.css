@@ -97,13 +97,86 @@ html[data-a11y="highContrast"] {
   --color-link: #0000ff; /* Blue - traditional accessible link color */
   --color-link-visited: #800080; /* Purple - accessible visited link */
   --color-focus: #ff0000; /* Red focus ring for 21:1 contrast */
+}
+
+/**
+ * Semantic Color Tokens
+ * Following Material Design 3 and Microsoft Fluent Design patterns
+ * Reference: https://m3.material.io/ and https://developer.microsoft.com/en-us/fluentui
+ * 
+ * These tokens provide semantic meaning (success, error, warning, info)
+ * instead of hard-coded colors (green-600, red-500, etc.)
+ * 
+ * Benefits:
+ * 1. Theme-able: Change globally via CSS variables
+ * 2. Accessible: High contrast mode can override
+ * 3. Maintainable: Single source of truth
+ * 4. Consistent: Same color for same meaning across app
+ */
+
+/* Base semantic tokens (Light mode) */
+:root {
+  /* Success colors (Completed, Valid, Active) */
+  --color-success: #22c55e;           /* green-600 */
+  --color-success-foreground: #166534; /* green-800 */
+  --color-success-background: #f0fdf4; /* green-50 */
+  --color-success-border: #bbf7d0;     /* green-200 */
   
+  /* Warning colors (Pending, Caution) */
+  --color-warning: #f59e0b;           /* amber-500 */
+  --color-warning-foreground: #92400e; /* amber-800 */
+  --color-warning-background: #fffbeb; /* amber-50 */
+  --color-warning-border: #fde68a;     /* amber-200 */
+  
+  /* Error colors (Failed, Invalid) */
+  --color-error: #ef4444;             /* red-500 */
+  --color-error-foreground: #991b1b;   /* red-800 */
+  --color-error-background: #fef2f2;   /* red-50 */
+  --color-error-border: #fecaca;       /* red-200 */
+  
+  /* Info colors (In Progress, Information) */
+  --color-info: #3b82f6;              /* blue-500 */
+  --color-info-foreground: #1e40af;    /* blue-800 */
+  --color-info-background: #eff6ff;    /* blue-50 */
+  --color-info-border: #bfdbfe;        /* blue-200 */
+}
+
+/* Dark mode semantic tokens */
+:root[data-theme="dark"],
+:root[data-theme*="dark"] {
+  /* Success colors - lighter for dark backgrounds */
+  --color-success: #4ade80;           /* green-400 */
+  --color-success-foreground: #bbf7d0; /* green-200 */
+  --color-success-background: rgba(34, 197, 94, 0.2); /* green-600/20 */
+  --color-success-border: rgba(34, 197, 94, 0.3);     /* green-600/30 */
+  
+  /* Warning colors */
+  --color-warning: #fbbf24;           /* amber-400 */
+  --color-warning-foreground: #fde68a; /* amber-200 */
+  --color-warning-background: rgba(245, 158, 11, 0.2); /* amber-500/20 */
+  --color-warning-border: rgba(245, 158, 11, 0.3);     /* amber-500/30 */
+  
+  /* Error colors */
+  --color-error: #f87171;             /* red-400 */
+  --color-error-foreground: #fecaca;   /* red-200 */
+  --color-error-background: rgba(239, 68, 68, 0.2);   /* red-500/20 */
+  --color-error-border: rgba(239, 68, 68, 0.3);       /* red-500/30 */
+  
+  /* Info colors */
+  --color-info: #60a5fa;              /* blue-400 */
+  --color-info-foreground: #bfdbfe;    /* blue-200 */
+  --color-info-background: rgba(59, 130, 246, 0.2);   /* blue-500/20 */
+  --color-info-border: rgba(59, 130, 246, 0.3);       /* blue-500/30 */
+}
+
+/* High Contrast mode overrides - WCAG AAA compliance (21:1) */
+html[data-a11y="highContrast"] {
   /* CRITICAL: Override ALL semantic colors to pure black/white in HC mode */
   /* This ensures no brand colors (green, purple, blue) appear in high contrast */
-  --color-success: #000000;    /* Was green - now pure black */
-  --color-error: #000000;      /* Was red - now pure black */
-  --color-warning: #000000;    /* Was amber - now pure black */
-  --color-info: #000000;       /* Was blue - now pure black */
+  --color-success: #000000;    /* Pure black */
+  --color-error: #000000;      /* Pure black */
+  --color-warning: #000000;    /* Pure black */
+  --color-info: #000000;       /* Pure black */
   --color-disabled: #808080;   /* Gray (intentional reduced contrast) */
   
   /* CRITICAL FIX: Override Tailwind hard-coded color classes */

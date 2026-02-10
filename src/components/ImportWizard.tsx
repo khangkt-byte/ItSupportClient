@@ -222,12 +222,12 @@ export function ImportWizard({
               </div>
 
               {file && (
-                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                <div className="bg-success-background border border-success-border rounded-lg p-4">
                   <div className="flex items-center gap-3">
-                    <FileSpreadsheet className="w-8 h-8 text-green-600 dark:text-green-400" />
+                    <FileSpreadsheet className="w-8 h-8 text-success" />
                     <div className="flex-1">
-                      <p className="font-medium text-green-900 dark:text-green-100">{file.name}</p>
-                      <p className="text-sm text-green-700 dark:text-green-300">
+                      <p className="font-medium text-success-foreground">{file.name}</p>
+                      <p className="text-sm text-success">
                         {(file.size / 1024).toFixed(2)} KB
                       </p>
                     </div>
@@ -264,32 +264,32 @@ export function ImportWizard({
             <div className="space-y-6">
               {/* Summary Statistics */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="bg-success-background border border-success-border rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                    <span className="text-sm text-gray-600">Valid Rows</span>
+                    <CheckCircle className="w-5 h-5 text-success" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Valid Rows</span>
                   </div>
-                  <div className="text-2xl font-semibold text-green-700">
+                  <div className="text-2xl font-semibold text-success-foreground">
                     {validationResult.validCount}
                   </div>
                 </div>
 
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="bg-warning-background border border-warning-border rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle className="w-5 h-5 text-yellow-600" />
-                    <span className="text-sm text-gray-600">Warnings</span>
+                    <AlertTriangle className="w-5 h-5 text-warning" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Warnings</span>
                   </div>
-                  <div className="text-2xl font-semibold text-yellow-700">
+                  <div className="text-2xl font-semibold text-warning-foreground">
                     {validationResult.warningCount}
                   </div>
                 </div>
 
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="bg-error-background border border-error-border rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <AlertCircle className="w-5 h-5 text-red-600" />
-                    <span className="text-sm text-gray-600">Errors</span>
+                    <AlertCircle className="w-5 h-5 text-error" />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Errors</span>
                   </div>
-                  <div className="text-2xl font-semibold text-red-700">
+                  <div className="text-2xl font-semibold text-error-foreground">
                     {validationResult.errorCount}
                   </div>
                 </div>
@@ -322,7 +322,7 @@ export function ImportWizard({
                               <tr key={`${row.rowNumber}-error-${idx}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                 <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-50">{row.rowNumber}</td>
                                 <td className="px-4 py-3 text-sm">
-                                  <Badge variant="outline" className="bg-red-50 dark:bg-red-900/30 border-red-400 dark:border-red-700 text-red-700 dark:text-red-300">
+                                  <Badge variant="outline" className="bg-error-background border-error-border text-error-foreground">
                                     {error.field}
                                   </Badge>
                                 </td>
@@ -332,7 +332,7 @@ export function ImportWizard({
                                 <td className="px-4 py-3 text-sm">
                                   {error.suggestedValue ? (
                                     <div>
-                                      <span className="font-medium text-green-700 dark:text-green-400">
+                                      <span className="font-medium text-success">
                                         {error.suggestedValue}
                                       </span>
                                       {error.matchScore && (
@@ -366,7 +366,7 @@ export function ImportWizard({
                               <tr key={`${row.rowNumber}-warning-${idx}`} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                                 <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-50">{row.rowNumber}</td>
                                 <td className="px-4 py-3 text-sm">
-                                  <Badge variant="outline" className="bg-yellow-50 dark:bg-yellow-900/30 border-yellow-400 dark:border-yellow-700 text-yellow-700 dark:text-yellow-300">
+                                  <Badge variant="outline" className="bg-warning-background border-warning-border text-warning-foreground">
                                     {warning.field}
                                   </Badge>
                                 </td>
@@ -430,9 +430,9 @@ export function ImportWizard({
                             {row.previewData?.issueDescription || 'N/A'}
                           </td>
                           <td className="px-4 py-3">
-                            {row.hasErrors && <Badge variant="outline" className="bg-red-50 dark:bg-red-900/30 border-red-400 dark:border-red-700 text-red-700 dark:text-red-300">Error</Badge>}
-                            {row.hasWarnings && !row.hasErrors && <Badge variant="outline" className="bg-yellow-50 dark:bg-yellow-900/30 border-yellow-400 dark:border-yellow-700 text-yellow-700 dark:text-yellow-300">Warning</Badge>}
-                            {!row.hasErrors && !row.hasWarnings && <Badge variant="outline" className="bg-green-50 border-green-400 text-green-700">Valid</Badge>}
+                            {row.hasErrors && <Badge variant="outline" className="bg-error-background border-error-border text-error-foreground">Error</Badge>}
+                            {row.hasWarnings && !row.hasErrors && <Badge variant="outline" className="bg-warning-background border-warning-border text-warning-foreground">Warning</Badge>}
+                            {!row.hasErrors && !row.hasWarnings && <Badge variant="outline" className="bg-success-background border-success-border text-success-foreground">Valid</Badge>}
                           </td>
                         </tr>
                       ))}
@@ -504,12 +504,12 @@ export function ImportWizard({
           {step === 3 && importResult && (
             <div className="space-y-6">
               <div className={`text-center p-8 rounded-lg ${
-                importResult.hasErrors ? 'bg-yellow-50 border border-yellow-200' : 'bg-green-50 border border-green-200'
+                importResult.hasErrors ? 'bg-warning-background border border-warning-border' : 'bg-success-background border border-success-border'
               }`}>
                 {importResult.hasErrors ? (
-                  <AlertTriangle className="w-16 h-16 mx-auto text-yellow-600 mb-4" />
+                  <AlertTriangle className="w-16 h-16 mx-auto text-warning mb-4" />
                 ) : (
-                  <CheckCircle className="w-16 h-16 mx-auto text-green-600 mb-4" />
+                  <CheckCircle className="w-16 h-16 mx-auto text-success mb-4" />
                 )}
                 <h3 className="text-2xl font-semibold mb-2">
                   {importResult.hasErrors ? 'Import Completed with Warnings' : 'Import Successful!'}
@@ -521,11 +521,11 @@ export function ImportWizard({
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                   <p className="text-sm text-gray-600 dark:text-gray-400">Imported</p>
-                  <p className="text-2xl font-semibold text-green-600 dark:text-green-400">{importResult.successCount}</p>
+                  <p className="text-2xl font-semibold text-success">{importResult.successCount}</p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                   <p className="text-sm text-gray-600 dark:text-gray-400">Auto-matched</p>
-                  <p className="text-2xl font-semibold text-primary-600 dark:text-primary-400">{importResult.autoMatched}</p>
+                  <p className="text-2xl font-semibold text-info">{importResult.autoMatched}</p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                   <p className="text-sm text-gray-600 dark:text-gray-400">Entities Created</p>

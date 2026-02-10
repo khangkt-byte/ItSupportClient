@@ -252,10 +252,10 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
 
   const getStatusBadge = (status: WorkStatus) => {
     const styles = {
-      pending: 'bg-yellow-50 text-yellow-700',
-      'in-progress': 'bg-primary-50 text-primary-700',
-      completed: 'bg-green-50 text-green-700',
-      cancelled: 'bg-gray-50 text-gray-700',
+      pending: 'bg-warning-background text-warning-foreground border border-warning-border',
+      'in-progress': 'bg-info-background text-info-foreground border border-info-border',
+      completed: 'bg-success-background text-success-foreground border border-success-border',
+      cancelled: 'bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border border-gray-300 dark:border-gray-600',
     };
     return styles[status];
   };
@@ -467,9 +467,9 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
 
       <div className="grid grid-cols-4 gap-4">
         <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Total</p><p className="text-2xl font-semibold text-gray-900 dark:text-gray-50">{data.length}</p></div>
-        <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Pending</p><p className="text-2xl font-semibold text-yellow-600 dark:text-yellow-400">{data.filter((l) => l.status === 'pending').length}</p></div>
-        <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">In Progress</p><p className="text-2xl font-semibold text-primary-600 dark:text-primary-400">{data.filter((l) => l.status === 'in-progress').length}</p></div>
-        <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Completed</p><p className="text-2xl font-semibold text-green-600 dark:text-green-400">{data.filter((l) => l.status === 'completed').length}</p></div>
+        <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Pending</p><p className="text-2xl font-semibold text-warning">{data.filter((l) => l.status === 'pending').length}</p></div>
+        <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">In Progress</p><p className="text-2xl font-semibold text-info">{data.filter((l) => l.status === 'in-progress').length}</p></div>
+        <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Completed</p><p className="text-2xl font-semibold text-success">{data.filter((l) => l.status === 'completed').length}</p></div>
       </div>
 
       <div className="card p-4 grid grid-cols-2 gap-4">

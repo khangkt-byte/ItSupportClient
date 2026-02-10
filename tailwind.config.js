@@ -7,8 +7,30 @@ module.exports = {
   ],
   theme: {
     extend: {
-      // Custom colors can be extended here
+      // Semantic color tokens - Material Design 3 pattern
+      // Reference: https://m3.material.io/styles/color/system/overview
       colors: {
+        // Semantic status colors (themeable via CSS variables)
+        success: 'var(--color-success)',
+        'success-foreground': 'var(--color-success-foreground)',
+        'success-background': 'var(--color-success-background)',
+        'success-border': 'var(--color-success-border)',
+        
+        warning: 'var(--color-warning)',
+        'warning-foreground': 'var(--color-warning-foreground)',
+        'warning-background': 'var(--color-warning-background)',
+        'warning-border': 'var(--color-warning-border)',
+        
+        error: 'var(--color-error)',
+        'error-foreground': 'var(--color-error-foreground)',
+        'error-background': 'var(--color-error-background)',
+        'error-border': 'var(--color-error-border)',
+        
+        info: 'var(--color-info)',
+        'info-foreground': 'var(--color-info-foreground)',
+        'info-background': 'var(--color-info-background)',
+        'info-border': 'var(--color-info-border)',
+        
         // Keep the existing Tailwind default color palette
       },
       spacing: {

@@ -326,7 +326,7 @@ export function PermissionEditor({
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-4">
           <h3 className="font-semibold text-lg flex items-center gap-2">
-            <Shield className="w-5 h-5 text-green-600" />
+            <Shield className="w-5 h-5 text-success" />
             Assign Permissions Directly ({selectedClaimIds.length} selected)
           </h3>
           <div className="flex items-center gap-2">
@@ -334,8 +334,8 @@ export function PermissionEditor({
               type="button"
               onClick={toggleSelectAllClaims}
               disabled={readOnly}
-              className={`px-3 py-1 text-sm font-medium rounded-md border border-green-200 text-green-700 transition-colors ${
-                readOnly ? 'opacity-60 cursor-not-allowed' : 'hover:bg-green-50 cursor-pointer'
+              className={`px-3 py-1 text-sm font-medium rounded-md border border-success-border text-success-foreground transition-colors ${
+                readOnly ? 'opacity-60 cursor-not-allowed' : 'hover:bg-success-background cursor-pointer'
               }`}
             >
               {areAllClaimsSelected ? 'Deselect All' : 'Select All'}
@@ -343,7 +343,7 @@ export function PermissionEditor({
             <button
               type="button"
               onClick={toggleExpandAll}
-              className="px-3 py-1 text-sm font-medium rounded-md border border-green-200 text-green-700 hover:bg-green-50 transition-colors cursor-pointer"
+              className="px-3 py-1 text-sm font-medium rounded-md border border-success-border text-success-foreground hover:bg-success-background transition-colors cursor-pointer"
             >
               {expandedModules.size === 0 ? 'Expand All' : 'Collapse All'}
             </button>
@@ -365,12 +365,12 @@ export function PermissionEditor({
                 <button
                   type="button"
                   onClick={() => toggleModule(group.category)}
-                  className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left cursor-pointer"
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <Shield className="w-5 h-5 text-green-600 flex-shrink-0" />
-                    <span className="font-semibold text-gray-900 text-base">{group.category}</span>
-                    <span className="text-xs text-gray-500">
+                    <Shield className="w-5 h-5 text-success flex-shrink-0" />
+                    <span className="font-semibold text-gray-900 dark:text-gray-50 text-base">{group.category}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       ({group.claims.length}){selectedInGroup > 0 ? ` • ${selectedInGroup} selected` : ''}
                     </span>
                   </div>
@@ -382,8 +382,8 @@ export function PermissionEditor({
                         toggleSelectAllInGroup(group);
                       }}
                       disabled={readOnly}
-                      className={`px-3 py-1 text-xs font-medium rounded-md border border-green-200 text-green-700 transition-colors ${
-                        readOnly ? 'opacity-60 cursor-not-allowed' : 'hover:bg-green-50 cursor-pointer'
+                      className={`px-3 py-1 text-xs font-medium rounded-md border border-success-border text-success-foreground transition-colors ${
+                        readOnly ? 'opacity-60 cursor-not-allowed' : 'hover:bg-success-background cursor-pointer'
                       }`}
                     >
                       {areAllSelectedInGroup ? 'Deselect All' : 'Select All'}
@@ -410,10 +410,10 @@ export function PermissionEditor({
                             key={claim.claimId}
                             className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors w-full justify-start ${
                               isDirectlySelected
-                                ? 'bg-green-50 text-green-700'
+                                ? 'bg-success-background text-success-foreground border border-success-border'
                                 : isInherited
-                                ? 'bg-primary-50 text-primary-700'
-                                : 'text-gray-700 hover:bg-gray-50'
+                                ? 'bg-info-background text-info-foreground border border-info-border'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                             } ${readOnly ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                             onClick={() => {
                               if (!readOnly) {

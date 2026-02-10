@@ -28,25 +28,25 @@ export function ImportValidation({
     <div className="space-y-6">
       {/* Summary Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 mb-2">
-            <CheckCircle className="size-5 text-green-600" />
-            <span className="text-sm text-gray-600">Total Rows</span>
+            <CheckCircle className="size-5 text-success" />
+            <span className="text-sm text-gray-600 dark:text-gray-400">Total Rows</span>
           </div>
-          <div className="text-2xl font-semibold text-gray-900">{validationResult.totalRows}</div>
+          <div className="text-2xl font-semibold text-gray-900 dark:text-gray-50">{validationResult.totalRows}</div>
         </div>
 
-        <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+        <div className="p-4 bg-warning-background rounded-lg border border-warning-border">
           <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="size-5 text-yellow-600" />
-            <span className="text-sm text-gray-600">Duplicates</span>
+            <AlertTriangle className="size-5 text-warning" />
+            <span className="text-sm text-gray-600 dark:text-gray-400">Duplicates</span>
           </div>
-          <div className="text-2xl font-semibold text-yellow-700">
+          <div className="text-2xl font-semibold text-warning-foreground">
             {validationResult.duplicateCount}
           </div>
         </div>
 
-        <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+        <div className="p-4 bg-error-background rounded-lg border border-error-border">
           <div className="flex items-center gap-2 mb-2">
             <XCircle className="size-5 text-red-600" />
             <span className="text-sm text-gray-600">Invalid Rows</span>
