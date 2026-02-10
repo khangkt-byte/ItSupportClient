@@ -247,7 +247,8 @@ describe('Color Validation Utilities', () => {
         });
 
         test('should distinguish between AA and AAA', () => {
-            const result = validateContrast('#000000', '#CCCCCC');
+            // #000000 vs #767676 has contrast ~4.6:1 (AA but not AAA)
+            const result = validateContrast('#000000', '#767676');
             expect(result.wcagAA).toBe(true);
             expect(result.wcagAAA).toBe(false);
             expect(result.level).toBe('AA');
@@ -370,7 +371,7 @@ describe('Color Validation Utilities', () => {
         });
 
         test('should return AA for adequate but not excellent contrast', () => {
-            const result = validateContrast('#000000', '#CCCCCC');
+            const result = validateContrast('#000000', '#767676');
             expect(getComplianceLevel(result)).toBe('AA');
         });
 

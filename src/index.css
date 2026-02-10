@@ -47,22 +47,251 @@ html.theme-transition *::after {
 
 /**
  * High Contrast Support
- * Enhanced contrast for users with visual impairments
- * @reference https://www.w3.org/WAI/WCAG21/Understanding/contrast-enhanced.html
+ * Enhanced contrast for users with visual impairments (WCAG AAA - 21:1 contrast)
+ * 
+ * Best Practices References:
+ * - Microsoft Fluent UI: https://learn.microsoft.com/en-us/fluent-ui/web-components/design-system/high-contrast
+ * - W3C WCAG 2.1 AAA: https://www.w3.org/WAI/WCAG21/Understanding/contrast-enhanced.html
+ * - Microsoft Edge Blog: https://blogs.windows.com/msedgedev/2020/09/17/styling-for-windows-high-contrast-with-new-standards-for-forced-colors/
+ * 
+ * Implementation:
+ * - Pure black/white (21:1 contrast ratio - exceeds WCAG AAA 7:1)
+ * - Applied IMMEDIATELY when user selects high contrast in app
+ * - No system preference required (user choice > system)
+ * - Compatible with forced-colors mode
  */
-@media (prefers-contrast: more) {
-  html[data-a11y="highContrast"] {
-    --color-primary-50: #ffffff;
-    --color-primary-100: #f0f0f0;
-    --color-primary-200: #d0d0d0;
-    --color-primary-300: #a0a0a0;
-    --color-primary-400: #707070;
-    --color-primary-500: #000000;
-    --color-primary-600: #000000;
-    --color-primary-700: #000000;
-    --color-primary-800: #000000;
-    --color-primary-900: #000000;
-    --color-primary-950: #000000;
+
+/* App-controlled high contrast (user choice in sidebar) */
+html[data-a11y="highContrast"] {
+  /* Force high contrast colors (21:1 ratio) */
+  forced-color-adjust: none;
+  
+  /* Pure black/white palette for maximum contrast */
+  --color-primary-50: #ffffff;
+  --color-primary-100: #f5f5f5;
+  --color-primary-200: #e0e0e0;
+  --color-primary-300: #b0b0b0;
+  --color-primary-400: #808080;
+  --color-primary-500: #000000;
+  --color-primary-600: #000000;
+  --color-primary-700: #000000;
+  --color-primary-800: #000000;
+  --color-primary-900: #000000;
+  --color-primary-950: #000000;
+  
+  /* High contrast text colors */
+  --color-text-primary: #000000;
+  --color-text-secondary: #333333;
+  --color-text-disabled: #808080;
+  
+  /* High contrast backgrounds */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f5f5f5;
+  --color-bg-accent: #000000;
+  
+  /* High contrast borders (at least 3:1 with adjacent colors) */
+  --color-border-primary: #000000;
+  --color-border-secondary: #666666;
+  
+  /* High contrast interactive elements */
+  --color-link: #0000ff; /* Blue - traditional accessible link color */
+  --color-link-visited: #800080; /* Purple - accessible visited link */
+  --color-focus: #ff0000; /* Red focus ring for 21:1 contrast */
+  
+  /* CRITICAL: Override ALL semantic colors to pure black/white in HC mode */
+  /* This ensures no brand colors (green, purple, blue) appear in high contrast */
+  --color-success: #000000;    /* Was green - now pure black */
+  --color-error: #000000;      /* Was red - now pure black */
+  --color-warning: #000000;    /* Was amber - now pure black */
+  --color-info: #000000;       /* Was blue - now pure black */
+  --color-disabled: #808080;   /* Gray (intentional reduced contrast) */
+  
+  /* CRITICAL FIX: Override Tailwind hard-coded color classes */
+  /* Components use text-green-600, text-purple-700, etc. which bypass CSS variables */
+  /* Force ALL brand colors to pure black for 21:1 contrast */
+}
+
+/* Override Tailwind color utilities in light HC mode */
+html[data-a11y="highContrast"] .text-green-400,
+html[data-a11y="highContrast"] .text-green-500,
+html[data-a11y="highContrast"] .text-green-600,
+html[data-a11y="highContrast"] .text-green-700,
+html[data-a11y="highContrast"] .text-blue-400,
+html[data-a11y="highContrast"] .text-blue-500,
+html[data-a11y="highContrast"] .text-blue-600,
+html[data-a11y="highContrast"] .text-blue-700,
+html[data-a11y="highContrast"] .text-purple-400,
+html[data-a11y="highContrast"] .text-purple-500,
+html[data-a11y="highContrast"] .text-purple-600,
+html[data-a11y="highContrast"] .text-purple-700,
+html[data-a11y="highContrast"] .text-red-400,
+html[data-a11y="highContrast"] .text-red-500,
+html[data-a11y="highContrast"] .text-red-600,
+html[data-a11y="highContrast"] .text-red-700,
+html[data-a11y="highContrast"] .text-amber-400,
+html[data-a11y="highContrast"] .text-amber-500,
+html[data-a11y="highContrast"] .text-amber-600,
+html[data-a11y="highContrast"] .text-amber-700,
+html[data-a11y="highContrast"] .text-cyan-400,
+html[data-a11y="highContrast"] .text-cyan-500,
+html[data-a11y="highContrast"] .text-cyan-600,
+html[data-a11y="highContrast"] .text-cyan-700,
+html[data-a11y="highContrast"] .text-indigo-400,
+html[data-a11y="highContrast"] .text-indigo-500,
+html[data-a11y="highContrast"] .text-indigo-600,
+html[data-a11y="highContrast"] .text-indigo-700 {
+  color: #000000 !important;
+}
+
+html[data-a11y="highContrast"] .bg-green-50,
+html[data-a11y="highContrast"] .bg-green-100,
+html[data-a11y="highContrast"] .bg-green-600,
+html[data-a11y="highContrast"] .bg-blue-50,
+html[data-a11y="highContrast"] .bg-blue-100,
+html[data-a11y="highContrast"] .bg-purple-50,
+html[data-a11y="highContrast"] .bg-purple-100,
+html[data-a11y="highContrast"] .bg-red-50,
+html[data-a11y="highContrast"] .bg-red-100,
+html[data-a11y="highContrast"] .bg-amber-50,
+html[data-a11y="highContrast"] .bg-amber-100 {
+  background-color: #ffffff !important;
+}
+
+html[data-a11y="highContrast"] .border-green-200,
+html[data-a11y="highContrast"] .border-blue-200,
+html[data-a11y="highContrast"] .border-purple-200,
+html[data-a11y="highContrast"] .border-red-200 {
+  border-color: #000000 !important;
+}
+
+/* Override hover states in light HC mode */
+html[data-a11y="highContrast"] .hover\:bg-green-50:hover,
+html[data-a11y="highContrast"] .hover\:bg-green-700:hover,
+html[data-a11y="highContrast"] .hover\:bg-blue-50:hover,
+html[data-a11y="highContrast"] .hover\:bg-purple-50:hover {
+  background-color: #f5f5f5 !important; /* Light gray for hover feedback */
+}
+
+html[data-a11y="highContrast"] .hover\:text-green-600:hover,
+html[data-a11y="highContrast"] .hover\:text-blue-600:hover,
+html[data-a11y="highContrast"] .hover\:text-purple-600:hover {
+  color: #000000 !important;
+}
+
+/* Dark mode high contrast variant */
+html[data-a11y="highContrast"][data-theme*="dark"] {
+  /* Invert for dark backgrounds */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #cccccc;
+  --color-bg-primary: #000000;
+  --color-bg-secondary: #1a1a1a;
+  --color-bg-accent: #ffffff;
+  --color-border-primary: #ffffff;
+  --color-link: #66b3ff; /* Light blue for dark backgrounds */
+  
+  /* CRITICAL: Override ALL semantic colors to pure white in dark HC mode */
+  /* This ensures 21:1 contrast - NO brand colors allowed */
+  --color-success: #ffffff;    /* Pure white (was green) */
+  --color-error: #ffffff;      /* Pure white (was red) */
+  --color-warning: #ffffff;    /* Pure white (was amber) */
+  --color-info: #ffffff;       /* Pure white (was blue) */
+  --color-disabled: #808080;   /* Gray (intentional reduced contrast) */
+}
+
+/* Override Tailwind color utilities in dark HC mode */
+html[data-a11y="highContrast"][data-theme*="dark"] .text-green-400,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-green-500,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-green-600,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-green-700,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-blue-400,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-blue-500,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-blue-600,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-blue-700,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-purple-400,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-purple-500,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-purple-600,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-purple-700,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-red-400,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-red-500,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-red-600,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-red-700,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-amber-400,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-amber-500,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-amber-600,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-amber-700,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-cyan-400,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-cyan-500,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-cyan-600,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-cyan-700,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-indigo-400,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-indigo-500,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-indigo-600,
+html[data-a11y="highContrast"][data-theme*="dark"] .text-indigo-700 {
+  color: #ffffff !important;
+}
+
+html[data-a11y="highContrast"][data-theme*="dark"] .bg-green-50,
+html[data-a11y="highContrast"][data-theme*="dark"] .bg-green-100,
+html[data-a11y="highContrast"][data-theme*="dark"] .bg-green-600,
+html[data-a11y="highContrast"][data-theme*="dark"] .bg-green-700,
+html[data-a11y="highContrast"][data-theme*="dark"] .bg-green-900,
+html[data-a11y="highContrast"][data-theme*="dark"] .bg-blue-50,
+html[data-a11y="highContrast"][data-theme*="dark"] .bg-blue-100,
+html[data-a11y="highContrast"][data-theme*="dark"] .bg-purple-50,
+html[data-a11y="highContrast"][data-theme*="dark"] .bg-purple-100,
+html[data-a11y="highContrast"][data-theme*="dark"] .bg-red-50,
+html[data-a11y="highContrast"][data-theme*="dark"] .bg-red-100,
+html[data-a11y="highContrast"][data-theme*="dark"] .bg-amber-50,
+html[data-a11y="highContrast"][data-theme*="dark"] .bg-amber-100 {
+  background-color: #000000 !important;
+}
+
+html[data-a11y="highContrast"][data-theme*="dark"] .border-green-200,
+html[data-a11y="highContrast"][data-theme*="dark"] .border-green-800,
+html[data-a11y="highContrast"][data-theme*="dark"] .border-blue-200,
+html[data-a11y="highContrast"][data-theme*="dark"] .border-blue-800,
+html[data-a11y="highContrast"][data-theme*="dark"] .border-purple-200,
+html[data-a11y="highContrast"][data-theme*="dark"] .border-purple-800,
+html[data-a11y="highContrast"][data-theme*="dark"] .border-red-200,
+html[data-a11y="highContrast"][data-theme*="dark"] .border-red-800 {
+  border-color: #ffffff !important;
+}
+
+/* Override hover states in dark HC mode */
+html[data-a11y="highContrast"][data-theme*="dark"] .hover\:bg-green-700:hover,
+html[data-a11y="highContrast"][data-theme*="dark"] .hover\:bg-blue-700:hover,
+html[data-a11y="highContrast"][data-theme*="dark"] .hover\:bg-purple-700:hover {
+  background-color: #1a1a1a !important; /* Dark gray for hover feedback */
+}
+
+html[data-a11y="highContrast"][data-theme*="dark"] .hover\:text-green-400:hover,
+html[data-a11y="highContrast"][data-theme*="dark"] .hover\:text-blue-400:hover,
+html[data-a11y="highContrast"][data-theme*="dark"] .hover\:text-purple-400:hover {
+  color: #ffffff !important;
+}
+
+/* System-level forced colors mode (Windows High Contrast, etc.) */
+@media (forced-colors: active) {
+  html {
+    forced-color-adjust: auto;
+    /* Use system colors per Microsoft/W3C standards */
+    background: Canvas;
+    color: CanvasText;
+  }
+  
+  a {
+    color: LinkText;
+  }
+  
+  button {
+    background: ButtonFace;
+    color: ButtonText;
+    border-color: ButtonText;
+  }
+  
+  :focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
   }
 }
 
