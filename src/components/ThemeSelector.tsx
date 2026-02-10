@@ -1,8 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Undo, RotateCcw, Eye } from 'lucide-react';
+import { ChevronRight, Undo, RotateCcw, Eye } from 'lucide-react';
 import { useTheme } from '../lib/hooks/useTheme';
 import type { Theme } from '../lib/hooks/useTheme';
-import { palettes, BrandTheme } from '../lib/constants/palettes';
 import {
   Dialog,
   DialogContent,
@@ -135,10 +134,10 @@ export function ThemeSelector() {
       {/* Theme Selector Button in Sidebar */}
       <button
         onClick={() => setIsOpen(true)}
-        className="w-full min-h-[48px] rounded-lg flex items-center border-none px-[15px] whitespace-nowrap transition-all duration-300 hover:bg-[var(--sidebar-color-hover-secondary)] bg-[var(--sidebar-color-bg-secondary)] text-[var(--sidebar-color-text-primary)]"
+        className="w-full min-h-12 rounded-lg flex items-center border-none px-3.75 whitespace-nowrap transition-all duration-300 hover:bg-(--sidebar-color-hover-secondary) bg-(--sidebar-color-bg-secondary) text-(--sidebar-color-text-primary)"
         title={`Current theme: ${currentOption.label}`}
       >
-        <div className="flex gap-[10px] items-center flex-1">
+        <div className="flex gap-2.5 items-center flex-1">
           <span className="material-symbols-rounded">palette</span>
           <span className="text-base">{currentOption.label}</span>
         </div>

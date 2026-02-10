@@ -261,7 +261,7 @@ export function PermissionEditor({
     <div className="space-y-6">
       <div className="bg-primary-50 border border-primary-200 rounded-lg p-4">
         <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" />
+          <Info className="w-5 h-5 text-primary-600 mt-0.5 shrink-0" />
           <div className="flex-1 text-sm">
             <p className="font-medium text-primary-900 mb-1">Hybrid Permission Model (RBAC + Direct Assignment)</p>
             <p className="text-primary-700">
@@ -309,11 +309,11 @@ export function PermissionEditor({
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">{role.description}</div>
                     )}
                   </div>
-                  <span className="text-xs text-gray-400 flex-shrink-0">
+                  <span className="text-xs text-gray-400 shrink-0">
                     {claimCount} perms
                   </span>
                   {isSelected && (
-                    <CheckCircle className="w-5 h-5 text-primary-600 flex-shrink-0" />
+                    <CheckCircle className="w-5 h-5 text-primary-600 shrink-0" />
                   )}
                 </label>
               );
@@ -368,13 +368,13 @@ export function PermissionEditor({
                   className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left cursor-pointer"
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <Shield className="w-5 h-5 text-success flex-shrink-0" />
+                    <Shield className="w-5 h-5 text-success shrink-0" />
                     <span className="font-semibold text-gray-900 dark:text-gray-50 text-base">{group.category}</span>
                     <span className="text-xs text-gray-500 dark:text-gray-400">
                       ({group.claims.length}){selectedInGroup > 0 ? ` • ${selectedInGroup} selected` : ''}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
                     <button
                       type="button"
                       onClick={(e) => {

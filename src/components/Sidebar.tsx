@@ -1,15 +1,6 @@
 import { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from './ui/dialog';
-import { Sun, Moon, Palette, Check } from 'lucide-react';
-import { BrandTheme, palettes } from '../lib/constants/palettes';
 import { useTheme } from '../lib/hooks/useTheme';
 import { ThemeSelector } from './ThemeSelector';
-import type { Theme } from '../lib/hooks/useTheme';
 
 interface SidebarProps {
   currentView: string;
@@ -63,9 +54,9 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
   return (
     <>
       {/* Mobile navbar */}
-      <nav className="site-nav sticky top-0 hidden max-md:block px-5 py-[15px] border-b bg-[var(--sidebar-color-bg-primary)] border-[var(--sidebar-color-border-hr)]">
+      <nav className="site-nav sticky top-0 hidden max-md:block px-5 py-3.75 border-b bg-(--sidebar-color-bg-primary) border-(--sidebar-color-border-hr)">
         <button 
-          className="h-10 w-10 border-none flex items-center justify-center rounded-lg absolute right-5 transition-all duration-[400ms] hover:bg-[var(--sidebar-color-hover-secondary)] bg-[var(--sidebar-color-bg-secondary)] text-[var(--sidebar-color-text-primary)] [position:unset]"
+          className="h-10 w-10 border-none flex items-center justify-center rounded-lg right-5 transition-all duration-400 hover:bg-(--sidebar-color-hover-secondary) bg-(--sidebar-color-bg-secondary) text-(--sidebar-color-text-primary)"
           onClick={toggleSidebar}
         >
           <span className="material-symbols-rounded text-[1.75rem]">menu</span>
@@ -74,34 +65,34 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
 
       {/* Sidebar */}
       <aside 
-        className={`sticky top-0 h-screen flex flex-shrink-0 flex-col bg-[var(--sidebar-color-bg-sidebar)] border-r border-[var(--sidebar-color-border-hr)] transition-[width] duration-[400ms] ${collapsed ? 'w-[90px]' : 'w-[270px]'} sidebar-container ${collapsed ? 'collapsed' : ''}`} 
+        className={`sticky top-0 h-screen flex shrink-0 flex-col bg-(--sidebar-color-bg-sidebar) border-r border-(--sidebar-color-border-hr) transition-[width] duration-400 ${collapsed ? 'w-22.5' : 'w-67.5'} sidebar-container ${collapsed ? 'collapsed' : ''}`} 
         style={{ 
           boxShadow: '0 3px 9px var(--sidebar-color-shadow)',
           transitionDuration: prefersReducedMotion ? '0ms' : '400ms'
         }}
       >
         {/* Sidebar header */}
-        <div className="py-5 px-[18px] flex relative items-center justify-between border-b border-[var(--sidebar-color-border-hr)]">
+        <div className="py-5 px-4.5 flex relative items-center justify-between border-b border-(--sidebar-color-border-hr)">
           <div className="flex items-center gap-3">
             <span 
-              className={`material-symbols-rounded block object-contain rounded-full transition-opacity ${prefersReducedMotion ? 'duration-0' : 'duration-[400ms]'} ${collapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+              className={`material-symbols-rounded block object-contain rounded-full transition-opacity ${prefersReducedMotion ? 'duration-0' : 'duration-400'} ${collapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
               style={{ color: '#695CFE', fontSize: '46px', width: '46px', height: '46px' }}
             >
               headset_mic
             </span>
-            <span className={`font-semibold text-lg whitespace-nowrap transition-opacity ${prefersReducedMotion ? 'duration-0' : 'duration-300'} text-[var(--sidebar-color-text-primary)] ${collapsed ? 'opacity-0 pointer-events-none absolute w-0 overflow-hidden' : 'opacity-100'}`}>
+            <span className={`font-semibold text-lg whitespace-nowrap transition-opacity ${prefersReducedMotion ? 'duration-0' : 'duration-300'} text-(--sidebar-color-text-primary) ${collapsed ? 'opacity-0 pointer-events-none absolute w-0 overflow-hidden' : 'opacity-100'}`}>
               IT Support
             </span>
           </div>
           <button 
-            className={`h-10 w-10 border-none flex absolute right-[18px] items-center justify-center rounded-lg transition-all ${prefersReducedMotion ? 'duration-0' : 'duration-[400ms]'} hover:bg-[var(--sidebar-color-hover-secondary)] bg-[var(--sidebar-color-bg-secondary)] text-[var(--sidebar-color-text-primary)] ${collapsed ? '-translate-x-0.5 h-12 w-[50px]' : ''} sidebar-toggle-btn`}
+            className={`h-10 w-10 border-none flex absolute right-4.5 items-center justify-center rounded-lg transition-all ${prefersReducedMotion ? 'duration-0' : 'duration-400'} hover:bg-(--sidebar-color-hover-secondary) bg-(--sidebar-color-bg-secondary) text-(--sidebar-color-text-primary) ${collapsed ? '-translate-x-0.5 h-12 w-12.5' : ''} sidebar-toggle-btn`}
             onClick={toggleSidebar}
           >
-            <span className={`material-symbols-rounded text-[1.75rem] transition-transform ${prefersReducedMotion ? 'duration-0' : 'duration-[400ms]'} ${collapsed ? 'rotate-180' : ''}`}>chevron_left</span>
+            <span className={`material-symbols-rounded text-[1.75rem] transition-transform ${prefersReducedMotion ? 'duration-0' : 'duration-400'} ${collapsed ? 'rotate-180' : ''}`}>chevron_left</span>
           </button>
         </div>
 
-        <div className={`flex-1 py-5 px-[18px] overflow-hidden overflow-y-auto ${collapsed ? 'scrollbar-none' : ''}`} style={{ scrollbarWidth: collapsed ? 'none' : 'thin', scrollbarColor: 'var(--sidebar-color-text-placeholder) transparent' }}>
+        <div className={`flex-1 py-5 px-4.5 overflow-hidden overflow-y-auto ${collapsed ? 'scrollbar-none' : ''}`} style={{ scrollbarWidth: collapsed ? 'none' : 'thin', scrollbarColor: 'var(--sidebar-color-text-placeholder) transparent' }}>
           {/* Sidebar Menu */}
           <ul className="flex gap-1 list-none flex-col">
             {menuItems.map((item) => {
@@ -111,7 +102,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
                 <li key={item.id}>
                   <button
                     onClick={() => onNavigate(item.id)}
-                    className={`flex gap-3 whitespace-nowrap rounded-lg py-3 px-[15px] items-center no-underline transition-all duration-300 border-none bg-none w-full ${isActive ? 'text-white bg-[var(--sidebar-color-hover-primary)]' : 'text-[var(--sidebar-color-text-primary)] hover:text-white hover:bg-[var(--sidebar-color-hover-primary)]'}`}
+                    className={`flex gap-3 whitespace-nowrap rounded-lg py-3 px-3.75 items-center no-underline transition-all duration-300 border-none bg-none w-full ${isActive ? 'text-white bg-(--sidebar-color-hover-primary)' : 'text-(--sidebar-color-text-primary) hover:text-white hover:bg-(--sidebar-color-hover-primary)'}`}
                   >
                     <span className="material-symbols-rounded">{item.icon}</span>
                     <span className={`transition-opacity duration-300 ${collapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>{item.label}</span>
@@ -123,17 +114,17 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
         </div>
 
         {/* Sidebar Footer */}
-        <div className="py-5 px-[18px] border-t border-[var(--sidebar-color-border-hr)] space-y-3">
+        <div className="py-5 px-4.5 border-t border-(--sidebar-color-border-hr) space-y-3">
           {/* New Theme Selector Component */}
           <ThemeSelector />
 
           {/* Accessibility Mode Button */}
           <button
             onClick={() => setIsAccessibilityOpen(!isAccessibilityOpen)}
-            className="w-full min-h-[48px] rounded-lg flex items-center border-none px-[15px] whitespace-nowrap transition-all duration-300 hover:bg-[var(--sidebar-color-hover-secondary)] bg-[var(--sidebar-color-bg-secondary)] text-[var(--sidebar-color-text-primary)]"
+            className="w-full min-h-12 rounded-lg flex items-center border-none px-3.75 whitespace-nowrap transition-all duration-300 hover:bg-(--sidebar-color-hover-secondary) bg-(--sidebar-color-bg-secondary) text-(--sidebar-color-text-primary)"
             title="Accessibility options"
           >
-            <div className="flex gap-[10px] items-center flex-1">
+            <div className="flex gap-2.5 items-center flex-1">
               <span className="material-symbols-rounded">accessibility</span>
               <span className={`text-base ${collapsed ? 'opacity-0 w-0' : 'opacity-100'}`} style={{ transition: collapsed ? 'all 0.2s ease' : 'opacity 0.4s 0.2s ease' }}>
                 Accessibility
@@ -143,8 +134,8 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
 
           {/* Accessibility Options Dropdown */}
           {isAccessibilityOpen && (
-            <div className="bg-[var(--sidebar-color-bg-secondary)] rounded-lg p-3 space-y-2 border border-[var(--sidebar-color-border-hr)] hidden md:block">
-              <p className="text-xs font-semibold text-[var(--sidebar-color-text-primary)] mb-2">Contrast Mode:</p>
+            <div className="bg-(--sidebar-color-bg-secondary) rounded-lg p-3 space-y-2 border border-(--sidebar-color-border-hr) hidden md:block">
+              <p className="text-xs font-semibold text-(--sidebar-color-text-primary) mb-2">Contrast Mode:</p>
               <button
                 onClick={() => setAccessibilityMode('default')}
                 className={`w-full px-3 py-2 rounded text-sm font-medium transition-all text-left ${

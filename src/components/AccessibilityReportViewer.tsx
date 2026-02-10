@@ -118,7 +118,7 @@ export function AccessibilityReportViewer() {
                         violation.severity
                     )}`}
                 >
-                    <div className="flex-shrink-0">{getSeverityIcon(violation.severity)}</div>
+                    <div className="shrink-0">{getSeverityIcon(violation.severity)}</div>
 
                     <div className="flex-1 text-left">
                         <div className="flex items-center gap-2">
@@ -206,7 +206,7 @@ export function AccessibilityReportViewer() {
         return (
             <Card className="p-6 bg-red-50 border-red-200">
                 <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
                     <div>
                         <h3 className="font-semibold text-red-900">Error generating report</h3>
                         <p className="text-sm text-red-700 mt-1">{error}</p>
@@ -406,7 +406,7 @@ export function AccessibilityReportViewer() {
                             <Card key={index} className="p-4">
                                 <div className="flex items-start gap-4">
                                     <div
-                                        className="w-16 h-16 rounded-lg border-2 border-gray-200 flex-shrink-0 shadow-sm"
+                                        className="w-16 h-16 rounded-lg border-2 border-gray-200 shrink-0 shadow-sm"
                                         style={{ backgroundColor: color.value }}
                                     />
                                     <div className="flex-1">
