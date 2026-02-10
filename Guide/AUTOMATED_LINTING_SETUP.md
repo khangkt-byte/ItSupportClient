@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project includes automated linting to prevent hardcoded colors and enforce semantic token usage.
+This project uses **ESLint 9** with flat config format to automatically detect hardcoded colors and enforce semantic token usage.
 
 ---
 
@@ -86,15 +86,22 @@ On push to `main` or `develop`:
 
 ## ESLint Rule Configuration
 
+### Version
+- **ESLint:** 9.39.2 (latest)
+- **TypeScript ESLint:** 8.55.0
+- **Config Format:** Flat config (`eslint.config.js`)
+
 ### Location
-`.eslintrc.cjs` - Main ESLint config
+`eslint.config.js` - Main ESLint flat config (new format)
 
 ### Rule Options
 
 ```javascript
-{
+// In eslint.config.js
+export default tseslint.config({
+  // ... other config
   rules: {
-    'no-hardcoded-colors': ['error', {
+    'custom-rules/no-hardcoded-colors': ['error', {
       allowTransparent: true,    // Allow 'transparent'
       allowInherit: true,         // Allow 'inherit'
       ignorePatterns: [           // Custom ignore patterns
@@ -103,7 +110,7 @@ On push to `main` or `develop`:
       ],
     }],
   }
-}
+});
 ```
 
 ### Disable for Specific Lines

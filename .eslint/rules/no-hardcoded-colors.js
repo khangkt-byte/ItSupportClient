@@ -80,7 +80,7 @@ function getSuggestion(colorValue) {
 /**
  * ESLint rule definition
  */
-module.exports = {
+export default {
     meta: {
         type: 'suggestion',
         docs: {
@@ -238,7 +238,9 @@ module.exports = {
             Literal(node) {
                 if (typeof node.value === 'string') {
                     // Check if this is a CSS property value
-                    const parent = context.getAncestors().slice(-1)[0];
+                    const sourceCode = context.sourceCode || context.getSourceCode();
+                    const ancestors = sourceCode.getAncestors(node);
+                    const parent = ancestors[ancestors.length - 1];
                     
                     // In object properties (CSS-in-JS)
                     if (parent && parent.type === 'Property') {
