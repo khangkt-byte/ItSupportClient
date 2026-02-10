@@ -58,11 +58,11 @@ export function AreaManagement({ data, setData }: Props) {
               <p className="text-sm text-gray-600 dark:text-gray-400">{item.description}</p>
             </div>
             <div className="flex gap-2 mt-4">
-              <button onClick={() => openForm(item)} className="flex-1 px-3 py-2 text-sm bg-primary-50 dark:bg-gray-700 text-primary-600 dark:text-primary-400 rounded-lg cursor-pointer hover:bg-primary-100 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1">
+              <button onClick={() => openForm(item)} className="flex-1 px-3 py-2 text-sm bg-primary-50 dark:bg-gray-700 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1">
                 <Edit className="w-4 h-4" />
                 Edit
               </button>
-              <button onClick={() => setConfirmDelete(item)} className="flex-1 px-3 py-2 text-sm bg-red-50 dark:bg-gray-700 text-red-600 dark:text-red-400 rounded-lg cursor-pointer hover:bg-red-100 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1">
+              <button onClick={() => setConfirmDelete(item)} className="flex-1 px-3 py-2 text-sm bg-red-50 dark:bg-gray-700 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1">
                 <Trash2 className="w-4 h-4" />
                 Delete
               </button>
@@ -75,7 +75,7 @@ export function AreaManagement({ data, setData }: Props) {
           <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col min-h-[200px]">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">{editing ? 'Edit' : 'Add'}</h3>
-              <button onClick={() => setShowForm(false)} className="cursor-pointer hover:text-gray-600 dark:hover:text-gray-300 text-gray-900 dark:text-gray-50 transition-colors">
+              <button onClick={() => setShowForm(false)} className="hover:text-gray-600 dark:hover:text-gray-300 text-gray-900 dark:text-gray-50 transition-colors">
                 <X className="w-6 h-6" />
               </button>
             </div>

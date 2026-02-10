@@ -601,6 +601,24 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     font: inherit;
   }
   
+  /* Make all buttons and clickable elements have pointer cursor by default */
+  button,
+  [role="button"],
+  [type="button"],
+  [type="submit"],
+  [type="reset"] {
+    cursor: pointer;
+  }
+  
+  /* Disabled buttons should show not-allowed cursor */
+  button:disabled,
+  [role="button"]:disabled,
+  [type="button"]:disabled,
+  [type="submit"]:disabled,
+  [type="reset"]:disabled {
+    cursor: not-allowed;
+  }
+  
   p,
   h1,
   h2,

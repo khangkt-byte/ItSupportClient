@@ -304,7 +304,7 @@ export function RoleManagement({ data, setData }: Props) {
                   <p className="font-medium text-red-900 dark:text-red-400">Error</p>
                   <p className="text-sm text-red-700 dark:text-red-300 mt-0.5">{error}</p>
                 </div>
-                <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 cursor-pointer transition-colors">
+                <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 transition-colors">
                   <X className="w-4 h-4" />
                 </button>
               </div>

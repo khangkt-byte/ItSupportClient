@@ -179,7 +179,7 @@ export function ImportWizard({
               Step {step} of 3: {step === 1 ? 'Upload File' : step === 2 ? 'Validation & Preview' : 'Import Results'}
             </p>
           </div>
-          <button onClick={onClose} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer transition-colors">
+          <button onClick={onClose} className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -208,7 +208,7 @@ export function ImportWizard({
                 </p>
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 cursor-pointer transition-colors"
+                  className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
                 >
                   Choose File
                 </button>
@@ -233,7 +233,7 @@ export function ImportWizard({
                     </div>
                     <button
                       onClick={() => setFile(null)}
-                      className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 cursor-pointer transition-colors"
+                      className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors"
                     >
                       <X className="w-5 h-5" />
                     </button>
@@ -556,7 +556,7 @@ export function ImportWizard({
               <div className="flex justify-end">
                 <button
                   onClick={onClose}
-                  className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-medium cursor-pointer"
+                  className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-medium"
                 >
                   Done
                 </button>

@@ -87,7 +87,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
       {/* Mobile navbar */}
       <nav className="site-nav sticky top-0 hidden max-md:block px-5 py-[15px] border-b bg-[var(--sidebar-color-bg-primary)] border-[var(--sidebar-color-border-hr)]">
         <button 
-          className="h-10 w-10 border-none cursor-pointer flex items-center justify-center rounded-lg absolute right-5 transition-all duration-[400ms] hover:bg-[var(--sidebar-color-hover-secondary)] bg-[var(--sidebar-color-bg-secondary)] text-[var(--sidebar-color-text-primary)] [position:unset]"
+          className="h-10 w-10 border-none flex items-center justify-center rounded-lg absolute right-5 transition-all duration-[400ms] hover:bg-[var(--sidebar-color-hover-secondary)] bg-[var(--sidebar-color-bg-secondary)] text-[var(--sidebar-color-text-primary)] [position:unset]"
           onClick={toggleSidebar}
         >
           <span className="material-symbols-rounded text-[1.75rem]">menu</span>
@@ -116,7 +116,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
             </span>
           </div>
           <button 
-            className={`h-10 w-10 border-none cursor-pointer flex absolute right-[18px] items-center justify-center rounded-lg transition-all ${prefersReducedMotion ? 'duration-0' : 'duration-[400ms]'} hover:bg-[var(--sidebar-color-hover-secondary)] bg-[var(--sidebar-color-bg-secondary)] text-[var(--sidebar-color-text-primary)] ${collapsed ? '-translate-x-0.5 h-12 w-[50px]' : ''} sidebar-toggle-btn`}
+            className={`h-10 w-10 border-none flex absolute right-[18px] items-center justify-center rounded-lg transition-all ${prefersReducedMotion ? 'duration-0' : 'duration-[400ms]'} hover:bg-[var(--sidebar-color-hover-secondary)] bg-[var(--sidebar-color-bg-secondary)] text-[var(--sidebar-color-text-primary)] ${collapsed ? '-translate-x-0.5 h-12 w-[50px]' : ''} sidebar-toggle-btn`}
             onClick={toggleSidebar}
           >
             <span className={`material-symbols-rounded text-[1.75rem] transition-transform ${prefersReducedMotion ? 'duration-0' : 'duration-[400ms]'} ${collapsed ? 'rotate-180' : ''}`}>chevron_left</span>
@@ -133,7 +133,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
                 <li key={item.id}>
                   <button
                     onClick={() => onNavigate(item.id)}
-                    className={`flex gap-3 whitespace-nowrap rounded-lg py-3 px-[15px] items-center no-underline transition-all duration-300 border-none bg-none w-full cursor-pointer ${isActive ? 'text-white bg-[var(--sidebar-color-hover-primary)]' : 'text-[var(--sidebar-color-text-primary)] hover:text-white hover:bg-[var(--sidebar-color-hover-primary)]'}`}
+                    className={`flex gap-3 whitespace-nowrap rounded-lg py-3 px-[15px] items-center no-underline transition-all duration-300 border-none bg-none w-full ${isActive ? 'text-white bg-[var(--sidebar-color-hover-primary)]' : 'text-[var(--sidebar-color-text-primary)] hover:text-white hover:bg-[var(--sidebar-color-hover-primary)]'}`}
                   >
                     <span className="material-symbols-rounded">{item.icon}</span>
                     <span className={`transition-opacity duration-300 ${collapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>{item.label}</span>
@@ -148,7 +148,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
         <div className="py-5 px-[18px] whitespace-nowrap border-t border-[var(--sidebar-color-border-hr)]">
           <button 
             onClick={() => setIsThemeModalOpen(true)}
-            className="w-full min-h-[48px] rounded-lg flex items-center cursor-pointer border-none px-[15px] whitespace-nowrap transition-all duration-300 hover:bg-[var(--sidebar-color-hover-secondary)] bg-[var(--sidebar-color-bg-secondary)] text-[var(--sidebar-color-text-primary)]"
+            className="w-full min-h-[48px] rounded-lg flex items-center border-none px-[15px] whitespace-nowrap transition-all duration-300 hover:bg-[var(--sidebar-color-hover-secondary)] bg-[var(--sidebar-color-bg-secondary)] text-[var(--sidebar-color-text-primary)]"
           >
             <div className="flex gap-[10px] items-center">
               <span className="material-symbols-rounded">{currentThemeOption.materialIcon}</span>

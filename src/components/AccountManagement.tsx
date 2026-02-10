@@ -513,14 +513,14 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                           <>
                             <button
                               onClick={() => openForm(item as any)}
-                              className="text-primary-600 inline-flex items-center justify-center cursor-pointer hover:text-primary-800 transition-colors"
+                              className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors"
                               title="Edit account"
                             >
                               <Edit className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => openConfirm(item.isLocked ? 'unlock' : 'lock', item as any)}
-                              className={`inline-flex items-center justify-center cursor-pointer transition-colors ${
+                              className={`inline-flex items-center justify-center transition-colors ${
                                 item.isLocked
                                   ? 'text-green-600 hover:text-green-800'
                                   : 'text-orange-600 hover:text-orange-800'
@@ -538,7 +538,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                         {hasPermission(Permissions.Account.Delete) && (
                           <button
                             onClick={() => openConfirm('delete', item as any)}
-                            className="text-red-600 inline-flex items-center justify-center cursor-pointer hover:text-red-800 transition-colors"
+                            className="text-red-600 inline-flex items-center justify-center hover:text-red-800 transition-colors"
                             title="Delete account"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -637,7 +637,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
               </div>
               <button
                 onClick={() => setShowForm(false)}
-                className="cursor-pointer hover:text-gray-600 dark:hover:text-gray-300 transition-colors text-gray-900 dark:text-gray-50"
+                className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors text-gray-900 dark:text-gray-50"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -653,7 +653,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                 </div>
                 <button
                   onClick={() => setError(null)}
-                  className="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 cursor-pointer transition-colors"
+                  className="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -811,7 +811,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
               </div>
               <button
                 onClick={closeConfirm}
-                className="cursor-pointer hover:text-gray-600 transition-colors"
+                className="hover:text-gray-600 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>

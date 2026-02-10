@@ -93,7 +93,7 @@ export function EmployeeDashboard({ user, onLogout, currentView, onNavigate }: P
         </div>
         <button
           onClick={() => setShowLogoutConfirm(true)}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2 cursor-pointer"
+          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
         >
           <LogOut className="w-4 h-4" />
           Logout
