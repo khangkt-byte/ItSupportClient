@@ -508,18 +508,36 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                   <td className="px-4 py-3 text-sm"><span className={`px-2 py-1 text-xs rounded ${getStatusBadge(log.status)}`}>{log.status}</span></td>
                   <td className="px-4 py-3 text-sm text-right">
                     <div className="inline-flex items-center gap-2">
-                      <button onClick={() => toggleRow(log.id)} className="text-primary-600 inline-flex items-center justify-center cursor-pointer hover:text-primary-800">{expandedRows.has(log.id) ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}</button>
+                      <button 
+                        onClick={() => toggleRow(log.id)} 
+                        className="text-primary-600 inline-flex items-center justify-center cursor-pointer hover:text-primary-800 transition-colors"
+                        title={expandedRows.has(log.id) ? "Collapse details" : "Expand details"}
+                      >
+                        {expandedRows.has(log.id) ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </button>
                       <PermissionGuard 
                         permission={Permissions.IssueLog.Edit}
                         fallback={null}
                       >
-                        <button onClick={() => openForm(log)} className="text-primary-600 inline-flex items-center justify-center cursor-pointer hover:text-primary-800"><Edit className="w-4 h-4" /></button>
+                        <button 
+                          onClick={() => openForm(log)} 
+                          className="text-primary-600 inline-flex items-center justify-center cursor-pointer hover:text-primary-800 transition-colors"
+                          title="Edit work log"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
                       </PermissionGuard>
                       <PermissionGuard 
                         permission={Permissions.IssueLog.Delete}
                         fallback={null}
                       >
-                        <button onClick={() => setConfirmDelete(log.id)} className="text-red-600 inline-flex items-center justify-center cursor-pointer hover:text-red-800"><Trash2 className="w-4 h-4" /></button>
+                        <button 
+                          onClick={() => setConfirmDelete(log.id)} 
+                          className="text-red-600 inline-flex items-center justify-center cursor-pointer hover:text-red-800 transition-colors"
+                          title="Delete work log"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </PermissionGuard>
                     </div>
                   </td>
