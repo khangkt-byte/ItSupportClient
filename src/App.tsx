@@ -168,7 +168,7 @@ export default function App() {
   }
 
   return (
-    <div className="container">
+    <div className="app-layout">
       <Sidebar 
         currentView={currentView} 
         onNavigate={handleNavigate} 

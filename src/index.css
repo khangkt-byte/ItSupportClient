@@ -906,12 +906,13 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     }
   }
 
-  /* Container layout */
-  .container {
+  /* App Layout */
+  .app-layout {
     display: flex;
+    min-height: 100vh;
   }
 
-  .container .main-content {
+  .app-layout .main-content {
     flex: 1;
     padding: 30px;
     color: var(--sidebar-color-text-primary);
