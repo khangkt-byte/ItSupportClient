@@ -153,82 +153,9 @@
 /* ========================================
  * SAFELIST
  * Classes that should always be included
- * Replaces safelist in tailwind.config.js
+ * 
+ * Note: In Tailwind v4, safelist is handled differently.
+ * These classes will be generated on-demand when used.
+ * If you need explicit safelist, create a safelist.html
+ * file or use @layer utilities.
  * ======================================== */
-
-@source inline('[href="#safelist"]') {
-  /* Layout utilities */
-  inline-flex
-  items-center
-  gap-1
-  gap-2
-  rounded-md
-  px-2
-  py-1
-  text-xs
-  font-medium
-  leading-4
-  tracking-wide
-  transition-colors
-  ring-1
-  ring-inset
-  
-  /* Semantic token classes */
-  bg-success-background
-  text-success-foreground
-  ring-success-border
-  
-  bg-warning-background
-  text-warning-foreground
-  ring-warning-border
-  
-  bg-info-background
-  text-info-foreground
-  ring-info-border
-  
-  bg-error-background
-  text-error-foreground
-  ring-error-border
-  
-  /* Status badge colors - Light mode */
-  bg-amber-50
-  text-amber-800
-  ring-amber-600/20
-  
-  bg-blue-50
-  text-blue-700
-  ring-blue-700/10
-  
-  bg-green-50
-  text-green-700
-  ring-green-600/20
-  
-  bg-gray-50
-  text-gray-600
-  ring-gray-500/10
-  
-  /* Status badge colors - Dark mode */
-  dark:bg-amber-400/10
-  dark:text-amber-400
-  dark:ring-amber-400/30
-  
-  dark:bg-blue-400/10
-  dark:text-blue-400
-  dark:ring-blue-400/30
-  
-  dark:bg-green-500/10
-  dark:text-green-400
-  dark:ring-green-500/20
-  
-  dark:bg-gray-400/10
-  dark:text-gray-400
-  dark:ring-gray-400/20
-  
-  /* Icon sizes */
-  w-3
-  h-3
-  w-4
-  h-4
-  w-5
-  h-5
-}
