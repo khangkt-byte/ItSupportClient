@@ -3,6 +3,7 @@ import { LoginPage } from './components/LoginPage';
 import { AdminDashboard } from './components/AdminDashboard';
 import { EmployeeDashboard } from './components/EmployeeDashboard';
 import { Sidebar } from './components/Sidebar';
+import { ThemeValidationTest } from './components/ThemeValidationTest';
 import { authApi } from './lib/api/auth';
 import { SecurityValidator } from './lib/utils/securityChecks';
 import type { User } from './types/data';
@@ -175,7 +176,10 @@ export default function App() {
         userRole={user.role}
       />
       <div className="main-content">
-        {user.role === 'admin' ? (
+        {/* Phase 3: Testing Page */}
+        {currentView === 'test-themes' ? (
+          <ThemeValidationTest />
+        ) : user.role === 'admin' ? (
           <AdminDashboard 
             user={user} 
             onLogout={handleLogout} 

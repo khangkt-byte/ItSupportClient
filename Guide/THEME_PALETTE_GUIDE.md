@@ -1015,22 +1015,29 @@ if (ratio < 4.5) {
 - `getSemanticTokens()` returns `null`
 - Semantic colors don't work
 
-**Cause:** Light/Dark themes don't have semantic tokens (only brand themes do)
+**Cause:** Semantic tokens should be available for all themes (light, dark, and all brand themes)
 
 **Solution:**
 ```tsx
 const { theme, getSemanticTokens } = useTheme();
 const tokens = getSemanticTokens();
 
-// Always check for null
+// Tokens should always be available - use them directly
 if (tokens) {
-  // Use semantic tokens
+  // Use semantic tokens (works for light, dark, and all brand themes)
   <span style={{ color: tokens.success }}>Success</span>
+  <span style={{ color: tokens.error }}>Error</span>
+  <span style={{ color: tokens.warning }}>Warning</span>
+  <span style={{ color: tokens.info }}>Info</span>
 } else {
-  // Fallback for light/dark themes
-  <span style={{ color: '#22c55e' }}>Success</span>
+  // This shouldn't happen - report as bug
+  console.error('Semantic tokens not available');
 }
 ```
+
+**Light/Dark Mode Semantic Tokens (Available since Fix v2.0):**
+- Light: `success=#22c55e, error=#ef4444, warning=#f59e0b, info=#3b82f6, disabled=#6b7280`
+- Dark: `success=#4ade80, error=#f87171, warning=#fbbf24, info=#60a5fa, disabled=#9ca3af`
 
 ### High Contrast Mode Not Working
 

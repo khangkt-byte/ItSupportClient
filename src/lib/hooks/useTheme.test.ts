@@ -297,24 +297,36 @@ describe('useTheme Hook - Complete Test Suite', () => {
     // ============================================================
 
     describe('Semantic Tokens', () => {
-        test('should return null for light theme (no semantic tokens)', () => {
+        test('should return semantic tokens for light theme', () => {
             const { result } = renderHook(() => useTheme());
 
             act(() => {
                 result.current.changeTheme('light');
             });
 
-            expect(result.current.getSemanticTokens()).toBeNull();
+            const tokens = result.current.getSemanticTokens();
+            expect(tokens).not.toBeNull();
+            expect(tokens?.success).toBe('#22c55e');    // green-600
+            expect(tokens?.error).toBe('#ef4444');      // red-500
+            expect(tokens?.warning).toBe('#f59e0b');    // amber-500
+            expect(tokens?.info).toBe('#3b82f6');       // blue-500
+            expect(tokens?.disabled).toBe('#6b7280');   // gray-500
         });
 
-        test('should return null for dark theme (no semantic tokens)', () => {
+        test('should return semantic tokens for dark theme', () => {
             const { result } = renderHook(() => useTheme());
 
             act(() => {
                 result.current.changeTheme('dark');
             });
 
-            expect(result.current.getSemanticTokens()).toBeNull();
+            const tokens = result.current.getSemanticTokens();
+            expect(tokens).not.toBeNull();
+            expect(tokens?.success).toBe('#4ade80');    // green-400
+            expect(tokens?.error).toBe('#f87171');      // red-400
+            expect(tokens?.warning).toBe('#fbbf24');    // amber-400
+            expect(tokens?.info).toBe('#60a5fa');       // blue-400
+            expect(tokens?.disabled).toBe('#9ca3af');   // gray-400
         });
 
         test('should return semantic tokens for brand theme', () => {

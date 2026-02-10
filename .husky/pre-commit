@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Color linting pre-commit hook
+echo "🎨 Checking for hardcoded colors..."
+
+# Run color linter
+npm run lint:colors
+
+# Check the exit code
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ Commit rejected: Hardcoded colors detected!"
+  echo "Please use semantic tokens instead:"
+  echo "  • var(--color-success) for green"
+  echo "  • var(--color-error) for red"
+  echo "  • var(--color-warning) for yellow/orange"
+  echo "  • var(--color-info) for blue"
+  echo ""
+  echo "📚 See Guide/SEMANTIC_TOKENS_GUIDE.md for more info"
+  echo ""
+  exit 1
+fi
+
+echo "✅ No hardcoded colors found!"

@@ -169,6 +169,96 @@ html[data-a11y="highContrast"] {
   --color-info-border: rgba(59, 130, 246, 0.3);       /* blue-500/30 */
 }
 
+/**
+ * Brand Theme Semantic Tokens
+ * All brand themes share the same semantic token colors per Material Design 3 standards
+ * These are overridden via JavaScript when theme changes to ensure consistency
+ * 
+ * Reference: https://m3.material.io/styles/color/system/overview
+ * 
+ * Light mode semantic tokens for brand themes
+ * Note: These are intentionally identical across all brand themes to maintain
+ * consistent meaning for semantic tokens regardless of primary brand color.
+ */
+
+/* Brand Theme Light Mode - Shared semantic tokens */
+:root[data-theme="brand-purple"],
+:root[data-theme="brand-red"],
+:root[data-theme="brand-blue"],
+:root[data-theme="brand-green"],
+:root[data-theme="brand-orange"],
+:root[data-theme="brand-teal"],
+:root[data-theme="brand-indigo"],
+:root[data-theme="brand-violet"],
+:root[data-theme="brand-pink"],
+:root[data-theme="brand-cyan"] {
+  /* Success colors (Completed, Valid, Active) */
+  --color-success: #22c55e;           /* green-600 */
+  --color-success-foreground: #166534; /* green-800 */
+  --color-success-background: #f0fdf4; /* green-50 */
+  --color-success-border: #bbf7d0;     /* green-200 */
+  
+  /* Warning colors (Pending, Caution) */
+  --color-warning: #f59e0b;           /* amber-500 */
+  --color-warning-foreground: #92400e; /* amber-800 */
+  --color-warning-background: #fffbeb; /* amber-50 */
+  --color-warning-border: #fde68a;     /* amber-200 */
+  
+  /* Error colors (Failed, Invalid) */
+  --color-error: #ef4444;             /* red-500 */
+  --color-error-foreground: #991b1b;   /* red-800 */
+  --color-error-background: #fef2f2;   /* red-50 */
+  --color-error-border: #fecaca;       /* red-200 */
+  
+  /* Info colors (In Progress, Information) */
+  --color-info: #3b82f6;              /* blue-500 */
+  --color-info-foreground: #1e40af;    /* blue-800 */
+  --color-info-background: #eff6ff;    /* blue-50 */
+  --color-info-border: #bfdbfe;        /* blue-200 */
+  
+  /* Disabled state */
+  --color-disabled: #6b7280;           /* gray-500 */
+}
+
+/* Brand Theme Dark Mode - Lighter semantic tokens for dark backgrounds */
+:root[data-theme="dark brand-purple"],
+:root[data-theme="dark brand-red"],
+:root[data-theme="dark brand-blue"],
+:root[data-theme="dark brand-green"],
+:root[data-theme="dark brand-orange"],
+:root[data-theme="dark brand-teal"],
+:root[data-theme="dark brand-indigo"],
+:root[data-theme="dark brand-violet"],
+:root[data-theme="dark brand-pink"],
+:root[data-theme="dark brand-cyan"] {
+  /* Success colors - lighter for dark backgrounds */
+  --color-success: #4ade80;           /* green-400 */
+  --color-success-foreground: #bbf7d0; /* green-200 */
+  --color-success-background: rgba(34, 197, 94, 0.2); /* green-600/20 */
+  --color-success-border: rgba(34, 197, 94, 0.3);     /* green-600/30 */
+  
+  /* Warning colors */
+  --color-warning: #fbbf24;           /* amber-400 */
+  --color-warning-foreground: #fde68a; /* amber-200 */
+  --color-warning-background: rgba(245, 158, 11, 0.2); /* amber-500/20 */
+  --color-warning-border: rgba(245, 158, 11, 0.3);     /* amber-500/30 */
+  
+  /* Error colors */
+  --color-error: #f87171;             /* red-400 */
+  --color-error-foreground: #fecaca;   /* red-200 */
+  --color-error-background: rgba(239, 68, 68, 0.2);   /* red-500/20 */
+  --color-error-border: rgba(239, 68, 68, 0.3);       /* red-500/30 */
+  
+  /* Info colors */
+  --color-info: #60a5fa;              /* blue-400 */
+  --color-info-foreground: #bfdbfe;    /* blue-200 */
+  --color-info-background: rgba(59, 130, 246, 0.2);   /* blue-500/20 */
+  --color-info-border: rgba(59, 130, 246, 0.3);       /* blue-500/30 */
+
+  /* Disabled state */
+  --color-disabled: #9ca3af;           /* gray-400 */
+}
+
 /* High Contrast mode overrides - WCAG AAA compliance (21:1) */
 html[data-a11y="highContrast"] {
   /* CRITICAL: Override ALL semantic colors to pure black/white in HC mode */
