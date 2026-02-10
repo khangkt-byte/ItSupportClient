@@ -397,7 +397,7 @@ html[data-a11y="highContrast"][data-theme*="dark"] .hover\:text-purple-400:hover
   --color-primary-950: #1e1b4b;
 
   /* Font Family */
-  --font-sans: "Poppins", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "Nunito", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 :root {

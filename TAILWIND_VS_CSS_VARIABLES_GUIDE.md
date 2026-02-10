@@ -139,7 +139,7 @@
 /* ✅ ĐÚNG: Theme configuration */
 @theme {
   --color-primary-500: #695CFE;
-  --font-sans: "Poppins", ui-sans-serif, system-ui;
+  --font-sans: "Nunito", ui-sans-serif, system-ui;
 }
 ```
 
