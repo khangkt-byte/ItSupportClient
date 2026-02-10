@@ -7,9 +7,12 @@
  * Can be run manually or as part of CI/CD
  */
 
-const fs = require('fs');
-const path = require('path');
-const { ESLint } = require('eslint');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Color regex patterns
 const COLOR_PATTERNS = {
@@ -147,11 +150,10 @@ async function main() {
 }
 
 // Run if called directly
-if (require.main === module) {
-    main().catch(err => {
-        console.error('Error:', err);
-        process.exit(1);
-    });
-}
+main().catch(err => {
+    console.error('Error:', err);
+    process.exit(1);
+});
 
-module.exports = { scanFile, scanDirectory, formatReport };
+export { scanFile, scanDirectory, formatReport };
+

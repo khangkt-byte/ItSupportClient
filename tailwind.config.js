@@ -1,3 +1,22 @@
+/**
+ * Tailwind CSS v4 Theme Configuration
+ * 
+ * ⚠️ WARNING: JavaScript config is DEPRECATED in Tailwind v4
+ * 
+ * Migration Path:
+ * 1. Move all theme values to @theme in CSS
+ * 2. Use @config directive to load this file explicitly
+ * 3. Or migrate completely to CSS-first configuration
+ * 
+ * References:
+ * - https://tailwindcss.com/docs/upgrade-guide
+ * - https://tailwindcss.com/docs/theme
+ * - https://tailwindcss.com/docs/adding-custom-styles
+ * 
+ * RECOMMENDED: Migrate to CSS @theme directive instead
+ * See: TAILWIND_V4_MIGRATION.md for full migration guide
+ */
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ['selector', '[data-theme="dark"]'], // Match HTML data-theme attribute
