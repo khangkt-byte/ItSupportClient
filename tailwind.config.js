@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: ['selector', '.dark-theme'],
+  darkMode: ['selector', '[data-theme="dark"]'],
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -78,18 +78,27 @@ module.exports = {
   },
   plugins: [],
   safelist: [
-    // Add commonly used dynamic classes to prevent purging
-    'bg-blue-50', 'bg-blue-100', 'bg-blue-600',
-    'text-blue-600', 'text-blue-700', 'text-blue-100',
-    'bg-green-50', 'bg-green-100', 'bg-green-700',
-    'text-green-600', 'text-green-700',
-    'bg-red-50', 'bg-red-100', 'bg-red-700',
-    'text-red-600', 'text-red-700',
-    'bg-orange-50', 'bg-orange-100', 'bg-orange-600',
-    'text-orange-600', 'text-orange-700',
-    'bg-yellow-50', 'bg-yellow-100', 'bg-yellow-600',
-    'text-yellow-600', 'text-yellow-700',
-    'border-blue-200', 'border-red-200', 'border-gray-300',
-    'ring-blue-500', 'ring-red-500',
+    // Badge base classes
+    'inline-flex', 'items-center', 'gap-1', 'rounded-md', 'px-2', 'py-1', 'text-xs', 'font-medium', 'leading-4', 'tracking-wide', 'transition-colors',
+    'ring-1', 'ring-inset',
+    
+    // PENDING/Warning badge colors
+    'bg-amber-50', 'text-amber-800', 'ring-amber-600/20',
+    'dark:bg-amber-400/10', 'dark:text-amber-400', 'dark:ring-amber-400/30',
+    
+    // IN PROGRESS/Info badge colors
+    'bg-blue-50', 'text-blue-700', 'ring-blue-700/10',
+    'dark:bg-blue-400/10', 'dark:text-blue-400', 'dark:ring-blue-400/30',
+    
+    // RESOLVED/Success badge colors
+    'bg-green-50', 'text-green-700', 'ring-green-600/20',
+    'dark:bg-green-500/10', 'dark:text-green-400', 'dark:ring-green-500/20',
+    
+    // CANCELLED/Neutral badge colors
+    'bg-gray-50', 'text-gray-600', 'ring-gray-500/10',
+    'dark:bg-gray-400/10', 'dark:text-gray-400', 'dark:ring-gray-400/20',
+    
+    // Status icons
+    'w-3', 'h-3',
   ],
 }

@@ -478,7 +478,7 @@ export interface ImportResultDto {
 }
 
 // Legacy types for backward compatibility
-export type WorkStatus = 'pending' | 'in-progress' | 'completed' | 'cancelled';
+export type WorkStatus = 'pending' | 'in-progress' | 'resolved' | 'cancelled';
 
 export interface WorkLog extends IssueLogDto {
   // Mapping for backward compatibility

@@ -1,5 +1,5 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
-import { Plus, Search, Edit, Trash2, X, ChevronDown, ChevronUp, Loader2, Download, Upload, FileSpreadsheet } from 'lucide-react';
+import { useState, useMemo, useRef, useEffect, JSX } from 'react';
+import { Plus, Search, Edit, Trash2, X, ChevronDown, ChevronUp, Loader2, Download, Upload, FileSpreadsheet, Clock, PlayCircle, CheckCircle2, XCircle } from 'lucide-react';
 import type { WorkLog, WorkStatus, Employee, Department, Area, ImportValidationResult, DuplicateHandling, IssueLogDto } from '../types/data';
 import { workLogsApi, issuesApi, causesApi } from '../api';
 import { workLogToCreateDto } from '../utils/workLogAdapter';
@@ -9,6 +9,7 @@ import { FlexibleMultiSelect } from './FlexibleMultiSelect';
 import { AutocompleteInput, type Suggestion } from './AutocompleteInput';
 import { useDebounce } from '../hooks/useDebounce';
 import { usePagination } from '../hooks/usePagination';
+import { useTheme } from '../lib/hooks/useTheme';
 import { Pagination } from './Pagination';
 import { exportWorkLogsToExcel, validateImportedWorkLogs, importWorkLogsFromExcel, downloadExcelTemplate } from '../utils/excelUtils';
 import { ImportValidation } from './ImportValidation';
@@ -38,6 +39,9 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
   const [importing, setImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
+  // Use theme hook to trigger re-renders when theme changes
+  const { theme } = useTheme();
 
   // Import wizard state
   const [showImportWizard, setShowImportWizard] = useState(false);
@@ -250,14 +254,63 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
     }
   };
 
-  const getStatusBadge = (status: WorkStatus) => {
-    const styles = {
-      pending: 'bg-warning-background text-warning-foreground border border-warning-border',
-      'in-progress': 'bg-info-background text-info-foreground border border-info-border',
-      completed: 'bg-success-background text-success-foreground border border-success-border',
-      cancelled: 'bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border border-gray-300 dark:border-gray-600',
+  const getStatusLabel = (status: WorkStatus | string) => {
+    const labels: Record<string, string> = {
+      pending: 'PENDING',
+      'in-progress': 'IN PROGRESS',
+      resolved: 'RESOLVED',
+      cancelled: 'CANCELLED',
     };
-    return styles[status];
+    return labels[status] || status?.toUpperCase() || 'UNKNOWN';
+  };
+
+  const getStatusIcon = (status: WorkStatus | string) => {
+    const iconProps = { className: 'w-3 h-3', strokeWidth: 2.5 };
+    const icons: Record<string, JSX.Element> = {
+      pending: <Clock {...iconProps} />,
+      'in-progress': <PlayCircle {...iconProps} />,
+      resolved: <CheckCircle2 {...iconProps} />,
+      cancelled: <XCircle {...iconProps} />,
+    };
+    return icons[status] || null;
+  };
+
+  const getStatusBadgeStyle = (status: WorkStatus | string): React.CSSProperties => {
+    const baseStyle: React.CSSProperties = {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '0.25rem',
+      borderRadius: '0.375rem',
+      paddingLeft: '0.5rem',
+      paddingRight: '0.5rem',
+      paddingTop: '0.25rem',
+      paddingBottom: '0.25rem',
+      fontSize: '0.75rem',
+      fontWeight: 500,
+      lineHeight: 1,
+      letterSpacing: '0.05em',
+      transitionProperty: 'color, background-color, border-color',
+      transitionDuration: '150ms',
+      border: 'none',
+    };
+
+    const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+
+    const statusStyles: Record<string, React.CSSProperties> = isDarkMode ? {
+      // Dark mode colors
+      pending: { ...baseStyle, backgroundColor: 'rgba(245, 158, 11, 0.1)', color: '#fbbf24', boxShadow: '0 0 0 1px rgb(251 191 36 / 0.3)' },
+      'in-progress': { ...baseStyle, backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#60a5fa', boxShadow: '0 0 0 1px rgb(96 165 250 / 0.3)' },
+      resolved: { ...baseStyle, backgroundColor: 'rgba(34, 197, 94, 0.1)', color: '#4ade80', boxShadow: '0 0 0 1px rgb(74 222 128 / 0.2)' },
+      cancelled: { ...baseStyle, backgroundColor: 'rgba(107, 114, 128, 0.1)', color: '#d1d5db', boxShadow: '0 0 0 1px rgb(209 213 219 / 0.2)' },
+    } : {
+      // Light mode colors
+      pending: { ...baseStyle, backgroundColor: '#fffbeb', color: '#92400e', boxShadow: '0 0 0 1px rgb(217 119 6 / 0.2)' },
+      'in-progress': { ...baseStyle, backgroundColor: '#eff6ff', color: '#1e40af', boxShadow: '0 0 0 1px rgb(30 58 138 / 0.1)' },
+      resolved: { ...baseStyle, backgroundColor: '#f0fdf4', color: '#166534', boxShadow: '0 0 0 1px rgb(34 197 94 / 0.2)' },
+      cancelled: { ...baseStyle, backgroundColor: '#f9fafb', color: '#4b5563', boxShadow: '0 0 0 1px rgb(75 85 99 / 0.1)' },
+    };
+
+    return statusStyles[status] || statusStyles.cancelled;
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -469,7 +522,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
         <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Total</p><p className="text-2xl font-semibold text-gray-900 dark:text-gray-50">{data.length}</p></div>
         <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Pending</p><p className="text-2xl font-semibold text-warning">{data.filter((l) => l.status === 'pending').length}</p></div>
         <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">In Progress</p><p className="text-2xl font-semibold text-info">{data.filter((l) => l.status === 'in-progress').length}</p></div>
-        <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Completed</p><p className="text-2xl font-semibold text-success">{data.filter((l) => l.status === 'completed').length}</p></div>
+        <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Resolved</p><p className="text-2xl font-semibold text-success">{data.filter((l) => l.status === 'resolved').length}</p></div>
       </div>
 
       <div className="card p-4 grid grid-cols-2 gap-4">
@@ -478,7 +531,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
           <option value="all">All Status</option>
           <option value="pending">Pending</option>
           <option value="in-progress">In Progress</option>
-          <option value="completed">Completed</option>
+          <option value="resolved">Resolved</option>
           <option value="cancelled">Cancelled</option>
         </select>
       </div>
@@ -505,7 +558,12 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                   <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-50">{(log.requesters || []).join(', ') || 'None'}</td>
                   <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-50">{log.department}</td>
                   <td className="px-4 py-3 text-sm"><button onClick={() => toggleRow(log.id)} className="text-left hover:text-primary-600 dark:hover:text-primary-400 line-clamp-2 text-gray-900 dark:text-gray-50">{log.issue}</button></td>
-                  <td className="px-4 py-3 text-sm"><span className={`px-2 py-1 text-xs rounded ${getStatusBadge(log.status)}`}>{log.status}</span></td>
+                  <td className="px-4 py-3 text-sm">
+                    <span style={getStatusBadgeStyle(log.status)}>
+                      {getStatusIcon(log.status)}
+                      {getStatusLabel(log.status)}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-sm text-right">
                     <div className="inline-flex items-center gap-2">
                       <button 
@@ -546,6 +604,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                   <tr className="bg-gray-50 dark:bg-gray-700">
                     <td colSpan={7} className="px-4 py-4">
                       <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div><p className="font-medium mb-1 text-gray-700 dark:text-gray-300">Area:</p><p className="text-gray-600 dark:text-gray-400">{log.area || 'N/A'}</p></div>
                         <div><p className="font-medium mb-1 text-gray-700 dark:text-gray-300">Cause:</p><p className="text-gray-600 dark:text-gray-400">{log.cause || 'N/A'}</p></div>
                         <div><p className="font-medium mb-1 text-gray-700 dark:text-gray-300">Fix:</p><p className="text-gray-600 dark:text-gray-400">{log.fixDescription || 'N/A'}</p></div>
                         {log.permanentFix && <div><p className="font-medium mb-1 text-gray-700 dark:text-gray-300">Permanent Fix:</p><p className="text-gray-600 dark:text-gray-400">{log.permanentFix}</p></div>}
@@ -600,7 +659,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                   <select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as WorkStatus })} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors">
                     <option value="pending">Pending</option>
                     <option value="in-progress">In Progress</option>
-                    <option value="completed">Completed</option>
+                    <option value="resolved">Resolved</option>
                     <option value="cancelled">Cancelled</option>
                   </select>
                 </div>
