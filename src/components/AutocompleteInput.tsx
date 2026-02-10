@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Check, X } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 export interface Suggestion {
   id: number; // Changed from string to number to match API
@@ -151,18 +151,18 @@ export function AutocompleteInput({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           required={required}
-          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         />
 
         {/* Suggestions Dropdown */}
         {showSuggestions && suggestions.length > 0 && (
           <div
             ref={dropdownRef}
-            className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-80 overflow-y-auto"
+            className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-80 overflow-y-auto"
           >
             {/* Header - Only show if suggestionHeader is provided and not empty */}
             {suggestionHeader && (
-              <div className="px-3 py-2 bg-gray-50 border-b border-gray-200 text-xs text-gray-600">
+              <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400">
                 {suggestionHeader}
               </div>
             )}
@@ -172,21 +172,21 @@ export function AutocompleteInput({
               <div
                 key={suggestion.id}
                 onClick={() => handleSelectSuggestion(suggestion)}
-                className={`px-3 py-2.5 cursor-pointer border-b border-gray-100 transition-colors ${
+                className={`px-3 py-2.5 cursor-pointer border-b border-gray-100 dark:border-gray-700 transition-colors ${
                   highlightedIndex === index
-                    ? 'bg-primary-100'
-                    : 'hover:bg-gray-100'
+                    ? 'bg-primary-100 dark:bg-primary-900'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
-                <div className="font-medium text-sm text-gray-900">
+                <div className="font-medium text-sm text-gray-900 dark:text-gray-50">
                   {suggestion.name}
                 </div>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="px-2 py-0.5 bg-primary-50 text-primary-700 text-xs rounded">
+                  <span className="px-2 py-0.5 bg-primary-50 dark:bg-primary-900 text-primary-700 dark:text-primary-300 text-xs rounded">
                     {suggestion.usageCount} times used
                   </span>
                   {suggestion.description && (
-                    <span className="text-xs text-gray-500 truncate">
+                    <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
                       {suggestion.description}
                     </span>
                   )}
@@ -195,7 +195,7 @@ export function AutocompleteInput({
             ))}
 
             {/* Footer */}
-            <div className="px-3 py-2 bg-gray-50 text-center text-xs text-gray-500">
+            <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700 text-center text-xs text-gray-500 dark:text-gray-400">
               Press Enter to continue
             </div>
           </div>

@@ -136,7 +136,7 @@ export function FlexibleMultiSelect({
 
       <div className="relative">
         {/* Selected values + Input */}
-        <div className="w-full min-h-[42px] px-3 py-2 border rounded-lg flex flex-wrap gap-2 items-center focus-within:ring-2 focus-within:ring-primary-500 focus-within:border-transparent">
+        <div className="w-full min-h-[42px] px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 flex flex-wrap gap-2 items-center focus-within:ring-2 focus-within:ring-primary-500 focus-within:border-transparent">
           {values.map((value) => {
             const option = options.find(opt => opt.value === value);
             const displayLabel = option ? option.label : value;
@@ -166,7 +166,7 @@ export function FlexibleMultiSelect({
             onKeyDown={handleKeyDown}
             onFocus={handleFocus}
             placeholder={values.length === 0 ? placeholder : ''}
-            className="flex-1 min-w-[120px] outline-none"
+            className="flex-1 min-w-[120px] outline-none bg-transparent text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500"
           />
         </div>
 
@@ -174,7 +174,7 @@ export function FlexibleMultiSelect({
         {showSuggestions && (filteredOptions.length > 0 || (allowCustom && inputValue.trim())) && (
           <div
             ref={dropdownRef}
-            className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+            className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto"
           >
             {/* Suggestions from list */}
             {filteredOptions.map((option, index) => (
@@ -183,11 +183,11 @@ export function FlexibleMultiSelect({
                 onClick={() => handleSelectOption(option.value)}
                 className={`px-3 py-2 cursor-pointer transition-colors ${
                   highlightedIndex === index
-                    ? 'bg-primary-100'
-                    : 'hover:bg-gray-100'
+                    ? 'bg-primary-100 dark:bg-primary-900'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
-                <div className="text-sm text-gray-900">{option.label}</div>
+                <div className="text-sm text-gray-900 dark:text-gray-50">{option.label}</div>
               </div>
             ))}
 
@@ -202,11 +202,11 @@ export function FlexibleMultiSelect({
                   setInputValue('');
                   setShowSuggestions(false);
                 }}
-                className="px-3 py-2 cursor-pointer border-t border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors"
+                className="px-3 py-2 cursor-pointer border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
               >
                 <div className="flex items-center gap-2 text-sm">
-                  <Plus className="w-4 h-4 text-green-600" />
-                  <span className="text-gray-700">
+                  <Plus className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  <span className="text-gray-700 dark:text-gray-300">
                     Add custom: <strong>{inputValue.trim()}</strong>
                   </span>
                 </div>
@@ -215,7 +215,7 @@ export function FlexibleMultiSelect({
 
             {/* Empty state */}
             {filteredOptions.length === 0 && (!allowCustom || !inputValue.trim()) && (
-              <div className="px-3 py-2 text-sm text-gray-500 text-center">
+              <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 text-center">
                 No suggestions found
               </div>
             )}
@@ -224,7 +224,7 @@ export function FlexibleMultiSelect({
       </div>
 
       {allowCustom && (
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
           Select from list or press Enter to add custom name
         </p>
       )}
