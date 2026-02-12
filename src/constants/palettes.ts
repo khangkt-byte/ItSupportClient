@@ -71,6 +71,32 @@ export interface SemanticTokens {
 }
 
 /**
+ * Semantic variant tokens for foreground, background, and border colors
+ *
+ * These provide the extended semantic color system for UI states.
+ * Light/dark mode each have a dedicated set of variants from Tailwind's color scale.
+ *
+ * @interface SemanticVariantTokens
+ * @reference
+ * - Material Design 3 Color Roles: https://m3.material.io/styles/color/roles
+ * - Fluent 2 Design Tokens: https://fluent2.microsoft.design/design-tokens
+ */
+export interface SemanticVariantTokens {
+    successForeground: string;
+    successBackground: string;
+    successBorder: string;
+    errorForeground: string;
+    errorBackground: string;
+    errorBorder: string;
+    warningForeground: string;
+    warningBackground: string;
+    warningBorder: string;
+    infoForeground: string;
+    infoBackground: string;
+    infoBorder: string;
+}
+
+/**
  * Complete theme palette
  *
  * @interface ThemePalette
@@ -81,6 +107,88 @@ export interface ThemePalette {
     neutral: ColorPalette;
     semantic?: SemanticTokens;
 }
+
+// ========================================
+// SHARED SEMANTIC TOKENS — Single Source of Truth
+// All brand themes share these values.
+// To change semantic colors globally, edit ONLY these constants.
+// ========================================
+
+/**
+ * Default (light mode) semantic tokens
+ * Used by ALL themes (light, dark, brand-*)
+ *
+ * @constant
+ * @see https://tailwindcss.com/docs/colors (Green-500, Red-500, Amber-500, Blue-500, Gray-500)
+ */
+export const defaultSemanticTokens: SemanticTokens = {
+    success: '#22c55e',    // Green-500 (WCAG AA compliant)
+    error: '#ef4444',      // Red-500
+    warning: '#f59e0b',    // Amber-500
+    info: '#3b82f6',       // Blue-500
+    disabled: '#6b7280',   // Gray-500
+};
+
+/**
+ * Dark mode semantic tokens
+ * Lighter variants (400-shade) for better contrast on dark backgrounds
+ *
+ * @constant
+ */
+export const darkSemanticTokens: SemanticTokens = {
+    success: '#4ade80',    // Green-400
+    error: '#f87171',      // Red-400
+    warning: '#fbbf24',    // Amber-400
+    info: '#60a5fa',       // Blue-400
+    disabled: '#9ca3af',   // Gray-400
+};
+
+/**
+ * Light mode semantic variant tokens
+ * Hand-picked from Tailwind color scale for optimal contrast.
+ *
+ * - foreground: 800-shade (dark) for text on light backgrounds
+ * - background: 50-shade for subtle tinted backgrounds
+ * - border: 200-shade for borders
+ *
+ * @constant
+ */
+export const lightSemanticVariants: SemanticVariantTokens = {
+    successForeground: '#166534',   // green-800
+    successBackground: '#f0fdf4',   // green-50
+    successBorder: '#bbf7d0',       // green-200
+    errorForeground: '#991b1b',     // red-800
+    errorBackground: '#fef2f2',     // red-50
+    errorBorder: '#fecaca',         // red-200
+    warningForeground: '#92400e',   // amber-800
+    warningBackground: '#fffbeb',   // amber-50
+    warningBorder: '#fde68a',       // amber-200
+    infoForeground: '#1e40af',      // blue-800
+    infoBackground: '#eff6ff',      // blue-50
+    infoBorder: '#bfdbfe',          // blue-200
+};
+
+/**
+ * Dark mode semantic variant tokens
+ * Uses 200-shade for foreground (light text on dark),
+ * and semi-transparent base colors for background/border.
+ *
+ * @constant
+ */
+export const darkSemanticVariants: SemanticVariantTokens = {
+    successForeground: '#bbf7d0',                   // green-200
+    successBackground: 'rgba(34, 197, 94, 0.2)',    // green-500 @ 20%
+    successBorder: 'rgba(34, 197, 94, 0.3)',        // green-500 @ 30%
+    errorForeground: '#fecaca',                     // red-200
+    errorBackground: 'rgba(239, 68, 68, 0.2)',      // red-500 @ 20%
+    errorBorder: 'rgba(239, 68, 68, 0.3)',          // red-500 @ 30%
+    warningForeground: '#fde68a',                   // amber-200
+    warningBackground: 'rgba(245, 158, 11, 0.2)',   // amber-500 @ 20%
+    warningBorder: 'rgba(245, 158, 11, 0.3)',       // amber-500 @ 30%
+    infoForeground: '#bfdbfe',                      // blue-200
+    infoBackground: 'rgba(59, 130, 246, 0.2)',      // blue-500 @ 20%
+    infoBorder: 'rgba(59, 130, 246, 0.3)',          // blue-500 @ 30%
+};
 
 // Neutral Gray - Used across all themes
 const neutralGray: ColorPalette = {
@@ -128,13 +236,7 @@ export const palettes = {
             950: '#0a3622',
         },
         neutral: neutralGray,
-        semantic: {
-            success: '#22c55e',    // Green-500
-            error: '#ef4444',      // Red-500
-            warning: '#f59e0b',    // Amber-500
-            info: '#3b82f6',       // Blue-500
-            disabled: '#6b7280',   // Gray-500
-        },
+        semantic: defaultSemanticTokens,
     } as ThemePalette,
 
     // Red
@@ -166,13 +268,7 @@ export const palettes = {
             950: '#500724',
         },
         neutral: neutralGray,
-        semantic: {
-            success: '#22c55e',
-            error: '#ef4444',
-            warning: '#f59e0b',
-            info: '#3b82f6',
-            disabled: '#6b7280',
-        },
+        semantic: defaultSemanticTokens,
     } as ThemePalette,
 
     // Blue
@@ -204,13 +300,7 @@ export const palettes = {
             950: '#082f49',
         },
         neutral: neutralGray,
-        semantic: {
-            success: '#22c55e',
-            error: '#ef4444',
-            warning: '#f59e0b',
-            info: '#3b82f6',
-            disabled: '#6b7280',
-        },
+        semantic: defaultSemanticTokens,
     } as ThemePalette,
 
     // Green
@@ -242,13 +332,7 @@ export const palettes = {
             950: '#082f49',
         },
         neutral: neutralGray,
-        semantic: {
-            success: '#22c55e',
-            error: '#ef4444',
-            warning: '#f59e0b',
-            info: '#3b82f6',
-            disabled: '#6b7280',
-        },
+        semantic: defaultSemanticTokens,
     } as ThemePalette,
 
     // Orange
@@ -280,13 +364,7 @@ export const palettes = {
             950: '#500724',
         },
         neutral: neutralGray,
-        semantic: {
-            success: '#22c55e',
-            error: '#ef4444',
-            warning: '#f59e0b',
-            info: '#3b82f6',
-            disabled: '#6b7280',
-        },
+        semantic: defaultSemanticTokens,
     } as ThemePalette,
 
     // Teal
@@ -318,13 +396,7 @@ export const palettes = {
             950: '#082f49',
         },
         neutral: neutralGray,
-        semantic: {
-            success: '#22c55e',
-            error: '#ef4444',
-            warning: '#f59e0b',
-            info: '#3b82f6',
-            disabled: '#6b7280',
-        },
+        semantic: defaultSemanticTokens,
     } as ThemePalette,
 
     // Indigo
@@ -356,13 +428,7 @@ export const palettes = {
             950: '#500724',
         },
         neutral: neutralGray,
-        semantic: {
-            success: '#22c55e',
-            error: '#ef4444',
-            warning: '#f59e0b',
-            info: '#3b82f6',
-            disabled: '#6b7280',
-        },
+        semantic: defaultSemanticTokens,
     } as ThemePalette,
 
     // Violet
@@ -394,13 +460,7 @@ export const palettes = {
             950: '#0a3622',
         },
         neutral: neutralGray,
-        semantic: {
-            success: '#22c55e',
-            error: '#ef4444',
-            warning: '#f59e0b',
-            info: '#3b82f6',
-            disabled: '#6b7280',
-        },
+        semantic: defaultSemanticTokens,
     } as ThemePalette,
 
     // Pink
@@ -432,13 +492,7 @@ export const palettes = {
             950: '#450a0a',
         },
         neutral: neutralGray,
-        semantic: {
-            success: '#22c55e',
-            error: '#ef4444',
-            warning: '#f59e0b',
-            info: '#3b82f6',
-            disabled: '#6b7280',
-        },
+        semantic: defaultSemanticTokens,
     } as ThemePalette,
 
     // Cyan
@@ -470,13 +524,7 @@ export const palettes = {
             950: '#0a3622',
         },
         neutral: neutralGray,
-        semantic: {
-            success: '#22c55e',
-            error: '#ef4444',
-            warning: '#f59e0b',
-            info: '#3b82f6',
-            disabled: '#6b7280',
-        },
+        semantic: defaultSemanticTokens,
     } as ThemePalette,
 };
 

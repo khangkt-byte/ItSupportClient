@@ -20,36 +20,34 @@
 
 @theme {
   /* ========================================
-   * SEMANTIC COLOR TOKENS
-   * Material Design 3 inspired semantic tokens
+   * SEMANTIC COLOR VARIANT TOKENS
+   * 
+   * SSOT: src/constants/palettes.ts → lightSemanticVariants
+   * Runtime override: src/utils/themeTokens.ts → applyThemeTokens()
+   * 
+   * These values MUST match lightSemanticVariants in palettes.ts.
+   * They are declared here for Tailwind v4 utility class registration
+   * (e.g., bg-success-background, text-error-foreground).
+   * At runtime, applyThemeTokens() overrides these for dark mode.
+   * 
+   * When changing these values, ALWAYS update palettes.ts first,
+   * then sync here AND run: npm run generate:themes
    * ======================================== */
-  
-  /* Success colors (Green) */
-  --color-success: #22c55e;
   --color-success-foreground: #166534;
   --color-success-background: #f0fdf4;
   --color-success-border: #bbf7d0;
   
-  /* Warning colors (Amber/Orange) */
-  --color-warning: #f59e0b;
   --color-warning-foreground: #92400e;
   --color-warning-background: #fffbeb;
   --color-warning-border: #fde68a;
   
-  /* Error colors (Red) */
-  --color-error: #ef4444;
   --color-error-foreground: #991b1b;
   --color-error-background: #fef2f2;
   --color-error-border: #fecaca;
   
-  /* Info colors (Blue) */
-  --color-info: #3b82f6;
   --color-info-foreground: #1e40af;
   --color-info-background: #eff6ff;
   --color-info-border: #bfdbfe;
-  
-  /* Disabled state */
-  --color-disabled: #6b7280;           /* gray-500 */
   
   /* ========================================
    * TYPOGRAPHY

@@ -30,6 +30,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { BrandTheme, palettes, SemanticTokens } from '@/constants/palettes';
+import { applyThemeTokens, GLOBAL_SEMANTIC_TOKENS, DARK_SEMANTIC_TOKENS } from '@/utils/themeTokens';
 
 /**
  * Theme type union
@@ -115,121 +116,14 @@ export const useTheme = (): UseThemeReturn => {
   const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   /**
-   * Apply semantic tokens to CSS variables
-   * 
-   * Updates CSS custom properties to match the current theme's semantic tokens.
-   * This ensures that Tailwind utilities using semantic token colors react to theme changes.
-   * 
-   * @param {Theme} nextTheme - Theme to apply
-   * 
-   * @description
-   * Semantic tokens provide consistent meaning across themes:
-   * - success: For positive/completed states (green)
-   * - warning: For pending/caution states (amber)
-   * - error: For failed/invalid states (red)
-   * - info: For in-progress/information states (blue)
-   * - disabled: For disabled elements (gray)
-   * 
-   * These tokens are resolved from the palettes object and applied as CSS variables
-   * that Tailwind utilities can consume.
-   *
-   * @reference
-   * - CSS Custom Properties: https://developer.mozilla.org/en-US/docs/Web/CSS/--*
-   * - Design Tokens: https://design-tokens.github.io/community-group/format/
-   * - Material Design 3: https://m3.material.io/styles/color/system/overview
-   *
-   * @internal
-   */
-  const applySemanticTokens = useCallback(
-    (nextTheme: Theme) => {
-      try {
-        const root = document.documentElement;
-
-        // Determine which palette to use based on theme
-        let tokens: SemanticTokens | undefined;
-
-        if (nextTheme === 'light' || nextTheme === 'dark') {
-          // Light and dark modes use default semantic tokens
-          // These are already defined in index.css via CSS selectors
-          // Read from existing CSS variables instead of hardcoding
-          const computedStyle = getComputedStyle(document.documentElement);
-          tokens = {
-            success: computedStyle.getPropertyValue('--color-success').trim() || 'var(--color-success)',
-            error: computedStyle.getPropertyValue('--color-error').trim() || 'var(--color-error)',
-            warning: computedStyle.getPropertyValue('--color-warning').trim() || 'var(--color-warning)',
-            info: computedStyle.getPropertyValue('--color-info').trim() || 'var(--color-info)',
-            disabled: computedStyle.getPropertyValue('--color-disabled').trim() || 'var(--color-disabled)',
-          };
-        } else {
-          // Brand themes all use the same semantic tokens
-          const palette = palettes[nextTheme as BrandTheme];
-          tokens = palette.semantic;
-        }
-
-        if (tokens) {
-          // Apply main semantic tokens
-          root.style.setProperty('--color-success', tokens.success);
-          root.style.setProperty('--color-error', tokens.error);
-          root.style.setProperty('--color-warning', tokens.warning);
-          root.style.setProperty('--color-info', tokens.info);
-          root.style.setProperty('--color-disabled', tokens.disabled);
-
-          // Apply foreground variants (text colors)
-          // Light mode foreground colors (inverted/darker versions of background)
-          if (nextTheme === 'light') {
-            root.style.setProperty('--color-success-foreground', '#166534'); // green-800
-            root.style.setProperty('--color-error-foreground', '#991b1b');   // red-800
-            root.style.setProperty('--color-warning-foreground', '#92400e'); // amber-800
-            root.style.setProperty('--color-info-foreground', '#1e40af');    // blue-800
-          } else {
-            // Dark mode foreground colors (lighter)
-            root.style.setProperty('--color-success-foreground', '#bbf7d0'); // green-200
-            root.style.setProperty('--color-error-foreground', '#fecaca');   // red-200
-            root.style.setProperty('--color-warning-foreground', '#fde68a'); // amber-200
-            root.style.setProperty('--color-info-foreground', '#bfdbfe');    // blue-200
-          }
-
-          // Apply background variants
-          if (nextTheme === 'light') {
-            root.style.setProperty('--color-success-background', '#f0fdf4');  // green-50
-            root.style.setProperty('--color-error-background', '#fef2f2');    // red-50
-            root.style.setProperty('--color-warning-background', '#fffbeb');  // amber-50
-            root.style.setProperty('--color-info-background', '#eff6ff');     // blue-50
-          } else {
-            // Dark mode backgrounds (semi-transparent)
-            root.style.setProperty('--color-success-background', 'rgba(34, 197, 94, 0.2)');
-            root.style.setProperty('--color-error-background', 'rgba(239, 68, 68, 0.2)');
-            root.style.setProperty('--color-warning-background', 'rgba(245, 158, 11, 0.2)');
-            root.style.setProperty('--color-info-background', 'rgba(59, 130, 246, 0.2)');
-          }
-
-          // Apply border variants
-          if (nextTheme === 'light') {
-            root.style.setProperty('--color-success-border', '#bbf7d0');  // green-200
-            root.style.setProperty('--color-error-border', '#fecaca');    // red-200
-            root.style.setProperty('--color-warning-border', '#fde68a');  // amber-200
-            root.style.setProperty('--color-info-border', '#bfdbfe');     // blue-200
-          } else {
-            // Dark mode borders (semi-transparent)
-            root.style.setProperty('--color-success-border', 'rgba(34, 197, 94, 0.3)');
-            root.style.setProperty('--color-error-border', 'rgba(239, 68, 68, 0.3)');
-            root.style.setProperty('--color-warning-border', 'rgba(245, 158, 11, 0.3)');
-            root.style.setProperty('--color-info-border', 'rgba(59, 130, 246, 0.3)');
-          }
-        }
-      } catch (error) {
-        console.error('Failed to apply semantic tokens:', error);
-      }
-    },
-    []
-  );
-
-  /**
    * Apply theme to document
    * 
    * Sets data-theme attribute on both html and body tags for cross-browser compatibility.
    * This allows CSS to react to theme changes via attribute selectors:
    * :root[data-theme="brand-purple"] { --color-primary-500: #695CFE; }
+   * 
+   * Also applies all CSS variables from design tokens via applyThemeTokens()
+   * (runtime injection from palettes.ts — Single Source of Truth).
    *
    * @param {Theme} nextTheme - Theme to apply
    * @param {AccessibilityMode} [mode='default'] - Accessibility mode
@@ -249,13 +143,15 @@ export const useTheme = (): UseThemeReturn => {
         document.documentElement.setAttribute('data-a11y', mode);
         document.body.setAttribute('data-a11y', mode);
 
-        // Apply semantic tokens to CSS variables for theme-aware components
-        applySemanticTokens(nextTheme);
+        // Apply all CSS variables from design tokens (Phase 1 - Runtime Injection)
+        // This handles primary palette + semantic tokens + foreground/background/border
+        // ALL values sourced from palettes.ts via themeTokens.ts
+        applyThemeTokens(nextTheme);
       } catch (error) {
         console.error('Failed to apply theme:', error);
       }
     },
-    [applySemanticTokens]
+    []
   );
 
   /**
@@ -496,30 +392,18 @@ export const useTheme = (): UseThemeReturn => {
    * @internal
    */
   const getSemanticTokens = useCallback((): SemanticTokens | null => {
-    // Light and dark modes have default semantic tokens
+    // Use centralized semantic token constants (Phase 1 - SSOT)
     if (theme === 'light') {
-      return {
-        success: '#22c55e',    // green-600
-        error: '#ef4444',      // red-500
-        warning: '#f59e0b',    // amber-500
-        info: '#3b82f6',       // blue-500
-        disabled: '#6b7280',   // gray-500
-      };
+      return GLOBAL_SEMANTIC_TOKENS;
     }
 
     if (theme === 'dark') {
-      return {
-        success: '#4ade80',    // green-400
-        error: '#f87171',      // red-400
-        warning: '#fbbf24',    // amber-400
-        info: '#60a5fa',       // blue-400
-        disabled: '#9ca3af',   // gray-400
-      };
+      return DARK_SEMANTIC_TOKENS;
     }
 
     // Brand themes use semantic tokens from palettes
     const palette = palettes[theme as BrandTheme];
-    return palette.semantic || null;
+    return palette.semantic || GLOBAL_SEMANTIC_TOKENS;
   }, [theme]);
 
   /**

@@ -1,3 +1,7 @@
+// TODO: NOT_INTEGRATED — This component is not imported by any route or layout.
+// Built for Phase 4 (theme scheduling) but never wired into the app.
+// Remove or integrate into Settings page before next release.
+
 import React, { useState, useEffect } from 'react';
 import {
     Clock,

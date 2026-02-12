@@ -9,8 +9,21 @@
  * - PDF report generation
  * - Detailed violation listings
  * 
+ * Core math functions are imported from colorMath.ts (SSOT).
+ * 
  * @module accessibilityReport
  */
+
+import { defaultSemanticTokens } from '@/constants/palettes';
+import {
+    hexToRgb,
+    getContrastRatio as calculateContrastRatio,
+    calculateBrightness,
+    meetsWCAGRatio as meetsWCAGStandard,
+} from '@/utils/colorMath';
+
+// Re-export for consumers that import from this file
+export { hexToRgb, calculateBrightness };
 
 /**
  * Color information in a report
@@ -71,95 +84,6 @@ export interface AccessibilityReport {
     summary: ViolationSummary;
     passedAA: boolean;
     passedAAA: boolean;
-}
-
-/**
- * Convert hex color to RGB
- * @param hex - Hex color value (#RRGGBB)
- * @returns RGB object or null if invalid
- */
-export function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-    } : null;
-}
-
-/**
- * Calculate color brightness (0-255)
- * Uses relative luminance formula for better accuracy
- * Reference: https://www.w3.org/TR/WCAG20/#relativeluminancedef
- * @param hex - Hex color value
- * @returns Brightness value 0-255
- */
-export function calculateBrightness(hex: string): number {
-    const rgb = hexToRgb(hex);
-    if (!rgb) return 128;
-
-    // Relative luminance calculation
-    const luminance = (value: number) => {
-        const v = value / 255;
-        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-    };
-
-    const L = 0.2126 * luminance(rgb.r) + 0.7152 * luminance(rgb.g) + 0.0722 * luminance(rgb.b);
-    return Math.round(L * 255);
-}
-
-/**
- * Calculate relative luminance for WCAG calculations
- * @param hex - Hex color value
- * @returns Luminance (0-1)
- */
-function relativeLuminance(hex: string): number {
-    const rgb = hexToRgb(hex);
-    if (!rgb) return 0.5;
-
-    const luminance = (value: number) => {
-        const v = value / 255;
-        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-    };
-
-    return 0.2126 * luminance(rgb.r) + 0.7152 * luminance(rgb.g) + 0.0722 * luminance(rgb.b);
-}
-
-/**
- * Calculate WCAG contrast ratio between two colors
- * Reference: https://www.w3.org/TR/WCAG20/#contrast-ratiodef
- * @param foreground - Foreground color (hex)
- * @param background - Background color (hex)
- * @returns Contrast ratio (minimum 1:1, maximum 21:1)
- */
-export function calculateContrastRatio(foreground: string, background: string): number {
-    const l1 = relativeLuminance(foreground);
-    const l2 = relativeLuminance(background);
-
-    const lighter = Math.max(l1, l2);
-    const darker = Math.min(l1, l2);
-
-    return (lighter + 0.05) / (darker + 0.05);
-}
-
-/**
- * Check if contrast ratio meets WCAG standard
- * @param ratio - Contrast ratio
- * @param level - 'AA' or 'AAA'
- * @param isLargeText - Is text >= 18pt or >= 14pt bold
- * @returns true if meets standard
- */
-export function meetsWCAGStandard(
-    ratio: number,
-    level: 'AA' | 'AAA',
-    isLargeText: boolean = false
-): boolean {
-    if (level === 'AA') {
-        return isLargeText ? ratio >= 3 : ratio >= 4.5;
-    } else {
-        // AAA
-        return isLargeText ? ratio >= 4.5 : ratio >= 7;
-    }
 }
 
 /**
@@ -267,10 +191,10 @@ export function generateAccessibilityReport(
     const textColor = colors.find(c => c.usage.includes('text'))?.value || '#000000';
 
     // Generate semantic color values
-    const successColor = colors.find(c => c.name.toLowerCase().includes('success'))?.value || '#22c55e';
-    const warningColor = colors.find(c => c.name.toLowerCase().includes('warning'))?.value || '#f59e0b';
-    const errorColor = colors.find(c => c.name.toLowerCase().includes('error'))?.value || '#ef4444';
-    const infoColor = colors.find(c => c.name.toLowerCase().includes('info'))?.value || '#3b82f6';
+    const successColor = colors.find(c => c.name.toLowerCase().includes('success'))?.value || defaultSemanticTokens.success;
+    const warningColor = colors.find(c => c.name.toLowerCase().includes('warning'))?.value || defaultSemanticTokens.warning;
+    const errorColor = colors.find(c => c.name.toLowerCase().includes('error'))?.value || defaultSemanticTokens.error;
+    const infoColor = colors.find(c => c.name.toLowerCase().includes('info'))?.value || defaultSemanticTokens.info;
 
     // Generate contrast pairs
     const contrastPairs = generateSampleContrasts(

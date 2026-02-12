@@ -1,3 +1,8 @@
+// TODO: NOT_INTEGRATED — This hook is not imported by any production code.
+// useTheme.ts already handles basic system preference detection in its init useEffect.
+// This hook adds override capability but was never wired into the app.
+// Remove or integrate before next release.
+
 import { useEffect, useCallback, useState, useMemo } from 'react';
 import { useTheme } from './useTheme';
 

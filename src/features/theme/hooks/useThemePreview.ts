@@ -1,3 +1,7 @@
+// TODO: NOT_INTEGRATED — This hook is not imported by any production code.
+// It was built for Phase 4 but never wired into the app.
+// Remove or integrate into ThemeSelector before next release.
+
 import { useState, useCallback, useEffect } from 'react';
 import { useTheme } from './useTheme';
 import type { Theme } from './useTheme';

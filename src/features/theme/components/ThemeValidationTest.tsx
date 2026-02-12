@@ -19,6 +19,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '@/features/theme/hooks/useTheme';
 import { palettes, BrandTheme } from '@/constants/palettes';
+import { getContrastRatio } from '@/utils/colorMath';
 
 interface PerformanceMetrics {
   themeChangeTime: number;
@@ -83,27 +84,11 @@ export const ThemeValidationTest: React.FC = () => {
 
   /**
    * Calculate WCAG contrast ratio between two hex colors
-   * Implementation follows WCAG 2.1 guidelines
+   * Uses shared colorMath.ts module (SSOT)
    * @reference https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html
    */
   const calculateContrast = (fg: string, bg: string): ColorContrastResult => {
-    const getLuminance = (hex: string): number => {
-      const rgb = parseInt(hex.slice(1), 16);
-      const r = ((rgb >> 16) & 0xff) / 255;
-      const g = ((rgb >> 8) & 0xff) / 255;
-      const b = (rgb & 0xff) / 255;
-      
-      const [rs, gs, bs] = [r, g, b].map(c => 
-        c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
-      );
-      
-      return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
-    };
-
-    const l1 = getLuminance(fg);
-    const l2 = getLuminance(bg);
-    const ratio = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
-
+    const ratio = getContrastRatio(fg, bg);
     return {
       ratio: Math.round(ratio * 100) / 100,
       wcagAA: ratio >= 4.5 ? 'pass' : 'fail',

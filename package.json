@@ -1,5 +1,5 @@
 {
-      "name": "IT Support Management Web App",
+      "name": "it-support-management-web-app",
       "version": "0.1.0",
       "private": true,
       "type": "module",
@@ -74,7 +74,10 @@
       },
       "scripts": {
             "dev": "vite",
-            "build": "vite build",
+            "build": "npm run validate:themes && npm run generate:themes && vite build",
+            "build:fast": "vite build",
+            "generate:themes": "node scripts/generateThemeCSS.js",
+            "validate:themes": "node scripts/validateThemes.js",
             "test": "jest",
             "test:watch": "jest --watch",
             "test:coverage": "jest --coverage",

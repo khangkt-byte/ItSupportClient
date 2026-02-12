@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { ChevronRight, Undo, RotateCcw, Eye } from 'lucide-react';
 import { useTheme } from '@/features/theme/hooks/useTheme';
 import type { Theme } from '@/features/theme/hooks/useTheme';
+import { palettes } from '@/constants/palettes';
 import {
   Dialog,
   DialogContent,
@@ -14,22 +15,133 @@ interface ThemeOption {
   label: string;
   category: 'light' | 'dark' | 'brand';
   color?: string;
+  previewColor?: string; // Static color for consistent preview
   description?: string;
 }
 
+/**
+ * Theme Options with Design Token Pattern
+ * 
+ * Following Industry Best Practices:
+ * 
+ * 1. Design Tokens as Single Source of Truth (SSOT)
+ *    - Material Design 3: https://m3.material.io/foundations/design-tokens/overview
+ *    - Fluent 2: https://fluent2.microsoft.design/design-tokens
+ *    - Carbon Design: https://carbondesignsystem.com/guidelines/color/usage
+ *    - Ant Design: https://ant.design/docs/react/customize-theme
+ *    - Atlassian: https://atlassian.design/foundations/color-new
+ * 
+ * 2. Never Hard-Code Colors in Components
+ *    - All colors consumed from central palette (palettes.ts)
+ *    - Ensures consistency across entire application
+ *    - Enables theme switching without component changes
+ *    - Type-safe color references
+ * 
+ * 3. Base Themes (Light/Dark)
+ *    - Light: #FFFFFF (Material Design, Fluent, shadcn/ui standard)
+ *    - Dark: #121212 (Material Design baseline surface)
+ * 
+ * 4. Brand Themes
+ *    - Use primary.500 from palette (mid-tone, most readable)
+ *    - Material Design 3 recommendation for primary brand color
+ *    - WCAG 2.1 Level AA compliant contrast ratios
+ * 
+ * Benefits of Design Token Pattern:
+ * ✅ Single source of truth - update once, reflects everywhere
+ * ✅ Type safety - TypeScript validates palette references
+ * ✅ Consistency - impossible to have color mismatches
+ * ✅ Maintainability - centralized color management
+ * ✅ Scalability - easy to add new themes
+ * ✅ Accessibility - tokens include contrast validation
+ * 
+ * @see palettes.ts - Central design token definitions
+ */
 const themeOptions: ThemeOption[] = [
-  { value: 'light', label: 'Light', category: 'light', description: 'Clean, bright interface' },
-  { value: 'dark', label: 'Dark', category: 'dark', description: 'Easy on the eyes' },
-  { value: 'brand-purple', label: 'Purple', category: 'brand', color: '#695CFE', description: 'Professional purple' },
-  { value: 'brand-red', label: 'Red', category: 'brand', color: '#ef4444', description: 'Energetic red' },
-  { value: 'brand-blue', label: 'Blue', category: 'brand', color: '#3b82f6', description: 'Trustworthy blue' },
-  { value: 'brand-green', label: 'Green', category: 'brand', color: '#22c55e', description: 'Fresh green' },
-  { value: 'brand-orange', label: 'Orange', category: 'brand', color: '#ea580c', description: 'Vibrant orange' },
-  { value: 'brand-teal', label: 'Teal', category: 'brand', color: '#14b8a6', description: 'Calm teal' },
-  { value: 'brand-indigo', label: 'Indigo', category: 'brand', color: '#6366f1', description: 'Modern indigo' },
-  { value: 'brand-violet', label: 'Violet', category: 'brand', color: '#a855f7', description: 'Creative violet' },
-  { value: 'brand-pink', label: 'Pink', category: 'brand', color: '#ec4899', description: 'Bold pink' },
-  { value: 'brand-cyan', label: 'Cyan', category: 'brand', color: '#1e88ff', description: 'Tech cyan' },
+  { 
+    value: 'light', 
+    label: 'Light', 
+    category: 'light', 
+    previewColor: '#FFFFFF', // Base theme - not in palettes
+    description: 'Clean, bright interface' 
+  },
+  { 
+    value: 'dark', 
+    label: 'Dark', 
+    category: 'dark', 
+    previewColor: '#121212', // Base theme - not in palettes
+    description: 'Easy on the eyes' 
+  },
+  // ✅ Brand themes use palettes constant (Design Token Pattern)
+  { 
+    value: 'brand-purple', 
+    label: 'Purple', 
+    category: 'brand', 
+    color: palettes['brand-purple'].primary[500], // ✅ From design tokens
+    description: 'Professional purple' 
+  },
+  { 
+    value: 'brand-red', 
+    label: 'Red', 
+    category: 'brand', 
+    color: palettes['brand-red'].primary[500], // ✅ From design tokens
+    description: 'Energetic red' 
+  },
+  { 
+    value: 'brand-blue', 
+    label: 'Blue', 
+    category: 'brand', 
+    color: palettes['brand-blue'].primary[500], // ✅ From design tokens
+    description: 'Trustworthy blue' 
+  },
+  { 
+    value: 'brand-green', 
+    label: 'Green', 
+    category: 'brand', 
+    color: palettes['brand-green'].primary[500], // ✅ From design tokens
+    description: 'Fresh green' 
+  },
+  { 
+    value: 'brand-orange', 
+    label: 'Orange', 
+    category: 'brand', 
+    color: palettes['brand-orange'].primary[500], // ✅ From design tokens
+    description: 'Vibrant orange' 
+  },
+  { 
+    value: 'brand-teal', 
+    label: 'Teal', 
+    category: 'brand', 
+    color: palettes['brand-teal'].primary[500], // ✅ From design tokens
+    description: 'Calm teal' 
+  },
+  { 
+    value: 'brand-indigo', 
+    label: 'Indigo', 
+    category: 'brand', 
+    color: palettes['brand-indigo'].primary[500], // ✅ From design tokens
+    description: 'Modern indigo' 
+  },
+  { 
+    value: 'brand-violet', 
+    label: 'Violet', 
+    category: 'brand', 
+    color: palettes['brand-violet'].primary[500], // ✅ From design tokens
+    description: 'Creative violet' 
+  },
+  { 
+    value: 'brand-pink', 
+    label: 'Pink', 
+    category: 'brand', 
+    color: palettes['brand-pink'].primary[500], // ✅ From design tokens
+    description: 'Bold pink' 
+  },
+  { 
+    value: 'brand-cyan', 
+    label: 'Cyan', 
+    category: 'brand', 
+    color: palettes['brand-cyan'].primary[500], // ✅ From design tokens
+    description: 'Tech cyan' 
+  },
 ];
 
 interface ThemeHistory {
@@ -311,7 +423,20 @@ export function ThemeSelector({ collapsed = false }: ThemeSelectorProps) {
 }
 
 /**
- * Individual theme card component
+ * Individual theme card component with static preview colors
+ * 
+ * Design Philosophy:
+ * - Light theme: Always shows #FFFFFF (white) with visible border
+ * - Dark theme: Always shows #121212 (Material Design standard)
+ * - Brand themes: Shows actual brand color
+ * - Consistent preview regardless of current theme
+ * 
+ * Implementation follows best practices from:
+ * - Material Design 3 (Google)
+ * - Fluent 2 (Microsoft)
+ * - shadcn/ui (Vercel)
+ * - Tailwind CSS
+ * - Carbon Design System (IBM)
  */
 interface ThemeCardProps {
   option: ThemeOption;
@@ -330,6 +455,19 @@ function ThemeCard({
   onMouseLeave,
   onClick,
 }: ThemeCardProps) {
+  // Determine static preview color
+  const getPreviewColor = () => {
+    // Brand themes: use their brand color
+    if (option.category === 'brand' && option.color) {
+      return option.color;
+    }
+    // Light/Dark themes: use static previewColor
+    return option.previewColor || '#FFFFFF';
+  };
+
+  const previewColor = getPreviewColor();
+  const isLightColor = option.category === 'light' || (option.previewColor === '#FFFFFF');
+
   return (
     <button
       onMouseEnter={onMouseEnter}
@@ -340,15 +478,13 @@ function ThemeCard({
       } ${isPreview ? 'scale-105' : ''}`}
       title={option.description || option.label}
     >
-      {/* Theme Preview Background */}
+      {/* Theme Preview Background with Static Color */}
       <div
-        className="w-full h-20 rounded-lg transition-all"
+        className={`w-full h-20 rounded-lg transition-all ${
+          isLightColor ? 'border-2 border-gray-300 dark:border-gray-600' : ''
+        }`}
         style={{
-          backgroundColor: option.category === 'brand' && option.color
-            ? option.color
-            : option.category === 'light'
-            ? 'var(--color-bg-primary)'
-            : 'var(--color-bg-accent)',
+          backgroundColor: previewColor,
         }}
       />
 

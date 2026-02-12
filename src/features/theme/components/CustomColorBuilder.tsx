@@ -1,3 +1,7 @@
+// TODO: NOT_INTEGRATED — This component is not imported by any route or layout.
+// Built for Phase 4 (custom color builder) but never wired into the app.
+// Remove or integrate into Settings page before next release.
+
 import { useState } from 'react';
 import {
     Copy,
