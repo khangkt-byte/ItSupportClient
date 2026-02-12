@@ -132,10 +132,14 @@ export function RoleManagement({ data, setData }: Props) {
 
       if (editing) {
         const updated = await rolesApi.update(editing.roleId, roleData);
-        setData(data.map((i) => (i.roleId === editing.roleId ? updated : i)));
+        // Transform RoleDto to Role by adding id property
+        const updatedRole = { ...updated, id: String(updated.roleId) };
+        setData(data.map((i) => (i.roleId === editing.roleId ? updatedRole : i)));
       } else {
         const created = await rolesApi.create(roleData);
-        setData([...data, created]);
+        // Transform RoleDto to Role by adding id property
+        const createdRole = { ...created, id: String(created.roleId) };
+        setData([...data, createdRole]);
       }
 
       setShowForm(false);
@@ -152,7 +156,8 @@ export function RoleManagement({ data, setData }: Props) {
     if (!confirmDelete) return;
 
     try {
-      await rolesApi.delete(confirmDelete.roleId);
+      // Use deleteSingle for single role deletion
+      await rolesApi.deleteSingle(confirmDelete.roleId);
       setData(data.filter((i) => i.roleId !== confirmDelete.roleId));
       setConfirmDelete(null);
     } catch (err: any) {
