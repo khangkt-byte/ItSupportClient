@@ -443,7 +443,7 @@ export function PermissionEditor({
       </div>
 
       {/* Effective Permissions Summary */}
-      <div className="bg-gradient-to-r from-primary-50 to-green-50 border border-primary-200 rounded-lg p-4">
+      <div className="bg-linear-to-r from-primary-50 to-green-50 border border-primary-200 rounded-lg p-4">
         <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2 text-sm">
           <CheckCircle className="w-5 h-5 text-primary-600" />
           Effective Permissions ({effectivePermissions.permissions.length} total)

@@ -548,7 +548,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                     <div className="inline-flex items-center gap-2">
                       <button 
                         onClick={() => toggleRow(log.id)} 
-                        className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors min-w-[16px] min-h-[16px]"
+                        className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors min-w-16px min-h-16px"
                         title={expandedRows.has(log.id) ? "Collapse details" : "Expand details"}
                       >
                         {expandedRows.has(log.id) ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -559,7 +559,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                       >
                         <button 
                           onClick={() => openForm(log)} 
-                          className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors min-w-[16px] min-h-[16px]"
+                          className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors min-w-16px min-h-16px"
                           title="Edit work log"
                         >
                           <Edit className="w-4 h-4" />
@@ -571,7 +571,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                       >
                         <button 
                           onClick={() => setConfirmDelete(log.id)} 
-                          className="text-red-600 inline-flex items-center justify-center hover:text-red-800 transition-colors min-w-[16px] min-h-[16px]"
+                          className="text-red-600 inline-flex items-center justify-center hover:text-red-800 transition-colors min-w-16px min-h-16px"
                           title="Delete work log"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -623,7 +623,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
         >
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white dark:bg-gray-800 rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between sticky top-0 bg-white dark:bg-gray-800 z-[60]"><h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">{editing ? 'Edit' : 'New'} Work Log</h3><button onClick={() => setShowForm(false)} className="hover:text-gray-600 dark:hover:text-gray-400"><X className="w-6 h-6" /></button></div>
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between sticky top-0 bg-white dark:bg-gray-800 z-60"><h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">{editing ? 'Edit' : 'New'} Work Log</h3><button onClick={() => setShowForm(false)} className="hover:text-gray-600 dark:hover:text-gray-400"><X className="w-6 h-6" /></button></div>
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -790,7 +790,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
       {showImportDialog && validationResult && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b flex justify-between sticky top-0 bg-white z-[60]">
+            <div className="px-6 py-4 border-b flex justify-between sticky top-0 bg-white z-60">
               <h3 className="text-lg font-semibold">Import Validation</h3>
               <button onClick={handleCancelImport} className="hover:text-gray-600"><X className="w-6 h-6" /></button>
             </div>

@@ -224,7 +224,7 @@ export function RoleManagement({ data, setData }: Props) {
         {data.map((item) => {
           const claimCount = item.claims?.length || 0;
           return (
-            <div key={item.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col min-h-[240px]">
+            <div key={item.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col min-h-240px">
               <div>
                 <div className="w-12 h-12 bg-primary-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-4">
                   <Shield className="w-6 h-6 text-primary-600 dark:text-primary-400" />

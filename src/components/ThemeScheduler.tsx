@@ -343,7 +343,7 @@ export function ThemeScheduler() {
 
                                 {/* Sunrise/Sunset Preview */}
                                 {sunriseTime && sunsetTime && (
-                                    <div className="p-4 bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg border border-blue-200">
+                                    <div className="p-4 bg-linear-to-r from-blue-50 to-orange-50 rounded-lg border border-blue-200">
                                         <p className="text-xs font-semibold text-gray-700 uppercase mb-3">
                                             Today's Times
                                         </p>
