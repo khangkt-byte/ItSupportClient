@@ -26,7 +26,6 @@
  * @reference https://www.w3.org/TR/WCAG21/#animation-from-interactions
  */
 html.theme-transition,
-html.theme-transition,
 html.theme-transition *,
 html.theme-transition *::before,
 html.theme-transition *::after {
@@ -115,32 +114,15 @@ html[data-a11y="highContrast"] {
  * 4. Consistent: Same color for same meaning across app
  */
 
-/* Base semantic tokens (Light mode) */
-:root {
-  /* Success colors (Completed, Valid, Active) */
-  --color-success: #22c55e;           /* green-600 */
-  --color-success-foreground: #166534; /* green-800 */
-  --color-success-background: #f0fdf4; /* green-50 */
-  --color-success-border: #bbf7d0;     /* green-200 */
-  
-  /* Warning colors (Pending, Caution) */
-  --color-warning: #f59e0b;           /* amber-500 */
-  --color-warning-foreground: #92400e; /* amber-800 */
-  --color-warning-background: #fffbeb; /* amber-50 */
-  --color-warning-border: #fde68a;     /* amber-200 */
-  
-  /* Error colors (Failed, Invalid) */
-  --color-error: #ef4444;             /* red-500 */
-  --color-error-foreground: #991b1b;   /* red-800 */
-  --color-error-background: #fef2f2;   /* red-50 */
-  --color-error-border: #fecaca;       /* red-200 */
-  
-  /* Info colors (In Progress, Information) */
-  --color-info: #3b82f6;              /* blue-500 */
-  --color-info-foreground: #1e40af;    /* blue-800 */
-  --color-info-background: #eff6ff;    /* blue-50 */
-  --color-info-border: #bfdbfe;        /* blue-200 */
-}
+/**
+ * Note: Light mode semantic tokens (success, warning, error, info) are
+ * defined in theme.css via @theme directive. They are automatically
+ * output as :root CSS variables by Tailwind v4.
+ * Do NOT duplicate them here.
+ *
+ * Only OVERRIDE sections below: dark mode, brand dark mode,
+ * and high contrast mode.
+ */
 
 /* Dark mode semantic tokens */
 :root[data-theme="dark"],
@@ -168,97 +150,20 @@ html[data-a11y="highContrast"] {
   --color-info-foreground: #bfdbfe;    /* blue-200 */
   --color-info-background: rgba(59, 130, 246, 0.2);   /* blue-500/20 */
   --color-info-border: rgba(59, 130, 246, 0.3);       /* blue-500/30 */
+  
+  /* Disabled state */
+  --color-disabled: #9ca3af;           /* gray-400 */
 }
 
 /**
  * Brand Theme Semantic Tokens
- * All brand themes share the same semantic token colors per Material Design 3 standards
- * These are overridden via JavaScript when theme changes to ensure consistency
- * 
+ * All brand themes share the same semantic token colors per Material Design 3 standards.
+ * Light mode values inherit from @theme defaults — no override needed.
+ * Dark mode values are inherited from :root[data-theme*="dark"] above
+ * (substring match catches "dark brand-*" themes automatically).
+ *
  * Reference: https://m3.material.io/styles/color/system/overview
- * 
- * Light mode semantic tokens for brand themes
- * Note: These are intentionally identical across all brand themes to maintain
- * consistent meaning for semantic tokens regardless of primary brand color.
  */
-
-/* Brand Theme Light Mode - Shared semantic tokens */
-:root[data-theme="brand-purple"],
-:root[data-theme="brand-red"],
-:root[data-theme="brand-blue"],
-:root[data-theme="brand-green"],
-:root[data-theme="brand-orange"],
-:root[data-theme="brand-teal"],
-:root[data-theme="brand-indigo"],
-:root[data-theme="brand-violet"],
-:root[data-theme="brand-pink"],
-:root[data-theme="brand-cyan"] {
-  /* Success colors (Completed, Valid, Active) */
-  --color-success: #22c55e;           /* green-600 */
-  --color-success-foreground: #166534; /* green-800 */
-  --color-success-background: #f0fdf4; /* green-50 */
-  --color-success-border: #bbf7d0;     /* green-200 */
-  
-  /* Warning colors (Pending, Caution) */
-  --color-warning: #f59e0b;           /* amber-500 */
-  --color-warning-foreground: #92400e; /* amber-800 */
-  --color-warning-background: #fffbeb; /* amber-50 */
-  --color-warning-border: #fde68a;     /* amber-200 */
-  
-  /* Error colors (Failed, Invalid) */
-  --color-error: #ef4444;             /* red-500 */
-  --color-error-foreground: #991b1b;   /* red-800 */
-  --color-error-background: #fef2f2;   /* red-50 */
-  --color-error-border: #fecaca;       /* red-200 */
-  
-  /* Info colors (In Progress, Information) */
-  --color-info: #3b82f6;              /* blue-500 */
-  --color-info-foreground: #1e40af;    /* blue-800 */
-  --color-info-background: #eff6ff;    /* blue-50 */
-  --color-info-border: #bfdbfe;        /* blue-200 */
-  
-  /* Disabled state */
-  --color-disabled: #6b7280;           /* gray-500 */
-}
-
-/* Brand Theme Dark Mode - Lighter semantic tokens for dark backgrounds */
-:root[data-theme="dark brand-purple"],
-:root[data-theme="dark brand-red"],
-:root[data-theme="dark brand-blue"],
-:root[data-theme="dark brand-green"],
-:root[data-theme="dark brand-orange"],
-:root[data-theme="dark brand-teal"],
-:root[data-theme="dark brand-indigo"],
-:root[data-theme="dark brand-violet"],
-:root[data-theme="dark brand-pink"],
-:root[data-theme="dark brand-cyan"] {
-  /* Success colors - lighter for dark backgrounds */
-  --color-success: #4ade80;           /* green-400 */
-  --color-success-foreground: #bbf7d0; /* green-200 */
-  --color-success-background: rgba(34, 197, 94, 0.2); /* green-600/20 */
-  --color-success-border: rgba(34, 197, 94, 0.3);     /* green-600/30 */
-  
-  /* Warning colors */
-  --color-warning: #fbbf24;           /* amber-400 */
-  --color-warning-foreground: #fde68a; /* amber-200 */
-  --color-warning-background: rgba(245, 158, 11, 0.2); /* amber-500/20 */
-  --color-warning-border: rgba(245, 158, 11, 0.3);     /* amber-500/30 */
-  
-  /* Error colors */
-  --color-error: #f87171;             /* red-400 */
-  --color-error-foreground: #fecaca;   /* red-200 */
-  --color-error-background: rgba(239, 68, 68, 0.2);   /* red-500/20 */
-  --color-error-border: rgba(239, 68, 68, 0.3);       /* red-500/30 */
-  
-  /* Info colors */
-  --color-info: #60a5fa;              /* blue-400 */
-  --color-info-foreground: #bfdbfe;    /* blue-200 */
-  --color-info-background: rgba(59, 130, 246, 0.2);   /* blue-500/20 */
-  --color-info-border: rgba(59, 130, 246, 0.3);       /* blue-500/30 */
-
-  /* Disabled state */
-  --color-disabled: #9ca3af;           /* gray-400 */
-}
 
 /* High Contrast mode overrides - WCAG AAA compliance (21:1) */
 html[data-a11y="highContrast"] {
@@ -753,20 +658,20 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   /* Focus visible outline for accessibility (WCAG 2.1 Level AA) */
   /* Reference: https://www.w3.org/WAI/WCAG21/Understanding/focus-visible.html */
   .focus-outline {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-primary-400;
+    @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-primary-400;
   }
   
   /* Button styles following Material Design 3 */
   /* Reference: https://m3.material.io/components/buttons/specs */
   .btn-base {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
   }
   
   .btn-primary {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
     @apply bg-primary-600 text-white hover:bg-primary-700;
     @apply focus-visible:ring-primary-500;
@@ -775,7 +680,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   
   .btn-secondary {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
     @apply bg-gray-100 text-gray-900 hover:bg-gray-200;
     @apply focus-visible:ring-gray-500;
@@ -784,7 +689,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   
   .btn-danger {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
     @apply bg-red-600 text-white hover:bg-red-700;
     @apply focus-visible:ring-red-500;
@@ -793,7 +698,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 
   .btn-success {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
     @apply bg-green-600 text-white hover:bg-green-700;
     @apply focus-visible:ring-green-500;
@@ -802,7 +707,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 
   .btn-warning {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
     @apply bg-orange-600 text-white hover:bg-orange-700;
     @apply focus-visible:ring-orange-500;
@@ -812,7 +717,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   /* Outline button variants */
   .btn-outline-primary {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
     @apply bg-primary-50 text-primary-600 hover:bg-primary-100;
     @apply focus-visible:ring-primary-400;
@@ -821,7 +726,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 
   .btn-outline-danger {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
     @apply bg-red-50 text-red-600 hover:bg-red-100;
     @apply focus-visible:ring-red-400;
@@ -830,7 +735,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 
   .btn-outline-success {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+    @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
     @apply bg-green-50 text-green-600 hover:bg-green-100;
     @apply focus-visible:ring-green-400;
@@ -841,7 +746,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   /* Reference: https://m3.material.io/components/text-fields/specs */
   .input-base {
     @apply w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm;
-    @apply placeholder:text-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500;
+    @apply placeholder:text-gray-400 focus:border-primary-500 focus:outline-hidden focus:ring-2 focus:ring-primary-500;
     @apply disabled:cursor-not-allowed disabled:opacity-50;
     @apply dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500;
     @apply dark:focus:border-primary-400 dark:focus:ring-primary-400;
@@ -850,7 +755,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   /* Card component following Material Design 3 */
   /* Reference: https://m3.material.io/components/cards/specs */
   .card {
-    @apply rounded-lg border border-gray-200 bg-white shadow-sm;
+    @apply rounded-lg border border-gray-200 bg-white shadow-xs;
     @apply dark:border-gray-700 dark:bg-gray-800;
   }
   
@@ -935,6 +840,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   .truncate-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -942,6 +848,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   .truncate-3 {
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }

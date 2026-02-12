@@ -29,7 +29,7 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
   // Show loading if data is still being fetched
   if (dataManager.employees.loading || dataManager.workLogs.loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-400px">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Loading...</p>

@@ -11,9 +11,12 @@
  * Usage:
  * Import this file in your main CSS:
  * @import "./theme.css";
+ *
+ * IMPORTANT: Do NOT add @import "tailwindcss" here.
+ * The parent file (index.css) already imports Tailwind.
+ * Adding it here would duplicate all Tailwind CSS output.
+ * Reference: https://tailwindcss.com/docs/upgrade-guide
  */
-
-@import "tailwindcss";
 
 @theme {
   /* ========================================
@@ -44,6 +47,9 @@
   --color-info-foreground: #1e40af;
   --color-info-background: #eff6ff;
   --color-info-border: #bfdbfe;
+  
+  /* Disabled state */
+  --color-disabled: #6b7280;           /* gray-500 */
   
   /* ========================================
    * TYPOGRAPHY
@@ -120,42 +126,11 @@
 }
 
 /* ========================================
- * DARK MODE THEME
- * Override colors for dark mode
- * ======================================== */
-
-[data-theme="dark"] {
-  /* Success colors (adjusted for dark backgrounds) */
-  --color-success: #22c55e;
-  --color-success-foreground: #86efac;
-  --color-success-background: #14532d;
-  --color-success-border: #166534;
-  
-  /* Warning colors */
-  --color-warning: #f59e0b;
-  --color-warning-foreground: #fde047;
-  --color-warning-background: #78350f;
-  --color-warning-border: #92400e;
-  
-  /* Error colors */
-  --color-error: #ef4444;
-  --color-error-foreground: #fca5a5;
-  --color-error-background: #7f1d1d;
-  --color-error-border: #991b1b;
-  
-  /* Info colors */
-  --color-info: #3b82f6;
-  --color-info-foreground: #93c5fd;
-  --color-info-background: #1e3a8a;
-  --color-info-border: #1e40af;
-}
-
-/* ========================================
- * SAFELIST
- * Classes that should always be included
- * 
- * Note: In Tailwind v4, safelist is handled differently.
- * These classes will be generated on-demand when used.
- * If you need explicit safelist, create a safelist.html
- * file or use @layer utilities.
+ * DARK MODE OVERRIDES
+ * Dark mode semantic tokens are defined in index.css
+ * via :root[data-theme="dark"] and :root[data-theme*="dark"]
+ * selectors for multi-theme runtime support.
+ *
+ * DO NOT define dark overrides here — they would conflict
+ * with the more specific selectors in index.css.
  * ======================================== */
