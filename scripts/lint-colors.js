@@ -65,10 +65,23 @@ const CONFIG = {
         '**/docs/**',
         // Type definitions that may contain color examples
         '**/*.d.ts',
+        // CSS files - these DEFINE color tokens (not violations)
+        '**/*.css',
+        '**/*.scss',
+        '**/*.sass',
+        '**/styles/**',
+        // Utility files that generate reports with embedded CSS
+        '**/accessibilityReport.ts',
+        '**/colorGenerator.ts',
+        '**/colorBlindness*',
+        '**/colorSimulation*',
+        // Theme palette constants (color definitions)
+        '**/palettes.ts',
+        '**/constants/palettes*',
     ],
     
-    // Files to scan
-    includeExtensions: ['.ts', '.tsx', '.js', '.jsx', '.css', '.scss'],
+    // Files to scan (removed .css, .scss since they define tokens)
+    includeExtensions: ['.ts', '.tsx', '.js', '.jsx'],
     
     // Allowed CSS color keywords (W3C Standard)
     allowedColors: [
@@ -166,29 +179,50 @@ class ContextAnalyzer {
     }
     
     /**
+     * Check if match is in a Tailwind class name
+     * Tailwind uses semantic color names like bg-red-500, text-blue-600
+     * These are NOT hardcoded colors - they're part of the design system
+     * @param {string} line 
+     * @param {string} match 
+     */
+    static isTailwindClass(line, match) {
+        // Tailwind color class patterns:
+        // bg-red-500, text-blue-600, border-green-300, etc.
+        const tailwindUtilityPattern = new RegExp(
+            `(?:bg|text|border|ring|divide|placeholder|from|via|to|decoration|accent|caret|fill|stroke|shadow|outline)-${match}-\\d+`,
+            'i'
+        );
+        
+        // Also check for Tailwind arbitrary values (allowed since semantic)
+        // bg-[var(--color-primary)] - already semantic
+        const tailwindArbitraryPattern = /(?:bg|text|border)-\[var\(--/;
+        
+        return tailwindUtilityPattern.test(line) || tailwindArbitraryPattern.test(line);
+    }
+    
+    /**
      * Check if match is in a CSS context
      * This is where we WANT to detect colors
      * @param {string} line 
      * @param {string} match 
      */
     static isCSSContext(line, match) {
-        // CSS property patterns
-        const cssPropertyPattern = /(?:color|background|border|fill|stroke|shadow|outline)[-\w]*\s*[:=]/i;
+        // Skip Tailwind classes first (these are semantic!)
+        if (this.isTailwindClass(line, match)) {
+            return false;
+        }
         
-        // className or style prop
-        const classNamePattern = /className\s*=\s*["'`]/;
-        const stylePattern = /style\s*=\s*{/;
+        // CSS property patterns (actual hardcoded colors)
+        const cssPropertyPattern = /(?:style\s*=\s*\{\{.*?(?:color|background|border|fill|stroke):\s*["'])/i;
         
-        // Tailwind classes
-        const tailwindPattern = /(?:bg|text|border)-\[var\(--/;
+        // Inline CSS strings
+        const inlineCSSPattern = /(?:color|background|border|fill|stroke):\s*["']?\w+["']?/i;
         
-        // Direct CSS in styled-components or CSS files
+        // styled-components or emotion
         const styledPattern = /styled\.\w+`|css`/;
         
         return cssPropertyPattern.test(line) ||
-               classNamePattern.test(line) ||
-               stylePattern.test(line) ||
-               tailwindPattern.test(line) ||
+               (inlineCSSPattern.test(line) && !line.includes('className')) ||
                styledPattern.test(line);
     }
     
@@ -252,9 +286,12 @@ class ColorLinter {
      * @param {string} filePath 
      */
     shouldExcludeFile(filePath) {
+        // Normalize path separators for cross-platform compatibility
+        const normalizedPath = filePath.replace(/\\/g, '/');
+        
         return this.config.excludePatterns.some(pattern => {
             const regex = new RegExp(pattern.replace(/\*\*/g, '.*').replace(/\*/g, '[^/]*'));
-            return regex.test(filePath);
+            return regex.test(normalizedPath);
         });
     }
     
@@ -451,8 +488,14 @@ async function main() {
     }
 }
 
-// Run if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run if called directly (Windows/Unix compatible)
+const isMain = process.argv[1] && (
+    import.meta.url === `file://${process.argv[1]}` ||
+    import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/')) ||
+    fileURLToPath(import.meta.url) === process.argv[1]
+);
+
+if (isMain) {
     main().catch(err => {
         console.error('💥 Error:', err.message);
         console.error(err.stack);

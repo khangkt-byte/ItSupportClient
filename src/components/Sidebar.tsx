@@ -76,7 +76,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
           <div className="flex items-center gap-3">
             <span 
               className={`material-symbols-rounded block object-contain rounded-full transition-opacity ${prefersReducedMotion ? 'duration-0' : 'duration-400'} ${collapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-              style={{ color: '#695CFE', fontSize: '46px', width: '46px', height: '46px' }}
+              style={{ color: 'var(--color-primary-500)', fontSize: '46px', width: '46px', height: '46px' }}
             >
               headset_mic
             </span>

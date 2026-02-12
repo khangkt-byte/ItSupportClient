@@ -242,7 +242,7 @@ export function ThemeSelector() {
                         className="w-full h-16 rounded-lg border-2 border-gray-200 dark:border-gray-600 shadow-sm transition-all"
                         style={{
                           backgroundColor: color.value,
-                          borderColor: getColorBrightness(color.value) > 128 ? '#ccc' : '#666',
+                          borderColor: getColorBrightness(color.value) > 128 ? 'var(--color-border-secondary)' : 'var(--color-border-primary)',
                         }}
                         title={`${color.value}`}
                       />
@@ -342,8 +342,8 @@ function ThemeCard({
           backgroundColor: option.category === 'brand' && option.color
             ? option.color
             : option.category === 'light'
-            ? '#ffffff'
-            : '#111827',
+            ? 'var(--color-bg-primary)'
+            : 'var(--color-bg-accent)',
         }}
       />
 

@@ -1,0 +1,242 @@
+﻿≡ƒÄ¿ Advanced Color Linter v2.0.0
+Context-aware detection with false-positive prevention
+
+≡ƒöì Scanning ./src for hardcoded colors...
+
+
+≡ƒÜ¿ Found 71 hardcoded color(s):
+============================================================
+
+≡ƒôä src\components\ThemeSelector.tsx
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  Line 245:81 - Hardcoded hex color: #ccc
+  Context: borderColor: getColorBrightness(color.value) > 128 ? '#ccc' : '#666',
+
+  Line 245:90 - Hardcoded hex color: #666
+  Context: borderColor: getColorBrightness(color.value) > 128 ? '#ccc' : '#666',
+
+  Line 345:16 - Hardcoded hex color: #ffffff
+  Context: ? '#ffffff'
+
+  Line 346:16 - Hardcoded hex color: #111827
+  Context: : '#111827',
+
+≡ƒôä src\lib\hooks\useAccessibilityReport.ts
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  Line 38:25 - Hardcoded hex color: #ffffff
+  Context: .trim() || '#ffffff';
+
+≡ƒôä src\lib\hooks\useTheme.ts
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  Line 156:47 - Hardcoded hex color: #22c55e
+  Context: success: nextTheme === 'light' ? '#22c55e' : '#4ade80',
+
+  Line 156:59 - Hardcoded hex color: #4ade80
+  Context: success: nextTheme === 'light' ? '#22c55e' : '#4ade80',
+
+  Line 157:45 - Hardcoded hex color: #ef4444
+  Context: error: nextTheme === 'light' ? '#ef4444' : '#f87171',
+
+  Line 157:57 - Hardcoded hex color: #f87171
+  Context: error: nextTheme === 'light' ? '#ef4444' : '#f87171',
+
+  Line 158:47 - Hardcoded hex color: #f59e0b
+  Context: warning: nextTheme === 'light' ? '#f59e0b' : '#fbbf24',
+
+  Line 158:59 - Hardcoded hex color: #fbbf24
+  Context: warning: nextTheme === 'light' ? '#f59e0b' : '#fbbf24',
+
+  Line 159:44 - Hardcoded hex color: #3b82f6
+  Context: info: nextTheme === 'light' ? '#3b82f6' : '#60a5fa',
+
+  Line 159:56 - Hardcoded hex color: #60a5fa
+  Context: info: nextTheme === 'light' ? '#3b82f6' : '#60a5fa',
+
+  Line 160:48 - Hardcoded hex color: #6b7280
+  Context: disabled: nextTheme === 'light' ? '#6b7280' : '#9ca3af',
+
+  Line 160:60 - Hardcoded hex color: #9ca3af
+  Context: disabled: nextTheme === 'light' ? '#6b7280' : '#9ca3af',
+
+≡ƒôä src\lib\utils\accessibilityReport.ts
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  Line 341:69 - Hardcoded hex color: #333
+  Context: body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+
+  Line 342:21 - Hardcoded hex color: #2563eb
+  Context: h1 { color: #2563eb; }
+
+  Line 343:21 - Hardcoded hex color: #1e40af
+  Context: h2 { color: #1e40af; margin-top: 30px; }
+
+  Line 345:36 - Hardcoded hex color: #ddd
+  Context: th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+
+  Line 346:32 - Hardcoded hex color: #f3f4f6
+  Context: th { background-color: #f3f4f6; }
+
+  Line 347:24 - Hardcoded hex color: #059669
+  Context: .pass { color: #059669; font-weight: bold; }
+
+  Line 348:24 - Hardcoded hex color: #dc2626
+  Context: .fail { color: #dc2626; font-weight: bold; }
+
+  Line 349:39 - Hardcoded hex color: #fee2e2
+  Context: .critical { background-color: #fee2e2; }
+
+  Line 350:38 - Hardcoded hex color: #fef3c7
+  Context: .warning { background-color: #fef3c7; }
+
+  Line 351:70 - Hardcoded hex color: #ccc
+  Context: .color-swatch { width: 30px; height: 30px; border: 1px solid #ccc; }
+
+  Line 352:38 - Hardcoded hex color: #f9fafb
+  Context: .summary { background-color: #f9fafb; padding: 15px; border-radius: 5px; margin:...
+
+  Line 364:59 - Hardcoded hex color: #dc2626
+  Context: ${report.summary.critical > 0 ? `<p style="color: #dc2626;">&#x26A0; Critical Is...
+
+  Line 416:24 - Hardcoded hex color: #666
+  Context: <p style="color: #666; font-size: 12px;">
+
+≡ƒôä src\lib\utils\colorGenerator.ts
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  Line 192:23 - Hardcoded hex color: #000000
+  Context: if (!rgb) return '#000000';
+
+≡ƒôä src\styles\theme.css
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  Line 25:20 - Hardcoded hex color: #22c55e
+  Context: --color-success: #22c55e;
+
+  Line 26:31 - Hardcoded hex color: #166534
+  Context: --color-success-foreground: #166534;
+
+  Line 27:31 - Hardcoded hex color: #f0fdf4
+  Context: --color-success-background: #f0fdf4;
+
+  Line 28:27 - Hardcoded hex color: #bbf7d0
+  Context: --color-success-border: #bbf7d0;
+
+  Line 31:20 - Hardcoded hex color: #f59e0b
+  Context: --color-warning: #f59e0b;
+
+  Line 32:31 - Hardcoded hex color: #92400e
+  Context: --color-warning-foreground: #92400e;
+
+  Line 33:31 - Hardcoded hex color: #fffbeb
+  Context: --color-warning-background: #fffbeb;
+
+  Line 34:27 - Hardcoded hex color: #fde68a
+  Context: --color-warning-border: #fde68a;
+
+  Line 37:18 - Hardcoded hex color: #ef4444
+  Context: --color-error: #ef4444;
+
+  Line 38:29 - Hardcoded hex color: #991b1b
+  Context: --color-error-foreground: #991b1b;
+
+  Line 39:29 - Hardcoded hex color: #fef2f2
+  Context: --color-error-background: #fef2f2;
+
+  Line 40:25 - Hardcoded hex color: #fecaca
+  Context: --color-error-border: #fecaca;
+
+  Line 43:17 - Hardcoded hex color: #3b82f6
+  Context: --color-info: #3b82f6;
+
+  Line 44:28 - Hardcoded hex color: #1e40af
+  Context: --color-info-foreground: #1e40af;
+
+  Line 45:28 - Hardcoded hex color: #eff6ff
+  Context: --color-info-background: #eff6ff;
+
+  Line 46:24 - Hardcoded hex color: #bfdbfe
+  Context: --color-info-border: #bfdbfe;
+
+  Line 100:28 - Hardcoded rgb color: rgb(0 0 0 / 0.05)
+  Context: --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+
+  Line 101:28 - Hardcoded rgb color: rgb(0 0 0 / 0.1)
+  Context: --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+
+  Line 101:61 - Hardcoded rgb color: rgb(0 0 0 / 0.1)
+  Context: --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+
+  Line 102:31 - Hardcoded rgb color: rgb(0 0 0 / 0.1)
+  Context: --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+
+  Line 102:64 - Hardcoded rgb color: rgb(0 0 0 / 0.1)
+  Context: --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+
+  Line 103:33 - Hardcoded rgb color: rgb(0 0 0 / 0.1)
+  Context: --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  Line 103:66 - Hardcoded rgb color: rgb(0 0 0 / 0.1)
+  Context: --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  Line 104:33 - Hardcoded rgb color: rgb(0 0 0 / 0.1)
+  Context: --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)...
+
+  Line 104:67 - Hardcoded rgb color: rgb(0 0 0 / 0.1)
+  Context: --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)...
+
+  Line 105:35 - Hardcoded rgb color: rgb(0 0 0 / 0.25)
+  Context: --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+  Line 129:20 - Hardcoded hex color: #22c55e
+  Context: --color-success: #22c55e;
+
+  Line 130:31 - Hardcoded hex color: #86efac
+  Context: --color-success-foreground: #86efac;
+
+  Line 131:31 - Hardcoded hex color: #14532d
+  Context: --color-success-background: #14532d;
+
+  Line 132:27 - Hardcoded hex color: #166534
+  Context: --color-success-border: #166534;
+
+  Line 135:20 - Hardcoded hex color: #f59e0b
+  Context: --color-warning: #f59e0b;
+
+  Line 136:31 - Hardcoded hex color: #fde047
+  Context: --color-warning-foreground: #fde047;
+
+  Line 137:31 - Hardcoded hex color: #78350f
+  Context: --color-warning-background: #78350f;
+
+  Line 138:27 - Hardcoded hex color: #92400e
+  Context: --color-warning-border: #92400e;
+
+  Line 141:18 - Hardcoded hex color: #ef4444
+  Context: --color-error: #ef4444;
+
+  Line 142:29 - Hardcoded hex color: #fca5a5
+  Context: --color-error-foreground: #fca5a5;
+
+  Line 143:29 - Hardcoded hex color: #7f1d1d
+  Context: --color-error-background: #7f1d1d;
+
+  Line 144:25 - Hardcoded hex color: #991b1b
+  Context: --color-error-border: #991b1b;
+
+  Line 147:17 - Hardcoded hex color: #3b82f6
+  Context: --color-info: #3b82f6;
+
+  Line 148:28 - Hardcoded hex color: #93c5fd
+  Context: --color-info-foreground: #93c5fd;
+
+  Line 149:28 - Hardcoded hex color: #1e3a8a
+  Context: --color-info-background: #1e3a8a;
+
+  Line 150:24 - Hardcoded hex color: #1e40af
+  Context: --color-info-border: #1e40af;
+
+============================================================
+≡ƒÆí Suggestion: Use semantic tokens like var(--color-success)
+≡ƒôÜ See TAILWIND_VS_CSS_VARIABLES_GUIDE.md for migration guide
+≡ƒôÜ See THEME_PALETTE_GUIDE.md for available tokens
+
+
+Γ¥î Linting failed. Please fix the issues above.
+

@@ -35,7 +35,7 @@ export function useAccessibilityReport() {
     const getCSSVariable = useCallback((varName: string): string => {
         return getComputedStyle(document.documentElement)
             .getPropertyValue(varName)
-            .trim() || '#ffffff';
+            .trim() || getComputedStyle(document.documentElement).getPropertyValue('--color-bg-primary').trim() || '#ffffff';
     }, []);
 
     /**

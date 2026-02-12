@@ -151,13 +151,14 @@ export const useTheme = (): UseThemeReturn => {
         if (nextTheme === 'light' || nextTheme === 'dark') {
           // Light and dark modes use default semantic tokens
           // These are already defined in index.css via CSS selectors
-          // but we can override them here if needed for specificity
+          // Read from existing CSS variables instead of hardcoding
+          const computedStyle = getComputedStyle(document.documentElement);
           tokens = {
-            success: nextTheme === 'light' ? '#22c55e' : '#4ade80',
-            error: nextTheme === 'light' ? '#ef4444' : '#f87171',
-            warning: nextTheme === 'light' ? '#f59e0b' : '#fbbf24',
-            info: nextTheme === 'light' ? '#3b82f6' : '#60a5fa',
-            disabled: nextTheme === 'light' ? '#6b7280' : '#9ca3af',
+            success: computedStyle.getPropertyValue('--color-success').trim() || 'var(--color-success)',
+            error: computedStyle.getPropertyValue('--color-error').trim() || 'var(--color-error)',
+            warning: computedStyle.getPropertyValue('--color-warning').trim() || 'var(--color-warning)',
+            info: computedStyle.getPropertyValue('--color-info').trim() || 'var(--color-info)',
+            disabled: computedStyle.getPropertyValue('--color-disabled').trim() || 'var(--color-disabled)',
           };
         } else {
           // Brand themes all use the same semantic tokens
