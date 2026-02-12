@@ -64,7 +64,6 @@ interface SearchFilterBarProps<T> {
   filterOptions: FilterOption[];
   currentFilter: string;
   onFilterChange: (value: string) => void;
-  filterLabel?: string;
 
   // Sort options
   sortOptions: SortOption[];
@@ -83,7 +82,6 @@ export function SearchFilterBar<T = any>({
   filterOptions,
   currentFilter,
   onFilterChange,
-  filterLabel = 'All Status',
   sortOptions,
   sortLabel = 'Sort By',
   placeholder = 'Search...',

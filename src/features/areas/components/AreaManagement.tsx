@@ -52,7 +52,7 @@ export function AreaManagement({ data, setData }: Props) {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {data.map((item) => (
-          <div key={item.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col min-h-[180px]">
+          <div key={item.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col min-h-45">
             <div className="flex-1">
               <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-gray-50">{item.name}</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">{item.description}</p>
@@ -72,7 +72,7 @@ export function AreaManagement({ data, setData }: Props) {
       </div>
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col min-h-[200px]">
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col min-h-50">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">{editing ? 'Edit' : 'Add'}</h3>
               <button onClick={() => setShowForm(false)} className="hover:text-gray-600 dark:hover:text-gray-300 text-gray-900 dark:text-gray-50 transition-colors">

@@ -188,15 +188,15 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
     }
   };
 
-  const getEmployeeName = (item: Account) => item.employeeName || 'Unknown';
+  // const getEmployeeName = (item: Account) => item.employeeName || 'Unknown';
 
-  const getRoleDisplay = (item: Account) => {
-    const roles = (item as { roles?: RoleDto[] | null }).roles;
-    if (roles && roles.length > 0) {
-      return roles.map(role => role.name).join(', ');
-    }
-    return item.role || 'No Role';
-  };
+  // const getRoleDisplay = (item: Account) => {
+  //   const roles = (item as { roles?: RoleDto[] | null }).roles;
+  //   if (roles && roles.length > 0) {
+  //     return roles.map(role => role.name).join(', ');
+  //   }
+  //   return item.role || 'No Role';
+  // };
 
   const openForm = (item?: Account) => {
     setEditing(item || null);
@@ -504,7 +504,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                     <td className="px-6 py-4 text-sm">
                       <span className="px-2 py-1 text-xs rounded bg-primary-100 text-primary-700 flex items-center gap-1 w-fit">
                         <Shield className="w-3 h-3" />
-                        {item.roleCount || 0} roles
+                        {((item as any).roles?.length || (item as any).roleCount || 0)} roles
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-right">

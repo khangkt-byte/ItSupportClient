@@ -412,8 +412,8 @@ class ApiClient {
  * Singleton API client instance
  * Configuration from environment variables
  */
-const API_BASE_URL = typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL
-  ? import.meta.env.VITE_API_URL
+const API_BASE_URL = typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_URL
+  ? (import.meta as any).env.VITE_API_URL
   : 'https://localhost:5001';
 
 export const apiClient = new ApiClient({

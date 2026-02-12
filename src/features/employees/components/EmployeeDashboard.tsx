@@ -12,7 +12,7 @@ interface Props {
   onNavigate: (view: string) => void;
 }
 
-export function EmployeeDashboard({ user, onLogout, currentView, onNavigate }: Props) {
+export function EmployeeDashboard({ user, onLogout, currentView }: Props) {
   const dataManager = useDataManager();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
@@ -24,7 +24,7 @@ export function EmployeeDashboard({ user, onLogout, currentView, onNavigate }: P
   // Show loading if data is still being fetched
   if (dataManager.workLogs.loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-100">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>

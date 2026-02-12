@@ -114,8 +114,8 @@ export function AdminRoute({
  */
 export function UnauthorizedFallback() {
   return (
-    <div className="flex items-center justify-center min-h-[400px] p-8">
-      <div className="bg-red-50 dark:bg-red-950 border border-red-300 dark:border-red-700 rounded-lg max-w-[500px] p-8 text-center">
+    <div className="flex items-center justify-center min-h-100 p-8">
+      <div className="bg-red-50 dark:bg-red-950 border border-red-300 dark:border-red-700 rounded-lg max-w-125 p-8 text-center">
         <h2 className="text-red-600 dark:text-red-400 text-2xl font-semibold mt-0 mb-3">
           🔒 Access Denied
         </h2>

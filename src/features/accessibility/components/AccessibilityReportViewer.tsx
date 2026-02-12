@@ -1,15 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
     AlertCircle,
     AlertTriangle,
     CheckCircle2,
     Download,
-    Filter,
     TrendingUp,
     Eye,
     Code,
 } from 'lucide-react';
-import { useAccessibilityReport } from '@/lib/hooks/useAccessibilityReport';
+import { useAccessibilityReport } from '@/features/accessibility/hooks/useAccessibilityReport';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +20,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import type { WCAGViolation } from '@/lib/utils/accessibilityReport';
+import type { WCAGViolation, ColorEntry } from '@/utils/accessibilityReport';
 
 /**
  * AccessibilityReportViewer Component
@@ -59,7 +58,7 @@ export function AccessibilityReportViewer() {
     const filteredViolations = useMemo(() => {
         if (!report) return [];
         if (selectedSeverity === 'all') return report.violations;
-        return report.violations.filter(v => v.severity === selectedSeverity);
+        return report.violations.filter((v: WCAGViolation) => v.severity === selectedSeverity);
     }, [report, selectedSeverity]);
 
     // Get severity color and icon
@@ -94,7 +93,7 @@ export function AccessibilityReportViewer() {
     };
 
     // Render color swatch
-    const Swatch = ({ color, label }: { color: string; label: string }) => (
+    const Swatch = ({ color }: { color: string; label?: string }) => (
         <div className="flex items-center gap-2">
             <div
                 className="w-10 h-10 rounded border border-gray-300 shadow-sm"
@@ -386,7 +385,7 @@ export function AccessibilityReportViewer() {
                                         </p>
                                     </Card>
                                 ) : (
-                                    filteredViolations.map((violation, index) => (
+                                    filteredViolations.map((violation: WCAGViolation, index: number) => (
                                         <ViolationRow
                                             key={index}
                                             violation={violation}
@@ -402,7 +401,7 @@ export function AccessibilityReportViewer() {
                 {/* Colors Tab */}
                 <TabsContent value="colors" className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {report.colors.map((color, index) => (
+                        {report.colors.map((color: ColorEntry, index: number) => (
                             <Card key={index} className="p-4">
                                 <div className="flex items-start gap-4">
                                     <div

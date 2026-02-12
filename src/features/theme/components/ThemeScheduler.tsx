@@ -8,7 +8,7 @@ import {
     Check,
     AlertCircle,
 } from 'lucide-react';
-import { useThemeScheduler } from '@/lib/hooks/useThemeScheduler';
+import { useThemeScheduler } from '@/features/theme/hooks/useThemeScheduler';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     Copy,
     Download,
     Save,
     RotateCcw,
     Trash2,
-    Plus,
     Check,
     AlertCircle,
     Palette,
 } from 'lucide-react';
-import { useColorBuilder } from '@/lib/hooks/useColorBuilder';
+import { useColorBuilder } from '@/features/theme/hooks/useColorBuilder';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -53,10 +52,10 @@ export function CustomColorBuilder() {
         setThemeName,
         setLightBg,
         setDarkBg,
-        colorScale,
+        // colorScale,
         semanticColors,
         harmonyColors,
-        allColors,
+        // allColors,
         accessibilityCheck,
         getLabeledScale,
         exportCSS,
@@ -118,7 +117,7 @@ export function CustomColorBuilder() {
 
     // Accessibility indicator
     const AccessibilityBadge = ({ passed, total }: { passed: number; total: number }) => {
-        const percentage = Math.round((passed / total) * 100);
+        // const percentage = Math.round((passed / total) * 100);
         const isGood = passed === total;
 
         return (
@@ -254,7 +253,7 @@ export function CustomColorBuilder() {
                     <Card className="p-6">
                         <h3 className="font-semibold mb-4">Color Scale (Tints & Shades)</h3>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 lg:grid-cols-11 gap-2">
-                            {getLabeledScale().map((item) => (
+                            {getLabeledScale().map((item: { label: string; color: string }) => (
                                 <div
                                     key={item.label}
                                     onClick={() => copyToClipboard(item.color)}
@@ -559,7 +558,7 @@ export function CustomColorBuilder() {
                 <Card className="p-6">
                     <h3 className="font-semibold mb-4">Saved Themes</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {savedThemes.map((theme) => (
+                        {savedThemes.map((theme: any) => (
                             <div key={theme.id} className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50">
                                 <div
                                     className="w-10 h-10 rounded-full border-2 border-gray-300"
