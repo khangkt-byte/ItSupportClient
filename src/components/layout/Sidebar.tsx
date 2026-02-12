@@ -105,7 +105,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
                     className={`flex gap-3 whitespace-nowrap rounded-lg py-3 px-3.75 items-center no-underline transition-all duration-300 border-none bg-none w-full ${isActive ? 'text-white bg-(--sidebar-color-hover-primary)' : 'text-(--sidebar-color-text-primary) hover:text-white hover:bg-(--sidebar-color-hover-primary)'}`}
                   >
                     <span className="material-symbols-rounded">{item.icon}</span>
-                    <span className={`transition-opacity duration-300 ${collapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>{item.label}</span>
+                    <span className={`transition-opacity duration-300 ${collapsed ? 'opacity-0 pointer-events-none absolute w-0 overflow-hidden' : 'opacity-100'}`}>{item.label}</span>
                   </button>
                 </li>
               );
@@ -116,7 +116,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
         {/* Sidebar Footer */}
         <div className="py-5 px-4.5 border-t border-(--sidebar-color-border-hr) space-y-3">
           {/* New Theme Selector Component */}
-          <ThemeSelector />
+          <ThemeSelector collapsed={collapsed} />
 
           {/* Accessibility Mode Button */}
           <button
@@ -126,14 +126,14 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
           >
             <div className="flex gap-2.5 items-center flex-1">
               <span className="material-symbols-rounded">accessibility</span>
-              <span className={`text-base ${collapsed ? 'opacity-0 w-0' : 'opacity-100'}`} style={{ transition: collapsed ? 'all 0.2s ease' : 'opacity 0.4s 0.2s ease' }}>
+              <span className={`text-base transition-opacity duration-300 ${collapsed ? 'opacity-0 w-0 overflow-hidden absolute' : 'opacity-100'}`}>
                 Accessibility
               </span>
             </div>
           </button>
 
           {/* Accessibility Options Dropdown */}
-          {isAccessibilityOpen && (
+          {isAccessibilityOpen && !collapsed && (
             <div className="bg-(--sidebar-color-bg-secondary) rounded-lg p-3 space-y-2 border border-(--sidebar-color-border-hr) hidden md:block">
               <p className="text-xs font-semibold text-(--sidebar-color-text-primary) mb-2">Contrast Mode:</p>
               <button

@@ -55,7 +55,12 @@ interface SemanticColorInfo {
  * Phase 4: Advanced Theme Management
  * @component
  */
-export function ThemeSelector() {
+
+interface ThemeSelectorProps {
+  collapsed?: boolean;
+}
+
+export function ThemeSelector({ collapsed = false }: ThemeSelectorProps) {
   const { theme: currentTheme, changeTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [previewTheme, setPreviewTheme] = useState<Theme | null>(null);
@@ -139,9 +144,9 @@ export function ThemeSelector() {
       >
         <div className="flex gap-2.5 items-center flex-1">
           <span className="material-symbols-rounded">palette</span>
-          <span className="text-base">{currentOption.label}</span>
+          <span className={`text-base transition-opacity duration-300 ${collapsed ? 'opacity-0 w-0 overflow-hidden absolute' : 'opacity-100'}`}>{currentOption.label}</span>
         </div>
-        <Eye className="w-4 h-4 opacity-60" />
+        {!collapsed && <Eye className="w-4 h-4 opacity-60" />}
       </button>
 
       {/* Theme Selector Modal */}
