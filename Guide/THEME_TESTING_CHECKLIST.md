@@ -374,10 +374,59 @@ Ready for production deployment!
 
 ## 📚 Additional Resources
 
-- **Implementation Guide:** [Guide/PHASE_2_IMPLEMENTATION_GUIDE.md](PHASE_2_IMPLEMENTATION_GUIDE.md)
-- **Completion Summary:** [Guide/PHASE_2_COMPLETION_SUMMARY.md](PHASE_2_COMPLETION_SUMMARY.md)
-- **Analysis Document:** [Ref/MULTI_THEME_ANALYSIS_AND_REFACTORING.md](../Ref/MULTI_THEME_ANALYSIS_AND_REFACTORING.md)
+- **Theme System Implementation Guide:** [Guide/THEME_SYSTEM_IMPLEMENTATION_GUIDE.md](THEME_SYSTEM_IMPLEMENTATION_GUIDE.md)
+- **Theme System Quick Reference:** [Ref/THEME_SYSTEM_QUICK_REFERENCE.md](../Ref/THEME_SYSTEM_QUICK_REFERENCE.md)
 - **palettes.ts (SSOT):** [src/constants/palettes.ts](../src/constants/palettes.ts)
+
+---
+
+## Phase 2 Validation Objectives (Merged)
+
+### Visual Regression
+- [ ] Test all themes (light, dark, 10 brand themes)
+- [ ] Verify semantic token colors match specifications
+- [ ] Test Work Log status badges in each theme
+- [ ] Capture baseline screenshots (optional)
+
+### Performance Targets
+- [ ] Theme change < 50ms (acceptable), < 10ms (excellent)
+- [ ] CSS variable update < 5ms
+- [ ] Total change time < 20ms
+
+### Accessibility
+- [ ] WCAG AA contrast for text and UI (>= 4.5:1 text, >= 3:1 UI)
+- [ ] High contrast mode works (21:1)
+- [ ] Keyboard navigation + focus visible
+- [ ] Reduced motion preference respected
+
+### Cross-Browser
+- [ ] Chrome, Edge, Firefox, Safari
+- [ ] Windows + macOS
+
+---
+
+## Phase 3 UAT Checklist (Merged)
+
+### Pre-Test Setup
+- [ ] Dev server running
+- [ ] Admin login available
+- [ ] Theme testing page accessible
+- [ ] DevTools open (Console + Elements)
+
+### Theme Validation
+- [ ] Light theme: white background, dark text
+- [ ] Dark theme: dark background, light text
+- [ ] Brand themes: primary color matches palette
+- [ ] High contrast mode: pure black/white
+
+### Performance
+- [ ] No flicker during theme switch
+- [ ] No UI lag
+- [ ] Theme persists after refresh
+
+### Documentation
+- [ ] Record issues found
+- [ ] Confirm fixes or open tickets
 
 ---
 

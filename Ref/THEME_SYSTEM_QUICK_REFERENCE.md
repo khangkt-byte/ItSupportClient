@@ -404,3 +404,108 @@ console.table({
 
 **Last Updated:** February 10, 2026  
 **Version:** 1.0.0
+
+---
+
+## Appendix: Design Token Pattern - Quick Reference (Merged)
+
+### ✅ Co - Ban NEN Dung `palettes.ts`
+
+**Single Source of Truth (SSOT)** - Nguyen tac vang cua Software Engineering.
+
+### ❌ Hard-Coded (SAI)
+
+```tsx
+// ThemeSelector.tsx
+const themeOptions = [
+  { value: 'brand-purple', color: '#695CFE' },  // ❌ Duplicate
+];
+
+// palettes.ts
+export const palettes = {
+  'brand-purple': { primary: { 500: '#695CFE' } }  // ❌ Same color!
+};
+```
+
+### ✅ Design Tokens (DUNG)
+
+```tsx
+// palettes.ts - SINGLE SOURCE OF TRUTH
+export const palettes = {
+  'brand-purple': { primary: { 500: '#695CFE' } }  // ✅ Defined ONCE
+};
+
+// ThemeSelector.tsx - CONSUME tokens
+import { palettes } from '@/constants/palettes';
+
+const themeOptions = [
+  { 
+    value: 'brand-purple', 
+    color: palettes['brand-purple'].primary[500]  // ✅ Reference token
+  },
+];
+```
+
+### Ai Dung Design Tokens?
+
+| Company | Design System | Token Pattern |
+|---------|---------------|---------------|
+| Google | Material Design 3 | ✅ Design Tokens |
+| Microsoft | Fluent 2 | ✅ Design Tokens |
+| IBM | Carbon Design | ✅ Design Tokens |
+| Alibaba | Ant Design | ✅ Design Tokens |
+| Atlassian | Atlassian DS | ✅ Design Tokens |
+| Shopify | Polaris | ✅ Design Tokens |
+| Adobe | Spectrum | ✅ Design Tokens |
+| Apple | HIG | ✅ Semantic Colors |
+| Amazon | Cloudscape | ✅ Design Tokens |
+| Salesforce | Lightning | ✅ Design Tokens |
+
+### Implementation Checklist
+
+- [✅] Import `palettes` into ThemeSelector
+- [✅] Replace hard-coded hex values with `palettes['brand-*'].primary[500]`
+- [✅] Build OK, no TypeScript errors
+
+**Full guide:** [Guide/DESIGN_TOKENS_BEST_PRACTICES.md](../Guide/DESIGN_TOKENS_BEST_PRACTICES.md)
+
+---
+
+## Appendix: High Contrast - Quick Reference (Merged)
+
+### Problem
+
+```css
+/* ❌ OLD - Requires OS setting + app setting */
+@media (prefers-contrast: more) {
+  html[data-a11y="highContrast"] { /* ... */ }
+}
+```
+
+### Solution
+
+```css
+/* ✅ NEW - Works immediately */
+html[data-a11y="highContrast"] {
+  forced-color-adjust: none;
+  --color-text: #000000;
+  --color-bg: #FFFFFF;
+}
+```
+
+### Standards Compliance
+
+| Standard | Requirement | Our Implementation | Status |
+|----------|-------------|-------------------|--------|
+| WCAG 2.1 AA | 4.5:1 | 21:1 | ✅ Exceeds |
+| WCAG 2.1 AAA | 7:1 | 21:1 | ✅ Exceeds |
+| Microsoft Fluent | System colors | Implemented | ✅ |
+| W3C Forced Colors | `forced-color-adjust` | Implemented | ✅ |
+
+### Testing
+
+1. App toggle: sidebar -> High Contrast
+2. Windows HC: `Win + U` -> High contrast -> ON
+3. DevTools Accessibility: contrast ratio should show AAA
+
+**Full guide:** This section is merged into this document.
