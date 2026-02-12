@@ -12,7 +12,7 @@ import type {
   Role, // Role type
   WorkLog, // WorkLog type
   DepartmentDto
-} from '../types/data';
+} from '@/types/data';
 import { useState, useEffect } from 'react';
 import {
   workLogsApi,
@@ -21,7 +21,7 @@ import {
   accountsApi,
   rolesApi,
   departmentApi, // Updated: singular name
-} from '../api';
+} from '@/services/api';
 
 function useApiData<T>(apiService: any) {
   const [data, setData] = useState<T[]>([]);

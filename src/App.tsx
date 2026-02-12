@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { LoginPage } from './components/LoginPage';
-import { AdminDashboard } from './components/AdminDashboard';
-import { EmployeeDashboard } from './components/EmployeeDashboard';
-import { Sidebar } from './components/Sidebar';
-import { ThemeValidationTest } from './components/ThemeValidationTest';
-import { authApi } from './lib/api/auth';
-import { SecurityValidator } from './lib/utils/securityChecks';
-import type { User } from './types/data';
+import { LoginPage } from '@/features/auth/components/LoginPage';
+import { AdminDashboard } from '@/features/dashboard/components/AdminDashboard';
+import { EmployeeDashboard } from '@/features/employees/components/EmployeeDashboard';
+import { Sidebar } from '@/components/layout/Sidebar';
+import { ThemeValidationTest } from '@/features/theme/components/ThemeValidationTest';
+import { authApi } from '@/services/api/auth';
+import { SecurityValidator } from '@/utils/securityChecks';
+import type { User } from '@/types/data';
 
 // IT Support Work Log Management System
 // Version: 3.0.0 - Permission System & Enterprise Security

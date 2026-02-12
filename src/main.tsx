@@ -2,7 +2,7 @@
   import { createRoot } from "react-dom/client";
   import App from "./App.tsx";
   import "./index.css";
-  import { SecurityValidator } from "./lib/utils/securityChecks";
+  import { SecurityValidator } from "@/utils/securityChecks";
 
   // Initialize security checks
   try {

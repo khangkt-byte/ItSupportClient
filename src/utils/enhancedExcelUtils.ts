@@ -1,6 +1,6 @@
 // Enhanced Excel utilities - stub version for API-based operations
 // The actual Excel processing is now handled by the backend API
-import type { WorkLog, Employee, Department, Area } from '../types/data';
+import type { WorkLog, Employee, Department, Area } from '@/types/data';
 
 export interface FieldError {
   field: string;
@@ -71,7 +71,7 @@ export async function validateWorkLogFile(
   areas: Area[]
 ): Promise<EnhancedValidationResult> {
   console.warn('validateWorkLogFile: Using stub - implement with API call');
-  
+
   // Return empty validation result
   return {
     totalRows: 0,
@@ -92,7 +92,7 @@ export async function importWorkLogsWithOptions(
   areas: Area[]
 ): Promise<ImportResult> {
   console.warn('importWorkLogsWithOptions: Using stub - implement with API call');
-  
+
   // Return empty import result
   return {
     hasErrors: false,

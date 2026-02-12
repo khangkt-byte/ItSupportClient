@@ -1,5 +1,5 @@
-import { workLogsApi } from '../api';
-import type { IssueSuggestionDto, CauseSuggestionDto } from '../types/data';
+import { workLogsApi } from '@/services/api';
+import type { IssueSuggestionDto, CauseSuggestionDto } from '@/types/data';
 
 // Debounce utility
 function debounce<T extends (...args: any[]) => any>(
@@ -7,13 +7,13 @@ function debounce<T extends (...args: any[]) => any>(
   wait: number
 ): (...args: Parameters<T>) => Promise<ReturnType<T>> {
   let timeout: NodeJS.Timeout | null = null;
-  
+
   return (...args: Parameters<T>) => {
     return new Promise((resolve) => {
       if (timeout) {
         clearTimeout(timeout);
       }
-      
+
       timeout = setTimeout(() => {
         resolve(func(...args));
       }, wait);
@@ -78,7 +78,7 @@ export const searchCausesDebounced = debounce(searchCauses, 300);
  */
 export async function findExactIssueMatch(text: string): Promise<IssueSuggestionDto | null> {
   const lowerText = text.toLowerCase().trim();
-  
+
   try {
     const results = await searchIssues(text);
     const exactMatch = results.find(
@@ -96,7 +96,7 @@ export async function findExactIssueMatch(text: string): Promise<IssueSuggestion
  */
 export async function findExactCauseMatch(text: string, issueId?: number): Promise<CauseSuggestionDto | null> {
   const lowerText = text.toLowerCase().trim();
-  
+
   try {
     const results = await searchCauses(text, issueId);
     const exactMatch = results.find(

@@ -9,7 +9,7 @@ import type {
   CreateIssueLogDto,
   UpdateIssueLogDto,
   WorkStatus
-} from '../types/data';
+} from '@/types/data';
 
 /**
  * Convert API IssueLogDto to UI WorkLog

@@ -1,6 +1,6 @@
 // This file is deprecated - use API calls directly via workLogsApi
 // Excel operations are now handled by the backend API
-import type { WorkLog } from '../types/data';
+import type { WorkLog } from '@/types/data';
 
 // Re-export simple helper that was used elsewhere
 export function exportWorkLogsToExcel(workLogs: WorkLog[], filename: string = 'work_logs.xlsx') {
