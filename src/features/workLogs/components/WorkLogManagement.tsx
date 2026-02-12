@@ -172,7 +172,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
       const workLogData: Partial<WorkLog> = {
         operators: [formData.operators[0] || currentUser],
         requesters: formData.requesters,
-        departmentId: dept?.departmentId,
+        dptId: dept?.dptId,
         areaId: areaObj?.areaId,
         issue: formData.issue,
         cause: formData.cause || undefined,
@@ -288,9 +288,9 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
       
       // Cancelled → Neutral gray (theme-aware via Tailwind dark: variant)
       // Reference: Universal design systems - gray for cancelled/neutral states
-      cancelled: 'bg-gray-50 text-gray-600 ring-1 ring-inset ring-gray-500/10 dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/20',
+      cancelled: 'bg-muted text-muted-foreground ring-1 ring-inset ring-border',
     };
-    return `${base} ${styles[status] || 'bg-gray-100 text-gray-700 ring-1 ring-inset ring-gray-600/20 dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/20'}`;
+    return `${base} ${styles[status] || 'bg-muted text-muted-foreground ring-1 ring-inset ring-border'}`;
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -499,15 +499,15 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
       </div>
 
       <div className="grid grid-cols-4 gap-4">
-        <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Total</p><p className="text-2xl font-semibold text-gray-900 dark:text-gray-50">{data.length}</p></div>
-        <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Pending</p><p className="text-2xl font-semibold text-warning">{data.filter((l) => l.status === 'pending').length}</p></div>
-        <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">In Progress</p><p className="text-2xl font-semibold text-info">{data.filter((l) => l.status === 'in-progress').length}</p></div>
-        <div className="card p-4"><p className="text-sm text-gray-500 dark:text-gray-400">Resolved</p><p className="text-2xl font-semibold text-success">{data.filter((l) => l.status === 'resolved').length}</p></div>
+        <div className="card p-4"><p className="text-sm text-muted-foreground">Total</p><p className="text-2xl font-semibold text-foreground">{data.length}</p></div>
+        <div className="card p-4"><p className="text-sm text-muted-foreground">Pending</p><p className="text-2xl font-semibold text-warning">{data.filter((l) => l.status === 'pending').length}</p></div>
+        <div className="card p-4"><p className="text-sm text-muted-foreground">In Progress</p><p className="text-2xl font-semibold text-info">{data.filter((l) => l.status === 'in-progress').length}</p></div>
+        <div className="card p-4"><p className="text-sm text-muted-foreground">Resolved</p><p className="text-2xl font-semibold text-success">{data.filter((l) => l.status === 'resolved').length}</p></div>
       </div>
 
       <div className="card p-4 grid grid-cols-2 gap-4">
-        <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" /><input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search..." className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500" /></div>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as WorkStatus | 'all')} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50">
+        <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-placeholder" /><input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search..." className="w-full pl-10 pr-4 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder" /></div>
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as WorkStatus | 'all')} className="px-4 py-2 border border-input rounded-lg bg-card text-foreground">
           <option value="all">All Status</option>
           <option value="pending">Pending</option>
           <option value="in-progress">In Progress</option>
@@ -516,28 +516,28 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
         </select>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
         <table className="w-full">
-          <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
+          <thead className="bg-muted border-b border-border">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Date</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Operator</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Requester</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Department</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Issue</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Actions</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Date</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Operator</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Requester</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Department</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Issue</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Status</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="divide-y divide-border">
             {pagination.paginatedData.map((log) => (
               <React.Fragment key={log.id}>
-                <tr className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-50">{new Date(log.reportDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
-                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-50">{(log.operators || []).join(', ')}</td>
-                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-50">{(log.requesters || []).join(', ') || 'None'}</td>
-                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-50">{log.department}</td>
-                  <td className="px-4 py-3 text-sm"><button onClick={() => toggleRow(log.id)} className="text-left hover:text-primary-600 dark:hover:text-primary-400 line-clamp-2 text-gray-900 dark:text-gray-50">{log.issue}</button></td>
+                <tr className="hover:bg-accent">
+                  <td className="px-4 py-3 text-sm text-foreground">{new Date(log.reportDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+                  <td className="px-4 py-3 text-sm text-foreground">{(log.operators || []).join(', ')}</td>
+                  <td className="px-4 py-3 text-sm text-foreground">{(log.requesters || []).join(', ') || 'None'}</td>
+                  <td className="px-4 py-3 text-sm text-foreground">{log.department}</td>
+                  <td className="px-4 py-3 text-sm"><button onClick={() => toggleRow(log.id)} className="text-left hover:text-primary-600 dark:hover:text-primary-400 line-clamp-2 text-foreground">{log.issue}</button></td>
                   <td className="px-4 py-3 text-sm">
                     <span className={getStatusBadge(log.status)}>
                       {getStatusIcon(log.status)}
@@ -571,7 +571,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                       >
                         <button 
                           onClick={() => setConfirmDelete(log.id)} 
-                          className="text-red-600 inline-flex items-center justify-center hover:text-red-800 transition-colors min-w-16px min-h-16px"
+                          className="text-error-foreground inline-flex items-center justify-center hover:text-error-foreground transition-colors min-w-16px min-h-16px"
                           title="Delete work log"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -581,14 +581,14 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                   </td>
                 </tr>
                 {expandedRows.has(log.id) && (
-                  <tr className="bg-gray-50 dark:bg-gray-700">
+                  <tr className="bg-muted">
                     <td colSpan={7} className="px-4 py-4">
                       <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div><p className="font-medium mb-1 text-gray-700 dark:text-gray-300">Area:</p><p className="text-gray-600 dark:text-gray-400">{log.area || 'N/A'}</p></div>
-                        <div><p className="font-medium mb-1 text-gray-700 dark:text-gray-300">Cause:</p><p className="text-gray-600 dark:text-gray-400">{log.cause || 'N/A'}</p></div>
-                        <div><p className="font-medium mb-1 text-gray-700 dark:text-gray-300">Fix:</p><p className="text-gray-600 dark:text-gray-400">{log.fixDescription || 'N/A'}</p></div>
-                        {log.permanentFix && <div><p className="font-medium mb-1 text-gray-700 dark:text-gray-300">Permanent Fix:</p><p className="text-gray-600 dark:text-gray-400">{log.permanentFix}</p></div>}
-                        {log.note && <div><p className="font-medium mb-1 text-gray-700 dark:text-gray-300">Note:</p><p className="text-gray-600 dark:text-gray-400">{log.note}</p></div>}
+                        <div><p className="font-medium mb-1 text-muted-foreground">Area:</p><p className="text-muted-foreground">{log.area || 'N/A'}</p></div>
+                        <div><p className="font-medium mb-1 text-muted-foreground">Cause:</p><p className="text-muted-foreground">{log.cause || 'N/A'}</p></div>
+                        <div><p className="font-medium mb-1 text-muted-foreground">Fix:</p><p className="text-muted-foreground">{log.fixDescription || 'N/A'}</p></div>
+                        {log.permanentFix && <div><p className="font-medium mb-1 text-muted-foreground">Permanent Fix:</p><p className="text-muted-foreground">{log.permanentFix}</p></div>}
+                        {log.note && <div><p className="font-medium mb-1 text-muted-foreground">Note:</p><p className="text-muted-foreground">{log.note}</p></div>}
                       </div>
                     </td>
                   </tr>
@@ -612,31 +612,31 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
         <PermissionGuard 
           permission={editing ? Permissions.IssueLog.Edit : Permissions.IssueLog.Create}
           fallback={
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-lg p-6 max-w-sm text-center">
-                <h3 className="text-lg font-semibold text-red-600 mb-2">Access Denied</h3>
-                <p className="text-gray-600 mb-4">You don't have permission to {editing ? 'edit' : 'create'} work logs.</p>
-                <button onClick={() => setShowForm(false)} className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">Close</button>
+            <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4">
+              <div className="bg-card rounded-lg p-6 max-w-sm text-center">
+                <h3 className="text-lg font-semibold text-error-foreground mb-2">Access Denied</h3>
+                <p className="text-muted-foreground mb-4">You don't have permission to {editing ? 'edit' : 'create'} work logs.</p>
+                <button onClick={() => setShowForm(false)} className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80">Close</button>
               </div>
             </div>
           }
         >
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between sticky top-0 bg-white dark:bg-gray-800 z-60"><h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">{editing ? 'Edit' : 'New'} Work Log</h3><button onClick={() => setShowForm(false)} className="hover:text-gray-600 dark:hover:text-gray-400"><X className="w-6 h-6" /></button></div>
+          <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4">
+            <div className="bg-card rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="px-6 py-4 border-b border-border flex justify-between sticky top-0 bg-card z-60"><h3 className="text-lg font-semibold text-foreground">{editing ? 'Edit' : 'New'} Work Log</h3><button onClick={() => setShowForm(false)} className="hover:text-muted-foreground"><X className="w-6 h-6" /></button></div>
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
-                    Date <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium mb-1 text-muted-foreground">
+                    Date <span className="text-error-foreground">*</span>
                   </label>
-                  <input type="date" required value={formData.reportDate} onChange={(e) => setFormData({ ...formData, reportDate: e.target.value })} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors" />
+                  <input type="date" required value={formData.reportDate} onChange={(e) => setFormData({ ...formData, reportDate: e.target.value })} className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
-                    Status <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium mb-1 text-muted-foreground">
+                    Status <span className="text-error-foreground">*</span>
                   </label>
-                  <select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as WorkStatus })} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors">
+                  <select required value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as WorkStatus })} className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors">
                     <option value="pending">Pending</option>
                     <option value="in-progress">In Progress</option>
                     <option value="resolved">Resolved</option>
@@ -644,8 +644,8 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                   </select>
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
-                    Operators (IT Department) <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium mb-1 text-muted-foreground">
+                    Operators (IT Department) <span className="text-error-foreground">*</span>
                   </label>
                   <FlexibleMultiSelect 
                     options={operatorOptions} 
@@ -658,7 +658,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                   />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Requesters</label>
+                  <label className="block text-sm font-medium mb-1 text-muted-foreground">Requesters</label>
                   <FlexibleMultiSelect 
                     options={requesterOptions} 
                     values={formData.requesters} 
@@ -669,8 +669,8 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
-                    Department <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium mb-1 text-muted-foreground">
+                    Department <span className="text-error-foreground">*</span>
                   </label>
                   <SearchableCombobox 
                     options={departmentOptions} 
@@ -681,8 +681,8 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
-                    Area <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium mb-1 text-muted-foreground">
+                    Area <span className="text-error-foreground">*</span>
                   </label>
                   <SearchableCombobox 
                     options={areaOptions} 
@@ -717,16 +717,16 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                 suggestionHeader={selectedIssue ? `💡 Common Causes for "${selectedIssue.name}"` : " Suggested Causes"}
               />
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Fix Description</label>
-                <textarea value={formData.fixDescription} onChange={(e) => setFormData({ ...formData, fixDescription: e.target.value })} rows={3} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none" />
+                <label className="block text-sm font-medium mb-1 text-muted-foreground">Fix Description</label>
+                <textarea value={formData.fixDescription} onChange={(e) => setFormData({ ...formData, fixDescription: e.target.value })} rows={3} className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Permanent Fix</label>
-                <textarea value={formData.permanentFix} onChange={(e) => setFormData({ ...formData, permanentFix: e.target.value })} rows={2} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none" />
+                <label className="block text-sm font-medium mb-1 text-muted-foreground">Permanent Fix</label>
+                <textarea value={formData.permanentFix} onChange={(e) => setFormData({ ...formData, permanentFix: e.target.value })} rows={2} className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none" />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Note</label>
-                <textarea value={formData.note} onChange={(e) => setFormData({ ...formData, note: e.target.value })} rows={2} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none" />
+                <label className="block text-sm font-medium mb-1 text-muted-foreground">Note</label>
+                <textarea value={formData.note} onChange={(e) => setFormData({ ...formData, note: e.target.value })} rows={2} className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none" />
               </div>
               <div className="flex gap-3">
                 <button type="submit" className="btn-primary flex-1 px-4 py-2">
@@ -741,7 +741,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
       )}
 
       <div className="card p-6">
-        <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-50">Excel Import/Export</h3>
+        <h3 className="text-lg font-semibold mb-4 text-foreground">Excel Import/Export</h3>
         <div className="grid grid-cols-3 gap-4">
           <button 
             onClick={() => exportWorkLogsToExcel(data)} 
@@ -769,7 +769,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
           </button>
           <button 
             onClick={() => downloadExcelTemplate()} 
-            className="px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
+            className="px-4 py-3 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors flex items-center justify-center gap-2"
           >
             <FileSpreadsheet className="w-5 h-5" />
             Download Template
@@ -782,17 +782,17 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
           className="hidden" 
           accept=".xlsx, .xls" 
         />
-        <p className="text-sm text-gray-500 mt-4">
+        <p className="text-sm text-muted-foreground mt-4">
           <strong>Note:</strong> The Excel template follows your existing work log format with columns: Report Date, Operators (comma-separated for multiple), Requesters (comma-separated for multiple, optional), Department, Area, Issue Description, Cause, Fix Description, Permanent Fix, Notes, and Status.
         </p>
       </div>
 
       {showImportDialog && validationResult && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b flex justify-between sticky top-0 bg-white z-60">
+        <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4">
+          <div className="bg-card rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b flex justify-between sticky top-0 bg-card z-60">
               <h3 className="text-lg font-semibold">Import Validation</h3>
-              <button onClick={handleCancelImport} className="hover:text-gray-600"><X className="w-6 h-6" /></button>
+              <button onClick={handleCancelImport} className="hover:text-muted-foreground"><X className="w-6 h-6" /></button>
             </div>
             <div className="p-6">
               <ImportValidation 

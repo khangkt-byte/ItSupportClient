@@ -67,7 +67,7 @@ export function useDataManager() {
       id: dept.dptId,
       name: dept.name,
       description: dept.description || '',
-      departmentId: dept.dptId, // Add for API compatibility
+      dptId: dept.dptId, // Add for API compatibility
     } as Department)),
     setData: (newData: Department[]) => {
       departmentsRaw.setData(newData as unknown as DepartmentDto[]);

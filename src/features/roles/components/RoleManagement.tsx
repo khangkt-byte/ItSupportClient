@@ -209,7 +209,7 @@ export function RoleManagement({ data, setData }: Props) {
             <Shield className="w-7 h-7 text-primary-600" />
             Role Management
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Manage roles and their associated permissions
           </p>
         </div>
@@ -229,14 +229,14 @@ export function RoleManagement({ data, setData }: Props) {
         {data.map((item) => {
           const claimCount = item.claims?.length || 0;
           return (
-            <div key={item.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col min-h-240px">
+            <div key={item.id} className="bg-card border border-border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col min-h-240px">
               <div>
                 <div className="w-12 h-12 bg-primary-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-4">
                   <Shield className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-gray-50">{item.name}</h3>
+                <h3 className="font-semibold text-lg mb-2 text-foreground">{item.name}</h3>
                 {item.description && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{item.description}</p>
+                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{item.description}</p>
                 )}
                 <div className="flex items-center gap-2 mb-4">
                   <span className="px-2 py-1 text-xs rounded-full bg-primary-100 dark:bg-gray-700 text-primary-700 dark:text-primary-400 font-medium">
@@ -258,7 +258,7 @@ export function RoleManagement({ data, setData }: Props) {
                   {hasPermission(Permissions.Role.Delete) && (
                     <button
                       onClick={() => setConfirmDelete(item)}
-                      className="flex-1 px-3 py-2 text-sm bg-red-50 dark:bg-gray-700 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                      className="flex-1 px-3 py-2 text-sm bg-error-background text-error-foreground rounded-lg hover:bg-error-background transition-colors flex items-center justify-center gap-1 cursor-pointer"
                     >
                       <Trash2 className="w-3 h-3" />
                       Delete
@@ -270,7 +270,7 @@ export function RoleManagement({ data, setData }: Props) {
           );
         })}
         {data.length === 0 && (
-          <div className="col-span-full py-12 text-center text-gray-500">
+          <div className="col-span-full py-12 text-center text-muted-foreground">
             <Shield className="w-12 h-12 mx-auto mb-3 text-gray-300" />
             <p className="text-lg font-medium">No roles found</p>
             <p className="text-sm mt-1">Create your first role to get started</p>
@@ -280,22 +280,22 @@ export function RoleManagement({ data, setData }: Props) {
 
       {/* Form Dialog */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full my-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-card rounded-lg max-w-4xl w-full my-4 max-h-[90vh] overflow-y-auto">
             {/* Header */}
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800 z-10">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center sticky top-0 bg-card z-10">
               <div>
-                <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-50">
+                <h3 className="text-lg font-semibold flex items-center gap-2 text-foreground">
                   <Shield className="w-5 h-5 text-primary-600" />
                   {editing ? 'Edit Role' : 'Create New Role'}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                <p className="text-sm text-muted-foreground mt-0.5">
                   Define role name, description, and permissions
                 </p>
               </div>
               <button
                 onClick={() => setShowForm(false)}
-                className="cursor-pointer hover:text-gray-600 dark:hover:text-gray-300 transition-colors text-gray-900 dark:text-gray-50"
+                className="cursor-pointer hover:text-muted-foreground transition-colors text-foreground"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -303,13 +303,13 @@ export function RoleManagement({ data, setData }: Props) {
 
             {/* Error Alert */}
             {error && (
-              <div className="mx-6 mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 shrink-0" />
+              <div className="mx-6 mt-4 p-4 bg-error-background border border-error-border rounded-lg flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
                 <div className="flex-1">
-                  <p className="font-medium text-red-900 dark:text-red-400">Error</p>
-                  <p className="text-sm text-red-700 dark:text-red-300 mt-0.5">{error}</p>
+                  <p className="font-medium text-error-foreground">Error</p>
+                  <p className="text-sm text-error-foreground mt-0.5">{error}</p>
                 </div>
-                <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 transition-colors">
+                <button onClick={() => setError(null)} className="text-error-foreground hover:text-error-foreground transition-colors">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -319,8 +319,8 @@ export function RoleManagement({ data, setData }: Props) {
               {/* Basic Info */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Role Name <span className="text-red-500">*</span>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">
+                    Role Name <span className="text-error-foreground">*</span>
                   </label>
                   <input
                     type="text"
@@ -328,17 +328,17 @@ export function RoleManagement({ data, setData }: Props) {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g., System Administrator"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+                    className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-foreground placeholder-placeholder transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Description</label>
                   <input
                     type="text"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Brief description of this role"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+                    className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-foreground placeholder-placeholder transition-colors"
                   />
                 </div>
               </div>
@@ -346,12 +346,12 @@ export function RoleManagement({ data, setData }: Props) {
               {/* Permissions Selection */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="text-sm font-medium text-muted-foreground">
                     Permissions ({formData.selectedClaimIds.length} selected)
                   </label>
                 </div>
 
-                <div className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg max-h-96 overflow-y-auto">
+                <div className="bg-muted border border-border rounded-lg max-h-96 overflow-y-auto">
                   {groupedClaims.map(group => {
                     const isExpanded = expandedGroups.has(group.category);
                     const selectedInGroup = group.claims.filter(c =>
@@ -360,16 +360,16 @@ export function RoleManagement({ data, setData }: Props) {
                     const allSelected = selectedInGroup === group.claims.length;
 
                     return (
-                      <div key={group.category} className="border-b border-gray-200 dark:border-gray-600 last:border-b-0">
+                      <div key={group.category} className="border-b border-border last:border-b-0">
                         {/* Group Header */}
-                        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <div className="flex items-center justify-between p-4 bg-card hover:bg-accent transition-colors">
                           <button
                             type="button"
                             onClick={() => toggleGroup(group.category)}
                             className="flex items-center gap-2 flex-1 text-left"
                           >
-                            <span className="font-medium text-gray-900 dark:text-gray-50">{group.category}</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">({group.claims.length})</span>
+                            <span className="font-medium text-foreground">{group.category}</span>
+                            <span className="text-xs text-muted-foreground">({group.claims.length})</span>
                             {selectedInGroup > 0 && (
                               <span className="px-2 py-0.5 text-xs bg-primary-100 dark:bg-gray-700 text-primary-700 dark:text-primary-400 rounded-full">
                                 {selectedInGroup} selected
@@ -394,23 +394,23 @@ export function RoleManagement({ data, setData }: Props) {
 
                         {/* Claims in Group */}
                         {isExpanded && (
-                          <div className="bg-gray-50 dark:bg-gray-700 divide-y divide-gray-200 dark:divide-gray-600">
+                          <div className="bg-muted divide-y divide-border">
                             {group.claims.map(claim => {
                               const isSelected = formData.selectedClaimIds.includes(claim.claimId);
                               return (
                                 <label
                                   key={claim.claimId}
-                                  className="flex items-center gap-3 p-3 pl-8 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                                  className="flex items-center gap-3 p-3 pl-8 cursor-pointer hover:bg-accent transition-colors"
                                 >
                                   <input
                                     type="checkbox"
                                     checked={isSelected}
                                     onChange={() => toggleClaim(claim.claimId)}
-                                    className="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 focus:ring-primary-500"
+                                    className="w-4 h-4 text-primary-600 rounded border-input focus:ring-primary-500"
                                   />
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2">
-                                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                      <span className="text-sm font-medium text-muted-foreground">
                                         {claim.claim}
                                       </span>
                                     </div>
@@ -430,7 +430,7 @@ export function RoleManagement({ data, setData }: Props) {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex gap-3 pt-4 border-t border-border">
                 <button
                   type="submit"
                   disabled={isLoading}

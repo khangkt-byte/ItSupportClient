@@ -115,15 +115,50 @@ html[data-a11y="highContrast"] {
  */
 
 /**
- * Note: Light mode AND dark mode semantic tokens are now defined in
+ * Note: Light mode AND dark mode SEMANTIC STATUS tokens are defined in
  * generated-themes.css (auto-generated from palettes.ts SSOT).
  * Do NOT duplicate them here.
  *
  * SSOT chain: palettes.ts → generateThemeCSS.js → generated-themes.css
  * Runtime overrides: themeTokens.ts → applyThemeTokens()
  *
- * Only OVERRIDE section below: high contrast mode.
+ * NEUTRAL SURFACE tokens (background, card, muted, border, etc.) are
+ * defined in theme.css @theme block (light defaults) and overridden
+ * below for dark mode. These are STATIC across all brand themes.
  */
+
+/* ========================================
+ * DARK MODE — Neutral Surface Token Overrides
+ * 
+ * Corresponding light defaults are in theme.css → @theme block.
+ * Values sourced from Tailwind Gray scale (consistent with neutralGray in palettes.ts).
+ *
+ * References:
+ * - shadcn/ui theming: https://ui.shadcn.com/docs/theming
+ * - Material Design 3 dark theme: https://m3.material.io/styles/color/dark-theme
+ * - Tailwind dark mode: https://tailwindcss.com/docs/dark-mode
+ * ======================================== */
+:root[data-theme="dark"] {
+  --color-background: #111827;
+  --color-foreground: #f9fafb;
+  --color-card: #1f2937;
+  --color-card-foreground: #f9fafb;
+  --color-popover: #1f2937;
+  --color-popover-foreground: #f9fafb;
+  --color-muted: #374151;
+  --color-muted-foreground: #9ca3af;
+  --color-accent: #374151;
+  --color-accent-foreground: #f9fafb;
+  --color-secondary: #374151;
+  --color-secondary-foreground: #f9fafb;
+  --color-destructive: #f87171;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #374151;
+  --color-input: #4b5563;
+  --color-ring: #6b7280;
+  --color-placeholder: #6b7280;
+  --color-overlay: rgba(0, 0, 0, 0.6);
+}
 
 /* High Contrast mode overrides - WCAG AAA compliance (21:1) */
 html[data-a11y="highContrast"] {

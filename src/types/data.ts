@@ -355,7 +355,7 @@ export interface IssueLogDto {
   issLogId: string; // UUID
   operator: string;
   requester: string | null;
-  departmentId: number;
+  dptId: number;
   departmentName: string;
   areaId: number;
   areaName: string;
@@ -522,7 +522,7 @@ export type DeviceType = { id: string; name: string; description: string };
 // Department - Note: API doesn't have Department endpoint, using inline data
 export interface Department {
   id: number;
-  departmentId: number; // Add for API compatibility
+  dptId: number; // Add for API compatibility
   name: string;
   description: string;
 }

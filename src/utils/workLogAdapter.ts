@@ -31,7 +31,7 @@ export function issueLogToWorkLog(issueLog: IssueLogDto): WorkLog {
     requesters: issueLog.requester ? issueLog.requester.split(',').map(s => s.trim()) : [],
 
     // Department and Area
-    departmentId: issueLog.departmentId,
+    dptId: issueLog.dptId,
     department: issueLog.departmentName,
     departmentName: issueLog.departmentName,
     areaId: issueLog.areaId,
@@ -81,7 +81,7 @@ export function workLogToCreateDto(workLog: Partial<WorkLog>): CreateIssueLogDto
       : (workLog.requester || null),
 
     // Department and Area IDs - use DptId instead of departmentId for API compatibility
-    DptId: workLog.departmentId,
+    DptId: workLog.dptId,
     AreaId: workLog.areaId,
 
     // Issue
@@ -126,8 +126,8 @@ export function workLogToUpdateDto(workLog: Partial<WorkLog>): UpdateIssueLogDto
       : (workLog.requester || null);
   }
 
-  if (workLog.departmentId !== undefined) {
-    dto.DptId = workLog.departmentId;
+  if (workLog.dptId !== undefined) {
+    dto.DptId = workLog.dptId;
   }
 
   if (workLog.areaId !== undefined) {

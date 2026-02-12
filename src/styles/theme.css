@@ -20,7 +20,45 @@
 
 @theme {
   /* ========================================
-   * SEMANTIC COLOR VARIANT TOKENS
+   * NEUTRAL SURFACE TOKENS
+   * 
+   * Following shadcn/ui + Material Design 3 conventions:
+   * @see https://ui.shadcn.com/docs/theming
+   * @see https://m3.material.io/styles/color/roles
+   * @see https://carbondesignsystem.com/guidelines/color/tokens
+   *
+   * Light-mode defaults. Dark overrides in index.css via
+   * :root[data-theme="dark"] selector.
+   *
+   * These tokens are STATIC across all brand themes (purple, red, blue, etc.)
+   * since neutral/surface colors don't change per brand — only primary does.
+   *
+   * Naming convention (shadcn/ui):
+   *   --color-{role}: background color
+   *   --color-{role}-foreground: text color on that background
+   * ======================================== */
+  --color-background: #ffffff;
+  --color-foreground: #111827;
+  --color-card: #ffffff;
+  --color-card-foreground: #111827;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #111827;
+  --color-muted: #f9fafb;
+  --color-muted-foreground: #6b7280;
+  --color-accent: #f3f4f6;
+  --color-accent-foreground: #111827;
+  --color-secondary: #f3f4f6;
+  --color-secondary-foreground: #111827;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #e5e7eb;
+  --color-input: #d1d5db;
+  --color-ring: #6b7280;
+  --color-placeholder: #9ca3af;
+  --color-overlay: rgba(0, 0, 0, 0.5);
+
+  /* ========================================
+   * SEMANTIC STATUS TOKENS (foreground/background/border)
    * 
    * SSOT: src/constants/palettes.ts → lightSemanticVariants
    * Runtime override: src/utils/themeTokens.ts → applyThemeTokens()

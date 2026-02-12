@@ -54,26 +54,26 @@ export function Pagination({
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-b-lg">
+    <div className="flex items-center justify-between border-t border-border bg-card px-4 py-3 sm:px-6 rounded-b-lg">
       <div className="flex flex-1 justify-between sm:hidden">
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={!hasPrevPage}
-          className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="relative inline-flex items-center rounded-md border border-input bg-card px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Previous
         </button>
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={!hasNextPage}
-          className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="relative ml-3 inline-flex items-center rounded-md border border-input bg-card px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Next
         </button>
       </div>
       <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm text-gray-700">
+          <p className="text-sm text-muted-foreground">
             Showing <span className="font-medium">{startItem}</span> to{' '}
             <span className="font-medium">{endItem}</span> of{' '}
             <span className="font-medium">{totalItems}</span> results
@@ -84,7 +84,7 @@ export function Pagination({
             <button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={!hasPrevPage}
-              className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="relative inline-flex items-center rounded-l-md px-2 py-2 text-placeholder ring-1 ring-inset ring-ring hover:bg-accent focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="sr-only">Previous</span>
               <ChevronLeft className="h-5 w-5" aria-hidden="true" />
@@ -93,7 +93,7 @@ export function Pagination({
               page === '...' ? (
                 <span
                   key={`ellipsis-${idx}`}
-                  className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300"
+                  className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-muted-foreground ring-1 ring-inset ring-ring"
                 >
                   ...
                 </span>
@@ -101,10 +101,10 @@ export function Pagination({
                 <button
                   key={page}
                   onClick={() => onPageChange(page as number)}
-                  className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 ${
+                  className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ring-1 ring-inset ring-ring hover:bg-accent focus:z-20 focus:outline-offset-0 ${
                     currentPage === page
                       ? 'z-10 bg-primary-600 text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600'
-                      : 'text-gray-900'
+                      : 'text-foreground'
                   }`}
                 >
                   {page}
@@ -114,7 +114,7 @@ export function Pagination({
             <button
               onClick={() => onPageChange(currentPage + 1)}
               disabled={!hasNextPage}
-              className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="relative inline-flex items-center rounded-r-md px-2 py-2 text-placeholder ring-1 ring-inset ring-ring hover:bg-accent focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="sr-only">Next</span>
               <ChevronRight className="h-5 w-5" aria-hidden="true" />

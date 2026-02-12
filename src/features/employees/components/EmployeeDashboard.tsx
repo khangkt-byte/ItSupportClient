@@ -27,7 +27,7 @@ export function EmployeeDashboard({ user, onLogout, currentView }: Props) {
       <div className="flex items-center justify-center min-h-100">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -39,20 +39,20 @@ export function EmployeeDashboard({ user, onLogout, currentView }: Props) {
       case 'employee':
         return (
           <div>
-            <h1 className="text-2xl font-semibold mb-5 text-gray-900 dark:text-gray-50">Employee Dashboard</h1>
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
-              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-50">Welcome, {user.fullName}!</h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <h1 className="text-2xl font-semibold mb-5 text-foreground">Employee Dashboard</h1>
+            <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
+              <h2 className="text-xl font-semibold mb-4 text-foreground">Welcome, {user.fullName}!</h2>
+              <p className="text-muted-foreground mb-4">
                 Use the menu to navigate and manage work logs.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                 <div className="bg-primary-50 dark:bg-primary-900/20 p-4 rounded-lg border border-primary-200 dark:border-primary-800">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Work Logs</p>
+                  <p className="text-sm text-muted-foreground">Total Work Logs</p>
                   <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">{dataManager.workLogs.data.length}</p>
                 </div>
                 <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Pending Work Logs</p>
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  <p className="text-sm text-muted-foreground">Pending Work Logs</p>
+                  <p className="text-2xl font-bold text-success-foreground">
                     {dataManager.workLogs.data.filter(log => log.status === 'pending').length}
                   </p>
                 </div>
@@ -74,9 +74,9 @@ export function EmployeeDashboard({ user, onLogout, currentView }: Props) {
       default:
         return (
           <div>
-            <h1 className="text-2xl font-semibold mb-5 text-gray-900 dark:text-gray-50">Employee Dashboard</h1>
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
-              <p className="text-gray-600 dark:text-gray-400">Select a menu item to get started.</p>
+            <h1 className="text-2xl font-semibold mb-5 text-foreground">Employee Dashboard</h1>
+            <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
+              <p className="text-muted-foreground">Select a menu item to get started.</p>
             </div>
           </div>
         );
@@ -88,7 +88,7 @@ export function EmployeeDashboard({ user, onLogout, currentView }: Props) {
       {/* Header with user info and logout */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <p className="text-sm text-gray-500">Logged in as</p>
+          <p className="text-sm text-muted-foreground">Logged in as</p>
           <p className="font-medium">{user.fullName} ({user.role})</p>
         </div>
         <button
@@ -110,7 +110,7 @@ export function EmployeeDashboard({ user, onLogout, currentView }: Props) {
         action="logout"
         title="Logout"
         description="Are you sure you want to logout?"
-        icon={<LogOut className="w-5 h-5 text-red-600" />}
+        icon={<LogOut className="w-5 h-5 text-error-foreground" />}
       />
     </>
   );

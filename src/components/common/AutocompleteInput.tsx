@@ -135,7 +135,7 @@ export function AutocompleteInput({
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
         {selectedSuggestion && showKbIndicator && (
-          <span className="ml-2 px-2 py-0.5 bg-green-600 text-white text-xs rounded">
+          <span className="ml-2 px-2 py-0.5 bg-success-foreground text-white text-xs rounded">
             From KB
           </span>
         )}
@@ -151,18 +151,18 @@ export function AutocompleteInput({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           required={required}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         />
 
         {/* Suggestions Dropdown */}
         {showSuggestions && suggestions.length > 0 && (
           <div
             ref={dropdownRef}
-            className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-80 overflow-y-auto"
+            className="absolute z-50 w-full mt-1 bg-card border border-border rounded-lg shadow-lg max-h-80 overflow-y-auto"
           >
             {/* Header - Only show if suggestionHeader is provided and not empty */}
             {suggestionHeader && (
-              <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400">
+              <div className="px-3 py-2 bg-muted border-b border-border text-xs text-muted-foreground">
                 {suggestionHeader}
               </div>
             )}
@@ -172,13 +172,13 @@ export function AutocompleteInput({
               <div
                 key={suggestion.id}
                 onClick={() => handleSelectSuggestion(suggestion)}
-                className={`px-3 py-2.5 cursor-pointer border-b border-gray-100 dark:border-gray-700 transition-colors ${
+                className={`px-3 py-2.5 cursor-pointer border-b border-border transition-colors ${
                   highlightedIndex === index
                     ? 'bg-primary-100 dark:bg-primary-900'
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                    : 'hover:bg-accent'
                 }`}
               >
-                <div className="font-medium text-sm text-gray-900 dark:text-gray-50">
+                <div className="font-medium text-sm text-foreground">
                   {suggestion.name}
                 </div>
                 <div className="flex items-center gap-2 mt-1">
@@ -186,7 +186,7 @@ export function AutocompleteInput({
                     {suggestion.usageCount} times used
                   </span>
                   {suggestion.description && (
-                    <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    <span className="text-xs text-muted-foreground truncate">
                       {suggestion.description}
                     </span>
                   )}
@@ -195,7 +195,7 @@ export function AutocompleteInput({
             ))}
 
             {/* Footer */}
-            <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700 text-center text-xs text-gray-500 dark:text-gray-400">
+            <div className="px-3 py-2 bg-muted text-center text-xs text-muted-foreground">
               Press Enter to continue
             </div>
           </div>
@@ -215,7 +215,7 @@ export function AutocompleteInput({
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
               <Check className="w-4 h-4 text-green-600" />
-              <span className="text-gray-700">
+              <span className="text-muted-foreground">
                 Linked to KB Issue: <strong>{selectedSuggestion.name}</strong>
               </span>
             </div>

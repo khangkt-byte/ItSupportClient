@@ -52,17 +52,17 @@ export function AreaManagement({ data, setData }: Props) {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {data.map((item) => (
-          <div key={item.id} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col min-h-45">
+          <div key={item.id} className="bg-card border border-border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col min-h-45">
             <div className="flex-1">
-              <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-gray-50">{item.name}</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{item.description}</p>
+              <h3 className="font-semibold text-lg mb-2 text-foreground">{item.name}</h3>
+              <p className="text-sm text-muted-foreground">{item.description}</p>
             </div>
             <div className="flex gap-2 mt-4">
               <button onClick={() => openForm(item)} className="flex-1 px-3 py-2 text-sm bg-primary-50 dark:bg-gray-700 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1">
                 <Edit className="w-4 h-4" />
                 Edit
               </button>
-              <button onClick={() => setConfirmDelete(item)} className="flex-1 px-3 py-2 text-sm bg-red-50 dark:bg-gray-700 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1">
+              <button onClick={() => setConfirmDelete(item)} className="flex-1 px-3 py-2 text-sm bg-error-background text-error-foreground rounded-lg hover:bg-error-background transition-colors flex items-center justify-center gap-1">
                 <Trash2 className="w-4 h-4" />
                 Delete
               </button>
@@ -71,11 +71,11 @@ export function AreaManagement({ data, setData }: Props) {
         ))}
       </div>
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col min-h-50">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50">{editing ? 'Edit' : 'Add'}</h3>
-              <button onClick={() => setShowForm(false)} className="hover:text-gray-600 dark:hover:text-gray-300 text-gray-900 dark:text-gray-50 transition-colors">
+        <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4">
+          <div className="bg-card border border-border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col min-h-50">
+            <div className="px-6 py-4 border-b border-border flex justify-between">
+              <h3 className="text-lg font-semibold text-foreground">{editing ? 'Edit' : 'Add'}</h3>
+              <button onClick={() => setShowForm(false)} className="hover:text-muted-foreground text-foreground transition-colors">
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -86,14 +86,14 @@ export function AreaManagement({ data, setData }: Props) {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Name *"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
               />
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Description"
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
+                className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
               />
               <div className="flex gap-3">
                 <button type="submit" className="btn-primary flex-1 px-4 py-2">

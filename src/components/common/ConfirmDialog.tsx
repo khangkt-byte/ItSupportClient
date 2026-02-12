@@ -78,19 +78,19 @@ export function ConfirmDialog({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg max-w-md w-full">
+    <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-card border border-border rounded-lg max-w-md w-full">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+        <div className="px-6 py-4 border-b border-border flex justify-between items-center">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
               {getIcon()}
               {title}
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="cursor-pointer hover:text-gray-600 dark:hover:text-gray-400 transition-colors text-gray-900 dark:text-gray-50"
+            className="cursor-pointer hover:text-muted-foreground transition-colors text-foreground"
           >
             <X className="w-6 h-6" />
           </button>
@@ -98,11 +98,11 @@ export function ConfirmDialog({
 
         {/* Content */}
         <div className="p-8">
-          <p className="text-base text-gray-700 dark:text-gray-300">{description}</p>
+          <p className="text-base text-muted-foreground">{description}</p>
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
+        <div className="p-4 border-t border-border flex gap-3">
           <button
             onClick={onClose}
             className="btn-secondary flex-1 px-4 py-2"

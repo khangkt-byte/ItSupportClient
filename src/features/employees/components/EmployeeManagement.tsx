@@ -78,7 +78,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       {/* Search */}
       <div className="card p-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-600 dark:text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <input
             type="text"
             value={searchQuery}
@@ -92,31 +92,31 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       {/* Table */}
       <div className="card overflow-hidden">
         <table className="w-full">
-          <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
+          <thead className="bg-muted border-b border-border">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Employee ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Phone</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Position</th>
-              <th className="px-6 py-3 text-right text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Employee ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Name</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Phone</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Email</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Position</th>
+              <th className="px-6 py-3 text-right text-xs font-medium uppercase text-muted-foreground">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="divide-y divide-border">
             {pagination.paginatedData.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-gray-600 dark:text-gray-400">
+                <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
                   No employees found
                 </td>
               </tr>
             ) : (
               pagination.paginatedData.map((item) => (
-                <tr key={item.empId} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-50">{item.empCode || 'N/A'}</td>
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-50">{item.fullName}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-50">{item.phoneNumber || 'N/A'}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-50">{item.email || 'N/A'}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-50">{item.position || 'N/A'}</td>
+                <tr key={item.empId} className="hover:bg-accent">
+                  <td className="px-6 py-4 text-sm text-foreground">{item.empCode || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-foreground">{item.fullName}</td>
+                  <td className="px-6 py-4 text-sm text-foreground">{item.phoneNumber || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm text-foreground">{item.email || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm text-foreground">{item.position || 'N/A'}</td>
                   <td className="px-6 py-4 text-sm text-right">
                     <button 
                       onClick={() => openForm(item)} 
@@ -127,7 +127,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
                     </button>
                     <button 
                       onClick={() => setConfirmDelete(item)} 
-                      className="text-red-600 hover:text-red-800 cursor-pointer"
+                      className="text-error-foreground hover:text-error-foreground cursor-pointer"
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -152,11 +152,11 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
 
       {/* Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4">
           <div className="card max-w-2xl w-full">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center">
               <h3 className="text-lg font-semibold">{editing ? 'Edit' : 'Add'} Employee</h3>
-              <button onClick={() => setShowForm(false)} className="hover:text-gray-600">
+              <button onClick={() => setShowForm(false)} className="hover:text-muted-foreground">
                 <X className="w-6 h-6" />
               </button>
             </div>

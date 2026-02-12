@@ -390,7 +390,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
             <User className="w-7 h-7 text-primary-600" />
             Account Management
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Manage user accounts with hybrid role and permission assignment
           </p>
         </div>
@@ -427,24 +427,24 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
       />
 
       {/* Accounts Table */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden shadow-sm">
+      <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
         {/* Loading indicator */}
         {isLoading && (
           <div className="flex items-center justify-center py-12">
             <div className="flex flex-col items-center gap-2">
               <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
-              <p className="text-gray-600 dark:text-gray-400">Loading accounts...</p>
+              <p className="text-muted-foreground">Loading accounts...</p>
             </div>
           </div>
         )}
 
         {/* Error state */}
         {error && !isLoading && (
-          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 shrink-0" />
+          <div className="p-4 bg-error-background border border-red-200 dark:border-red-800 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
             <div className="flex-1">
-              <p className="font-medium text-red-900 dark:text-red-400">Error</p>
-              <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+              <p className="font-medium text-error-foreground">Error</p>
+              <p className="text-sm text-error-foreground">{error}</p>
             </div>
           </div>
         )}
@@ -452,50 +452,50 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
         {/* Table */}
         {!isLoading && !error && (
           <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
+            <thead className="bg-muted border-b border-border">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Employee
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Employee Code
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Username
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                   Roles
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y divide-border">
               {(paginatedResult?.items || []).length > 0 ? (
                 (paginatedResult?.items || []).map((item) => (
-                  <tr key={item.accountId} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-50">{item.empName || 'Unknown'}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                  <tr key={item.accountId} className="hover:bg-accent transition-colors">
+                    <td className="px-6 py-4 text-sm font-medium text-foreground">{item.empName || 'Unknown'}</td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
                       {item.empCode || 'N/A'}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-50">
+                    <td className="px-6 py-4 text-sm text-foreground">
                       <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                        <User className="w-4 h-4 text-placeholder" />
                         {item.username}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm">
                       {item.isLocked ? (
-                        <span className="px-2 py-1 text-xs rounded bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-medium flex items-center gap-1 w-fit">
+                        <span className="px-2 py-1 text-xs rounded bg-error-background text-error-foreground font-medium flex items-center gap-1 w-fit">
                           <Lock className="w-3 h-3" />
                           Locked
                         </span>
                       ) : (
-                        <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-700 font-medium flex items-center gap-1 w-fit">
+                        <span className="px-2 py-1 text-xs rounded bg-success-background text-success-foreground font-medium flex items-center gap-1 w-fit">
                           <Unlock className="w-3 h-3" />
                           Active
                         </span>
@@ -522,8 +522,8 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                               onClick={() => openConfirm(item.isLocked ? 'unlock' : 'lock', item as any)}
                               className={`inline-flex items-center justify-center transition-colors ${
                                 item.isLocked
-                                  ? 'text-green-600 hover:text-green-800'
-                                  : 'text-orange-600 hover:text-orange-800'
+                                  ? 'text-success-foreground hover:text-success-foreground'
+                                  : 'text-warning-foreground hover:text-warning-foreground'
                               }`}
                               title={item.isLocked ? 'Unlock account' : 'Lock account'}
                             >
@@ -538,7 +538,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                         {hasPermission(Permissions.Account.Delete) && (
                           <button
                             onClick={() => openConfirm('delete', item as any)}
-                            className="text-red-600 inline-flex items-center justify-center hover:text-red-800 transition-colors"
+                            className="text-error-foreground inline-flex items-center justify-center hover:text-error-foreground transition-colors"
                             title="Delete account"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -550,8 +550,8 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                    <User className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
+                  <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
+                    <User className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
                     <p className="text-lg font-medium">No accounts found</p>
                     <p className="text-sm mt-1">Create your first account to get started</p>
                   </td>
@@ -565,7 +565,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
       {/* Pagination Controls */}
       {paginatedResult && !isLoading && (
         <div className="card p-4 flex items-center justify-between">
-          <div className="text-sm text-gray-600 dark:text-gray-400">
+          <div className="text-sm text-muted-foreground">
             Page <span className="font-medium">{paginatedResult.page}</span> of{' '}
             <span className="font-medium">{paginatedResult.totalPages}</span> ({' '}
             <span className="font-medium">{paginatedResult.totalCount}</span> total items)
@@ -579,7 +579,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                 })
               }
               disabled={!paginatedResult.hasPreviousPage}
-              className="flex items-center gap-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-900 dark:text-gray-50"
+              className="flex items-center gap-1 px-3 py-2 border border-input rounded-lg bg-card hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
             >
               <ChevronLeft className="w-4 h-4" />
               <span>Previous</span>
@@ -598,7 +598,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                 );
                 setQueryParams({ ...queryParams, page: pageNum });
               }}
-              className="w-12 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50"
+              className="w-12 px-2 py-2 border border-input rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-card text-foreground"
             />
             
             <button
@@ -609,7 +609,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                 })
               }
               disabled={!paginatedResult.hasNextPage}
-              className="flex items-center gap-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-900 dark:text-gray-50"
+              className="flex items-center gap-1 px-3 py-2 border border-input rounded-lg bg-card hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
             >
               <span>Next</span>
               <ChevronRight className="w-4 h-4" />
@@ -620,16 +620,16 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
 
       {/* Form Dialog - Multi-step */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg max-w-6xl w-full my-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-card rounded-lg max-w-6xl w-full my-4 max-h-[90vh] overflow-y-auto">
             {/* Header */}
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800 z-10">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center sticky top-0 bg-card z-10">
               <div>
-                <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-gray-50">
+                <h3 className="text-lg font-semibold flex items-center gap-2 text-foreground">
                   <User className="w-5 h-5 text-primary-600" />
                   {editing ? 'Edit Account' : 'Create New Account'}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                <p className="text-sm text-muted-foreground mt-0.5">
                   {formStep === 'basic'
                     ? 'Step 1: Basic Information'
                     : 'Step 2: Permission Assignment'}
@@ -637,7 +637,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
               </div>
               <button
                 onClick={() => setShowForm(false)}
-                className="hover:text-gray-600 dark:hover:text-gray-300 transition-colors text-gray-900 dark:text-gray-50"
+                className="hover:text-muted-foreground transition-colors text-foreground"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -645,15 +645,15 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
 
             {/* Error Alert */}
             {error && (
-              <div className="mx-6 mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 shrink-0" />
+              <div className="mx-6 mt-4 p-4 bg-error-background border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
                 <div className="flex-1">
-                  <p className="font-medium text-red-900 dark:text-red-400">Error</p>
-                  <p className="text-sm text-red-700 dark:text-red-300 mt-0.5">{error}</p>
+                  <p className="font-medium text-error-foreground">Error</p>
+                  <p className="text-sm text-error-foreground mt-0.5">{error}</p>
                 </div>
                 <button
                   onClick={() => setError(null)}
-                  className="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 transition-colors"
+                  className="text-error-foreground hover:text-error-foreground transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -673,7 +673,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                     onChange={(e) =>
                       setFormData({ ...formData, employeeId: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+                    className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
                     disabled={!!editing}
                   >
                     <option value="">Select employee...</option>
@@ -684,12 +684,12 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                     ))}
                   </select>
                   {editing && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Employee cannot be changed</p>
+                    <p className="text-xs text-muted-foreground mt-1">Employee cannot be changed</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">
                     Username <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -700,12 +700,12 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                       setFormData({ ...formData, username: e.target.value })
                     }
                     placeholder="Enter username"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+                    className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">
                     Password {!editing && <span className="text-red-500">*</span>}
                   </label>
                   <input
@@ -716,10 +716,10 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                       setFormData({ ...formData, password: e.target.value })
                     }
                     placeholder={editing ? 'Leave empty to keep current password' : 'Enter password'}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-50 placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
+                    className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
                   />
                   {editing && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Leave empty to keep current password
                     </p>
                   )}
@@ -760,7 +760,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
                 />
 
                 {/* Actions */}
-                <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex gap-3 pt-4 border-t border-border">
                   <button
                     type="button"
                     onClick={() => setFormStep('basic')}
@@ -793,25 +793,25 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
       )}
 
       {confirmState && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg max-w-md w-full">
+        <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-card rounded-lg max-w-md w-full">
             {/* Header */}
             <div className="px-6 py-4 border-b flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-semibold flex items-center gap-2">
                   {confirmState.action === 'delete' ? (
-                    <Trash2 className="w-5 h-5 text-red-600" />
+                    <Trash2 className="w-5 h-5 text-error-foreground" />
                   ) : confirmState.action === 'lock' ? (
-                    <Lock className="w-5 h-5 text-orange-600" />
+                    <Lock className="w-5 h-5 text-warning-foreground" />
                   ) : (
-                    <Unlock className="w-5 h-5 text-green-600" />
+                    <Unlock className="w-5 h-5 text-success-foreground" />
                   )}
                   {confirmTitle}
                 </h3>
               </div>
               <button
                 onClick={closeConfirm}
-                className="hover:text-gray-600 transition-colors"
+                className="hover:text-muted-foreground transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -819,7 +819,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
 
             {/* Content */}
             <div className="p-8">
-              <p className="text-base text-gray-700">{confirmDescription}</p>
+              <p className="text-base text-muted-foreground">{confirmDescription}</p>
             </div>
 
             {/* Footer */}

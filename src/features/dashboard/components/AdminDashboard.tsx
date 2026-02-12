@@ -32,7 +32,7 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
       <div className="flex items-center justify-center min-h-100">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -47,21 +47,21 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
             <h1 className="text-2xl font-semibold mb-5">Admin Dashboard</h1>
             <div className="card p-6">
               <h2 className="text-xl font-semibold mb-4">Welcome, {user.fullName}!</h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
+              <p className="text-muted-foreground mb-4">
                 You have full administrative access to the IT Support Management System.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
                 <div className="p-4 rounded-lg bg-primary-100 dark:bg-primary-900/20">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Work Logs</p>
+                  <p className="text-sm text-muted-foreground">Total Work Logs</p>
                   <p className="text-2xl font-bold text-primary-600">{dataManager.workLogs.data.length}</p>
                 </div>
                 <div className="p-4 rounded-lg bg-green-100 dark:bg-green-900/20">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Employees</p>
-                  <p className="text-2xl font-bold text-green-600">{dataManager.employees.data.length}</p>
+                  <p className="text-sm text-muted-foreground">Total Employees</p>
+                  <p className="text-2xl font-bold text-success-foreground">{dataManager.employees.data.length}</p>
                 </div>
                 <div className="p-4 rounded-lg bg-purple-100 dark:bg-purple-900/20">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Areas</p>
-                  <p className="text-2xl font-bold text-purple-600">{dataManager.areas.data.length}</p>
+                  <p className="text-sm text-muted-foreground">Total Areas</p>
+                  <p className="text-2xl font-bold text-primary-600">{dataManager.areas.data.length}</p>
                 </div>
               </div>
             </div>
@@ -122,7 +122,7 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
           <div>
             <h1 className="text-2xl font-semibold mb-5">Admin Dashboard</h1>
             <div className="card p-6">
-              <p className="text-gray-600 dark:text-gray-400">Select a menu item to get started.</p>
+              <p className="text-muted-foreground">Select a menu item to get started.</p>
             </div>
           </div>
         );
@@ -134,7 +134,7 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
       {/* Header with user info and logout */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Logged in as</p>
+          <p className="text-sm text-muted-foreground">Logged in as</p>
           <p className="font-medium">{user.fullName} ({user.role})</p>
         </div>
         <button
@@ -156,7 +156,7 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
         action="logout"
         title="Logout"
         description="Are you sure you want to logout?"
-        icon={<LogOut className="w-5 h-5 text-red-600" />}
+          icon={<LogOut className="w-5 h-5 text-error-foreground" />}
       />
     </>
   );

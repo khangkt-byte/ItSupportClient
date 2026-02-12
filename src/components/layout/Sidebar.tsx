@@ -141,7 +141,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
                 className={`w-full px-3 py-2 rounded text-sm font-medium transition-all text-left ${
                   accessibilityMode === 'default'
                     ? 'bg-primary-600 text-white'
-                    : 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-50 hover:bg-gray-300 dark:hover:bg-gray-500'
+                    : 'bg-secondary text-foreground hover:bg-secondary/80'
                 }`}
               >
                 ✓ Normal
@@ -151,13 +151,13 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
                 className={`w-full px-3 py-2 rounded text-sm font-medium transition-all text-left ${
                   accessibilityMode === 'highContrast'
                     ? 'bg-primary-600 text-white'
-                    : 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-50 hover:bg-gray-300 dark:hover:bg-gray-500'
+                    : 'bg-secondary text-foreground hover:bg-secondary/80'
                 }`}
               >
                 ⊕ High Contrast (AA+)
               </button>
               {prefersReducedMotion && (
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">✓ Reduced motion enabled</p>
+                <p className="text-xs text-muted-foreground mt-2">✓ Reduced motion enabled</p>
               )}
             </div>
           )}

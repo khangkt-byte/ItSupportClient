@@ -263,21 +263,21 @@ export function ThemeSelector({ collapsed = false }: ThemeSelectorProps) {
 
       {/* Theme Selector Modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-4xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl bg-card border border-border max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-gray-50">
+            <DialogTitle className="text-2xl font-bold text-foreground">
               ✨ Theme Selector & Preview
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-6 py-4">
             {/* Controls */}
-            <div className="flex gap-2 flex-wrap items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-4">
+            <div className="flex gap-2 flex-wrap items-center justify-between border-b border-border pb-4">
               <div className="flex gap-2">
                 <button
                   onClick={undo}
                   disabled={!canUndo}
-                  className="px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-50 hover:bg-gray-200 dark:hover:bg-gray-600"
+                  className="px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed bg-accent text-foreground hover:bg-secondary"
                   title="Undo to previous theme"
                 >
                   <Undo className="w-4 h-4" />
@@ -285,7 +285,7 @@ export function ThemeSelector({ collapsed = false }: ThemeSelectorProps) {
                 </button>
                 <button
                   onClick={reset}
-                  className="px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-50 hover:bg-gray-200 dark:hover:bg-gray-600"
+                  className="px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 bg-accent text-foreground hover:bg-secondary"
                   title="Reset to Light theme"
                 >
                   <RotateCcw className="w-4 h-4" />
@@ -293,7 +293,7 @@ export function ThemeSelector({ collapsed = false }: ThemeSelectorProps) {
                 </button>
               </div>
 
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+              <div className="text-sm text-muted-foreground">
                 {history.length > 1 && `History: ${history.length} changes`}
               </div>
             </div>
@@ -302,7 +302,7 @@ export function ThemeSelector({ collapsed = false }: ThemeSelectorProps) {
             <div className="space-y-6">
               {/* Light/Dark Themes */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50 mb-3">
+                <h3 className="text-lg font-semibold text-foreground mb-3">
                   Base Themes
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -322,7 +322,7 @@ export function ThemeSelector({ collapsed = false }: ThemeSelectorProps) {
 
               {/* Brand Themes */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-50 mb-3">
+                <h3 className="text-lg font-semibold text-foreground mb-3">
                   Brand Colors
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
@@ -342,10 +342,10 @@ export function ThemeSelector({ collapsed = false }: ThemeSelectorProps) {
             </div>
 
             {/* Semantic Colors Preview */}
-            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+            <div className="bg-muted rounded-lg p-4 border border-border">
               <button
                 onClick={() => setShowSemanticColors(!showSemanticColors)}
-                className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-50 mb-3 hover:opacity-70 transition-opacity"
+                className="flex items-center gap-2 text-sm font-semibold text-foreground mb-3 hover:opacity-70 transition-opacity"
               >
                 {showSemanticColors ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                 Semantic Colors Preview
@@ -356,7 +356,7 @@ export function ThemeSelector({ collapsed = false }: ThemeSelectorProps) {
                   {semanticColors.map((color) => (
                     <div key={color.name} className="space-y-2">
                       <div
-                        className="w-full h-16 rounded-lg border-2 border-gray-200 dark:border-gray-600 shadow-sm transition-all"
+                        className="w-full h-16 rounded-lg border-2 border-border shadow-sm transition-all"
                         style={{
                           backgroundColor: color.value,
                           borderColor: getColorBrightness(color.value) > 128 ? 'var(--color-border-secondary)' : 'var(--color-border-primary)',
@@ -364,9 +364,9 @@ export function ThemeSelector({ collapsed = false }: ThemeSelectorProps) {
                         title={`${color.value}`}
                       />
                       <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-50">{color.name}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{color.usage}</p>
-                        <code className="text-xs text-gray-600 dark:text-gray-300 font-mono">{color.value}</code>
+                        <p className="text-sm font-medium text-foreground">{color.name}</p>
+                        <p className="text-xs text-muted-foreground">{color.usage}</p>
+                        <code className="text-xs text-muted-foreground font-mono">{color.value}</code>
                       </div>
                     </div>
                   ))}
@@ -376,10 +376,10 @@ export function ThemeSelector({ collapsed = false }: ThemeSelectorProps) {
 
             {/* Theme History */}
             {history.length > 1 && (
-              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+              <div className="bg-muted rounded-lg p-4 border border-border">
                 <button
                   onClick={() => setShowHistory(!showHistory)}
-                  className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-50 mb-3 hover:opacity-70 transition-opacity"
+                  className="flex items-center gap-2 text-sm font-semibold text-foreground mb-3 hover:opacity-70 transition-opacity"
                 >
                   {showHistory ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                   Theme History ({history.length})
@@ -396,7 +396,7 @@ export function ThemeSelector({ collapsed = false }: ThemeSelectorProps) {
                           className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                             currentTheme === item.theme
                               ? 'bg-primary-600 text-white'
-                              : 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-gray-50 hover:bg-gray-300 dark:hover:bg-gray-500'
+                              : 'bg-secondary text-foreground hover:bg-secondary/80'
                           }`}
                           title={`Switch to ${option?.label} (${new Date(item.timestamp).toLocaleTimeString()})`}
                         >
@@ -410,8 +410,8 @@ export function ThemeSelector({ collapsed = false }: ThemeSelectorProps) {
             )}
 
             {/* Info Box */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-              <p className="text-sm text-blue-900 dark:text-blue-200">
+            <div className="bg-info-background border border-info-border rounded-lg p-4">
+              <p className="text-sm text-info-foreground">
                 <span className="font-semibold">💡 Tip:</span> Themes are saved to your browser. System preference will be detected on next visit.
               </p>
             </div>
@@ -481,7 +481,7 @@ function ThemeCard({
       {/* Theme Preview Background with Static Color */}
       <div
         className={`w-full h-20 rounded-lg transition-all ${
-          isLightColor ? 'border-2 border-gray-300 dark:border-gray-600' : ''
+          isLightColor ? 'border-2 border-border' : ''
         }`}
         style={{
           backgroundColor: previewColor,
@@ -490,7 +490,7 @@ function ThemeCard({
 
       {/* Label Overlay */}
       <div
-        className={`absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity p-2 text-center`}
+        className={`absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-overlay opacity-0 group-hover:opacity-100 transition-opacity p-2 text-center`}
       >
         <p className="text-white font-semibold text-sm">{option.label}</p>
         {option.description && (
