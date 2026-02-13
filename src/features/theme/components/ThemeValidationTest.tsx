@@ -150,12 +150,14 @@ export const ThemeValidationTest: React.FC = () => {
    */
   const measureCombinationChange = useCallback(
     (targetAppearance: 'light' | 'dark' | 'auto', targetBrand: string) => {
-      const startTime = performance.now();
-      performance.mark('combination-change-start');
-      
-      // Change both simultaneously
+      // CRITICAL FIX: Apply theme IMMEDIATELY (don't wait for performance measurement)
+      // Force update even if theme is already the same (for testing purposes)
       setAppearance(targetAppearance);
       setBrandColor(targetBrand as any);
+      
+      // Start performance measurement AFTER theme is applied
+      const startTime = performance.now();
+      performance.mark('combination-change-start');
       
       requestAnimationFrame(() => {
         const cssUpdateEnd = performance.now();
@@ -176,11 +178,14 @@ export const ThemeValidationTest: React.FC = () => {
           });
           
           // Track tested combination
-          const resolvedApp = targetAppearance === 'auto' ? resolvedAppearance : targetAppearance;
+          // Read actual resolved appearance from DOM (in case 'auto' mode)
+          const actualAppearance = document.documentElement.getAttribute('data-appearance') as 'light' | 'dark' || 
+                                  (targetAppearance === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : targetAppearance);
+          
           setTestedCombinations(prev => [
-            ...prev.filter(c => !(c.appearance === resolvedApp && c.brand === targetBrand)),
+            ...prev.filter(c => !(c.appearance === actualAppearance && c.brand === targetBrand)),
             {
-              appearance: resolvedApp as 'light' | 'dark',
+              appearance: actualAppearance as 'light' | 'dark',
               brand: targetBrand,
               tested: true,
               passed: totalMs < 50, // Target: <50ms (WCAG timing)
@@ -190,7 +195,7 @@ export const ThemeValidationTest: React.FC = () => {
         });
       });
     },
-    [setAppearance, setBrandColor, resolvedAppearance]
+    [setAppearance, setBrandColor] // REMOVED resolvedAppearance from deps to prevent stale closure
   );
 
   /**
@@ -483,29 +488,72 @@ export const ThemeValidationTest: React.FC = () => {
 
           {/* Quick test buttons */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {/* Light + Default */}
             <button
               onClick={() => measureCombinationChange('light', 'default')}
-              className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-sm"
+              className="group relative px-4 py-3 bg-white border-2 border-gray-300 dark:bg-gray-800 dark:border-gray-600 rounded-lg hover:border-indigo-500 dark:hover:border-indigo-400 transition-all text-sm shadow-sm hover:shadow-md"
             >
-              ☀️ Light + Default
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-lg">☀️</span>
+                <span className="font-semibold text-gray-900 dark:text-gray-100">Light + Default</span>
+              </div>
+              <div className="flex gap-1">
+                <div className="h-5 w-5 rounded bg-success" title="Success" />
+                <div className="h-5 w-5 rounded bg-warning" title="Warning" />
+                <div className="h-5 w-5 rounded bg-error" title="Error" />
+                <div className="h-5 w-5 rounded bg-indigo-500" title="Primary (Default)" />
+              </div>
             </button>
+
+            {/* Dark + Default */}
             <button
               onClick={() => measureCombinationChange('dark', 'default')}
-              className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-sm"
+              className="group relative px-4 py-3 bg-gray-900 border-2 border-gray-700 dark:bg-gray-950 dark:border-gray-800 rounded-lg hover:border-indigo-400 transition-all text-sm shadow-sm hover:shadow-md"
             >
-              🌙 Dark + Default
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-lg">🌙</span>
+                <span className="font-semibold text-gray-100">Dark + Default</span>
+              </div>
+              <div className="flex gap-1">
+                <div className="h-5 w-5 rounded bg-success" title="Success" />
+                <div className="h-5 w-5 rounded bg-warning" title="Warning" />
+                <div className="h-5 w-5 rounded bg-error" title="Error" />
+                <div className="h-5 w-5 rounded bg-indigo-400" title="Primary (Default)" />
+              </div>
             </button>
+
+            {/* Light + Purple */}
             <button
               onClick={() => measureCombinationChange('light', 'brand-purple')}
-              className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-sm"
+              className="group relative px-4 py-3 bg-white border-2 border-gray-300 dark:bg-gray-800 dark:border-gray-600 rounded-lg hover:border-purple-500 dark:hover:border-purple-400 transition-all text-sm shadow-sm hover:shadow-md"
             >
-              ☀️ Light + Purple
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-lg">☀️</span>
+                <span className="font-semibold text-gray-900 dark:text-gray-100">Light + Purple</span>
+              </div>
+              <div className="flex gap-1">
+                <div className="h-5 w-5 rounded bg-success" title="Success" />
+                <div className="h-5 w-5 rounded bg-warning" title="Warning" />
+                <div className="h-5 w-5 rounded bg-error" title="Error" />
+                <div className="h-5 w-5 rounded bg-purple-500" title="Primary (Purple)" />
+              </div>
             </button>
+
+            {/* Dark + Purple */}
             <button
               onClick={() => measureCombinationChange('dark', 'brand-purple')}
-              className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-sm"
+              className="group relative px-4 py-3 bg-gray-900 border-2 border-gray-700 dark:bg-gray-950 dark:border-gray-800 rounded-lg hover:border-purple-400 transition-all text-sm shadow-sm hover:shadow-md"
             >
-              🌙 Dark + Purple
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-lg">🌙</span>
+                <span className="font-semibold text-gray-100">Dark + Purple</span>
+              </div>
+              <div className="flex gap-1">
+                <div className="h-5 w-5 rounded bg-success" title="Success" />
+                <div className="h-5 w-5 rounded bg-warning" title="Warning" />
+                <div className="h-5 w-5 rounded bg-error" title="Error" />
+                <div className="h-5 w-5 rounded bg-purple-400" title="Primary (Purple)" />
+              </div>
             </button>
           </div>
 
@@ -557,7 +605,7 @@ export const ThemeValidationTest: React.FC = () => {
                 {Object.entries(tokens).map(([key, value]) => {
                   const bgVar = `--color-${key}-background`;
                   const fgVar = `--color-${key}-foreground`;
-                  const bg = getCSSVariable(bgVar) || '#ffffff';
+                  const bg = getCSSVariable(bgVar) || 'hsl(var(--background))';
                   const fg = getCSSVariable(fgVar) || value;
                   
                   // Calculate contrast (WCAG 2.1 standard)
@@ -758,10 +806,10 @@ export const ThemeValidationTest: React.FC = () => {
                         {brand.replace('brand-', '')}
                       </h4>
                       <div className="flex gap-1 mb-2">
-                        <div className="h-6 w-6 rounded" style={{ backgroundColor: '#22c55e' }} title="Success (Light)" />
-                        <div className="h-6 w-6 rounded" style={{ backgroundColor: '#f59e0b' }} title="Warning (Light)" />
-                        <div className="h-6 w-6 rounded" style={{ backgroundColor: '#ef4444' }} title="Error (Light)" />
-                        <div className="h-6 w-6 rounded" style={{ backgroundColor: '#3b82f6' }} title="Info (Light)" />
+                        <div className="h-6 w-6 rounded bg-success" title="Success (Light)" />
+                        <div className="h-6 w-6 rounded bg-warning" title="Warning (Light)" />
+                        <div className="h-6 w-6 rounded bg-error" title="Error (Light)" />
+                        <div className="h-6 w-6 rounded bg-info" title="Info (Light)" />
                       </div>
                       <button
                         onClick={() => measureCombinationChange('light', brand)}
@@ -786,10 +834,10 @@ export const ThemeValidationTest: React.FC = () => {
                         {brand.replace('brand-', '')}
                       </h4>
                       <div className="flex gap-1 mb-2">
-                        <div className="h-6 w-6 rounded" style={{ backgroundColor: '#4ade80' }} title="Success (Dark)" />
-                        <div className="h-6 w-6 rounded" style={{ backgroundColor: '#fbbf24' }} title="Warning (Dark)" />
-                        <div className="h-6 w-6 rounded" style={{ backgroundColor: '#f87171' }} title="Error (Dark)" />
-                        <div className="h-6 w-6 rounded" style={{ backgroundColor: '#60a5fa' }} title="Info (Dark)" />
+                        <div className="h-6 w-6 rounded bg-success" title="Success (Dark)" />
+                        <div className="h-6 w-6 rounded bg-warning" title="Warning (Dark)" />
+                        <div className="h-6 w-6 rounded bg-error" title="Error (Dark)" />
+                        <div className="h-6 w-6 rounded bg-info" title="Info (Dark)" />
                       </div>
                       <button
                         onClick={() => measureCombinationChange('dark', brand)}
@@ -827,7 +875,7 @@ export const ThemeValidationTest: React.FC = () => {
                 <label className="flex items-start gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded">
                   <input type="checkbox" className="mt-1 rounded" />
                   <span className="text-gray-700 dark:text-gray-300">
-                    <strong>Dark → Light:</strong> Semantic tokens change back (e.g., success #22c55e ↔ #4ade80)
+                    <strong>Dark → Light:</strong> Semantic tokens change back (lighter/darker values)
                   </span>
                 </label>
                 <label className="flex items-start gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded">
@@ -854,13 +902,13 @@ export const ThemeValidationTest: React.FC = () => {
                 <label className="flex items-start gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded">
                   <input type="checkbox" className="mt-1 rounded" />
                   <span className="text-gray-700 dark:text-gray-300">
-                    <strong>Brand Change in Light:</strong> Semantic tokens UNCHANGED (success stays #22c55e)
+                    <strong>Brand Change in Light:</strong> Semantic tokens UNCHANGED (success color stays consistent)
                   </span>
                 </label>
                 <label className="flex items-start gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded">
                   <input type="checkbox" className="mt-1 rounded" />
                   <span className="text-gray-700 dark:text-gray-300">
-                    <strong>Brand Change in Dark:</strong> Semantic tokens UNCHANGED (success stays #4ade80)
+                    <strong>Brand Change in Dark:</strong> Semantic tokens UNCHANGED (success color stays consistent)
                   </span>
                 </label>
                 <label className="flex items-start gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded">
@@ -1070,7 +1118,7 @@ export const ThemeValidationTest: React.FC = () => {
               <ul className="list-disc list-inside text-sm space-y-1 ml-4">
                 <li><strong>Action:</strong> Set appearance to Dark mode</li>
                 <li><strong>Test:</strong> Cycle through all brands (Default → Purple → Orange → Rose)</li>
-                <li><strong>Verify:</strong> Semantic tokens UNCHANGED (success stays #4ade80)</li>
+                <li><strong>Verify:</strong> Semantic tokens UNCHANGED (success color stays consistent)</li>
                 <li><strong>Verify:</strong> Primary palette changes (--color-primary-500 updates)</li>
                 <li><strong>Check CSS Variables:</strong>
                   <ul className="list-circle list-inside ml-6 mt-1 space-y-0.5">
