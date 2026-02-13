@@ -190,6 +190,74 @@ export const darkSemanticVariants: SemanticVariantTokens = {
     infoBorder: 'rgba(59, 130, 246, 0.3)',          // blue-500 @ 30%
 };
 
+/**
+ * High Contrast mode semantic tokens (Light)
+ * Pure black for maximum contrast (21:1 ratio) - WCAG AAA
+ * Applied when: html[data-a11y="highContrast"]
+ *
+ * @constant
+ */
+export const highContrastLightSemanticTokens: SemanticTokens = {
+    success: '#000000',    // Pure black
+    error: '#000000',
+    warning: '#000000',
+    info: '#000000',
+    disabled: '#808080',   // Gray (intentional reduced contrast)
+};
+
+/**
+ * High Contrast mode semantic tokens (Dark)
+ * Pure white for maximum contrast (21:1 ratio) - WCAG AAA
+ * Applied when: html[data-a11y="highContrast"][data-appearance="dark"]
+ *
+ * @constant
+ */
+export const highContrastDarkSemanticTokens: SemanticTokens = {
+    success: '#ffffff',    // Pure white
+    error: '#ffffff',
+    warning: '#ffffff',
+    info: '#ffffff',
+    disabled: '#808080',   // Gray (intentional reduced contrast)
+};
+
+/**
+ * High Contrast light variant tokens
+ * @constant
+ */
+export const highContrastLightVariants: SemanticVariantTokens = {
+    successForeground: '#000000',
+    successBackground: '#f5f5f5',    // Light gray
+    successBorder: '#000000',
+    errorForeground: '#000000',
+    errorBackground: '#f5f5f5',
+    errorBorder: '#000000',
+    warningForeground: '#000000',
+    warningBackground: '#f5f5f5',
+    warningBorder: '#000000',
+    infoForeground: '#000000',
+    infoBackground: '#f5f5f5',
+    infoBorder: '#000000',
+};
+
+/**
+ * High Contrast dark variant tokens
+ * @constant
+ */
+export const highContrastDarkVariants: SemanticVariantTokens = {
+    successForeground: '#ffffff',
+    successBackground: '#1a1a1a',    // Dark gray
+    successBorder: '#ffffff',
+    errorForeground: '#ffffff',
+    errorBackground: '#1a1a1a',
+    errorBorder: '#ffffff',
+    warningForeground: '#ffffff',
+    warningBackground: '#1a1a1a',
+    warningBorder: '#ffffff',
+    infoForeground: '#ffffff',
+    infoBackground: '#1a1a1a',
+    infoBorder: '#ffffff',
+};
+
 // Neutral Gray - Used across all themes
 const neutralGray: ColorPalette = {
     50: '#f9fafb',

@@ -139,8 +139,13 @@ html[data-a11y="highContrast"] {
 /* ========================================
  * DARK MODE — Neutral Surface Token Overrides
  * 
- * Corresponding light defaults are in theme.css → @theme block.
- * Values sourced from Tailwind Gray scale (consistent with neutralGray in palettes.ts).
+ * CRITICAL: These are BUILD-TIME defaults for Tailwind scanning
+ * At RUNTIME, applyThemeTokens() REPLACES with values from palettes.ts
+ * 
+ * Timeline:
+ * 1. Build: Tailwind v4 scans these dark mode values
+ * 2. App loads: applyThemeTokens() OVERWRITES with palettes.ts::darkSemanticTokens
+ * 3. Result: Colors fully dynamic from SSOT (palettes.ts)
  *
  * References:
  * - shadcn/ui theming: https://ui.shadcn.com/docs/theming
@@ -171,8 +176,7 @@ html[data-a11y="highContrast"] {
   --color-overlay: rgba(0, 0, 0, 0.6);
   
   /* ========================================
-   * THEME BUILDER / DEMO TOKENS (same in dark mode)
-   * Used for color preview and demo components
+   * DEMO TOKENS (dark mode)
    * ======================================== */
   --color-demo-light: #ffffff;
   --color-demo-dark: #121212;
@@ -182,17 +186,16 @@ html[data-a11y="highContrast"] {
 
 /* High Contrast mode overrides - WCAG AAA compliance (21:1) */
 html[data-a11y="highContrast"] {
-  /* CRITICAL: Override ALL semantic colors to pure black/white in HC mode */
-  /* This ensures no brand colors (green, purple, blue) appear in high contrast */
-  --color-success: #000000;    /* Pure black */
-  --color-error: #000000;      /* Pure black */
-  --color-warning: #000000;    /* Pure black */
-  --color-info: #000000;       /* Pure black */
-  --color-disabled: #808080;   /* Gray (intentional reduced contrast) */
-  
-  /* CRITICAL FIX: Override Tailwind hard-coded color classes */
-  /* Components use text-green-600, text-purple-700, etc. which bypass CSS variables */
-  /* Force ALL brand colors to pure black for 21:1 contrast */
+  /* 
+   * High Contrast color overrides automatically applied from:
+   * src/constants/palettes.ts → highContrastLightSemanticTokens
+   * 
+   * All semantic colors override to pure black/white for 21:1 contrast ratio.
+   * This is the SSOT (Single Source of Truth) for all color definitions.
+   * 
+   * Override Tailwind hard-coded color utilities (text-green-*, bg-*, etc.)
+   * which bypass CSS variables - force them to pure black for accessibility
+   */
 }
 
 /* Override Tailwind color utilities in light HC mode */
@@ -273,13 +276,8 @@ html[data-a11y="highContrast"][data-appearance="dark"] {
   --color-border-primary: #ffffff;
   --color-link: #66b3ff; /* Light blue for dark backgrounds */
   
-  /* CRITICAL: Override ALL semantic colors to pure white in dark HC mode */
-  /* This ensures 21:1 contrast - NO brand colors allowed */
-  --color-success: #ffffff;    /* Pure white (was green) */
-  --color-error: #ffffff;      /* Pure white (was red) */
-  --color-warning: #ffffff;    /* Pure white (was amber) */
-  --color-info: #ffffff;       /* Pure white (was blue) */
-  --color-disabled: #808080;   /* Gray (intentional reduced contrast) */
+  /* Semantic colors in dark HC mode handled by generated-themes.css */
+  /* High contrast overrides auto-applied from palettes.ts SSOT */
 }
 
 /* Override Tailwind color utilities in dark HC mode */
@@ -603,18 +601,38 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
     @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    @apply bg-success-background text-success-foreground hover:bg-success-background/90;
+    background-color: var(--color-success-background);
+    color: var(--color-success-foreground);
     @apply focus-visible:ring-ring;
-    @apply dark:bg-success-background dark:hover:bg-success-background/80;
+    transition: all 150ms;
+  }
+  
+  .btn-success:hover {
+    background-color: rgba(var(--color-success-background-rgb, 34 197 126), 0.9);
+  }
+  
+  .dark .btn-success:hover,
+  :root[data-appearance="dark"] .btn-success:hover {
+    background-color: rgba(var(--color-success-background-rgb, 34 197 126), 0.8);
   }
 
   .btn-warning {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
     @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    @apply bg-warning-background text-warning-foreground hover:bg-warning-background/90;
+    background-color: var(--color-warning-background);
+    color: var(--color-warning-foreground);
     @apply focus-visible:ring-ring;
-    @apply dark:bg-warning-background dark:hover:bg-warning-background/80;
+    transition: all 150ms;
+  }
+  
+  .btn-warning:hover {
+    background-color: rgba(var(--color-warning-background-rgb, 245 158 11), 0.9);
+  }
+  
+  .dark .btn-warning:hover,
+  :root[data-appearance="dark"] .btn-warning:hover {
+    background-color: rgba(var(--color-warning-background-rgb, 245 158 11), 0.8);
   }
 
   /* Outline button variants */
@@ -631,18 +649,40 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
     @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    @apply bg-error-background text-error-foreground hover:bg-secondary;
+    background-color: var(--color-error-background);
+    color: var(--color-error-foreground);
     @apply focus-visible:ring-ring;
-    @apply dark:bg-error-background dark:text-error-foreground dark:hover:bg-secondary;
+    transition: all 150ms;
+  }
+  
+  .btn-outline-danger:hover {
+    @apply hover:bg-secondary;
+  }
+  
+  .dark .btn-outline-danger,
+  :root[data-appearance="dark"] .btn-outline-danger {
+    background-color: var(--color-error-background);
+    color: var(--color-error-foreground);
   }
 
   .btn-outline-success {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
     @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    @apply bg-success-background text-success-foreground hover:bg-secondary;
+    background-color: var(--color-success-background);
+    color: var(--color-success-foreground);
     @apply focus-visible:ring-ring;
-    @apply dark:bg-success-background dark:text-success-foreground dark:hover:bg-secondary;
+    transition: all 150ms;
+  }
+  
+  .btn-outline-success:hover {
+    @apply hover:bg-secondary;
+  }
+  
+  .dark .btn-outline-success,
+  :root[data-appearance="dark"] .btn-outline-success {
+    background-color: var(--color-success-background);
+    color: var(--color-success-foreground);
   }
   
   /* Input base styles following Material Design 3 */

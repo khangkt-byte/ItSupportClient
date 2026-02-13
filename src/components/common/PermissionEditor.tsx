@@ -382,7 +382,7 @@ export function PermissionEditor({
                         toggleSelectAllInGroup(group);
                       }}
                       disabled={readOnly}
-                      className={`px-3 py-1 text-xs font-medium rounded-md border border-success-border text-success-foreground transition-colors ${
+                      className={`px-3 py-1 text-xs font-medium rounded-md  border border-success-border text-success-foreground transition-colors ${
                         readOnly ? 'opacity-60 cursor-not-allowed' : 'hover:bg-success-background cursor-pointer'
                       }`}
                     >
@@ -410,7 +410,7 @@ export function PermissionEditor({
                             key={claim.claimId}
                             className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors w-full justify-start ${
                               isDirectlySelected
-                                ? 'bg-success-background text-success-foreground'
+                                ? 'bg-success-backgrouund text-successuccess-foreground'
                                 : isInherited
                                 ? 'bg-info-background text-info-foreground'
                                 : 'text-muted-foreground hover:bg-accent'
@@ -443,7 +443,7 @@ export function PermissionEditor({
       </div>
 
       {/* Effective Permissions Summary */}
-      <div className="bg-linear-to-r from-primary-50 to-green-50 border border-primary-200 rounded-lg p-4">
+      <div className="bg-card border border-border rounded-lg p-4">
         <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2 text-sm">
           <CheckCircle className="w-5 h-5 text-primary-600" />
           Effective Permissions ({effectivePermissions.permissions.length} total)

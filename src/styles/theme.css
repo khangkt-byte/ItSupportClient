@@ -22,20 +22,17 @@
   /* ========================================
    * NEUTRAL SURFACE TOKENS
    * 
-   * Following shadcn/ui + Material Design 3 conventions:
-   * @see https://ui.shadcn.com/docs/theming
-   * @see https://m3.material.io/styles/color/roles
-   * @see https://carbondesignsystem.com/guidelines/color/tokens
-   *
-   * Light-mode defaults. Dark overrides in index.css via
-   * :root[data-appearance="dark"] selector.
-   *
-   * These tokens are STATIC across all brand themes (purple, red, blue, etc.)
-   * since neutral/surface colors don't change per brand — only primary does.
-   *
-   * Naming convention (shadcn/ui):
-   *   --color-{role}: background color
-   *   --color-{role}-foreground: text color on that background
+   * CRITICAL: These values are TEMPORARY for Tailwind build scanning.
+   * At RUNTIME, they are REPLACED by applyThemeTokens() from palettes.ts
+   * 
+   * SSOT: src/constants/palettes.ts is the ACTUAL source
+   * Build-time: Tailwind scans these @theme values to generate utilities
+   * Runtime: applyThemeTokens() OVERWRITES with fresh palettes.ts values
+   * 
+   * This ensures:
+   * 1. Build completes (Tailwind has color values to scan)
+   * 2. Colors are dynamic (runtime values from palettes.ts, not CSS)
+   * 3. Changes to palettes.ts work without rebuild
    * ======================================== */
   --color-background: #ffffff;
   --color-foreground: #111827;
@@ -60,38 +57,49 @@
   --color-overlay: rgba(0, 0, 0, 0.5);
 
   /* ========================================
-   * SEMANTIC STATUS TOKENS (foreground/background/border)
+   * SEMANTIC STATUS TOKENS
    * 
-   * SSOT: src/constants/palettes.ts → lightSemanticVariants
-   * Runtime override: src/utils/themeTokens.ts → applyThemeTokens()
+   * IMPORTANT: These BUILD-TIME values are OVERWRITTEN at RUNTIME
+   * by applyThemeTokens() which reads from palettes.ts:
+   * - defaultSemanticTokens (light)
+   * - darkSemanticTokens (dark)
+   * - lightSemanticVariants
+   * - darkSemanticVariants
    * 
-   * These values MUST match lightSemanticVariants in palettes.ts.
-   * They are declared here for Tailwind v4 utility class registration
-   * (e.g., bg-success-background, text-error-foreground).
-   * At runtime, applyThemeTokens() overrides these for dark mode.
+   * Timeline:
+   * 1. Build: Tailwind scans these values, generates utilities
+   * 2. App loads: applyThemeTokens() REPLACES with palettes.ts values
+   * 3. Result: All colors come from palettes.ts, fully dynamic
    * 
-   * When changing these values, ALWAYS update palettes.ts first,
-   * then sync here AND run: npm run generate:themes
+   * DO NOT edit hex values here manually.
+   * Edit src/constants/palettes.ts instead.
+   * 
+   * @see src/utils/themeTokens.ts - applyThemeTokens() applies values
+   * @see src/constants/palettes.ts - SSOT definitions
    * ======================================== */
+  /* Base semantic tokens - Light mode (build-time defaults) */
+  --color-success: #22c55e;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+  --color-disabled: #6b7280;
+  
+  /* Semantic variants - Light mode (build-time defaults) */
   --color-success-foreground: #166534;
   --color-success-background: #f0fdf4;
   --color-success-border: #bbf7d0;
-  
-  --color-warning-foreground: #92400e;
-  --color-warning-background: #fffbeb;
-  --color-warning-border: #fde68a;
-  
   --color-error-foreground: #991b1b;
   --color-error-background: #fef2f2;
   --color-error-border: #fecaca;
-  
+  --color-warning-foreground: #92400e;
+  --color-warning-background: #fffbeb;
+  --color-warning-border: #fde68a;
   --color-info-foreground: #1e40af;
   --color-info-background: #eff6ff;
   --color-info-border: #bfdbfe;
   
   /* ========================================
-   * THEME BUILDER / DEMO TOKENS
-   * Used for color preview and demo components (non-production UI)
+   * DEMO TOKENS
    * ======================================== */
   --color-demo-light: #ffffff;
   --color-demo-dark: #121212;
