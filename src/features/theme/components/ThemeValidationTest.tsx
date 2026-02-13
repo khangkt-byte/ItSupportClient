@@ -169,6 +169,7 @@ export const ThemeValidationTest: React.FC = () => {
             </p>
             <button
               onClick={() => setAccessibilityMode(accessibilityMode === 'default' ? 'highContrast' : 'default')}
+              // TODO: Hard-coded colors intentional - test/validation component (non-production)
               className="mt-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm"
             >
               Toggle High Contrast
@@ -277,6 +278,7 @@ export const ThemeValidationTest: React.FC = () => {
                         className="h-20 rounded-lg border border-gray-300 dark:border-gray-600 flex items-center justify-center"
                         style={{ backgroundColor: value }}
                       >
+                        {/* TODO: Hard-coded text-white intentional - test/validation component (non-production) */}
                         <span className="text-white text-xs font-mono drop-shadow">
                           {value}
                         </span>
@@ -375,6 +377,7 @@ export const ThemeValidationTest: React.FC = () => {
               🖼️ Visual Comparison (All Themes)
             </h2>
             <button
+              // TODO: Hard-coded colors intentional - test/validation component (non-production)
               onClick={() => setShowAllThemes(!showAllThemes)}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm"
             >

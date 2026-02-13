@@ -12,7 +12,7 @@
  * 3. Commit both palettes.ts and this generated file
  * 
  * Generation info:
- * - Generated: 2026-02-12T10:10:24.730Z
+ * - Generated: 2026-02-13T02:29:34.731Z
  * - Themes: 10
  * - Source: scripts/generateThemeCSS.js
  * 
@@ -50,9 +50,10 @@
 /* ========================================
  * DARK MODE SEMANTIC TOKENS
  * Source: palettes.ts → darkSemanticTokens + darkSemanticVariants
+ * Uses data-appearance attribute for combinatorial theming
  * ======================================== */
 
-:root[data-theme="dark"] {
+:root[data-appearance="dark"] {
   --color-success: #4ade80;
   --color-error: #f87171;
   --color-warning: #fbbf24;
@@ -77,7 +78,7 @@
  * Each theme defines 11 primary color tones
  * ======================================== */
 
-:root[data-theme="brand-purple"] {
+:root[data-brand="brand-purple"] {
   --color-primary-50: #f5f3ff;
   --color-primary-100: #ede9fe;
   --color-primary-200: #ddd6fe;
@@ -91,7 +92,7 @@
   --color-primary-950: #1e1b4b;
 }
 
-:root[data-theme="brand-red"] {
+:root[data-brand="brand-red"] {
   --color-primary-50: #fef2f2;
   --color-primary-100: #fee2e2;
   --color-primary-200: #fecaca;
@@ -105,7 +106,7 @@
   --color-primary-950: #450a0a;
 }
 
-:root[data-theme="brand-blue"] {
+:root[data-brand="brand-blue"] {
   --color-primary-50: #eff6ff;
   --color-primary-100: #dbeafe;
   --color-primary-200: #bfdbfe;
@@ -119,7 +120,7 @@
   --color-primary-950: #172554;
 }
 
-:root[data-theme="brand-green"] {
+:root[data-brand="brand-green"] {
   --color-primary-50: #f0fdf4;
   --color-primary-100: #dcfce7;
   --color-primary-200: #bbf7d0;
@@ -133,7 +134,7 @@
   --color-primary-950: #0a3622;
 }
 
-:root[data-theme="brand-orange"] {
+:root[data-brand="brand-orange"] {
   --color-primary-50: #fff7ed;
   --color-primary-100: #fed7aa;
   --color-primary-200: #fdba74;
@@ -147,7 +148,7 @@
   --color-primary-950: #2c0f04;
 }
 
-:root[data-theme="brand-teal"] {
+:root[data-brand="brand-teal"] {
   --color-primary-50: #f0fdfa;
   --color-primary-100: #ccfbf1;
   --color-primary-200: #99f6e4;
@@ -161,7 +162,7 @@
   --color-primary-950: #0d3331;
 }
 
-:root[data-theme="brand-indigo"] {
+:root[data-brand="brand-indigo"] {
   --color-primary-50: #eef2ff;
   --color-primary-100: #e0e7ff;
   --color-primary-200: #c7d2fe;
@@ -175,7 +176,7 @@
   --color-primary-950: #1e1b4b;
 }
 
-:root[data-theme="brand-violet"] {
+:root[data-brand="brand-violet"] {
   --color-primary-50: #faf5ff;
   --color-primary-100: #f3e8ff;
   --color-primary-200: #e9d5ff;
@@ -189,7 +190,7 @@
   --color-primary-950: #3f0f5c;
 }
 
-:root[data-theme="brand-pink"] {
+:root[data-brand="brand-pink"] {
   --color-primary-50: #fdf2f8;
   --color-primary-100: #fce7f3;
   --color-primary-200: #fbcfe8;
@@ -203,7 +204,7 @@
   --color-primary-950: #500724;
 }
 
-:root[data-theme="brand-cyan"] {
+:root[data-brand="brand-cyan"] {
   --color-primary-50: #ecf8ff;
   --color-primary-100: #d9f0ff;
   --color-primary-200: #b3e0ff;

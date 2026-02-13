@@ -43,7 +43,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         <div className="bg-card rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-primary-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <FileText className="w-10 h-10 text-white" />
+              <FileText className="w-10 h-10 text-primary-foreground" />
             </div>
             <h1 className="text-2xl font-bold text-foreground">IT Support System</h1>
             <p className="text-muted-foreground mt-2">Sign in to access your account</p>
@@ -91,14 +91,14 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="p-3 bg-error-background border border-error-border rounded-lg">
                 <p className="text-sm text-error-foreground">{error}</p>
               </div>
             )}
 
             <button
               type="submit"
-              className="w-full bg-primary-600 text-white py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+              className="w-full bg-primary-600 text-primary-foreground py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
               disabled={isLoading}
             >
               {isLoading ? 'Signing In...' : 'Sign In'}

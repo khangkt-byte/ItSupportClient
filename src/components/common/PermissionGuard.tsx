@@ -151,10 +151,10 @@ export function AdminOnly({
  */
 export function ForbiddenMessage() {
   return (
-    <div className="p-8 text-center bg-red-50 dark:bg-red-950 border border-red-300 dark:border-red-700 rounded-lg text-red-600 dark:text-red-400">
+    <div className="p-8 text-center bg-error-background border border-error-border rounded-lg text-error-foreground">
       <h3 className="mt-0 font-semibold text-lg">⛔ Access Denied</h3>
       <p className="mb-0">You don't have permission to access this resource.</p>
-      <p className="text-sm text-red-800 dark:text-red-300 mt-2 mb-0">
+      <p className="text-sm text-error-foreground mt-2 mb-0">
         Contact your administrator if you believe this is an error.
       </p>
     </div>

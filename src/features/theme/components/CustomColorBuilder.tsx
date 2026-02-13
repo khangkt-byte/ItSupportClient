@@ -104,9 +104,9 @@ export function CustomColorBuilder() {
                     {showCopy && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 rounded-lg transition-colors">
                             {isCopied ? (
-                                <Check className="w-5 h-5 text-white" />
+                                <Check className="w-5 h-5 text-primary-foreground" />
                             ) : (
-                                <Copy className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <Copy className="w-5 h-5 text-primary-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                             )}
                         </div>
                     )}
@@ -192,7 +192,7 @@ export function CustomColorBuilder() {
                             <Input
                                 value={baseColor}
                                 onChange={(e) => setBaseColor(e.target.value)}
-                                placeholder="#2563eb"
+                                placeholder="var(--color-demo-primary)"
                                 className="flex-1"
                             />
                         </div>
@@ -215,7 +215,7 @@ export function CustomColorBuilder() {
                             <Input
                                 value={lightBg}
                                 onChange={(e) => setLightBg(e.target.value)}
-                                placeholder="#ffffff"
+                                placeholder="var(--color-demo-light)"
                                 className="flex-1"
                             />
                         </div>
@@ -235,7 +235,7 @@ export function CustomColorBuilder() {
                             <Input
                                 value={darkBg}
                                 onChange={(e) => setDarkBg(e.target.value)}
-                                placeholder="#1f2937"
+                                placeholder="var(--color-demo-grey)"
                                 className="flex-1"
                             />
                         </div>

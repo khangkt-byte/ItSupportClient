@@ -115,14 +115,14 @@ export function AdminRoute({
 export function UnauthorizedFallback() {
   return (
     <div className="flex items-center justify-center min-h-100 p-8">
-      <div className="bg-red-50 dark:bg-red-950 border border-red-300 dark:border-red-700 rounded-lg max-w-125 p-8 text-center">
-        <h2 className="text-red-600 dark:text-red-400 text-2xl font-semibold mt-0 mb-3">
+      <div className="bg-error-background border border-error-border rounded-lg max-w-125 p-8 text-center">
+        <h2 className="text-error-foreground text-2xl font-semibold mt-0 mb-3">
           🔒 Access Denied
         </h2>
-        <p className="text-red-900 dark:text-red-300 mb-0">
+        <p className="text-error-foreground mb-0">
           You don't have permission to access this page.
         </p>
-        <p className="text-sm text-red-800 dark:text-red-400 mt-4 mb-0">
+        <p className="text-sm text-error-foreground mt-4 mb-0">
           Please contact your administrator if you believe this is an error.
         </p>
       </div>

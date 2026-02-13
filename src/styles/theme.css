@@ -28,7 +28,7 @@
    * @see https://carbondesignsystem.com/guidelines/color/tokens
    *
    * Light-mode defaults. Dark overrides in index.css via
-   * :root[data-theme="dark"] selector.
+   * :root[data-appearance="dark"] selector.
    *
    * These tokens are STATIC across all brand themes (purple, red, blue, etc.)
    * since neutral/surface colors don't change per brand — only primary does.
@@ -49,8 +49,10 @@
   --color-accent-foreground: #111827;
   --color-secondary: #f3f4f6;
   --color-secondary-foreground: #111827;
+  --color-primary-foreground: #ffffff;
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
+  --color-inverse-foreground: #ffffff;
   --color-border: #e5e7eb;
   --color-input: #d1d5db;
   --color-ring: #6b7280;
@@ -86,6 +88,15 @@
   --color-info-foreground: #1e40af;
   --color-info-background: #eff6ff;
   --color-info-border: #bfdbfe;
+  
+  /* ========================================
+   * THEME BUILDER / DEMO TOKENS
+   * Used for color preview and demo components (non-production UI)
+   * ======================================== */
+  --color-demo-light: #ffffff;
+  --color-demo-dark: #121212;
+  --color-demo-primary: #2563eb;
+  --color-demo-grey: #1f2937;
   
   /* ========================================
    * TYPOGRAPHY
@@ -164,8 +175,8 @@
 /* ========================================
  * DARK MODE OVERRIDES
  * Dark mode semantic tokens are defined in index.css
- * via :root[data-theme="dark"] and :root[data-theme*="dark"]
- * selectors for multi-theme runtime support.
+ * via :root[data-appearance="dark"] selector for
+ * combinatorial theming (appearance + brand independent).
  *
  * DO NOT define dark overrides here — they would conflict
  * with the more specific selectors in index.css.

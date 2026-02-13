@@ -76,7 +76,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
           <div className="flex items-center gap-3">
             <span 
               className={`material-symbols-rounded block object-contain rounded-full transition-opacity ${prefersReducedMotion ? 'duration-0' : 'duration-400'} ${collapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-              style={{ color: 'var(--color-primary-500)', fontSize: '46px', width: '46px', height: '46px' }}
+              style={{ color: 'var(--sidebar-color-logo)', fontSize: '46px', width: '46px', height: '46px' }}
             >
               headset_mic
             </span>
@@ -102,7 +102,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
                 <li key={item.id}>
                   <button
                     onClick={() => onNavigate(item.id)}
-                    className={`flex gap-3 whitespace-nowrap rounded-lg py-3 px-3.75 items-center no-underline transition-all duration-300 border-none bg-none w-full ${isActive ? 'text-white bg-(--sidebar-color-hover-primary)' : 'text-(--sidebar-color-text-primary) hover:text-white hover:bg-(--sidebar-color-hover-primary)'}`}
+                    className={`flex gap-3 whitespace-nowrap rounded-lg py-3 px-3.75 items-center no-underline transition-all duration-300 border-none bg-none w-full ${isActive ? 'text-primary-foreground bg-(--sidebar-color-hover-primary)' : 'text-(--sidebar-color-text-primary) hover:text-primary-foreground hover:bg-(--sidebar-color-hover-primary)'}`}
                   >
                     <span className="material-symbols-rounded">{item.icon}</span>
                     <span className={`transition-opacity duration-300 ${collapsed ? 'opacity-0 pointer-events-none absolute w-0 overflow-hidden' : 'opacity-100'}`}>{item.label}</span>
@@ -140,7 +140,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
                 onClick={() => setAccessibilityMode('default')}
                 className={`w-full px-3 py-2 rounded text-sm font-medium transition-all text-left ${
                   accessibilityMode === 'default'
-                    ? 'bg-primary-600 text-white'
+                    ? 'bg-primary-600 text-primary-foreground'
                     : 'bg-secondary text-foreground hover:bg-secondary/80'
                 }`}
               >
@@ -150,7 +150,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
                 onClick={() => setAccessibilityMode('highContrast')}
                 className={`w-full px-3 py-2 rounded text-sm font-medium transition-all text-left ${
                   accessibilityMode === 'highContrast'
-                    ? 'bg-primary-600 text-white'
+                    ? 'bg-primary-600 text-primary-foreground'
                     : 'bg-secondary text-foreground hover:bg-secondary/80'
                 }`}
               >

@@ -49,13 +49,13 @@ export function ConfirmDialog({
   const getButtonClass = () => {
     switch (action) {
       case 'delete':
-        return 'bg-red-600 dark:bg-red-600 hover:bg-red-700 dark:hover:bg-red-700';
+        return 'bg-destructive dark:bg-destructive hover:bg-destructive/90 dark:hover:bg-destructive/90';
       case 'lock':
         return 'bg-orange-600 dark:bg-orange-600 hover:bg-orange-700 dark:hover:bg-orange-700';
       case 'unlock':
         return 'bg-green-600 dark:bg-green-600 hover:bg-green-700 dark:hover:bg-green-700';
       case 'logout':
-        return 'bg-red-600 dark:bg-red-600 hover:bg-red-700 dark:hover:bg-red-700';
+        return 'bg-destructive dark:bg-destructive hover:bg-destructive/90 dark:hover:bg-destructive/90';
       default:
         return 'bg-primary-600 dark:bg-primary-600 hover:bg-primary-700 dark:hover:bg-primary-700';
     }
@@ -111,7 +111,7 @@ export function ConfirmDialog({
           </button>
           <button
             onClick={onConfirm}
-            className={`flex-1 px-4 py-2 rounded-lg text-white cursor-pointer transition-colors ${getButtonClass()}`}
+            className={`flex-1 px-4 py-2 rounded-lg text-destructive-foreground cursor-pointer transition-colors ${getButtonClass()}`}
           >
             {getConfirmLabel()}
           </button>

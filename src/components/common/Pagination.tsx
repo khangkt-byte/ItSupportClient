@@ -103,7 +103,7 @@ export function Pagination({
                   onClick={() => onPageChange(page as number)}
                   className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ring-1 ring-inset ring-ring hover:bg-accent focus:z-20 focus:outline-offset-0 ${
                     currentPage === page
-                      ? 'z-10 bg-primary-600 text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600'
+                      ? 'z-10 bg-primary-600 text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600'
                       : 'text-foreground'
                   }`}
                 >

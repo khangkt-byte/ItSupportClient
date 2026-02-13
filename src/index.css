@@ -18,7 +18,7 @@
 @import "tailwindcss";
 @import "./styles/theme.css";
 
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@custom-variant dark (&:where([data-appearance="dark"], [data-appearance="dark"] *));
 
 /**
  * Theme Transition Support
@@ -138,7 +138,7 @@ html[data-a11y="highContrast"] {
  * - Material Design 3 dark theme: https://m3.material.io/styles/color/dark-theme
  * - Tailwind dark mode: https://tailwindcss.com/docs/dark-mode
  * ======================================== */
-:root[data-theme="dark"] {
+:root[data-appearance="dark"] {
   --color-background: #111827;
   --color-foreground: #f9fafb;
   --color-card: #1f2937;
@@ -151,13 +151,24 @@ html[data-a11y="highContrast"] {
   --color-accent-foreground: #f9fafb;
   --color-secondary: #374151;
   --color-secondary-foreground: #f9fafb;
+  --color-primary-foreground: #ffffff;
   --color-destructive: #f87171;
   --color-destructive-foreground: #ffffff;
+  --color-inverse-foreground: #ffffff;
   --color-border: #374151;
   --color-input: #4b5563;
   --color-ring: #6b7280;
   --color-placeholder: #6b7280;
   --color-overlay: rgba(0, 0, 0, 0.6);
+  
+  /* ========================================
+   * THEME BUILDER / DEMO TOKENS (same in dark mode)
+   * Used for color preview and demo components
+   * ======================================== */
+  --color-demo-light: #ffffff;
+  --color-demo-dark: #121212;
+  --color-demo-primary: #2563eb;
+  --color-demo-grey: #1f2937;
 }
 
 /* High Contrast mode overrides - WCAG AAA compliance (21:1) */
@@ -243,7 +254,7 @@ html[data-a11y="highContrast"] .hover\:text-purple-600:hover {
 }
 
 /* Dark mode high contrast variant */
-html[data-a11y="highContrast"][data-theme*="dark"] {
+html[data-a11y="highContrast"][data-appearance="dark"] {
   /* Invert for dark backgrounds */
   --color-text-primary: #ffffff;
   --color-text-secondary: #cccccc;
@@ -263,74 +274,74 @@ html[data-a11y="highContrast"][data-theme*="dark"] {
 }
 
 /* Override Tailwind color utilities in dark HC mode */
-html[data-a11y="highContrast"][data-theme*="dark"] .text-green-400,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-green-500,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-green-600,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-green-700,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-blue-400,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-blue-500,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-blue-600,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-blue-700,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-purple-400,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-purple-500,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-purple-600,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-purple-700,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-red-400,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-red-500,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-red-600,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-red-700,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-amber-400,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-amber-500,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-amber-600,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-amber-700,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-cyan-400,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-cyan-500,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-cyan-600,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-cyan-700,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-indigo-400,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-indigo-500,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-indigo-600,
-html[data-a11y="highContrast"][data-theme*="dark"] .text-indigo-700 {
+html[data-a11y="highContrast"][data-appearance="dark"] .text-green-400,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-green-500,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-green-600,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-green-700,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-blue-400,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-blue-500,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-blue-600,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-blue-700,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-purple-400,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-purple-500,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-purple-600,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-purple-700,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-red-400,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-red-500,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-red-600,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-red-700,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-amber-400,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-amber-500,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-amber-600,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-amber-700,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-cyan-400,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-cyan-500,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-cyan-600,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-cyan-700,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-indigo-400,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-indigo-500,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-indigo-600,
+html[data-a11y="highContrast"][data-appearance="dark"] .text-indigo-700 {
   color: #ffffff !important;
 }
 
-html[data-a11y="highContrast"][data-theme*="dark"] .bg-green-50,
-html[data-a11y="highContrast"][data-theme*="dark"] .bg-green-100,
-html[data-a11y="highContrast"][data-theme*="dark"] .bg-green-600,
-html[data-a11y="highContrast"][data-theme*="dark"] .bg-green-700,
-html[data-a11y="highContrast"][data-theme*="dark"] .bg-green-900,
-html[data-a11y="highContrast"][data-theme*="dark"] .bg-blue-50,
-html[data-a11y="highContrast"][data-theme*="dark"] .bg-blue-100,
-html[data-a11y="highContrast"][data-theme*="dark"] .bg-purple-50,
-html[data-a11y="highContrast"][data-theme*="dark"] .bg-purple-100,
-html[data-a11y="highContrast"][data-theme*="dark"] .bg-red-50,
-html[data-a11y="highContrast"][data-theme*="dark"] .bg-red-100,
-html[data-a11y="highContrast"][data-theme*="dark"] .bg-amber-50,
-html[data-a11y="highContrast"][data-theme*="dark"] .bg-amber-100 {
+html[data-a11y="highContrast"][data-appearance="dark"] .bg-green-50,
+html[data-a11y="highContrast"][data-appearance="dark"] .bg-green-100,
+html[data-a11y="highContrast"][data-appearance="dark"] .bg-green-600,
+html[data-a11y="highContrast"][data-appearance="dark"] .bg-green-700,
+html[data-a11y="highContrast"][data-appearance="dark"] .bg-green-900,
+html[data-a11y="highContrast"][data-appearance="dark"] .bg-blue-50,
+html[data-a11y="highContrast"][data-appearance="dark"] .bg-blue-100,
+html[data-a11y="highContrast"][data-appearance="dark"] .bg-purple-50,
+html[data-a11y="highContrast"][data-appearance="dark"] .bg-purple-100,
+html[data-a11y="highContrast"][data-appearance="dark"] .bg-red-50,
+html[data-a11y="highContrast"][data-appearance="dark"] .bg-red-100,
+html[data-a11y="highContrast"][data-appearance="dark"] .bg-amber-50,
+html[data-a11y="highContrast"][data-appearance="dark"] .bg-amber-100 {
   background-color: #000000 !important;
 }
 
-html[data-a11y="highContrast"][data-theme*="dark"] .border-green-200,
-html[data-a11y="highContrast"][data-theme*="dark"] .border-green-800,
-html[data-a11y="highContrast"][data-theme*="dark"] .border-blue-200,
-html[data-a11y="highContrast"][data-theme*="dark"] .border-blue-800,
-html[data-a11y="highContrast"][data-theme*="dark"] .border-purple-200,
-html[data-a11y="highContrast"][data-theme*="dark"] .border-purple-800,
-html[data-a11y="highContrast"][data-theme*="dark"] .border-red-200,
-html[data-a11y="highContrast"][data-theme*="dark"] .border-red-800 {
+html[data-a11y="highContrast"][data-appearance="dark"] .border-green-200,
+html[data-a11y="highContrast"][data-appearance="dark"] .border-green-800,
+html[data-a11y="highContrast"][data-appearance="dark"] .border-blue-200,
+html[data-a11y="highContrast"][data-appearance="dark"] .border-blue-800,
+html[data-a11y="highContrast"][data-appearance="dark"] .border-purple-200,
+html[data-a11y="highContrast"][data-appearance="dark"] .border-purple-800,
+html[data-a11y="highContrast"][data-appearance="dark"] .border-red-200,
+html[data-a11y="highContrast"][data-appearance="dark"] .border-red-800 {
   border-color: #ffffff !important;
 }
 
 /* Override hover states in dark HC mode */
-html[data-a11y="highContrast"][data-theme*="dark"] .hover\:bg-green-700:hover,
-html[data-a11y="highContrast"][data-theme*="dark"] .hover\:bg-blue-700:hover,
-html[data-a11y="highContrast"][data-theme*="dark"] .hover\:bg-purple-700:hover {
+html[data-a11y="highContrast"][data-appearance="dark"] .hover\:bg-green-700:hover,
+html[data-a11y="highContrast"][data-appearance="dark"] .hover\:bg-blue-700:hover,
+html[data-a11y="highContrast"][data-appearance="dark"] .hover\:bg-purple-700:hover {
   background-color: #1a1a1a !important; /* Dark gray for hover feedback */
 }
 
-html[data-a11y="highContrast"][data-theme*="dark"] .hover\:text-green-400:hover,
-html[data-a11y="highContrast"][data-theme*="dark"] .hover\:text-blue-400:hover,
-html[data-a11y="highContrast"][data-theme*="dark"] .hover\:text-purple-400:hover {
+html[data-a11y="highContrast"][data-appearance="dark"] .hover\:text-green-400:hover,
+html[data-a11y="highContrast"][data-appearance="dark"] .hover\:text-blue-400:hover,
+html[data-a11y="highContrast"][data-appearance="dark"] .hover\:text-purple-400:hover {
   color: #ffffff !important;
 }
 
@@ -395,7 +406,7 @@ html[data-a11y="highContrast"][data-theme*="dark"] .hover\:text-purple-400:hover
   color-scheme: light;
 }
 
-:root[data-theme="dark"] {
+:root[data-appearance="dark"] {
   color-scheme: dark;
 }
 
@@ -565,36 +576,36 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
     @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    @apply bg-gray-100 text-gray-900 hover:bg-gray-200;
-    @apply focus-visible:ring-gray-500;
-    @apply dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600;
+    @apply bg-muted text-foreground hover:bg-accent;
+    @apply focus-visible:ring-ring;
+    @apply dark:bg-muted dark:text-foreground dark:hover:bg-accent;
   }
   
   .btn-danger {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
     @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    @apply bg-red-600 text-white hover:bg-red-700;
-    @apply focus-visible:ring-red-500;
-    @apply dark:bg-red-500 dark:hover:bg-red-600;
+    @apply bg-destructive text-destructive-foreground hover:bg-destructive/90;
+    @apply focus-visible:ring-ring;
+    @apply dark:bg-destructive dark:hover:bg-destructive/80;
   }
 
   .btn-success {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
     @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    @apply bg-green-600 text-white hover:bg-green-700;
-    @apply focus-visible:ring-green-500;
-    @apply dark:bg-green-500 dark:hover:bg-green-600;
+    @apply bg-success-background text-success-foreground hover:bg-success-background/90;
+    @apply focus-visible:ring-ring;
+    @apply dark:bg-success-background dark:hover:bg-success-background/80;
   }
 
   .btn-warning {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
     @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    @apply bg-orange-600 text-white hover:bg-orange-700;
-    @apply focus-visible:ring-orange-500;
-    @apply dark:bg-orange-500 dark:hover:bg-orange-600;
+    @apply bg-warning-background text-warning-foreground hover:bg-warning-background/90;
+    @apply focus-visible:ring-ring;
+    @apply dark:bg-warning-background dark:hover:bg-warning-background/80;
   }
 
   /* Outline button variants */
@@ -602,44 +613,44 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
     @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    @apply bg-primary-50 text-primary-600 hover:bg-primary-100;
-    @apply focus-visible:ring-primary-400;
-    @apply dark:bg-primary-900/20 dark:text-primary-400 dark:hover:bg-primary-900/30;
+    @apply bg-accent text-foreground hover:bg-secondary;
+    @apply focus-visible:ring-ring;
+    @apply dark:bg-accent dark:text-foreground dark:hover:bg-secondary;
   }
 
   .btn-outline-danger {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
     @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    @apply bg-red-50 text-red-600 hover:bg-red-100;
-    @apply focus-visible:ring-red-400;
-    @apply dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30;
+    @apply bg-error-background text-error-foreground hover:bg-secondary;
+    @apply focus-visible:ring-ring;
+    @apply dark:bg-error-background dark:text-error-foreground dark:hover:bg-secondary;
   }
 
   .btn-outline-success {
     @apply inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150;
     @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
-    @apply bg-green-50 text-green-600 hover:bg-green-100;
-    @apply focus-visible:ring-green-400;
-    @apply dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/30;
+    @apply bg-success-background text-success-foreground hover:bg-secondary;
+    @apply focus-visible:ring-ring;
+    @apply dark:bg-success-background dark:text-success-foreground dark:hover:bg-secondary;
   }
   
   /* Input base styles following Material Design 3 */
   /* Reference: https://m3.material.io/components/text-fields/specs */
   .input-base {
-    @apply w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm;
-    @apply placeholder:text-gray-400 focus:border-primary-500 focus:outline-hidden focus:ring-2 focus:ring-primary-500;
+    @apply w-full rounded-lg border border-input bg-card px-3 py-2 text-sm;
+    @apply placeholder:text-placeholder focus:border-ring focus:outline-hidden focus:ring-2 focus:ring-ring;
     @apply disabled:cursor-not-allowed disabled:opacity-50;
-    @apply dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500;
-    @apply dark:focus:border-primary-400 dark:focus:ring-primary-400;
+    @apply dark:border-input dark:bg-card dark:text-foreground dark:placeholder:text-placeholder;
+    @apply dark:focus:border-ring dark:focus:ring-ring;
   }
   
   /* Card component following Material Design 3 */
   /* Reference: https://m3.material.io/components/cards/specs */
   .card {
-    @apply rounded-lg border border-gray-200 bg-white shadow-xs;
-    @apply dark:border-gray-700 dark:bg-gray-800;
+    @apply rounded-lg border border-border bg-card shadow-xs;
+    @apply dark:border-border dark:bg-card;
   }
   
   /* Badge component */
@@ -740,30 +751,37 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 /**
  * Sidebar Component Styles
  * CSS variables and pseudo-elements that Tailwind cannot replace
+ * 
+ * NOTE: Sidebar uses brand colors when a brand is selected,
+ * but falls back to neutral colors when Default brand is active
  */
 @layer components {
-  /* Sidebar CSS Variables - Dynamic theme colors */
+  /* Sidebar CSS Variables - Light mode (default) */
   :root {
     --sidebar-color-text-primary: #1F2936;
     --sidebar-color-text-placeholder: #798EAE;
     --sidebar-color-bg-primary: #f9fafb;
-    --sidebar-color-bg-secondary: var(--color-primary-100);
+    --sidebar-color-bg-secondary: var(--color-primary-100, #e5e7eb);     /* Brand color or Gray-200 fallback */
     --sidebar-color-bg-sidebar: #FFFFFF;
     --sidebar-color-border-hr: #E2E8F0;
-    --sidebar-color-hover-primary: var(--color-primary-500);
-    --sidebar-color-hover-secondary: #e2e2fb;
+    --sidebar-color-hover-primary: var(--color-primary-500, #6366f1);    /* Brand color or Indigo-500 fallback */
+    --sidebar-color-hover-secondary: var(--color-primary-50, #f3f4f6);   /* Brand color or Gray-100 fallback */
     --sidebar-color-shadow: rgba(0, 0, 0, 0.05);
+    --sidebar-color-logo: var(--color-primary-500, #6366f1);             /* Brand color or Indigo-500 fallback */
   }
 
-  :root[data-theme="dark"] {
+  /* Sidebar CSS Variables - Dark mode */
+  :root[data-appearance="dark"] {
     --sidebar-color-text-primary: #F1F5F9;
     --sidebar-color-text-placeholder: #A6B7D2;
     --sidebar-color-bg-primary: #111827;
-    --sidebar-color-bg-secondary: #3D4859;
+    --sidebar-color-bg-secondary: var(--color-primary-900, #374151);     /* Brand color or Gray-700 fallback */
     --sidebar-color-bg-sidebar: #1f2937;
     --sidebar-color-border-hr: #3B475C;
-    --sidebar-color-hover-secondary: #48566a;
+    --sidebar-color-hover-primary: var(--color-primary-600, #818cf8);    /* Brand color or Indigo-400 fallback */
+    --sidebar-color-hover-secondary: var(--color-primary-950, #4b5563);  /* Brand color or Gray-600 fallback */
     --sidebar-color-shadow: rgba(0, 0, 0, 0.3);
+    --sidebar-color-logo: var(--color-primary-400, #818cf8);             /* Brand color or Indigo-400 fallback */
   }
 
   /* Mobile backdrop overlay - Tailwind cannot handle body::before with :has() */

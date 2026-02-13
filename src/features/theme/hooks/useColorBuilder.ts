@@ -24,10 +24,10 @@ import {
  * @returns Color builder utilities
  */
 export function useColorBuilder() {
-    const [baseColor, setBaseColor] = useState('#2563eb'); // Blue
+    const [baseColor, setBaseColor] = useState('var(--color-demo-primary)'); // Blue
     const [themeName, setThemeName] = useState('Custom Brand');
-    const [lightBg, setLightBg] = useState('#ffffff');
-    const [darkBg, setDarkBg] = useState('#1f2937');
+    const [lightBg, setLightBg] = useState('var(--color-demo-light)');
+    const [darkBg, setDarkBg] = useState('var(--color-demo-grey)');
     const [savedThemes, setSavedThemes] = useState<Array<{
         id: string;
         name: string;
@@ -187,10 +187,10 @@ export function useColorBuilder() {
      * Reset to default brand color
      */
     const reset = useCallback(() => {
-        setBaseColor('#2563eb');
+        setBaseColor('var(--color-demo-primary)');
         setThemeName('Custom Brand');
-        setLightBg('#ffffff');
-        setDarkBg('#1f2937');
+        setLightBg('var(--color-demo-light)');
+        setDarkBg('var(--color-demo-grey)');
     }, []);
 
     /**

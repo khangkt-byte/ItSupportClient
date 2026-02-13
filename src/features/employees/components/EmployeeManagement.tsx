@@ -217,7 +217,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                  className="flex-1 px-4 py-2 bg-primary-600 text-primary-foreground rounded-lg hover:bg-primary-700"
                 >
                   {editing ? 'Update' : 'Create'} Employee
                 </button>

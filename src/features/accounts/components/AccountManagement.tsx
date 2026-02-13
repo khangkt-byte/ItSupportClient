@@ -440,7 +440,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
 
         {/* Error state */}
         {error && !isLoading && (
-          <div className="p-4 bg-error-background border border-red-200 dark:border-red-800 flex items-start gap-3">
+          <div className="p-4 bg-error-background border border-error-border flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
             <div className="flex-1">
               <p className="font-medium text-error-foreground">Error</p>
@@ -645,7 +645,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
 
             {/* Error Alert */}
             {error && (
-              <div className="mx-6 mt-4 p-4 bg-error-background border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-3">
+              <div className="mx-6 mt-4 p-4 bg-error-background border border-error-border rounded-lg flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
                 <div className="flex-1">
                   <p className="font-medium text-error-foreground">Error</p>

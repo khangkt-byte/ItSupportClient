@@ -55,11 +55,11 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
                   <p className="text-sm text-muted-foreground">Total Work Logs</p>
                   <p className="text-2xl font-bold text-primary-600">{dataManager.workLogs.data.length}</p>
                 </div>
-                <div className="p-4 rounded-lg bg-green-100 dark:bg-green-900/20">
+                <div className="p-4 rounded-lg bg-success-background">
                   <p className="text-sm text-muted-foreground">Total Employees</p>
                   <p className="text-2xl font-bold text-success-foreground">{dataManager.employees.data.length}</p>
                 </div>
-                <div className="p-4 rounded-lg bg-purple-100 dark:bg-purple-900/20">
+                <div className="p-4 rounded-lg bg-primary-100 dark:bg-primary-900/20">
                   <p className="text-sm text-muted-foreground">Total Areas</p>
                   <p className="text-2xl font-bold text-primary-600">{dataManager.areas.data.length}</p>
                 </div>
@@ -139,7 +139,7 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
         </div>
         <button
           onClick={() => setShowLogoutConfirm(true)}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2 cursor-pointer"
+          className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 flex items-center gap-2 cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
           Logout

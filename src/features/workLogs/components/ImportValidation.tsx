@@ -101,7 +101,7 @@ export function ImportValidation({
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-2xl">⏭️</span>
                   <strong className="text-foreground">Skip duplicates</strong>
-                  <Badge variant="outline" className="text-xs bg-primary-50 border-blue-300 text-primary-700">Recommended</Badge>
+                  <Badge variant="outline" className="text-xs bg-primary-50 border-primary-300 text-primary-700">Recommended</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
                   Skip importing rows that match existing work logs. Best for re-importing the same file.
@@ -292,7 +292,7 @@ export function ImportValidation({
           Cancel
         </button>
         <button
-          className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg transition-colors"
+          className="bg-primary-600 hover:bg-primary-700 text-primary-foreground px-6 py-2 rounded-lg transition-colors"
           onClick={onConfirm}
         >
           Confirm Import

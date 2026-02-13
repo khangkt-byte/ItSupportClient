@@ -745,7 +745,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
         <div className="grid grid-cols-3 gap-4">
           <button 
             onClick={() => exportWorkLogsToExcel(data)} 
-            className="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+            className="px-4 py-3 bg-primary-600 text-primary-foreground rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-2"
           >
             <Download className="w-5 h-5" />
             Export to Excel
@@ -753,7 +753,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
           <button 
             onClick={() => setShowImportWizard(true)} 
             disabled={importing}
-            className="px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-3 bg-primary-600 text-primary-foreground rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {importing ? (
               <>

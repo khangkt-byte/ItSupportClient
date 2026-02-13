@@ -169,7 +169,8 @@ function extractSemanticVariants(varName) {
  * Generate CSS for a single brand theme
  */
 function generateThemeCSS(themeName, colors) {
-  let css = `:root[data-theme="${themeName}"] {\n`;
+  // Use data-brand attribute for combinatorial theming (appearance + brand independent)
+  let css = `:root[data-brand="${themeName}"] {\n`;
   
   // Sort tones numerically (50, 100, 200, ..., 950)
   const sortedTones = Object.keys(colors).sort((a, b) => Number(a) - Number(b));
@@ -254,9 +255,10 @@ function generateCSS() {
 /* ========================================
  * DARK MODE SEMANTIC TOKENS
  * Source: palettes.ts → darkSemanticTokens + darkSemanticVariants
+ * Uses data-appearance attribute for combinatorial theming
  * ======================================== */
 
-:root[data-theme="dark"] {
+:root[data-appearance="dark"] {
   --color-success: ${darkSemanticTokens.success};
   --color-error: ${darkSemanticTokens.error};
   --color-warning: ${darkSemanticTokens.warning};

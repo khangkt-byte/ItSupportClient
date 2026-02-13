@@ -127,6 +127,7 @@ export function ThemeScheduler() {
         <div className="space-y-4">
             {/* Quick Status Card */}
             {schedule.mode !== 'disabled' && (
+                // TODO: Hard-coded colors intentional - scheduler component (non-production)
                 <Card className={`p-4 ${isDarkModeActive ? 'bg-slate-800 border-slate-700 text-white' : 'bg-blue-50 border-blue-200'}`}>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">

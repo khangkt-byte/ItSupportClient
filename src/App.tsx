@@ -144,10 +144,10 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-muted">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -155,10 +155,10 @@ export default function App() {
 
   if (securityError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-muted">
         <div className="text-center">
-          <p className="text-red-500">Security Error:</p>
-          <p className="text-gray-600">{securityError}</p>
+          <p className="text-error-foreground">Security Error:</p>
+          <p className="text-muted-foreground">{securityError}</p>
         </div>
       </div>
     );

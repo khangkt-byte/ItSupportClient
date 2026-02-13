@@ -135,7 +135,7 @@ export function AutocompleteInput({
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
         {selectedSuggestion && showKbIndicator && (
-          <span className="ml-2 px-2 py-0.5 bg-success-foreground text-white text-xs rounded">
+          <span className="ml-2 px-2 py-0.5 bg-success-foreground text-inverse-foreground text-xs rounded">
             From KB
           </span>
         )}
@@ -211,7 +211,7 @@ export function AutocompleteInput({
 
       {/* KB Indicator */}
       {selectedSuggestion && showKbIndicator && (
-        <div className="mt-2 px-3 py-2 bg-green-50 border-l-4 border-green-500 rounded">
+        <div className="mt-2 px-3 py-2 bg-success-background border-l-4 border-success-border rounded">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
               <Check className="w-4 h-4 text-green-600" />

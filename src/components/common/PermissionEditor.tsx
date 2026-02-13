@@ -278,10 +278,10 @@ export function PermissionEditor({
           Assign Roles ({selectedRoleIds.length} selected)
         </h3>
 
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
+        <div className="bg-card border border-border rounded-lg divide-y divide-border">
           {availableRoles.length === 0 ? (
-            <div className="p-6 text-center text-gray-500 dark:text-gray-400">
-              <Shield className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+            <div className="p-6 text-center text-muted-foreground">
+              <Shield className="w-12 h-12 mx-auto mb-2 text-placeholder" />
               <p>No roles available</p>
             </div>
           ) : (
@@ -292,7 +292,7 @@ export function PermissionEditor({
               return (
                 <label
                   key={role.roleId}
-                  className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                  className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-accent transition-colors ${
                     readOnly ? 'opacity-60 cursor-not-allowed' : ''
                   }`}
                 >
@@ -301,15 +301,15 @@ export function PermissionEditor({
                     checked={isSelected}
                     onChange={() => toggleRole(role.roleId)}
                     disabled={readOnly}
-                    className="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
+                    className="w-4 h-4 text-primary-600 rounded border-input focus:ring-primary-500"
                   />
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-gray-900 dark:text-gray-50">{role.name}</div>
+                    <div className="font-medium text-foreground">{role.name}</div>
                     {role.description && (
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">{role.description}</div>
+                      <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{role.description}</div>
                     )}
                   </div>
-                  <span className="text-xs text-gray-400 shrink-0">
+                  <span className="text-xs text-placeholder shrink-0">
                     {claimCount} perms
                   </span>
                   {isSelected && (
@@ -361,16 +361,16 @@ export function PermissionEditor({
               selectableGroupIds.length > 0 && selectableGroupIds.every(id => selectedClaimIds.includes(id));
 
             return (
-              <div key={group.category} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <div key={group.category} className="bg-card border border-border rounded-lg">
                 <button
                   type="button"
                   onClick={() => toggleModule(group.category)}
-                  className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center justify-between px-5 py-4 hover:bg-accent transition-colors text-left cursor-pointer"
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <Shield className="w-5 h-5 text-success shrink-0" />
-                    <span className="font-semibold text-gray-900 dark:text-gray-50 text-base">{group.category}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                    <span className="font-semibold text-foreground text-base">{group.category}</span>
+                    <span className="text-xs text-muted-foreground">
                       ({group.claims.length}){selectedInGroup > 0 ? ` • ${selectedInGroup} selected` : ''}
                     </span>
                   </div>
@@ -389,9 +389,9 @@ export function PermissionEditor({
                       {areAllSelectedInGroup ? 'Deselect All' : 'Select All'}
                     </button>
                     {isExpanded ? (
-                      <ChevronUp className="w-5 h-5 text-gray-400" />
+                      <ChevronUp className="w-5 h-5 text-muted-foreground" />
                     ) : (
-                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                      <ChevronDown className="w-5 h-5 text-muted-foreground" />
                     )}
                   </div>
                 </button>
@@ -413,7 +413,7 @@ export function PermissionEditor({
                                 ? 'bg-success-background text-success-foreground'
                                 : isInherited
                                 ? 'bg-info-background text-info-foreground'
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                : 'text-muted-foreground hover:bg-accent'
                             } ${readOnly ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                             onClick={() => {
                               if (!readOnly) {
@@ -444,13 +444,13 @@ export function PermissionEditor({
 
       {/* Effective Permissions Summary */}
       <div className="bg-linear-to-r from-primary-50 to-green-50 border border-primary-200 rounded-lg p-4">
-        <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2 text-sm">
+        <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2 text-sm">
           <CheckCircle className="w-5 h-5 text-primary-600" />
           Effective Permissions ({effectivePermissions.permissions.length} total)
         </h4>
         <div className="flex flex-wrap gap-2">
           {effectivePermissions.permissions.length === 0 ? (
-            <p className="text-xs text-gray-500 italic">No permissions assigned</p>
+            <p className="text-xs text-muted-foreground italic">No permissions assigned</p>
           ) : (
             effectivePermissions.permissions.map(permission => {
               const source = effectivePermissions.sources.get(permission);
@@ -461,8 +461,8 @@ export function PermissionEditor({
                     source === 'role'
                       ? 'bg-primary-100 text-primary-700 border border-primary-200'
                       : source === 'direct'
-                      ? 'bg-green-100 text-green-700 border border-green-200'
-                      : 'bg-purple-100 text-purple-700 border border-purple-200'
+                      ? 'bg-success-background text-success-foreground border border-success-border'
+                      : 'bg-info-background text-info-foreground border border-info-border'
                   }`}
                 >
                   {permission}

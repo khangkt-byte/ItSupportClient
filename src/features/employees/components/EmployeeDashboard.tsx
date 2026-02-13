@@ -50,7 +50,7 @@ export function EmployeeDashboard({ user, onLogout, currentView }: Props) {
                   <p className="text-sm text-muted-foreground">Total Work Logs</p>
                   <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">{dataManager.workLogs.data.length}</p>
                 </div>
-                <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                <div className="bg-success-background p-4 rounded-lg border border-success-border">
                   <p className="text-sm text-muted-foreground">Pending Work Logs</p>
                   <p className="text-2xl font-bold text-success-foreground">
                     {dataManager.workLogs.data.filter(log => log.status === 'pending').length}
@@ -93,7 +93,7 @@ export function EmployeeDashboard({ user, onLogout, currentView }: Props) {
         </div>
         <button
           onClick={() => setShowLogoutConfirm(true)}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+          className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 flex items-center gap-2"
         >
           <LogOut className="w-4 h-4" />
           Logout

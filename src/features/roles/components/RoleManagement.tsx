@@ -231,7 +231,7 @@ export function RoleManagement({ data, setData }: Props) {
           return (
             <div key={item.id} className="bg-card border border-border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col min-h-240px">
               <div>
-                <div className="w-12 h-12 bg-primary-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center mb-4">
                   <Shield className="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2 text-foreground">{item.name}</h3>
@@ -239,7 +239,7 @@ export function RoleManagement({ data, setData }: Props) {
                   <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{item.description}</p>
                 )}
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="px-2 py-1 text-xs rounded-full bg-primary-100 dark:bg-gray-700 text-primary-700 dark:text-primary-400 font-medium">
+                  <span className="px-2 py-1 text-xs rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 font-medium">
                     {claimCount} {claimCount !== 1 ? 'permissions' : 'permission'}
                   </span>
                 </div>
@@ -249,7 +249,7 @@ export function RoleManagement({ data, setData }: Props) {
                   {hasPermission(Permissions.Role.Edit) && (
                     <button
                       onClick={() => openForm(item)}
-                      className="flex-1 px-3 py-2 text-sm bg-primary-50 dark:bg-gray-700 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-100 dark:hover:bg-gray-600 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                      className="flex-1 px-3 py-2 text-sm bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors flex items-center justify-center gap-1 cursor-pointer"
                     >
                       <Edit className="w-3 h-3" />
                       Edit
@@ -271,7 +271,7 @@ export function RoleManagement({ data, setData }: Props) {
         })}
         {data.length === 0 && (
           <div className="col-span-full py-12 text-center text-muted-foreground">
-            <Shield className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+            <Shield className="w-12 h-12 mx-auto mb-3 text-placeholder" />
             <p className="text-lg font-medium">No roles found</p>
             <p className="text-sm mt-1">Create your first role to get started</p>
           </div>
@@ -328,7 +328,7 @@ export function RoleManagement({ data, setData }: Props) {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g., System Administrator"
-                    className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-foreground placeholder-placeholder transition-colors"
+                    className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
                   />
                 </div>
                 <div>
@@ -338,7 +338,7 @@ export function RoleManagement({ data, setData }: Props) {
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Brief description of this role"
-                    className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-foreground placeholder-placeholder transition-colors"
+                    className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
                   />
                 </div>
               </div>
@@ -371,7 +371,7 @@ export function RoleManagement({ data, setData }: Props) {
                             <span className="font-medium text-foreground">{group.category}</span>
                             <span className="text-xs text-muted-foreground">({group.claims.length})</span>
                             {selectedInGroup > 0 && (
-                              <span className="px-2 py-0.5 text-xs bg-primary-100 dark:bg-gray-700 text-primary-700 dark:text-primary-400 rounded-full">
+                              <span className="px-2 py-0.5 text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-full">
                                 {selectedInGroup} selected
                               </span>
                             )}
@@ -380,14 +380,14 @@ export function RoleManagement({ data, setData }: Props) {
                             <button
                               type="button"
                               onClick={() => toggleAllInCategory(group.category)}
-                              className="px-2 py-1 text-xs bg-primary-50 dark:bg-gray-700 text-primary-600 dark:text-primary-400 rounded hover:bg-primary-100 dark:hover:bg-gray-600 transition-colors"
+                              className="px-2 py-1 text-xs bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
                             >
                               {allSelected ? 'Deselect All' : 'Select All'}
                             </button>
                             {isExpanded ? (
-                              <ChevronUp className="w-4 h-4 text-gray-400" />
+                              <ChevronUp className="w-4 h-4 text-muted-foreground" />
                             ) : (
-                              <ChevronDown className="w-4 h-4 text-gray-400" />
+                              <ChevronDown className="w-4 h-4 text-muted-foreground" />
                             )}
                           </div>
                         </div>
@@ -434,7 +434,7 @@ export function RoleManagement({ data, setData }: Props) {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="flex-1 px-4 py-2 bg-primary-600 dark:bg-primary-600 text-white rounded-lg cursor-pointer hover:bg-primary-700 dark:hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2 bg-primary-600 dark:bg-primary-600 text-primary-foreground rounded-lg cursor-pointer hover:bg-primary-700 dark:hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isLoading ? (
                     <>

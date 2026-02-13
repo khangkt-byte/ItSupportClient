@@ -153,11 +153,26 @@ export function applyCSSVars(vars: Record<string, string>): void {
  * applyThemeTokens('dark');
  * // Applies dark mode semantic tokens only
  */
-export function applyThemeTokens(themeName: 'light' | 'dark' | BrandTheme): void {
+/**
+ * Apply theme tokens with combinatorial appearance + brand support
+ * 
+ * @param themeName - Legacy theme name (for backwards compatibility)
+ * @param appearance - Appearance setting ('light' | 'dark')
+ * @param brand - Brand color theme
+ */
+export function applyThemeTokens(
+    themeName: 'light' | 'dark' | BrandTheme,
+    appearance?: 'light' | 'dark',
+    brand?: 'default' | BrandTheme
+): void {
     let allVars: Record<string, string> = {};
 
-    // Apply semantic tokens based on light/dark
-    if (themeName === 'dark' || themeName.includes('dark')) {
+    // NEW: Use appearance parameter if provided (combinatorial mode)
+    // Otherwise fall back to legacy themeName detection
+    const isDark = appearance === 'dark' || (appearance === undefined && (themeName === 'dark' || themeName.includes('dark')));
+
+    // Apply semantic tokens based on appearance
+    if (isDark) {
         allVars = {
             ...allVars,
             ...generateSemanticVars(DARK_SEMANTIC_TOKENS, darkSemanticVariants),
@@ -169,9 +184,14 @@ export function applyThemeTokens(themeName: 'light' | 'dark' | BrandTheme): void
         };
     }
 
-    // Apply brand theme palette if not light/dark
-    if (themeName !== 'light' && themeName !== 'dark') {
-        const palette = palettes[themeName as BrandTheme];
+    // NEW: Apply brand palette if brand is provided and not 'default'
+    // Otherwise fall back to legacy themeName detection
+    const brandToApply = brand && brand !== 'default'
+        ? brand
+        : (themeName !== 'light' && themeName !== 'dark' ? themeName : null);
+
+    if (brandToApply) {
+        const palette = palettes[brandToApply as BrandTheme];
 
         if (palette) {
             // Primary palette
@@ -196,12 +216,34 @@ export function applyThemeTokens(themeName: 'light' | 'dark' | BrandTheme): void
 
             // Override semantic tokens if theme has custom ones
             if (palette.semantic) {
+                // Use correct semantic variants based on appearance (light/dark)
+                const semanticVariants = isDark ? darkSemanticVariants : lightSemanticVariants;
                 allVars = {
                     ...allVars,
-                    ...generateSemanticVars(palette.semantic, lightSemanticVariants),
+                    ...generateSemanticVars(palette.semantic, semanticVariants),
                 };
             }
         }
+    } else {
+        // When brand is 'default', clear brand palette variables
+        // This allows CSS fallback values to work in sidebar
+        const root = document.documentElement;
+        const tones = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950'];
+
+        // Clear primary palette
+        tones.forEach(tone => {
+            root.style.removeProperty(`--color-primary-${tone}`);
+        });
+
+        // Clear secondary palette
+        tones.forEach(tone => {
+            root.style.removeProperty(`--color-secondary-${tone}`);
+        });
+
+        // Clear neutral palette  
+        tones.forEach(tone => {
+            root.style.removeProperty(`--color-neutral-${tone}`);
+        });
     }
 
     // Apply all variables at once
