@@ -8,4 +8,16 @@
   Run `npm i` to install the dependencies.
 
   Run `npm run dev` to start the development server.
+
+  ## Color system documentation
+
+  Start here:
+  - Guide/COLOR_SYSTEM_USER_GUIDE.md
+
+  Deep dives:
+  - Guide/DYNAMIC_COLORS_RUNTIME.md
+  - Guide/SEMANTIC_COLORS_SSOT.md
+  - Guide/SEMANTIC_TOKENS_GUIDE.md
+  - Guide/COLORS_QUICK_REFERENCE.md
+  - Guide/THEME_TESTING_CHECKLIST.md
   

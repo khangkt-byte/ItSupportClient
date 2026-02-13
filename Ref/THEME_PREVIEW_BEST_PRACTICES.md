@@ -23,6 +23,7 @@ When implementing theme selectors with visual previews, using CSS variables for 
 
 ```tsx
 // ✅ CORRECT: Uses static preview colors
+// Source brand colors from palettes.ts (SSOT) when available
 <div
   style={{
     backgroundColor: option.previewColor || '#FFFFFF'

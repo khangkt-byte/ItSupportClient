@@ -388,6 +388,11 @@ Found 315 violations (15 false positives - 5%)
 2. [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html)
 3. [Microsoft Coding Guidelines](https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions)
 
+### **Project Docs:**
+1. Guide/COLOR_SYSTEM_USER_GUIDE.md
+2. Guide/SEMANTIC_TOKENS_GUIDE.md
+3. Guide/DYNAMIC_COLORS_RUNTIME.md
+
 ### **Tools We Studied:**
 1. **ESLint:** Context-aware linting
 2. **Stylelint:** CSS-specific rules

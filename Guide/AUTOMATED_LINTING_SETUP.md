@@ -44,7 +44,7 @@ npm run lint:colors
   Line 20:15 - Hardcoded named color: red
 
 💡 Suggestion: Replace with semantic tokens like var(--color-success)
-📚 See Guide/SEMANTIC_TOKENS_GUIDE.md for more info
+📚 See Guide/COLOR_SYSTEM_USER_GUIDE.md and Guide/SEMANTIC_TOKENS_GUIDE.md for more info
 ```
 
 ### Pre-Commit Hook
@@ -356,8 +356,8 @@ const TOKEN_SUGGESTIONS = {
 
 ## Resources
 
+- **Color System User Guide:** `Guide/COLOR_SYSTEM_USER_GUIDE.md`
 - **Semantic Tokens Guide:** `Guide/SEMANTIC_TOKENS_GUIDE.md`
-- **Theme Builder:** `Guide/THEME_BUILDER_TUTORIAL.md`
 - **Accessibility:** `Guide/ACCESSIBILITY_BEST_PRACTICES.md`
 - **ESLint Docs:** https://eslint.org/docs/latest/
 

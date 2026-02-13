@@ -454,8 +454,8 @@ class ColorLinter {
         
         report += `${'='.repeat(60)}\n`;
         report += `💡 Suggestion: Use semantic tokens like var(--color-success)\n`;
-        report += `📚 See TAILWIND_VS_CSS_VARIABLES_GUIDE.md for migration guide\n`;
-        report += `📚 See THEME_PALETTE_GUIDE.md for available tokens\n\n`;
+        report += `📚 See Guide/COLOR_SYSTEM_USER_GUIDE.md for workflow\n`;
+        report += `📚 See Guide/SEMANTIC_TOKENS_GUIDE.md for token usage\n\n`;
         
         return report;
     }

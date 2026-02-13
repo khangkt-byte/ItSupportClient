@@ -330,8 +330,8 @@ html.theme-transition * {
 ## 📚 Additional Resources
 
 ### Internal Documentation:
-- [Theme System Implementation Guide](./THEME_SYSTEM_IMPLEMENTATION_GUIDE.md)
-- [Best Practices Guide](./BEST_PRACTICES_GUIDE.md)
+- [Color System User Guide](./COLOR_SYSTEM_USER_GUIDE.md)
+- [Dynamic Colors Runtime](./DYNAMIC_COLORS_RUNTIME.md)
 - [Accessibility Best Practices](./ACCESSIBILITY_BEST_PRACTICES.md)
 
 ### External References:
@@ -367,6 +367,5 @@ html.theme-transition * {
 
 ---
 
-**Last Updated**: 2025  
-**Optimized By**: AI Assistant  
+**Last Updated**: 2026-02-13  
 **Standards Referenced**: Google Web.dev, Microsoft Fluent 2, Apple HIG, Material Design 3

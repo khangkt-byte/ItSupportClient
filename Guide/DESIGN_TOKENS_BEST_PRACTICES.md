@@ -15,6 +15,16 @@
 
 ---
 
+## Project Implementation (Quick Reference)
+
+- SSOT: src/constants/palettes.ts
+- Runtime injection: src/utils/themeTokens.ts via applyThemeTokens()
+- Integration: src/features/theme/hooks/useTheme.ts
+- Build-time defaults: src/styles/theme.css and src/index.css
+- Auto-generated fallback: src/styles/generated-themes.css
+
+---
+
 ## 🌍 Chuẩn Quốc Tế - Design Token Pattern
 
 ### 1. Material Design 3 (Google)
