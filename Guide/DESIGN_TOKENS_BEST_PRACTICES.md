@@ -594,20 +594,29 @@ export const palettes = {
 };
 ```
 
-### Layer 2: Semantic Tokens (theme.css)
+### Layer 2: Semantic Tokens (generated-themes.css)
 
 ```css
-/* ✅ Map raw tokens to semantic meanings */
-:root[data-theme="brand-purple"] {
-  /* Primary Colors */
+/* ✅ Combinatorial Theming: Appearance-based semantic tokens */
+:root[data-appearance="dark"] {
+  /* Semantic Tokens (appearance-dependent) */
+  --color-success: #4ade80;      /* Lighter for dark mode */
+  --color-error: #f87171;        /* Lighter for dark mode */
+  --color-warning: #fbbf24;      /* Lighter for dark mode */
+  --color-info: #60a5fa;         /* Lighter for dark mode */
+}
+
+/* ✅ Brand-based palette */
+:root[data-brand="brand-purple"] {
+  /* Primary Colors (brand-independent of appearance) */
   --color-primary-50: #f5f3ff;   /* From palettes['brand-purple'].primary[50] */
   --color-primary-500: #695CFE;  /* From palettes['brand-purple'].primary[500] */
   --color-primary-900: #3730a3;  /* From palettes['brand-purple'].primary[900] */
-  
-  /* Semantic Mappings */
-  --color-success: #22c55e;      /* From palettes['brand-purple'].semantic.success */
-  --color-error: #ef4444;        /* From palettes['brand-purple'].semantic.error */
 }
+
+/* Both selectors can match simultaneously:
+   :root[data-appearance="dark"][data-brand="brand-purple"]
+*/
 ```
 
 ### Layer 3: Component Tokens (Components)

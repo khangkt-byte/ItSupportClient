@@ -1,19 +1,21 @@
-# Theme Testing Checklist - Phase 2 Verification
+# Theme Testing Checklist - Combinatorial Theming System
 
-**Server:** https://localhost:3002/  
-**Date:** February 12, 2026  
+**Architecture:** Option A - Appearance (Light/Dark/Auto) + Brand Color (Independent)  
+**Date:** February 13, 2026  
 **Status:** Ready for testing
 
 ---
 
 ## 🎯 Testing Objectives
 
-1. ✅ Verify all 10 brand themes render correctly
-2. ✅ Confirm brand-purple theme works (was broken before)
-3. ✅ Check CSS variables injected properly
-4. ✅ Test theme persistence (localStorage)
-5. ✅ Verify no console errors
-6. ✅ Check accessibility compliance
+1. ✅ Verify combinatorial theming (Appearance × Brand Color)
+2. ✅ Test all 3 appearance modes (Light, Dark, Auto)
+3. ✅ Test all 11 brand colors (Default + 10 brands)
+4. ✅ Verify CSS attributes (`data-appearance`, `data-brand`)
+5. ✅ Check CSS variables injected properly
+6. ✅ Test theme persistence (localStorage)
+7. ✅ Verify no console errors
+8. ✅ Check accessibility compliance
 
 ---
 
@@ -30,7 +32,7 @@ Browser: Chrome/Edge (recommended for DevTools)
 Press: F12 or Ctrl+Shift+I
 Tabs needed:
   - Console (check for errors)
-  - Elements (inspect CSS variables)
+  - Elements (inspect CSS variables and attributes)
   - Application (check localStorage)
 ```
 
@@ -43,391 +45,609 @@ Access theme selector
 
 ---
 
-## 🧪 Theme Testing Checklist
+## 🧪 Part 1: Appearance Testing (Light/Dark/Auto)
 
-### Base Themes
+### 1.1 Light Appearance ☀️
 
-#### Light Theme ☀️
+**Steps:**
 - [ ] Open theme selector
-- [ ] Select "Light"
-- [ ] **Expected:** White background, dark text
-- [ ] Check DevTools Console: No errors
-- [ ] Check Elements → `<html>` → `data-theme="light"`
-- [ ] Check CSS variables:
-  ```css
-  --color-success: #22c55e
-  --color-error: #ef4444
-  --color-warning: #f59e0b
-  --color-info: #3b82f6
-  ```
-- [ ] **Result:** ✅ PASS / ❌ FAIL
+- [ ] Click "Light" in Appearance section
+- [ ] Ensure Brand Color is set to "Default"
 
-#### Dark Theme 🌙
-- [ ] Select "Dark"
-- [ ] **Expected:** Dark background, light text
-- [ ] Check `data-theme="dark"`
-- [ ] Check CSS variables (lighter semantic colors):
-  ```css
-  --color-success: #4ade80
-  --color-error: #f87171
-  ```
-- [ ] **Result:** ✅ PASS / ❌ FAIL
+**Expected Results:**
+- [ ] White/light background, dark text
+- [ ] Check DevTools Console: No errors
+- [ ] Check Elements → `<html>`:
+  - `data-appearance="light"` ✅
+  - `data-brand="default"` ✅
+  - `data-theme="light"` (legacy) ✅
+- [ ] Check localStorage:
+  - `appearance: "light"` ✅
+  - `brandColor: "default"` ✅
+
+**CSS Variables (Semantic Tokens - Light Mode):**
+```css
+--color-success: #22c55e
+--color-error: #ef4444
+--color-warning: #f59e0b
+--color-info: #3b82f6
+--color-background: #ffffff
+--color-foreground: #111827
+```
+
+**Result:** ✅ PASS / ❌ FAIL  
+**Notes:** _____________________________
 
 ---
 
-### Brand Themes (10 Total)
+### 1.2 Dark Appearance 🌙
 
-#### 1. brand-purple 💜 ⭐ (PREVIOUSLY BROKEN)
-- [ ] Select "Purple" theme
-- [ ] **Expected:** Purple primary color (#695CFE)
-- [ ] **Critical Test:** UI elements should be purple
-- [ ] Check `data-theme="brand-purple"`
-- [ ] Check CSS variables in Elements tab:
+**Steps:**
+- [ ] Click "Dark" in Appearance section
+- [ ] Ensure Brand Color is still "Default"
+
+**Expected Results:**
+- [ ] Dark background, light text
+- [ ] Check Elements → `<html>`:
+  - `data-appearance="dark"` ✅
+  - `data-brand="default"` ✅
+  - `data-theme="dark"` (legacy) ✅
+
+**CSS Variables (Semantic Tokens - Dark Mode):**
+```css
+--color-success: #4ade80
+--color-error: #f87171
+--color-warning: #fbbf24
+--color-info: #60a5fa
+--color-background: #111827
+--color-foreground: #f9fafb
+```
+
+**Result:** ✅ PASS / ❌ FAIL  
+**Notes:** _____________________________
+
+---
+
+### 1.3 Auto Appearance 🖥️
+
+**Steps:**
+- [ ] Click "Auto" in Appearance section
+- [ ] Check that it follows system preference
+
+**Expected Results:**
+- [ ] Check Elements → `<html>`:
+  - `data-appearance="light"` or `"dark"` (based on system) ✅
+  - `data-brand="default"` ✅
+- [ ] Open DevTools → Settings → Rendering
+- [ ] Toggle "Emulate CSS media prefers-color-scheme: dark"
+- [ ] Theme should switch automatically
+
+**System Preference Test:**
+- [ ] When system is light → appearance="light"
+- [ ] When system is dark → appearance="dark"
+- [ ] Auto icon (🖥️) should be visible in selector
+
+**Result:** ✅ PASS / ❌ FAIL  
+**Notes:** _____________________________
+
+---
+
+## 🧪 Part 2: Brand Color Testing (11 Brands)
+
+**Note:** Test each brand color in BOTH Light and Dark appearances
+
+### 2.1 Default Brand Color (Neutral)
+
+**Steps:**
+- [ ] Set Appearance: Light
+- [ ] Click "Default" in Brand Colors section
+
+**Expected Results:**
+- [ ] Neutral Indigo colors (#6366f1)
+- [ ] Check `data-brand="default"` ✅
+- [ ] Check `data-theme="light"` (legacy) ✅
+- [ ] No `--color-primary-*` CSS variables (uses CSS fallback)
+- [ ] Sidebar uses Indigo color
+
+**Dark Mode Test:**
+- [ ] Set Appearance: Dark
+- [ ] Check `data-appearance="dark"` + `data-brand="default"` ✅
+- [ ] Sidebar still uses Indigo (lighter tone)
+
+**Result:** ✅ PASS / ❌ FAIL
+
+---
+
+### 2.2 Brand Purple 💜
+
+**Light Mode:**
+- [ ] Appearance: Light
+- [ ] Brand Color: Purple
+- [ ] Check `data-appearance="light"` + `data-brand="brand-purple"` ✅
+- [ ] Check CSS variables:
   ```css
   --color-primary-50: #f5f3ff
   --color-primary-500: #695CFE
   --color-primary-950: #1e1b4b
   ```
-- [ ] Check buttons, links, accents are purple
-- [ ] Reload page → theme persists
-- [ ] **Result:** ✅ PASS / ❌ FAIL
-- [ ] **Notes:** _____________________________
+- [ ] Primary buttons are purple
+- [ ] Links are purple
+- [ ] Sidebar logo/accents are purple
 
-#### 2. brand-red 🔴
-- [ ] Select "Red" theme
-- [ ] **Expected:** Red primary color (#ef4444)
-- [ ] Check `data-theme="brand-red"`
-- [ ] Check CSS variables:
-  ```css
-  --color-primary-500: #ef4444
-  ```
-- [ ] UI elements are red
-- [ ] **Result:** ✅ PASS / ❌ FAIL
+**Dark Mode:**
+- [ ] Appearance: Dark
+- [ ] Brand Color: Purple (same)
+- [ ] Check `data-appearance="dark"` + `data-brand="brand-purple"` ✅
+- [ ] Dark semantic tokens (success: #4ade80) ✅
+- [ ] Purple brand colors still applied ✅
+- [ ] Sidebar uses purple (lighter tone for dark mode)
 
-#### 3. brand-blue 🔵
-- [ ] Select "Blue" theme
-- [ ] **Expected:** Blue primary color (#3b82f6)
-- [ ] Check `data-theme="brand-blue"`
-- [ ] Check CSS variables:
-  ```css
-  --color-primary-500: #3b82f6
-  ```
-- [ ] UI elements are blue
-- [ ] **Result:** ✅ PASS / ❌ FAIL
+**Persistence:**
+- [ ] Reload page → Purple brand persists
+- [ ] Appearance persists separately
 
-#### 4. brand-green 🟢
-- [ ] Select "Green" theme
-- [ ] **Expected:** Green primary color (#22c55e)
-- [ ] Check `data-theme="brand-green"`
-- [ ] Check CSS variables:
-  ```css
-  --color-primary-500: #22c55e
-  ```
-- [ ] UI elements are green
-- [ ] **Result:** ✅ PASS / ❌ FAIL
-
-#### 5. brand-orange 🟠
-- [ ] Select "Orange" theme
-- [ ] **Expected:** Orange primary color (#ea580c)
-- [ ] Check `data-theme="brand-orange"`
-- [ ] Check CSS variables:
-  ```css
-  --color-primary-500: #ea580c
-  ```
-- [ ] UI elements are orange
-- [ ] **Result:** ✅ PASS / ❌ FAIL
-
-#### 6. brand-teal 🟦
-- [ ] Select "Teal" theme
-- [ ] **Expected:** Teal primary color (#14b8a6)
-- [ ] Check `data-theme="brand-teal"`
-- [ ] Check CSS variables:
-  ```css
-  --color-primary-500: #14b8a6
-  ```
-- [ ] UI elements are teal
-- [ ] **Result:** ✅ PASS / ❌ FAIL
-
-#### 7. brand-indigo 🟪
-- [ ] Select "Indigo" theme
-- [ ] **Expected:** Indigo primary color (#6366f1)
-- [ ] Check `data-theme="brand-indigo"`
-- [ ] Check CSS variables:
-  ```css
-  --color-primary-500: #6366f1
-  ```
-- [ ] UI elements are indigo
-- [ ] **Result:** ✅ PASS / ❌ FAIL
-
-#### 8. brand-violet 🔮
-- [ ] Select "Violet" theme
-- [ ] **Expected:** Violet primary color (#a855f7)
-- [ ] Check `data-theme="brand-violet"`
-- [ ] Check CSS variables:
-  ```css
-  --color-primary-500: #a855f7
-  ```
-- [ ] UI elements are violet
-- [ ] **Result:** ✅ PASS / ❌ FAIL
-
-#### 9. brand-pink 🩷
-- [ ] Select "Pink" theme
-- [ ] **Expected:** Pink primary color (#ec4899)
-- [ ] Check `data-theme="brand-pink"`
-- [ ] Check CSS variables:
-  ```css
-  --color-primary-500: #ec4899
-  ```
-- [ ] UI elements are pink
-- [ ] **Result:** ✅ PASS / ❌ FAIL
-
-#### 10. brand-cyan 🔷
-- [ ] Select "Cyan" theme
-- [ ] **Expected:** Cyan primary color (#1e88ff)
-- [ ] Check `data-theme="brand-cyan"`
-- [ ] Check CSS variables:
-  ```css
-  --color-primary-500: #1e88ff
-  ```
-- [ ] UI elements are cyan
-- [ ] **Result:** ✅ PASS / ❌ FAIL
+**Result:** ✅ PASS / ❌ FAIL  
+**Notes:** _____________________________
 
 ---
 
-## 🔍 Advanced Verification
+### 2.3 Brand Red 🔴
 
-### CSS Variable Injection Test
+**Combinatorial Test:**
+- [ ] Light + Red: `data-appearance="light"` + `data-brand="brand-red"`
+- [ ] Dark + Red: `data-appearance="dark"` + `data-brand="brand-red"`
+- [ ] Check `--color-primary-500: #ef4444`
+- [ ] Buttons/links are red in both modes
 
-1. **Open DevTools → Elements**
-2. **Select `<html>` element**
-3. **Check Styles panel**
-4. **Look for inline styles:**
-   ```html
-   <html data-theme="brand-purple" style="--color-primary-500: #695CFE; ...">
-   ```
-5. **Verify CSS variables match palettes.ts:**
-   - [ ] All 11 primary tones present (50-950)
-   - [ ] Semantic tokens present (success, error, warning, info)
-   - [ ] Values exactly match palettes.ts
-
-### localStorage Persistence Test
-
-1. **Select brand-purple theme**
-2. **Open DevTools → Application → Local Storage**
-3. **Check key:** `theme`
-4. **Expected value:** `"brand-purple"`
-5. **Reload page (F5)**
-6. **Verify:** Theme persists as purple
-7. **Result:** ✅ PASS / ❌ FAIL
-
-### Console Error Test
-
-1. **Open DevTools → Console**
-2. **Switch between all themes rapidly**
-3. **Expected:** No errors, no warnings
-4. **Check for:**
-   - [ ] No "theme not found" errors
-   - [ ] No CSS variable undefined warnings
-   - [ ] No React errors
-5. **Result:** ✅ PASS / ❌ FAIL
+**Result:** ✅ PASS / ❌ FAIL
 
 ---
 
-## 🎨 Visual Quality Test
+### 2.4 Brand Blue 🔵
 
-### UI Components to Check
+**Combinatorial Test:**
+- [ ] Light + Blue: Check primary color #3b82f6
+- [ ] Dark + Blue: Same brand, different semantic tokens
+- [ ] Check `data-brand="brand-blue"`
 
-For each theme, verify these components render correctly:
-
-#### Buttons
-- [ ] Primary button uses theme color
-- [ ] Hover state works
-- [ ] Disabled state visible
-
-#### Links
-- [ ] Links use theme color
-- [ ] Hover underline works
-
-#### Badges/Tags
-- [ ] Background uses theme color
-- [ ] Text readable (contrast)
-
-#### Form Elements
-- [ ] Focus rings use theme color
-- [ ] Validation states separate (success/error)
-
-#### Cards/Panels
-- [ ] Borders use theme color
-- [ ] Headers styled properly
-
-#### Icons
-- [ ] Icon colors match theme
-- [ ] Consistent styling
+**Result:** ✅ PASS / ❌ FAIL
 
 ---
 
-## ♿ Accessibility Test
+### 2.5 Brand Green 🟢
 
-### Contrast Check (DevTools)
+**Combinatorial Test:**
+- [ ] Light + Green: Primary #22c55e
+- [ ] Dark + Green: Same primary, light semantic tokens
+- [ ] Check `data-brand="brand-green"`
 
-1. **Right-click any text element**
-2. **Inspect**
-3. **Check computed contrast ratio**
-4. **Expected:**
-   - Normal text: ≥ 4.5:1 (WCAG AA)
-   - Large text: ≥ 3:1 (WCAG AA)
-
-### Screen Reader Test (Optional)
-
-1. **Enable Windows Narrator** (Win+Ctrl+Enter)
-2. **Navigate through themed UI**
-3. **Verify:**
-   - [ ] All elements announced
-   - [ ] Theme change announced
-   - [ ] No aria errors
+**Result:** ✅ PASS / ❌ FAIL
 
 ---
 
-## 📸 Screenshot Documentation
+### 2.6 Brand Orange 🟠
 
-Take screenshots of:
+**Combinatorial Test:**
+- [ ] Light + Orange: Primary #f97316
+- [ ] Dark + Orange: Same brand palette applies
+- [ ] Check `data-brand="brand-orange"`
+- [ ] Sidebar uses orange
 
-1. **brand-purple theme** (proof it works now)
-2. **All 10 brand themes** (grid view)
-3. **DevTools showing CSS variables**
-4. **localStorage showing persistence**
-
-Save to: `Guide/screenshots/phase2-testing/`
+**Result:** ✅ PASS / ❌ FAIL
 
 ---
 
-## 🐛 Issue Reporting
+### 2.7 Brand Teal 🟦
 
-If any theme fails, document:
+**Combinatorial Test:**
+- [ ] Light + Teal: Primary #14b8a6
+- [ ] Dark + Teal: Check color adaptation
+- [ ] Check `data-brand="brand-teal"`
 
-### Issue Template
+**Result:** ✅ PASS / ❌ FAIL
 
-```markdown
-**Theme:** [brand-purple]
-**Issue:** [Description]
-**Expected:** [What should happen]
-**Actual:** [What actually happens]
-**Console Errors:** [Copy any errors]
-**Screenshots:** [Attach if helpful]
-**Steps to Reproduce:**
-1. [Step 1]
-2. [Step 2]
-3. [Step 3]
+---
+
+### 2.8 Brand Indigo 🟣
+
+**Combinatorial Test:**
+- [ ] Light + Indigo: Primary #6366f1
+- [ ] Dark + Indigo: Same as default but as brand
+- [ ] Check `data-brand="brand-indigo"`
+
+**Result:** ✅ PASS / ❌ FAIL
+
+---
+
+### 2.9 Brand Violet 💟
+
+**Combinatorial Test:**
+- [ ] Light + Violet: Primary #8b5cf6
+- [ ] Dark + Violet: Check color consistency
+- [ ] Check `data-brand="brand-violet"`
+
+**Result:** ✅ PASS / ❌ FAIL
+
+---
+
+### 2.10 Brand Pink 🩷
+
+**Combinatorial Test:**
+- [ ] Light + Pink: Primary #ec4899
+- [ ] Dark + Pink: Check UI elements
+- [ ] Check `data-brand="brand-pink"`
+
+**Result:** ✅ PASS / ❌ FAIL
+
+---
+
+### 2.11 Brand Cyan 🩵
+
+**Combinatorial Test:**
+- [ ] Light + Cyan: Primary #06b6d4
+- [ ] Dark + Cyan: Check semantic + brand separation
+- [ ] Check `data-brand="brand-cyan"`
+
+**Result:** ✅ PASS / ❌ FAIL
+
+---
+
+## 🧪 Part 3: Combinatorial Permutations (Critical)
+
+**Test Matrix:** 3 Appearances × 11 Brand Colors = 33 combinations
+
+### High Priority Combinations:
+
+| # | Appearance | Brand Color | data-appearance | data-brand | Expected Primary |
+|---|------------|-------------|-----------------|------------|------------------|
+| 1 | Light | Default | light | default | #6366f1 (Indigo fallback) |
+| 2 | Dark | Default | dark | default | #818cf8 (Indigo lighter) |
+| 3 | Light | Purple | light | brand-purple | #695CFE |
+| 4 | Dark | Purple | dark | brand-purple | #695CFE |
+| 5 | Auto (Light) | Orange | light | brand-orange | #f97316 |
+| 6 | Auto (Dark) | Orange | dark | brand-orange | #f97316 |
+
+**Test Each Row:**
+- [ ] Row 1: ✅ PASS / ❌ FAIL
+- [ ] Row 2: ✅ PASS / ❌ FAIL
+- [ ] Row 3: ✅ PASS / ❌ FAIL ⭐ (Previously broken)
+- [ ] Row 4: ✅ PASS / ❌ FAIL ⭐ (Critical fix)
+- [ ] Row 5: ✅ PASS / ❌ FAIL
+- [ ] Row 6: ✅ PASS / ❌ FAIL
+
+---
+
+## 🧪 Part 4: Persistence Testing
+
+### 4.1 localStorage Verification
+
+**Steps:**
+- [ ] Set Appearance: Dark
+- [ ] Set Brand Color: Purple
+- [ ] Open DevTools → Application → Local Storage
+- [ ] Check keys:
+  ```javascript
+  appearance: "dark"
+  brandColor: "brand-purple"
+  theme: "brand-purple" // Legacy
+  ```
+
+**Reload Test:**
+- [ ] Hard reload (Ctrl+Shift+R)
+- [ ] Appearance stays Dark ✅
+- [ ] Brand Color stays Purple ✅
+- [ ] Both attributes present on `<html>` ✅
+
+**Result:** ✅ PASS / ❌ FAIL
+
+---
+
+### 4.2 Cross-Tab Sync
+
+**Steps:**
+- [ ] Open two tabs with the app
+- [ ] Tab 1: Change appearance to Dark
+- [ ] Tab 2: Should update automatically
+- [ ] Tab 1: Change brand to Red
+- [ ] Tab 2: Should update to Red
+
+**Result:** ✅ PASS / ❌ FAIL
+
+---
+
+## 🧪 Part 5: Performance Testing
+
+### 5.1 Theme Switch Speed
+
+**Expected Performance (After Optimization):**
+- Target: <50ms total
+- CSS Update: <25ms
+- Theme Change: <20ms
+
+**Test:**
+- [ ] Open DevTools → Performance
+- [ ] Toggle Dark ↔ Light multiple times
+- [ ] Check flame chart for theme operations
+- [ ] Look for console warnings: "Theme change took Xms"
+- [ ] Should be <50ms per switch
+
+**Results:**
+- [ ] Light → Dark: _____ ms
+- [ ] Dark → Light: _____ ms
+- [ ] Performance: ✅ <50ms / ⚠️ 50-100ms / ❌ >100ms
+
+**Notes:** _____________________________
+
+---
+
+### 5.2 Brand Color Switch Speed
+
+**Test:**
+- [ ] Switch between brand colors rapidly
+- [ ] Check console for performance warnings
+- [ ] Should feel instant (<50ms)
+
+**Result:** ✅ PASS / ❌ FAIL
+
+---
+
+## 🧪 Part 6: CSS Variables Inspection
+
+### 6.1 Semantic Tokens (Appearance-based)
+
+**Light Appearance:**
+```css
+:root[data-appearance="light"] {
+  --color-success: #22c55e;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+}
 ```
 
----
-
-## ✅ Final Verification
-
-### All Tests Complete
-
-- [ ] **12 themes tested** (light, dark, 10 brands)
-- [ ] **brand-purple works** ⭐ (critical fix verified)
-- [ ] **CSS variables injected** (all themes)
-- [ ] **localStorage persistence** (tested)
-- [ ] **No console errors** (verified)
-- [ ] **Accessibility checks** (passed)
-- [ ] **Visual quality** (good)
-- [ ] **Screenshots taken** (documented)
-
-### Summary
-
-**Total Themes:** 12  
-**Passed:** _____ / 12  
-**Failed:** _____ / 12  
-**Critical Issues:** _____  
-**Minor Issues:** _____  
-
-### Sign-off
-
-**Tester:** _____________________  
-**Date:** February 12, 2026  
-**Status:** ✅ APPROVED / ⚠️ WITH WARNINGS / ❌ FAILED  
-**Notes:** _____________________
-
----
-
-## 🎉 Success Criteria
-
-**Phase 2 is COMPLETE if:**
-
-- ✅ All 12 themes render correctly
-- ✅ brand-purple theme works (was broken)
-- ✅ CSS variables properly injected
-- ✅ Theme persistence via localStorage
-- ✅ Zero console errors
-- ✅ WCAG AA accessibility compliance
-- ✅ Visual quality acceptable
-
-**If all criteria met:**
-```
-🎊 PHASE 2 IMPLEMENTATION VERIFIED ✅
-Ready for production deployment!
+**Dark Appearance:**
+```css
+:root[data-appearance="dark"] {
+  --color-success: #4ade80;
+  --color-error: #f87171;
+  --color-warning: #fbbf24;
+  --color-info: #60a5fa;
+}
 ```
 
----
-
-## 📚 Additional Resources
-
-- **Theme System Implementation Guide:** [Guide/THEME_SYSTEM_IMPLEMENTATION_GUIDE.md](THEME_SYSTEM_IMPLEMENTATION_GUIDE.md)
-- **Theme System Quick Reference:** [Ref/THEME_SYSTEM_QUICK_REFERENCE.md](../Ref/THEME_SYSTEM_QUICK_REFERENCE.md)
-- **palettes.ts (SSOT):** [src/constants/palettes.ts](../src/constants/palettes.ts)
+**Verification:**
+- [ ] In Light mode, check computed `--color-success` = #22c55e
+- [ ] In Dark mode, check computed `--color-success` = #4ade80
+- [ ] Semantic tokens change with appearance ✅
 
 ---
 
-## Phase 2 Validation Objectives (Merged)
+### 6.2 Brand Palette (Brand-based)
 
-### Visual Regression
-- [ ] Test all themes (light, dark, 10 brand themes)
-- [ ] Verify semantic token colors match specifications
-- [ ] Test Work Log status badges in each theme
-- [ ] Capture baseline screenshots (optional)
+**Purple Brand:**
+```css
+:root[data-brand="brand-purple"] {
+  --color-primary-50: #f5f3ff;
+  --color-primary-500: #695CFE;
+  --color-primary-950: #1e1b4b;
+  /* ... 11 tones total */
+}
+```
 
-### Performance Targets
-- [ ] Theme change < 50ms (acceptable), < 10ms (excellent)
-- [ ] CSS variable update < 5ms
-- [ ] Total change time < 20ms
-
-### Accessibility
-- [ ] WCAG AA contrast for text and UI (>= 4.5:1 text, >= 3:1 UI)
-- [ ] High contrast mode works (21:1)
-- [ ] Keyboard navigation + focus visible
-- [ ] Reduced motion preference respected
-
-### Cross-Browser
-- [ ] Chrome, Edge, Firefox, Safari
-- [ ] Windows + macOS
+**Verification:**
+- [ ] Select Purple brand in Light mode
+- [ ] Check `--color-primary-500` = #695CFE ✅
+- [ ] Switch to Dark appearance
+- [ ] Check `--color-primary-500` still #695CFE ✅ (brand persists)
+- [ ] But `--color-success` changed ✅ (semantic updated)
 
 ---
 
-## Phase 3 UAT Checklist (Merged)
+### 6.3 CSS Fallback Pattern (Sidebar)
 
-### Pre-Test Setup
-- [ ] Dev server running
-- [ ] Admin login available
-- [ ] Theme testing page accessible
-- [ ] DevTools open (Console + Elements)
+**Default Brand:**
+```css
+/* When data-brand="default", no --color-primary-* variables set */
+/* Sidebar CSS uses fallback: */
+--sidebar-color-logo: var(--color-primary-500, #6366f1);
+/* Falls back to Indigo */
+```
 
-### Theme Validation
-- [ ] Light theme: white background, dark text
-- [ ] Dark theme: dark background, light text
-- [ ] Brand themes: primary color matches palette
-- [ ] High contrast mode: pure black/white
+**Purple Brand:**
+```css
+/* When data-brand="brand-purple", --color-primary-500 exists */
+--sidebar-color-logo: var(--color-primary-500, #6366f1);
+/* Uses brand purple #695CFE */
+```
 
-### Performance
-- [ ] No flicker during theme switch
-- [ ] No UI lag
-- [ ] Theme persists after refresh
-
-### Documentation
-- [ ] Record issues found
-- [ ] Confirm fixes or open tickets
+**Verification:**
+- [ ] Default brand → Sidebar is Indigo (#6366f1) ✅
+- [ ] Purple brand → Sidebar is Purple (#695CFE) ✅
+- [ ] CSS fallback working correctly ✅
 
 ---
 
-**Happy Testing! 🚀**
+## 🧪 Part 7: Accessibility Testing
+
+### 7.1 Keyboard Navigation
+
+**Test:**
+- [ ] Open theme selector with keyboard (Tab)
+- [ ] Navigate appearance options with Arrow keys
+- [ ] Select with Enter/Space
+- [ ] Navigate brand colors with Tab
+- [ ] All focusable elements have visible focus ring
+
+**Result:** ✅ PASS / ❌ FAIL
+
+---
+
+### 7.2 Screen Reader
+
+**Test:**
+- [ ] Enable NVDA/JAWS
+- [ ] Navigate to theme selector
+- [ ] Appearance options announced correctly
+- [ ] Brand color options announced with color names
+- [ ] Current selection state announced
+
+**Result:** ✅ PASS / ❌ FAIL
+
+---
+
+### 7.3 Reduced Motion
+
+**Test:**
+- [ ] Enable Windows Settings → Accessibility → Reduce Motion
+- [ ] Switch themes
+- [ ] No transition animations should occur
+- [ ] Check CSS: `transition-duration: 0ms !important`
+
+**Result:** ✅ PASS / ❌ FAIL
+
+---
+
+### 7.4 High Contrast Mode
+
+**Test:**
+- [ ] Enable Windows High Contrast Mode
+- [ ] App should respect system colors
+- [ ] Theme selector still functional
+- [ ] Check `data-a11y` attribute updates
+
+**Result:** ✅ PASS / ❌ FAIL
+
+---
+
+## 🧪 Part 8: Edge Cases
+
+### 8.1 Invalid localStorage Data
+
+**Test:**
+- [ ] Open DevTools → Application → localStorage
+- [ ] Set `appearance` to invalid value: "invalid"
+- [ ] Reload page
+- [ ] Should fallback to "auto" or "light"
+- [ ] No crashes or console errors
+
+**Result:** ✅ PASS / ❌ FAIL
+
+---
+
+### 8.2 Missing localStorage
+
+**Test:**
+- [ ] Clear all localStorage
+- [ ] Reload page
+- [ ] Should initialize with defaults:
+  - Appearance: "auto"
+  - Brand Color: "default"
+- [ ] Works correctly
+
+**Result:** ✅ PASS / ❌ FAIL
+
+---
+
+### 8.3 System Preference Change (Auto mode)
+
+**Test:**
+- [ ] Set Appearance: Auto
+- [ ] Open Windows Settings → Personalization → Colors
+- [ ] Change "Choose your mode" Light ↔ Dark
+- [ ] App should update automatically
+- [ ] Check media query listener working
+
+**Result:** ✅ PASS / ❌ FAIL
+
+---
+
+## 📊 Summary Checklist
+
+### Architecture Verification
+
+- [ ] **Option A Implemented:** Appearance + Brand Color independent ✅
+- [ ] **DOM Attributes Correct:**
+  - `data-appearance` (light/dark) ✅
+  - `data-brand` (default/brand-*) ✅
+  - `data-theme` (legacy) ✅
+- [ ] **CSS Selectors Work:**
+  - `:root[data-appearance="dark"]` ✅
+  - `:root[data-brand="brand-purple"]` ✅
+  - Both can match simultaneously ✅
+
+### Functional Requirements
+
+- [ ] All 3 appearance modes work (Light/Dark/Auto)
+- [ ] All 11 brand colors work (Default + 10 brands)
+- [ ] Dark mode + Brand colors work together (33 combinations)
+- [ ] Persistence working (localStorage)
+- [ ] Cross-tab synchronization working
+- [ ] System preference respected (Auto mode)
+
+### Performance Requirements
+
+- [ ] Theme switching <50ms
+- [ ] No layout thrashing
+- [ ] GPU acceleration active (will-change)
+- [ ] requestAnimationFrame batching working
+- [ ] Performance monitoring in console (dev mode)
+
+### Accessibility Requirements
+
+- [ ] Keyboard navigation
+- [ ] Screen reader support
+- [ ] Reduced motion respected
+- [ ] High contrast mode compatible
+- [ ] Focus indicators visible
+
+### Browser Compatibility
+
+- [ ] Chrome/Edge (Chromium): ✅ PASS / ❌ FAIL
+- [ ] Firefox: ✅ PASS / ❌ FAIL
+- [ ] Safari: ✅ PASS / ❌ FAIL
+
+---
+
+## 🐛 Known Issues Log
+
+**Issue Template:**
+```
+Issue #X: [Title]
+Severity: Critical / High / Medium / Low
+Steps to Reproduce:
+1. 
+2. 
+Expected: 
+Actual: 
+Browser: 
+Screenshot: 
+```
+
+**Logged Issues:**
+
+_[No issues logged yet]_
+
+---
+
+## ✅ Sign-Off
+
+**Tested By:** _____________________________  
+**Date:** _____________________________  
+**Overall Result:** ✅ PASS / ❌ FAIL  
+**Ready for Production:** YES / NO
+
+**Notes:**
+_____________________________________________________________
+_____________________________________________________________
+_____________________________________________________________
+
+---
+
+## 📚 References
+
+- **Architecture Decision:** Option A (Combinatorial)
+- **Apple HIG Dark Mode:** https://developer.apple.com/design/human-interface-guidelines/dark-mode/
+- **Material Design 3:** https://m3.material.io/styles/color/system/overview
+- **WCAG 2.1:** https://www.w3.org/WAI/WCAG21/quickref/
+- **Chrome Performance:** https://web.dev/rendering-performance/
+- **Implementation Guide:** `/Guide/THEME_SYSTEM_IMPLEMENTATION_GUIDE.md`

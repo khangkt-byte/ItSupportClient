@@ -24,13 +24,23 @@
 // Open browser Dev Tools > Console
 // Method 1: Simple visual test
 
-// Switch to brand-blue
-document.documentElement.setAttribute('data-theme', 'brand-blue');
-// Check: PENDING badge should still show amber (ok - semantic unchanged)
-// Check: IN PROGRESS badge should show blue (ok - info color)
-// Check: RESOLVED badge should show green (ok - success color)
+// NEW COMBINATORIAL SYSTEM:
+// Set appearance and brand independently
 
-// Value: Semantic tokens stay consistent across themes ✅
+// Test Light + Blue Brand
+document.documentElement.setAttribute('data-appearance', 'light');
+document.documentElement.setAttribute('data-brand', 'brand-blue');
+// Check: PENDING badge shows amber (semantic token)
+// Check: RESOLVED badge shows green (semantic token)
+// Check: Brand color is blue (--color-primary-500)
+
+// Test Dark + Blue Brand  
+document.documentElement.setAttribute('data-appearance', 'dark');
+document.documentElement.setAttribute('data-brand', 'brand-blue');
+// Check: Semantic tokens change (lighter colors for dark)
+// Check: Brand color stays blue (--color-primary-500 same)
+
+// Value: Semantic tokens controlled by appearance, brand colors independent ✅
 ```
 
 ### ✅ Test 2: CSS Variables Actually Update
@@ -38,12 +48,18 @@ document.documentElement.setAttribute('data-theme', 'brand-blue');
 // Check that CSS variables are applied to DOM
 const root = document.documentElement;
 const successColor = getComputedStyle(root).getPropertyValue('--color-success');
-console.log(successColor);  // Should output: ' #22c55e' (with space in value)
+console.log(successColor);  // Should output: ' #22c55e' (light mode)
 
-// Test dark mode
-document.documentElement.setAttribute('data-theme', 'dark');
+// NEW: Test dark mode with data-appearance attribute
+document.documentElement.setAttribute('data-appearance', 'dark');
 const darkSuccessColor = getComputedStyle(root).getPropertyValue('--color-success');
 console.log(darkSuccessColor);  // Should output: ' #4ade80' (lighter green)
+
+// Test brand color independence
+document.documentElement.setAttribute('data-brand', 'brand-purple');
+const primaryColor = getComputedStyle(root).getPropertyValue('--color-primary-500');
+console.log(primaryColor);  // Should output: ' #695CFE' (purple)
+// Note: Success color stays #4ade80 (dark semantic token)
 ```
 
 ### ✅ Test 3: useTheme Hook Returns Correct Tokens
@@ -256,11 +272,21 @@ export function ThemeSelector() {
 
 ### Direct DOM API (For Debugging)
 ```javascript
-// Change theme via JavaScript (debugging only)
+// NEW: Combinatorial theming requires two attributes
+// Change appearance
+document.documentElement.setAttribute('data-appearance', 'dark');
+document.body.setAttribute('data-appearance', 'dark');
+
+// Change brand color
+document.documentElement.setAttribute('data-brand', 'brand-blue');
+document.body.setAttribute('data-brand', 'brand-blue');
+
+// Legacy attribute (for backward compatibility)
 document.documentElement.setAttribute('data-theme', 'brand-blue');
 document.body.setAttribute('data-theme', 'brand-blue');
 
 // But use the useTheme hook in production for proper state management!
+// Recommended: setAppearance('dark') + setBrandColor('brand-blue')
 ```
 
 ### Redux/Zustand Integration (If Needed)

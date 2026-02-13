@@ -22,14 +22,23 @@
 
 /**
  * Theme Transition Support
- * Smooth color transitions when theme changes, unless user prefers reduced motion
+ * Optimized for 60fps performance (target: <16ms per frame)
  * @reference https://www.w3.org/TR/WCAG21/#animation-from-interactions
+ * @reference https://web.dev/articles/animations-guide
+ * 
+ * PERFORMANCE OPTIMIZATION:
+ * - Use will-change hint for GPU acceleration (Chrome/Safari best practice)
+ * - Reduced transition time: 150ms (was 300ms)
+ * - Only transition color properties (cheapest to animate)
  */
 html.theme-transition,
 html.theme-transition *,
 html.theme-transition *::before,
 html.theme-transition *::after {
-  transition: background-color 300ms ease, color 300ms ease, border-color 300ms ease !important;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease !important;
+  
+  /* GPU acceleration hint - Chrome DevTools best practice */
+  will-change: background-color, color, border-color;
 }
 
 /**

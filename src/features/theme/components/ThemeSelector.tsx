@@ -206,14 +206,16 @@ export function ThemeSelector({ collapsed = false }: ThemeSelectorProps) {
   }, [setAppearance, setBrandColor]);
 
   // Get semantic colors for current theme
+  // Note: Semantic colors are determined by appearance (light/dark), not brand
   const getSemanticColors = useCallback((themeValue: Theme): SemanticColorInfo[] => {
     const getCSSVariable = (varName: string): string => {
       return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
     };
 
-    // Temporarily apply theme to get colors
-    const original = document.documentElement.getAttribute('data-theme');
-    document.documentElement.setAttribute('data-theme', themeValue);
+    // Temporarily apply appearance to get semantic colors
+    const originalAppearance = document.documentElement.getAttribute('data-appearance');
+    const tempAppearance = resolvedAppearance; // Use current resolved appearance
+    document.documentElement.setAttribute('data-appearance', tempAppearance);
 
     const colors: SemanticColorInfo[] = [
       { name: 'Success', value: getCSSVariable('--color-success'), usage: 'Completed, Valid' },
@@ -223,14 +225,12 @@ export function ThemeSelector({ collapsed = false }: ThemeSelectorProps) {
     ];
 
     // Restore original
-    if (original) {
-      document.documentElement.setAttribute('data-theme', original);
-    } else {
-      document.documentElement.removeAttribute('data-theme');
+    if (originalAppearance) {
+      document.documentElement.setAttribute('data-appearance', originalAppearance);
     }
 
     return colors;
-  }, []);
+  }, [resolvedAppearance]);
 
   const semanticColors = useMemo(
     () => getSemanticColors(currentTheme),

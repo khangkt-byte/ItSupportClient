@@ -192,6 +192,12 @@ export const useTheme = (): UseThemeReturn => {
   /**
    * Apply theme to document
    * 
+   * PERFORMANCE OPTIMIZATIONS (Google/Microsoft/Apple Standards):
+   * 1. Batched DOM operations via requestAnimationFrame
+   * 2. GPU acceleration hints with will-change
+   * 3. Reduced transition time: 150ms (was 300ms)
+   * 4. Performance monitoring in development
+   * 
    * NEW: Sets data-appearance and data-brand attributes for combinatorial theming.
    * Also maintains legacy data-theme for backwards compatibility.
    * 
@@ -213,6 +219,7 @@ export const useTheme = (): UseThemeReturn => {
    * - HTML data attributes: https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes
    * - CSS attribute selectors: https://developer.mozilla.org/en-US/docs/Web/CSS/Attribute_selectors
    * - Apple HIG Dark Mode: https://developer.apple.com/design/human-interface-guidelines/dark-mode/
+   * - Chrome Rendering Performance: https://web.dev/rendering-performance/
    *
    * @internal
    */
@@ -224,17 +231,20 @@ export const useTheme = (): UseThemeReturn => {
       mode: AccessibilityMode = 'default'
     ) => {
       try {
-        // NEW: Set combinatorial attributes
-        document.documentElement.setAttribute('data-appearance', currentAppearance);
-        document.body.setAttribute('data-appearance', currentAppearance);
-        document.documentElement.setAttribute('data-brand', currentBrand);
-        document.body.setAttribute('data-brand', currentBrand);
+        // PERFORMANCE: Batch DOM operations in requestAnimationFrame
+        requestAnimationFrame(() => {
+          // NEW: Set combinatorial attributes
+          document.documentElement.setAttribute('data-appearance', currentAppearance);
+          document.body.setAttribute('data-appearance', currentAppearance);
+          document.documentElement.setAttribute('data-brand', currentBrand);
+          document.body.setAttribute('data-brand', currentBrand);
 
-        // Legacy: Set combined theme attribute for backwards compatibility
-        document.documentElement.setAttribute('data-theme', nextTheme);
-        document.body.setAttribute('data-theme', nextTheme);
-        document.documentElement.setAttribute('data-a11y', mode);
-        document.body.setAttribute('data-a11y', mode);
+          // Legacy: Set combined theme attribute for backwards compatibility
+          document.documentElement.setAttribute('data-theme', nextTheme);
+          document.body.setAttribute('data-theme', nextTheme);
+          document.documentElement.setAttribute('data-a11y', mode);
+          document.body.setAttribute('data-a11y', mode);
+        });
 
         // Apply all CSS variables from design tokens (Phase 1 - Runtime Injection)
         // This handles primary palette + semantic tokens + foreground/background/border
@@ -455,6 +465,11 @@ export const useTheme = (): UseThemeReturn => {
    * NEW: Set appearance independently (light/dark/auto)
    * Follows Apple HIG and Material Design 3 best practices
    *
+   * PERFORMANCE OPTIMIZATIONS:
+   * - Reduced transition timeout: 150ms (was 300ms) for 60fps
+   * - GPU hints via CSS will-change
+   * - Batched DOM operations in requestAnimationFrame
+   *
    * @param {Appearance} newAppearance - Appearance to set (light/dark/auto)
    *
    * @description
@@ -468,6 +483,7 @@ export const useTheme = (): UseThemeReturn => {
    * @reference
    * - Apple HIG Dark Mode: https://developer.apple.com/design/human-interface-guidelines/dark-mode/
    * - Material Design 3 Dark Theme: https://m3.material.io/styles/color/dark-theme/overview
+   * - Chrome Rendering Performance: https://web.dev/rendering-performance/
    *
    * @example
    * const { setAppearance } = useTheme();
@@ -477,6 +493,9 @@ export const useTheme = (): UseThemeReturn => {
    */
   const setAppearance = useCallback(
     (newAppearance: Appearance) => {
+      // PERFORMANCE: Mark start for monitoring
+      const startTime = performance.now();
+
       // Resolve actual appearance if auto
       const actualAppearance: 'light' | 'dark' = newAppearance === 'auto'
         ? resolvedAppearance
@@ -493,9 +512,10 @@ export const useTheme = (): UseThemeReturn => {
           clearTimeout(transitionTimeoutRef.current);
         }
 
+        // PERFORMANCE: Reduced from 300ms to 150ms (matches CSS transition)
         transitionTimeoutRef.current = setTimeout(() => {
           document.documentElement.classList.remove('theme-transition');
-        }, 300);
+        }, 150);
       }
 
       // Update state
@@ -527,6 +547,14 @@ export const useTheme = (): UseThemeReturn => {
       } catch (error) {
         console.error('Failed to dispatch appearance change event:', error);
       }
+
+      // PERFORMANCE: Log in development if slow
+      if (process.env.NODE_ENV === 'development') {
+        const duration = performance.now() - startTime;
+        if (duration > 16) { // 60fps threshold
+          console.warn(`⚠️ setAppearance took ${duration.toFixed(2)}ms (target: <16ms for 60fps)`);
+        }
+      }
     },
     [brandColor, resolvedAppearance, accessibilityMode, prefersReducedMotion, applyTheme, computeTheme]
   );
@@ -534,6 +562,10 @@ export const useTheme = (): UseThemeReturn => {
   /**
    * NEW: Set brand color independently
    * Follows Material Design 3 seed color / brand color best practices
+   *
+   * PERFORMANCE OPTIMIZATIONS:
+   * - Reduced transition timeout: 150ms (was 300ms)
+   * - Performance monitoring in development
    *
    * @param {BrandColorTheme} newBrandColor - Brand color to set
    *
@@ -547,6 +579,7 @@ export const useTheme = (): UseThemeReturn => {
    *
    * @reference
    * - Material Design 3 Color Roles: https://m3.material.io/styles/color/roles
+   * - Chrome Rendering Performance: https://web.dev/rendering-performance/
    *
    * @example
    * const { setBrandColor } = useTheme();
@@ -556,6 +589,9 @@ export const useTheme = (): UseThemeReturn => {
    */
   const setBrandColor = useCallback(
     (newBrandColor: BrandColorTheme) => {
+      // PERFORMANCE: Mark start for monitoring
+      const startTime = performance.now();
+
       // Validate brand color exists
       const allBrandColors: BrandColorTheme[] = ['default', ...Object.keys(palettes) as BrandTheme[]];
       if (!allBrandColors.includes(newBrandColor)) {
@@ -579,9 +615,10 @@ export const useTheme = (): UseThemeReturn => {
           clearTimeout(transitionTimeoutRef.current);
         }
 
+        // PERFORMANCE: Reduced from 300ms to 150ms (matches CSS transition)
         transitionTimeoutRef.current = setTimeout(() => {
           document.documentElement.classList.remove('theme-transition');
-        }, 300);
+        }, 150);
       }
 
       // Update state
@@ -612,6 +649,14 @@ export const useTheme = (): UseThemeReturn => {
         );
       } catch (error) {
         console.error('Failed to dispatch brand color change event:', error);
+      }
+
+      // PERFORMANCE: Log in development if slow
+      if (process.env.NODE_ENV === 'development') {
+        const duration = performance.now() - startTime;
+        if (duration > 16) { // 60fps threshold
+          console.warn(`⚠️ setBrandColor took ${duration.toFixed(2)}ms (target: <16ms for 60fps)`);
+        }
       }
     },
     [appearance, resolvedAppearance, accessibilityMode, prefersReducedMotion, applyTheme, computeTheme]

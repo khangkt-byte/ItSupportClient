@@ -883,7 +883,15 @@ const tokens = getSemanticTokens();
 // Hardcoded theme logic duplicated across components
 const [theme, setTheme] = useState('light');
 localStorage.setItem('theme', theme);
+
+// OLD: Single attribute approach (deprecated)
 document.documentElement.setAttribute('data-theme', theme);
+
+// NEW: Use useTheme hook with combinatorial theming
+const { setAppearance, setBrandColor } = useTheme();
+setAppearance('dark');        // Semantic tokens
+setBrandColor('brand-purple'); // Brand palette
+// Hook handles DOM updates, localStorage, events automatically
 ```
 
 ### 6. Handle Theme Transitions Gracefully

@@ -314,8 +314,8 @@ function main() {
     const outputPath = join(__dirname, '../src/styles/generated-themes.css');
     writeFileSync(outputPath, css, 'utf-8');
     
-    // Count themes
-    const themeCount = (css.match(/data-theme="/g) || []).length;
+    // Count brand themes (using data-brand selector)
+    const themeCount = (css.match(/data-brand="/g) || []).length;
     const lineCount = css.split('\n').length;
     
     console.log('✅ Theme CSS generated successfully!\n');
