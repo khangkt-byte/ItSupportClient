@@ -4,19 +4,13 @@ import type {
   CreateIssueLogDto,
   UpdateIssueLogDto,
   PaginatedResult,
-  QueryParams,
+  WorkLogsQueryParams,
   ImportValidationResultDto,
   ImportResultDto,
   IssueSuggestionDto,
   CauseSuggestionDto,
   BulkDeleteResultDto,
 } from '@/types/data';
-
-/**
- * Query parameters for work logs list endpoint
- * Extends the generic QueryParams with work logs-specific filtering
- */
-export interface WorkLogsQueryParams extends QueryParams { }
 
 export const workLogsApi = {
   /**
@@ -30,6 +24,10 @@ export const workLogsApi = {
       SortBy: params.sortBy,
       IsDescending: params.isDescending,
       Search: params.search,
+      Status: params.status,
+      DptId: params.dptId,
+      AreaId: params.areaId,
+      IssueId: params.issueId,
     });
 
     return apiClient.get<PaginatedResult<IssueLogDto>>(`/api/issue-logs${queryString}`);

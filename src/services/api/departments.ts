@@ -11,22 +11,16 @@ import type {
   UpdateDepartmentDto,
   DepartmentSuggestionDto,
   PaginatedResult,
-  QueryParams,
+  DepartmentsQueryParams,
   BulkDeleteResultDto
 } from '@/types/data';
-
-/**
- * Query parameters for departments list endpoint
- * Extends the generic QueryParams with departments-specific filtering
- */
-export interface DepartmentQueryParams extends QueryParams { }
 
 class DepartmentAPI {
   /**
    * GET /api/departments
    * Lấy danh sách phòng ban (có phân trang)
    */
-  async getAll(params?: DepartmentQueryParams): Promise<PaginatedResult<DepartmentDto>> {
+  async getAll(params?: DepartmentsQueryParams): Promise<PaginatedResult<DepartmentDto>> {
     const queryParams = new URLSearchParams();
 
     if (params?.page) queryParams.append('Page', params.page.toString());

@@ -24,7 +24,7 @@ import { PermissionEditor } from '@/components/common/PermissionEditor';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { accountsApi } from '@/services/api/accounts';
 import { rolesApi } from '@/services/api/roles';
-import type { Account, Employee, RoleDto, ClaimDto, QueryParams, PaginatedResult, ListAccountDto } from '@/types/data';
+import type { Account, Employee, RoleDto, ClaimDto, AccountsQueryParams, PaginatedResult, ListAccountDto } from '@/types/data';
 import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 
@@ -47,20 +47,18 @@ type ConfirmAction = 'delete' | 'lock' | 'unlock';
 type ConfirmState = { action: ConfirmAction; account: Account } | null;
 
 export function AccountManagement({ data, setData, employees, roles }: Props) {
-  // Query Parameters state
-  const [queryParams, setQueryParams] = useState<QueryParams>({
+  // Query Parameters state (includes server-side filters)
+  const [queryParams, setQueryParams] = useState<AccountsQueryParams>({
     page: 1,
     pageSize: 10,
     search: '',
     sortBy: 'username',
     isDescending: false,
+    isLocked: null, // null = all, true = locked only, false = active only
   });
 
   // Paginated result state
   const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<ListAccountDto> | null>(null);
-
-  // Filter state
-  const [statusFilter, setStatusFilter] = useState('all');
 
   // Form states
   const [showForm, setShowForm] = useState(false);
@@ -81,34 +79,14 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
 
   const { hasPermission } = usePermission();
 
-  // Fetch accounts with current query parameters
+  // Fetch accounts with current query parameters (server-side filtering)
   const fetchAccounts = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
       
-      // Build the actual query params for the API
-      const apiParams = { ...queryParams };
-      
-      // Add status filter if not 'all'
-      if (statusFilter !== 'all') {
-        // This would be sent to backend if needed
-        // For now, we'll filter locally
-      }
-
-      const result = await accountsApi.getAll(apiParams);
+      const result = await accountsApi.getAll(queryParams);
       setPaginatedResult(result);
-      
-      // If backend doesn't filter status, filter locally
-      if (statusFilter !== 'all') {
-        const filtered = {
-          ...result,
-          items: result.items.filter(item =>
-            statusFilter === 'active' ? !item.isLocked : item.isLocked
-          ),
-        };
-        setPaginatedResult(filtered);
-      }
     } catch (err) {
       console.error('Failed to fetch accounts:', err);
       setError('Failed to load accounts');
@@ -116,7 +94,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
     } finally {
       setIsLoading(false);
     }
-  }, [queryParams, statusFilter]);
+  }, [queryParams]);
 
   // Fetch accounts when query parameters or status filter changes
   useEffect(() => {
@@ -415,12 +393,24 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
           { label: 'Active', value: 'active' },
           { label: 'Locked', value: 'locked' },
         ]}
-        currentFilter={statusFilter}
-        onFilterChange={setStatusFilter}
+        currentFilter={
+          queryParams.isLocked === null ? 'all' :
+          queryParams.isLocked ? 'locked' : 'active'
+        }
+        onFilterChange={(value) =>
+          setQueryParams({
+            ...queryParams,
+            isLocked: value === 'all' ? null : value === 'locked',
+            page: 1, // Reset to page 1 when filter changes
+          })
+        }
         sortOptions={[
           { label: 'Username', value: 'username' },
-          { label: 'Employee Name', value: 'employeeName' },
+          { label: 'Employee Name', value: 'empName' },
+          { label: 'Employee Code', value: 'empCode' },
           { label: 'Created Date', value: 'createdAt' },
+          { label: 'Last Login', value: 'lastLoginAt' },
+          { label: 'Status', value: 'isLocked' },
         ]}
         placeholder="Search by username, email, or employee name..."
         showResults={true}

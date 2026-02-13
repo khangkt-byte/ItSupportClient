@@ -4,15 +4,9 @@ import type {
   CreateAreaDto,
   UpdateAreaDto,
   PaginatedResult,
-  QueryParams,
+  AreasQueryParams,
   BulkDeleteResultDto,
 } from '@/types/data';
-
-/**
- * Query parameters for areas list endpoint
- * Extends the generic QueryParams with areas-specific filtering
- */
-export interface AreasQueryParams extends QueryParams { }
 
 export const areasApi = {
   /**

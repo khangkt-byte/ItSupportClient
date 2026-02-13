@@ -8,15 +8,11 @@ import type {
   ChangePasswordDto,
   LoginHistoryDto,
   PaginatedResult,
-  QueryParams,
+  AccountsQueryParams,
   BulkDeleteResultDto,
 } from '@/types/data';
 
-/**
- * Query parameters for accounts list endpoint
- * Extends the generic QueryParams with accounts-specific filtering
- */
-export interface AccountsQueryParams extends QueryParams { }
+// Removed: AccountsQueryParams is now imported from @/types/data for consistency
 
 export const accountsApi = {
   /**
@@ -30,6 +26,7 @@ export const accountsApi = {
       SortBy: params.sortBy,
       IsDescending: params.isDescending,
       Search: params.search,
+      IsLocked: params.isLocked, // null will be omitted by buildQueryString
     });
 
     return apiClient.get<PaginatedResult<ListAccountDto>>(`/api/accounts${queryString}`);

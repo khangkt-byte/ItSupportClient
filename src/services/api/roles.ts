@@ -12,12 +12,6 @@ import type {
   BulkDeleteResultDto,
 } from '@/types/data';
 
-/**
- * Query parameters for roles list endpoint
- * Extends the generic QueryParams with roles-specific filtering
- */
-export interface RolesQueryParams extends QueryParams { }
-
 export const rolesApi = {
   /**
    * Get all roles with pagination

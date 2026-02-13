@@ -8,15 +8,9 @@ import type {
   UpdateProfileDto,
   ProfileDto,
   PaginatedResult,
-  QueryParams,
+  EmployeesQueryParams,
   BulkDeleteResultDto,
 } from '@/types/data';
-
-/**
- * Query parameters for employees list endpoint
- * Extends the generic QueryParams with employees-specific filtering
- */
-export interface EmployeesQueryParams extends QueryParams { }
 
 export const employeesApi = {
   /**
@@ -30,6 +24,8 @@ export const employeesApi = {
       SortBy: params.sortBy,
       IsDescending: params.isDescending,
       Search: params.search,
+      DptId: params.dptId,
+      AreaId: params.areaId,
     });
 
     return apiClient.get<PaginatedResult<ListEmployeeDto>>(`/api/employees${queryString}`);

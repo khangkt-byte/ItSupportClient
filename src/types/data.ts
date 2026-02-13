@@ -24,6 +24,46 @@ export interface QueryParams {
   search?: string;
 }
 
+/**
+ * Module-specific query parameters
+ * Extends QueryParams with resource-specific filters
+ * Reference: Microsoft REST API Guidelines, Azure API Design Best Practices
+ */
+
+// Accounts
+export interface AccountsQueryParams extends QueryParams {
+  isLocked?: boolean | null; // null = all, true = locked only, false = active only
+}
+
+// Employees
+export interface EmployeesQueryParams extends QueryParams {
+  dptId?: number | null; // Filter by department
+  areaId?: number | null; // Filter by area
+}
+
+// Roles
+export interface RolesQueryParams extends QueryParams {
+  // Future: Add role-specific filters
+}
+
+// Work Logs (Issue Logs)
+export interface WorkLogsQueryParams extends QueryParams {
+  status?: string | null; // Filter by status (pending, in-progress, resolved, cancelled)
+  dptId?: number | null; // Filter by department
+  areaId?: number | null; // Filter by area
+  issueId?: number | null; // Filter by issue type
+}
+
+// Areas
+export interface AreasQueryParams extends QueryParams {
+  // Future: Add area-specific filters
+}
+
+// Departments
+export interface DepartmentsQueryParams extends QueryParams {
+  // Future: Add department-specific filters
+}
+
 // Role Management
 export interface ClaimDto {
   claimId: number;
