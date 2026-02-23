@@ -70,7 +70,10 @@ export const workLogsApi = {
    * Delete single work log
    */
   async deleteSingle(id: string, softDelete: boolean = true): Promise<boolean> {
-    return this.delete([id], softDelete);
+    const result = await this.delete([id], softDelete);
+    // Adjust the logic below based on the actual structure of BulkDeleteResultDto
+    // For example, if it has a 'success' or 'deletedCount' property:
+    return result && (result.deletedCount ?? 0) > 0;
   },
 
   /**

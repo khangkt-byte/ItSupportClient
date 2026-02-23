@@ -1083,7 +1083,7 @@ export const ThemeValidationTest: React.FC = () => {
         </div>
 
         {/* Testing Workflow Instructions */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-lg shadow-lg p-6">
+        <div className="bg-linear-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-lg shadow-lg p-6">
           <h2 className="text-2xl font-bold text-blue-900 dark:text-blue-100 mb-4">
             📋 Combinatorial Testing Workflow
           </h2>

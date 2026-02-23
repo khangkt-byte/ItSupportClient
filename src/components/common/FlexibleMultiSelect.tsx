@@ -136,7 +136,7 @@ export function FlexibleMultiSelect({
 
       <div className="relative">
         {/* Selected values + Input */}
-        <div className="w-full min-h-[42px] px-3 py-2 border border-input rounded-lg bg-card flex flex-wrap gap-2 items-center focus-within:ring-2 focus-within:ring-primary-500 focus-within:border-transparent">
+        <div className="w-full min-h-10.5 px-3 py-2 border border-input rounded-lg bg-card flex flex-wrap gap-2 items-center focus-within:ring-2 focus-within:ring-primary-500 focus-within:border-transparent">
           {values.map((value) => {
             const option = options.find(opt => opt.value === value);
             const displayLabel = option ? option.label : value;
@@ -166,7 +166,7 @@ export function FlexibleMultiSelect({
             onKeyDown={handleKeyDown}
             onFocus={handleFocus}
             placeholder={values.length === 0 ? placeholder : ''}
-            className="flex-1 min-w-[120px] outline-none bg-transparent text-foreground placeholder-placeholder"
+            className="flex-1 min-w-30 outline-none bg-transparent text-foreground placeholder-placeholder"
           />
         </div>
 

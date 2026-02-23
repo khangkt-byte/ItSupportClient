@@ -322,7 +322,6 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
           </div>
         )}
       </div>
-      </div>
 
       {/* Form Modal */}
       {showForm && (
