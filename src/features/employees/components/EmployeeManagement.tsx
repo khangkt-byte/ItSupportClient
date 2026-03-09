@@ -16,7 +16,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit, Trash2, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Edit, Trash2, X, ChevronLeft, ChevronRight, User, AlertCircle } from 'lucide-react';
 import { employeesApi } from '@/services/api/employees';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import type { Employee, Department, AreaDto, EmployeesQueryParams, PaginatedResult, ListEmployeeDto } from '@/types/data';
@@ -38,6 +38,10 @@ interface EmployeeFormData {
 }
 
 export function EmployeeManagement({ data, setData, departments, areas }: Props) {
+  void data;
+  void setData;
+  void areas;
+
   // Server-side query parameters
   const [queryParams, setQueryParams] = useState<EmployeesQueryParams>({
     page: 1,
@@ -70,7 +74,6 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
 
   // Additional filter state for UI
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
-  const [areaFilter, setAreaFilter] = useState<string>('all');
 
   // Fetch employees from server with current query parameters
   const fetchEmployees = useCallback(async () => {
@@ -105,16 +108,6 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
     setQueryParams({
       ...queryParams,
       dptId: value === 'all' ? null : parseInt(value),
-      page: 1,
-    });
-  };
-
-  // Handle area filter change
-  const handleAreaFilterChange = (value: string) => {
-    setAreaFilter(value);
-    setQueryParams({
-      ...queryParams,
-      areaId: value === 'all' ? null : parseInt(value),
       page: 1,
     });
   };
@@ -175,10 +168,18 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Employee Management</h2>
+        <div>
+          <h2 className="text-2xl font-semibold flex items-center gap-2">
+            <User className="w-7 h-7 text-primary-600" />
+            Employee Management
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Manage employee profiles with search, filter, and sorting controls
+          </p>
+        </div>
         <button
           onClick={() => openForm()}
-          className="btn-primary px-4 py-2 flex items-center gap-2"
+          className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm"
         >
           <Plus className="w-5 h-5" />
           Add Employee
@@ -207,20 +208,34 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
           { label: 'Created Date', value: 'createdAt' },
         ]}
         placeholder="Search by name, employee code, or email..."
+        showResults={true}
       />
 
-      {/* Error State */}
-      {error && (
-        <div className="card p-4 bg-error-background border-error-foreground">
-          <p className="text-error-foreground">{error}</p>
-        </div>
-      )}
-
       {/* Table */}
-      <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-muted/50 border-b border-border">
+      <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+              <p className="text-muted-foreground">Loading employees...</p>
+            </div>
+          </div>
+        )}
+
+        {error && !isLoading && (
+          <div className="p-4 bg-error-background border border-error-border flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium text-error-foreground">Error</p>
+              <p className="text-sm text-error-foreground">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {!isLoading && !error && (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-muted/50 border-b border-border">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Employee Code</th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Name</th>
@@ -229,18 +244,9 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Position</th>
                 <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">Actions</th>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-border bg-card">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-                      Loading employees...
-                    </div>
-                  </td>
-                </tr>
-              ) : !paginatedResult || paginatedResult.items.length === 0 ? (
+              </thead>
+              <tbody className="divide-y divide-border bg-card">
+              {!paginatedResult || paginatedResult.items.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
                     <div className="flex flex-col items-center gap-2">
@@ -278,12 +284,13 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
                   </tr>
                 ))
               )}
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {/* Pagination Controls - Microsoft 365 style */}
-        {paginatedResult && paginatedResult.totalPages > 1 && (
+        {paginatedResult && paginatedResult.totalPages > 1 && !isLoading && !error && (
           <div className="flex items-center justify-between px-6 py-3 border-t border-border bg-muted/20">
             <div className="flex items-center gap-2">
               <button
