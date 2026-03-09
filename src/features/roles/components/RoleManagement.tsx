@@ -19,10 +19,11 @@
  * - GET /api/roles/claims - Get all available claims
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Plus, Edit, Trash2, X, Shield, Save, AlertCircle, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { rolesApi } from '@/services/api/roles';
-import type { Role, RoleDto, ClaimDto } from '@/types/data';
+import { SearchFilterBar } from '@/components/common/SearchFilterBar';
+import type { Role, RoleDto, ClaimDto, RolesQueryParams, PaginatedResult } from '@/types/data';
 import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
@@ -64,6 +65,16 @@ function groupClaimsByCategory(claims: ClaimDto[]): ClaimGroup[] {
 }
 
 export function RoleManagement({ data, setData }: Props) {
+  const [queryParams, setQueryParams] = useState<RolesQueryParams>({
+    page: 1,
+    pageSize: 10,
+    search: '',
+    sortBy: 'name',
+    isDescending: false,
+  });
+  const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<RoleDto> | null>(null);
+  const [roleFilter, setRoleFilter] = useState<string>('all');
+
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<RoleDto | null>(null);
   const [formData, setFormData] = useState<RoleFormData>({
@@ -79,6 +90,30 @@ export function RoleManagement({ data, setData }: Props) {
   const [confirmDelete, setConfirmDelete] = useState<RoleDto | null>(null);
 
   const { hasPermission } = usePermission();
+
+  const fetchRoles = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const result = await rolesApi.getAll(queryParams);
+      setPaginatedResult(result);
+    } catch (err) {
+      console.error('Failed to fetch roles:', err);
+      setError('Failed to load roles');
+      setPaginatedResult(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [queryParams]);
+
+  const syncDataManagerRoles = useCallback(async () => {
+    const allRoles = await rolesApi.getAll({ page: 1, pageSize: 1000, sortBy: 'name', isDescending: false });
+    setData(allRoles.items.map((role) => ({ ...role, id: String(role.roleId) } as Role)));
+  }, [setData]);
+
+  useEffect(() => {
+    fetchRoles();
+  }, [fetchRoles]);
 
   // Load available claims when form opens
   useEffect(() => {
@@ -131,17 +166,12 @@ export function RoleManagement({ data, setData }: Props) {
       };
 
       if (editing) {
-        const updated = await rolesApi.update(editing.roleId, roleData);
-        // Transform RoleDto to Role by adding id property
-        const updatedRole = { ...updated, id: String(updated.roleId) };
-        setData(data.map((i) => (i.roleId === editing.roleId ? updatedRole : i)));
+        await rolesApi.update(editing.roleId, roleData);
       } else {
-        const created = await rolesApi.create(roleData);
-        // Transform RoleDto to Role by adding id property
-        const createdRole = { ...created, id: String(created.roleId) };
-        setData([...data, createdRole]);
+        await rolesApi.create(roleData);
       }
 
+      await Promise.all([fetchRoles(), syncDataManagerRoles()]);
       setShowForm(false);
       setFormData({ name: '', description: '', selectedClaimIds: [] });
     } catch (err: any) {
@@ -158,7 +188,7 @@ export function RoleManagement({ data, setData }: Props) {
     try {
       // Use deleteSingle for single role deletion
       await rolesApi.deleteSingle(confirmDelete.roleId);
-      setData(data.filter((i) => i.roleId !== confirmDelete.roleId));
+      await Promise.all([fetchRoles(), syncDataManagerRoles()]);
       setConfirmDelete(null);
     } catch (err: any) {
       alert(err.message || 'Failed to delete role');
@@ -224,59 +254,163 @@ export function RoleManagement({ data, setData }: Props) {
         )}
       </div>
 
-      {/* Roles Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {data.map((item) => {
-          const claimCount = item.claims?.length || 0;
-          return (
-            <div key={item.id} className="bg-card border border-border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col min-h-240px">
-              <div>
-                <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center mb-4">
-                  <Shield className="w-6 h-6 text-primary-600 dark:text-primary-400" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2 text-foreground">{item.name}</h3>
-                {item.description && (
-                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{item.description}</p>
-                )}
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="px-2 py-1 text-xs rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 font-medium">
-                    {claimCount} {claimCount !== 1 ? 'permissions' : 'permission'}
-                  </span>
-                </div>
-              </div>
-              {(hasPermission(Permissions.Role.Edit) || hasPermission(Permissions.Role.Delete)) && (
-                <div className="flex gap-2 mt-auto">
-                  {hasPermission(Permissions.Role.Edit) && (
-                    <button
-                      onClick={() => openForm(item)}
-                      className="flex-1 px-3 py-2 text-sm bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                    >
-                      <Edit className="w-3 h-3" />
-                      Edit
-                    </button>
-                  )}
-                  {hasPermission(Permissions.Role.Delete) && (
-                    <button
-                      onClick={() => setConfirmDelete(item)}
-                      className="flex-1 px-3 py-2 text-sm bg-error-background text-error-foreground rounded-lg hover:bg-error-background transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                      Delete
-                    </button>
-                  )}
-                </div>
-              )}
+      <SearchFilterBar
+        queryParams={queryParams}
+        onQueryChange={(params) => setQueryParams(params as RolesQueryParams)}
+        paginatedResult={paginatedResult || undefined}
+        filterOptions={[{ label: 'All Roles', value: 'all' }]}
+        currentFilter={roleFilter}
+        onFilterChange={setRoleFilter}
+        sortOptions={[
+          { label: 'Role Name', value: 'name' },
+          { label: 'Description', value: 'description' },
+          { label: 'Created Date', value: 'createdAt' },
+        ]}
+        placeholder="Search by role name or description..."
+        showResults={true}
+      />
+
+      <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+              <p className="text-muted-foreground">Loading roles...</p>
             </div>
-          );
-        })}
-        {data.length === 0 && (
-          <div className="col-span-full py-12 text-center text-muted-foreground">
-            <Shield className="w-12 h-12 mx-auto mb-3 text-placeholder" />
-            <p className="text-lg font-medium">No roles found</p>
-            <p className="text-sm mt-1">Create your first role to get started</p>
           </div>
         )}
+
+        {error && !showForm && !isLoading && (
+          <div className="p-4 bg-error-background border border-error-border flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium text-error-foreground">Error</p>
+              <p className="text-sm text-error-foreground">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {!isLoading && !error && (
+          <table className="w-full">
+            <thead className="bg-muted border-b border-border">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Role Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Description</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Permissions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Created</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {(paginatedResult?.items || []).length > 0 ? (
+                (paginatedResult?.items || []).map((item) => {
+                  const claimCount = item.claims?.length || 0;
+                  return (
+                    <tr key={item.roleId} className="hover:bg-accent transition-colors">
+                      <td className="px-6 py-4 text-sm font-medium text-foreground">{item.name}</td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground max-w-xs truncate">{item.description || 'N/A'}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className="px-2 py-1 text-xs rounded bg-primary-100 text-primary-700 font-medium">
+                          {claimCount} {claimCount !== 1 ? 'permissions' : 'permission'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground">
+                        {new Date(item.createdAt).toLocaleDateString('en-GB', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                        })}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-right">
+                        <div className="inline-flex items-center gap-2">
+                          {hasPermission(Permissions.Role.Edit) && (
+                            <button
+                              onClick={() => openForm(item)}
+                              className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors"
+                              title="Edit role"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                          )}
+                          {hasPermission(Permissions.Role.Delete) && (
+                            <button
+                              onClick={() => setConfirmDelete(item)}
+                              className="text-error-foreground inline-flex items-center justify-center hover:text-error-foreground transition-colors"
+                              title="Delete role"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
+                    <Shield className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
+                    <p className="text-lg font-medium">No roles found</p>
+                    <p className="text-sm mt-1">Create your first role to get started</p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
+
+      {paginatedResult && !isLoading && (
+        <div className="card p-4 flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Page <span className="font-medium">{paginatedResult.page}</span> of{' '}
+            <span className="font-medium">{paginatedResult.totalPages}</span> ({' '}
+            <span className="font-medium">{paginatedResult.totalCount}</span> total items)
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() =>
+                setQueryParams({
+                  ...queryParams,
+                  page: Math.max(1, (queryParams.page || 1) - 1),
+                })
+              }
+              disabled={!paginatedResult.hasPreviousPage}
+              className="flex items-center gap-1 px-3 py-2 border border-input rounded-lg bg-card hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
+            >
+              <span>Previous</span>
+            </button>
+
+            <input
+              type="number"
+              min="1"
+              max={paginatedResult.totalPages}
+              value={queryParams.page || 1}
+              onChange={(e) => {
+                const pageNum = Math.min(
+                  Math.max(1, parseInt(e.target.value) || 1),
+                  paginatedResult.totalPages
+                );
+                setQueryParams({ ...queryParams, page: pageNum });
+              }}
+              className="w-12 px-2 py-2 border border-input rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-card text-foreground"
+            />
+
+            <button
+              onClick={() =>
+                setQueryParams({
+                  ...queryParams,
+                  page: Math.min(paginatedResult.totalPages, (queryParams.page || 1) + 1),
+                })
+              }
+              disabled={!paginatedResult.hasNextPage}
+              className="flex items-center gap-1 px-3 py-2 border border-input rounded-lg bg-card hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
+            >
+              <span>Next</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Form Dialog */}
       {showForm && (

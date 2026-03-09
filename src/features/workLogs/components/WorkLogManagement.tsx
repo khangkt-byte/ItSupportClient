@@ -1,15 +1,13 @@
 import { useState, useMemo, useRef, useEffect, JSX } from 'react';
-import { Plus, Search, Edit, Trash2, X, ChevronDown, ChevronUp, Loader2, Download, Upload, FileSpreadsheet, Clock, PlayCircle, CheckCircle2, XCircle } from 'lucide-react';
-import type { WorkLog, WorkStatus, Employee, Department, Area, ImportValidationResult, DuplicateHandling, IssueLogDto } from '@/types/data';
+import { Plus, Edit, Trash2, X, ChevronDown, ChevronUp, Loader2, Download, Upload, FileSpreadsheet, Clock, PlayCircle, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import type { WorkLog, WorkStatus, Employee, Department, Area, ImportValidationResult, DuplicateHandling, IssueLogDto, WorkLogsQueryParams, PaginatedResult } from '@/types/data';
 import { workLogsApi, issuesApi, causesApi } from '@/services/api';
 import { workLogToCreateDto } from '@/utils/workLogAdapter';
 import React from 'react';
 import { SearchableCombobox } from '@/components/common/SearchableCombobox';
 import { FlexibleMultiSelect } from '@/components/common/FlexibleMultiSelect';
 import { AutocompleteInput, type Suggestion } from '@/components/common/AutocompleteInput';
-import { useDebounce } from '@/hooks/useDebounce';
-import { usePagination } from '@/hooks/usePagination';
-import { Pagination } from '@/components/common/Pagination';
+import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { exportWorkLogsToExcel, validateImportedWorkLogs, importWorkLogsFromExcel, downloadExcelTemplate } from '@/utils/excelUtils';
 import { ImportValidation } from '@/features/workLogs/components/ImportValidation';
 import { ImportWizard } from '@/features/workLogs/components/ImportWizard';
@@ -28,14 +26,21 @@ interface Props {
 }
 
 export function WorkLogManagement({ data, setData, currentUser, employees, departments, areas }: Props) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSearch = useDebounce(searchQuery, 300);
-  const [statusFilter, setStatusFilter] = useState<WorkStatus | 'all'>('all');
+  const [queryParams, setQueryParams] = useState<WorkLogsQueryParams>({
+    page: 1,
+    pageSize: 20,
+    search: '',
+    sortBy: 'reportDate',
+    isDescending: true,
+    status: null,
+  });
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<WorkLog | null>(null);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [submitting, setSubmitting] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
@@ -105,23 +110,77 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
     [areas]
   );
 
-  // Memoize filtered logs with debounced search
+  // Client-side filtering/sorting/pagination with SearchFilterBar query params
   const filteredLogs = useMemo(() => {
-    return data.filter((log) => {
+    const searchText = (queryParams.search || '').toLowerCase().trim();
+    const statusValue = queryParams.status;
+
+    const filtered = data.filter((log) => {
       const operators = log.operators || [];
       const requesters = log.requesters || [];
       const issue = log.issue || log.issueDescription || '';
       const matchesSearch =
-        issue.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        operators.some(op => op.toLowerCase().includes(debouncedSearch.toLowerCase())) ||
-        requesters.some(req => req.toLowerCase().includes(debouncedSearch.toLowerCase()));
-      const matchesStatus = statusFilter === 'all' || log.status === statusFilter;
+        !searchText ||
+        issue.toLowerCase().includes(searchText) ||
+        operators.some(op => op.toLowerCase().includes(searchText)) ||
+        requesters.some(req => req.toLowerCase().includes(searchText)) ||
+        (log.department || '').toLowerCase().includes(searchText) ||
+        (log.area || '').toLowerCase().includes(searchText);
+      const matchesStatus = !statusValue || log.status === statusValue;
       return matchesSearch && matchesStatus;
     });
-  }, [data, debouncedSearch, statusFilter]);
 
-  // Pagination
-  const pagination = usePagination({ data: filteredLogs, itemsPerPage: 20 });
+    const sortBy = queryParams.sortBy || 'reportDate';
+    const direction = queryParams.isDescending ? -1 : 1;
+
+    filtered.sort((a, b) => {
+      const getValue = (log: WorkLog): string => {
+        switch (sortBy) {
+          case 'reportDate':
+            return log.reportDate || '';
+          case 'status':
+            return log.status || '';
+          case 'department':
+            return log.department || '';
+          case 'area':
+            return log.area || '';
+          case 'operator':
+            return (log.operators || []).join(', ');
+          case 'requester':
+            return (log.requesters || []).join(', ');
+          default:
+            return log.issue || log.issueDescription || '';
+        }
+      };
+
+      const aValue = getValue(a).toLowerCase();
+      const bValue = getValue(b).toLowerCase();
+      if (aValue < bValue) return -1 * direction;
+      if (aValue > bValue) return 1 * direction;
+      return 0;
+    });
+
+    return filtered;
+  }, [data, queryParams]);
+
+  const paginatedResult = useMemo<PaginatedResult<WorkLog>>(() => {
+    const pageSize = queryParams.pageSize || 20;
+    const totalCount = filteredLogs.length;
+    const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+    const page = Math.min(Math.max(queryParams.page || 1, 1), totalPages);
+    const start = (page - 1) * pageSize;
+    const items = filteredLogs.slice(start, start + pageSize);
+
+    return {
+      page,
+      pageSize,
+      totalCount,
+      totalPages,
+      hasPreviousPage: page > 1,
+      hasNextPage: page < totalPages,
+      items,
+    };
+  }, [filteredLogs, queryParams.page, queryParams.pageSize]);
 
   const toggleRow = (id: string) => {
     const newExpanded = new Set(expandedRows);
@@ -130,6 +189,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
   };
 
   const openForm = (log?: WorkLog) => {
+    setError(null);
     setEditing(log || null);
     setFormData(log ? {
       reportDate: new Date(log.reportDate).toISOString().slice(0, 10),
@@ -162,6 +222,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    setError(null);
     
     try {
       // Find department and area IDs
@@ -230,6 +291,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
       setShowForm(false);
     } catch (error) {
       console.error('Failed to submit work log:', error);
+      setError('Failed to submit work log. Please try again.');
       alert('Failed to submit work log: ' + (error as Error).message);
     } finally {
       setSubmitting(false);
@@ -245,6 +307,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
       setConfirmDelete(null);
     } catch (error) {
       console.error('Failed to delete work log:', error);
+      setError('Failed to delete work log. Please try again.');
       alert('Failed to delete work log: ' + (error as Error).message);
       setConfirmDelete(null);
     }
@@ -482,8 +545,13 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between">
-        <div><h2 className="text-2xl font-semibold">Work Log Management</h2></div>
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-semibold">Work Log Management</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Track and manage issue logs with consistent filtering, sorting, and pagination
+          </p>
+        </div>
         <PermissionGuard 
           permission={Permissions.IssueLog.Create}
           fallback={
@@ -492,7 +560,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
             </button>
           }
         >
-          <button onClick={() => openForm()} className="btn-primary px-4 py-2 flex items-center gap-2">
+          <button onClick={() => openForm()} className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm">
             <Plus className="w-5 h-5" />New Work Log
           </button>
         </PermissionGuard>
@@ -505,16 +573,48 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
         <div className="card p-4"><p className="text-sm text-muted-foreground">Resolved</p><p className="text-2xl font-semibold text-success">{data.filter((l) => l.status === 'resolved').length}</p></div>
       </div>
 
-      <div className="card p-4 grid grid-cols-2 gap-4">
-        <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-placeholder" /><input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search..." className="w-full pl-10 pr-4 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder" /></div>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as WorkStatus | 'all')} className="px-4 py-2 border border-input rounded-lg bg-card text-foreground">
-          <option value="all">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="in-progress">In Progress</option>
-          <option value="resolved">Resolved</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-      </div>
+      <SearchFilterBar
+        queryParams={queryParams}
+        onQueryChange={(params) => setQueryParams(params as WorkLogsQueryParams)}
+        paginatedResult={paginatedResult}
+        filterOptions={[
+          { label: 'All Status', value: 'all' },
+          { label: 'Pending', value: 'pending' },
+          { label: 'In Progress', value: 'in-progress' },
+          { label: 'Resolved', value: 'resolved' },
+          { label: 'Cancelled', value: 'cancelled' },
+        ]}
+        currentFilter={statusFilter}
+        onFilterChange={(value) => {
+          setStatusFilter(value);
+          setQueryParams({
+            ...queryParams,
+            status: value === 'all' ? null : value,
+            page: 1,
+          });
+        }}
+        sortOptions={[
+          { label: 'Report Date', value: 'reportDate' },
+          { label: 'Issue', value: 'issue' },
+          { label: 'Status', value: 'status' },
+          { label: 'Department', value: 'department' },
+          { label: 'Area', value: 'area' },
+          { label: 'Operator', value: 'operator' },
+          { label: 'Requester', value: 'requester' },
+        ]}
+        placeholder="Search by issue, operator, requester, department, or area..."
+        showResults={true}
+      />
+
+      {error && (
+        <div className="p-4 bg-error-background border border-error-border rounded-lg flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
+          <div className="flex-1">
+            <p className="font-medium text-error-foreground">Error</p>
+            <p className="text-sm text-error-foreground">{error}</p>
+          </div>
+        </div>
+      )}
 
       <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
         <table className="w-full">
@@ -530,7 +630,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {pagination.paginatedData.map((log) => (
+            {paginatedResult.items.length > 0 ? paginatedResult.items.map((log) => (
               <React.Fragment key={log.id}>
                 <tr className="hover:bg-accent">
                   <td className="px-4 py-3 text-sm text-foreground">{new Date(log.reportDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
@@ -594,18 +694,68 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                   </tr>
                 )}
               </React.Fragment>
-            ))}
+            )) : (
+              <tr>
+                <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground">
+                  <p className="text-lg font-medium">No work logs found</p>
+                  <p className="text-sm mt-1">Try adjusting your search or status filter</p>
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
-        <Pagination 
-          currentPage={pagination.currentPage}
-          totalPages={pagination.totalPages}
-          onPageChange={pagination.goToPage}
-          hasNextPage={pagination.hasNextPage}
-          hasPrevPage={pagination.hasPrevPage}
-          totalItems={filteredLogs.length}
-          itemsPerPage={20}
-        />
+
+        {paginatedResult.totalPages > 1 && (
+          <div className="card p-4 flex items-center justify-between border-t border-border rounded-none">
+            <div className="text-sm text-muted-foreground">
+              Page <span className="font-medium">{paginatedResult.page}</span> of{' '}
+              <span className="font-medium">{paginatedResult.totalPages}</span> ({' '}
+              <span className="font-medium">{paginatedResult.totalCount}</span> total items)
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() =>
+                  setQueryParams({
+                    ...queryParams,
+                    page: Math.max(1, (queryParams.page || 1) - 1),
+                  })
+                }
+                disabled={!paginatedResult.hasPreviousPage}
+                className="flex items-center gap-1 px-3 py-2 border border-input rounded-lg bg-card hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
+              >
+                <span>Previous</span>
+              </button>
+
+              <input
+                type="number"
+                min="1"
+                max={paginatedResult.totalPages}
+                value={queryParams.page || 1}
+                onChange={(e) => {
+                  const pageNum = Math.min(
+                    Math.max(1, parseInt(e.target.value) || 1),
+                    paginatedResult.totalPages
+                  );
+                  setQueryParams({ ...queryParams, page: pageNum });
+                }}
+                className="w-12 px-2 py-2 border border-input rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-card text-foreground"
+              />
+
+              <button
+                onClick={() =>
+                  setQueryParams({
+                    ...queryParams,
+                    page: Math.min(paginatedResult.totalPages, (queryParams.page || 1) + 1),
+                  })
+                }
+                disabled={!paginatedResult.hasNextPage}
+                className="flex items-center gap-1 px-3 py-2 border border-input rounded-lg bg-card hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
+              >
+                <span>Next</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {showForm && (
