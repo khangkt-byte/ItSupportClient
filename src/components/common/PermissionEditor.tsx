@@ -82,6 +82,14 @@ export function PermissionEditor({
     });
   }, [groupedClaims]);
 
+  useEffect(() => {
+    // Keep direct claims as explicit-only: remove claims already inherited from selected roles.
+    const sanitizedClaims = selectedClaimIds.filter(claimId => !roleClaimIds.has(claimId));
+    if (sanitizedClaims.length !== selectedClaimIds.length) {
+      onClaimsChange(sanitizedClaims);
+    }
+  }, [selectedClaimIds, roleClaimIds, onClaimsChange]);
+
   const effectivePermissions = useMemo(() => {
     const permissionSet = new Set<string>();
     const sources = new Map<string, 'role' | 'direct' | 'both'>();
@@ -116,7 +124,6 @@ export function PermissionEditor({
       // Remove role
       const newRoles = selectedRoleIds.filter(id => id !== roleId);
       onRolesChange(newRoles);
-      console.log('Role removed:', roleId, 'New roles:', newRoles);
     } else {
       // Add role and remove its claims from direct assignments
       const role = availableRoles.find(r => r.roleId === roleId);
@@ -129,7 +136,6 @@ export function PermissionEditor({
       // ALWAYS call onClaimsChange when adding a role, even if nothing to remove
       // This ensures any overlapping claims are cleared
       onClaimsChange(nextClaims);
-      console.log('Role added:', roleId, 'Removed claims:', Array.from(roleClaimIdsToRemove), 'New claims:', nextClaims);
     }
   };
 
@@ -145,21 +151,11 @@ export function PermissionEditor({
     const isInherited = roleClaimIds.has(claimId);
     const isChecked = isDirect || isInherited;
 
-    console.log('=== toggleClaim ===', { 
-      claimId, 
-      isDirect, 
-      isInherited, 
-      isChecked,
-      currentRoles: selectedRoleIds,
-      currentDirectClaims: selectedClaimIds 
-    });
-
     // Unchecking a claim
     if (isChecked) {
       // If from role, remove role and preserve other claims as direct
       if (isInherited) {
         const rolesToRemove = selectedRoleIds.filter(roleId => roleHasClaim(roleId, claimId));
-        console.log('ClaimId', claimId, 'is inherited from roles:', rolesToRemove);
         
         const claimsToPreserve = new Set<number>();
         rolesToRemove.forEach(roleId => {
@@ -187,7 +183,6 @@ export function PermissionEditor({
           nextClaims = nextClaims.filter(id => id !== claimId);
         }
         
-        console.log('Removing roles:', rolesToRemove, 'Preserving claims:', preservedNotInRoles, 'Final claims:', nextClaims);
         onRolesChange(nextRoles);
         onClaimsChange(nextClaims);
         return;
@@ -195,14 +190,12 @@ export function PermissionEditor({
       
       // If only direct assignment, remove it
       if (isDirect) {
-        console.log('Removing direct claim:', claimId);
         onClaimsChange(selectedClaimIds.filter(id => id !== claimId));
         return;
       }
     }
 
     // Checking a claim (add to direct)
-    console.log('Adding direct claim:', claimId);
     onClaimsChange([...selectedClaimIds, claimId]);
   };
 
@@ -410,14 +403,13 @@ export function PermissionEditor({
                             key={claim.claimId}
                             className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors w-full justify-start ${
                               isDirectlySelected
-                                ? 'bg-success-backgrouund text-successuccess-foreground'
+                                ? 'bg-success-background text-success-foreground'
                                 : isInherited
                                 ? 'bg-info-background text-info-foreground'
                                 : 'text-muted-foreground hover:bg-accent'
                             } ${readOnly ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                             onClick={() => {
                               if (!readOnly) {
-                                console.log('Click on permission:', claim.claim);
                                 toggleClaim(claim.claimId);
                               }
                             }}
