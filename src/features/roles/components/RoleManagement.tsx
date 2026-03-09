@@ -21,6 +21,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Plus, Edit, Trash2, X, Shield, Save, AlertCircle, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { PaginationBar } from '@/components/common/PaginationBar';
 import { rolesApi } from '@/services/api/roles';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import type { Role, RoleDto, ClaimDto, RolesQueryParams, PaginatedResult } from '@/types/data';
@@ -65,6 +66,7 @@ function groupClaimsByCategory(claims: ClaimDto[]): ClaimGroup[] {
 }
 
 export function RoleManagement({ data, setData }: Props) {
+  void data;
   const [queryParams, setQueryParams] = useState<RolesQueryParams>({
     page: 1,
     pageSize: 10,
@@ -361,55 +363,19 @@ export function RoleManagement({ data, setData }: Props) {
       </div>
 
       {paginatedResult && !isLoading && (
-        <div className="card p-4 flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            Page <span className="font-medium">{paginatedResult.page}</span> of{' '}
-            <span className="font-medium">{paginatedResult.totalPages}</span> ({' '}
-            <span className="font-medium">{paginatedResult.totalCount}</span> total items)
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() =>
-                setQueryParams({
-                  ...queryParams,
-                  page: Math.max(1, (queryParams.page || 1) - 1),
-                })
-              }
-              disabled={!paginatedResult.hasPreviousPage}
-              className="flex items-center gap-1 px-3 py-2 border border-input rounded-lg bg-card hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
-            >
-              <span>Previous</span>
-            </button>
-
-            <input
-              type="number"
-              min="1"
-              max={paginatedResult.totalPages}
-              value={queryParams.page || 1}
-              onChange={(e) => {
-                const pageNum = Math.min(
-                  Math.max(1, parseInt(e.target.value) || 1),
-                  paginatedResult.totalPages
-                );
-                setQueryParams({ ...queryParams, page: pageNum });
-              }}
-              className="w-12 px-2 py-2 border border-input rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-card text-foreground"
-            />
-
-            <button
-              onClick={() =>
-                setQueryParams({
-                  ...queryParams,
-                  page: Math.min(paginatedResult.totalPages, (queryParams.page || 1) + 1),
-                })
-              }
-              disabled={!paginatedResult.hasNextPage}
-              className="flex items-center gap-1 px-3 py-2 border border-input rounded-lg bg-card hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
-            >
-              <span>Next</span>
-            </button>
-          </div>
-        </div>
+        <PaginationBar
+          page={paginatedResult.page}
+          totalPages={paginatedResult.totalPages}
+          totalCount={paginatedResult.totalCount}
+          hasPreviousPage={paginatedResult.hasPreviousPage}
+          hasNextPage={paginatedResult.hasNextPage}
+          onPageChange={(page: number) =>
+            setQueryParams((prev) => ({
+              ...prev,
+              page: Math.min(Math.max(1, page), paginatedResult.totalPages),
+            }))
+          }
+        />
       )}
 
       {/* Form Dialog */}
