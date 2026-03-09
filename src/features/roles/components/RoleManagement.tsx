@@ -20,7 +20,7 @@
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Plus, Edit, Trash2, X, Shield, Save, AlertCircle, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Shield, Save, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { rolesApi } from '@/services/api/roles';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
@@ -49,7 +49,8 @@ function groupClaimsByCategory(claims: ClaimDto[]): ClaimGroup[] {
   const groups = new Map<string, ClaimDto[]>();
 
   claims.forEach(claim => {
-    const category = claim.category || 'Other';
+    const fallbackCategory = claim.claim?.split('.')?.[0];
+    const category = claim.category || fallbackCategory || 'Other';
     if (!groups.has(category)) {
       groups.set(category, []);
     }
@@ -229,6 +230,25 @@ export function RoleManagement({ data, setData }: Props) {
       selectedClaimIds: allSelected
         ? prev.selectedClaimIds.filter(id => !categoryClaimIds.includes(id))
         : [...new Set([...prev.selectedClaimIds, ...categoryClaimIds])]
+    }));
+  };
+
+  const toggleExpandAll = () => {
+    if (expandedGroups.size === 0) {
+      setExpandedGroups(new Set(groupedClaims.map(g => g.category)));
+      return;
+    }
+    setExpandedGroups(new Set());
+  };
+
+  const areAllClaimsSelected =
+    availableClaims.length > 0 &&
+    availableClaims.every(claim => formData.selectedClaimIds.includes(claim.claimId));
+
+  const toggleSelectAllClaims = () => {
+    setFormData(prev => ({
+      ...prev,
+      selectedClaimIds: areAllClaimsSelected ? [] : availableClaims.map(c => c.claimId)
     }));
   };
 
@@ -445,87 +465,104 @@ export function RoleManagement({ data, setData }: Props) {
 
               {/* Permissions Selection */}
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <label className="text-sm font-medium text-muted-foreground">
-                    Permissions ({formData.selectedClaimIds.length} selected)
-                  </label>
-                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-4">
+                    <label className="text-sm font-medium text-muted-foreground">
+                      Permissions ({formData.selectedClaimIds.length} selected)
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={toggleSelectAllClaims}
+                        className="px-3 py-1 text-sm font-medium rounded-md border border-success-border text-success-foreground hover:bg-success-background transition-colors cursor-pointer"
+                      >
+                        {areAllClaimsSelected ? 'Deselect All' : 'Select All'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={toggleExpandAll}
+                        className="px-3 py-1 text-sm font-medium rounded-md border border-success-border text-success-foreground hover:bg-success-background transition-colors cursor-pointer"
+                      >
+                        {expandedGroups.size === 0 ? 'Expand All' : 'Collapse All'}
+                      </button>
+                    </div>
+                  </div>
 
-                <div className="bg-muted border border-border rounded-lg max-h-96 overflow-y-auto">
-                  {groupedClaims.map(group => {
-                    const isExpanded = expandedGroups.has(group.category);
-                    const selectedInGroup = group.claims.filter(c =>
-                      formData.selectedClaimIds.includes(c.claimId)
-                    ).length;
-                    const allSelected = selectedInGroup === group.claims.length;
+                  <div className="space-y-3 pr-1">
+                    {groupedClaims.map(group => {
+                      const isExpanded = expandedGroups.has(group.category);
+                      const selectedInGroup = group.claims.filter(c =>
+                        formData.selectedClaimIds.includes(c.claimId)
+                      ).length;
+                      const allSelected = group.claims.length > 0 && selectedInGroup === group.claims.length;
 
-                    return (
-                      <div key={group.category} className="border-b border-border last:border-b-0">
-                        {/* Group Header */}
-                        <div className="flex items-center justify-between p-4 bg-card hover:bg-accent transition-colors">
+                      return (
+                        <div key={group.category} className="bg-card border border-border rounded-lg">
                           <button
                             type="button"
                             onClick={() => toggleGroup(group.category)}
-                            className="flex items-center gap-2 flex-1 text-left"
+                            className="w-full flex items-center justify-between px-5 py-4 hover:bg-accent transition-colors text-left cursor-pointer"
                           >
-                            <span className="font-medium text-foreground">{group.category}</span>
-                            <span className="text-xs text-muted-foreground">({group.claims.length})</span>
-                            {selectedInGroup > 0 && (
-                              <span className="px-2 py-0.5 text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-full">
-                                {selectedInGroup} selected
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <Shield className="w-5 h-5 text-success shrink-0" />
+                              <span className="font-semibold text-foreground text-base">{group.category}</span>
+                              <span className="text-xs text-muted-foreground">
+                                ({group.claims.length}){selectedInGroup > 0 ? ` • ${selectedInGroup} selected` : ''}
                               </span>
-                            )}
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleAllInCategory(group.category);
+                                }}
+                                className="px-3 py-1 text-xs font-medium rounded-md border border-success-border text-success-foreground hover:bg-success-background transition-colors cursor-pointer"
+                              >
+                                {allSelected ? 'Deselect All' : 'Select All'}
+                              </button>
+                              {isExpanded ? (
+                                <ChevronUp className="w-5 h-5 text-muted-foreground" />
+                              ) : (
+                                <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                              )}
+                            </div>
                           </button>
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => toggleAllInCategory(group.category)}
-                              className="px-2 py-1 text-xs bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
-                            >
-                              {allSelected ? 'Deselect All' : 'Select All'}
-                            </button>
-                            {isExpanded ? (
-                              <ChevronUp className="w-4 h-4 text-muted-foreground" />
-                            ) : (
-                              <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                            )}
-                          </div>
-                        </div>
 
-                        {/* Claims in Group */}
-                        {isExpanded && (
-                          <div className="bg-muted divide-y divide-border">
-                            {group.claims.map(claim => {
-                              const isSelected = formData.selectedClaimIds.includes(claim.claimId);
-                              return (
-                                <label
-                                  key={claim.claimId}
-                                  className="flex items-center gap-3 p-3 pl-8 cursor-pointer hover:bg-accent transition-colors"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={isSelected}
-                                    onChange={() => toggleClaim(claim.claimId)}
-                                    className="w-4 h-4 text-primary-600 rounded border-input focus:ring-primary-500"
-                                  />
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-sm font-medium text-muted-foreground">
-                                        {claim.claim}
-                                      </span>
+                          {isExpanded && (
+                            <div className="px-5">
+                              <div className="grid grid-cols-4 gap-2 pt-2 pb-3">
+                                {group.claims.map(claim => {
+                                  const isSelected = formData.selectedClaimIds.includes(claim.claimId);
+                                  const permissionLabel = claim.claim || claim.category || 'Unknown.Permission';
+
+                                  return (
+                                    <div
+                                      key={claim.claimId}
+                                      className={`flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors w-full justify-start ${
+                                        isSelected
+                                          ? 'bg-success-background text-success-foreground'
+                                          : 'text-muted-foreground hover:bg-accent'
+                                      } cursor-pointer`}
+                                      onClick={() => toggleClaim(claim.claimId)}
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={isSelected}
+                                        readOnly
+                                        className="w-4 h-4 accent-green-600 pointer-events-none"
+                                      />
+                                      <span className="leading-none">{permissionLabel}</span>
                                     </div>
-                                  </div>
-                                  {isSelected && (
-                                    <CheckCircle className="w-4 h-4 text-primary-600 dark:text-primary-400 shrink-0" />
-                                  )}
-                                </label>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
