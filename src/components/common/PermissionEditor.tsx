@@ -355,12 +355,11 @@ export function PermissionEditor({
 
             return (
               <div key={group.category} className="bg-card border border-border rounded-lg">
-                <button
-                  type="button"
-                  onClick={() => toggleModule(group.category)}
-                  className="w-full flex items-center justify-between px-5 py-4 hover:bg-accent transition-colors text-left cursor-pointer"
-                >
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                <div className="w-full flex items-center justify-between px-5 py-4 hover:bg-accent transition-colors">
+                  <div 
+                    className="flex items-center gap-2 flex-1 min-w-0 cursor-pointer"
+                    onClick={() => toggleModule(group.category)}
+                  >
                     <Shield className="w-5 h-5 text-success shrink-0" />
                     <span className="font-semibold text-foreground text-base">{group.category}</span>
                     <span className="text-xs text-muted-foreground">
@@ -381,13 +380,20 @@ export function PermissionEditor({
                     >
                       {areAllSelectedInGroup ? 'Deselect All' : 'Select All'}
                     </button>
-                    {isExpanded ? (
-                      <ChevronUp className="w-5 h-5 text-muted-foreground" />
-                    ) : (
-                      <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => toggleModule(group.category)}
+                      className="p-1 cursor-pointer hover:bg-accent rounded transition-colors"
+                      aria-label={isExpanded ? 'Collapse' : 'Expand'}
+                    >
+                      {isExpanded ? (
+                        <ChevronUp className="w-5 h-5 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                      )}
+                    </button>
                   </div>
-                </button>
+                </div>
 
                 {isExpanded && (
                   <div className="px-5">
