@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, JSX } from 'react';
-import { Plus, Edit, Trash2, X, ChevronDown, ChevronUp, Loader2, Download, Upload, FileSpreadsheet, Clock, PlayCircle, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, X, ChevronDown, ChevronUp, Loader2, Download, Upload, FileSpreadsheet, Clock, PlayCircle, CheckCircle2, XCircle, AlertCircle, Save } from 'lucide-react';
 import type { WorkLog, WorkStatus, Employee, Department, Area, ImportValidationResult, DuplicateHandling, IssueLogDto, WorkLogsQueryParams, PaginatedResult } from '@/types/data';
 import { workLogsApi, issuesApi, causesApi } from '@/services/api';
 import { workLogToCreateDto } from '@/utils/workLogAdapter';
@@ -8,6 +8,7 @@ import { SearchableCombobox } from '@/components/common/SearchableCombobox';
 import { FlexibleMultiSelect } from '@/components/common/FlexibleMultiSelect';
 import { AutocompleteInput, type Suggestion } from '@/components/common/AutocompleteInput';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
+import { PaginationBar } from '@/components/common/PaginationBar';
 import { exportWorkLogsToExcel, validateImportedWorkLogs, importWorkLogsFromExcel, downloadExcelTemplate } from '@/utils/excelUtils';
 import { ImportValidation } from '@/features/workLogs/components/ImportValidation';
 import { ImportWizard } from '@/features/workLogs/components/ImportWizard';
@@ -25,7 +26,8 @@ interface Props {
   areas: Area[];
 }
 
-export function WorkLogManagement({ data, setData, currentUser, employees, departments, areas }: Props) {
+export function WorkLogManagement({ data, setData, currentUser, employees, departments, areas, loading }: Props) {
+  const [isLoading, setIsLoading] = useState<boolean>(!!loading);
   const [queryParams, setQueryParams] = useState<WorkLogsQueryParams>({
     page: 1,
     pageSize: 20,
@@ -292,7 +294,6 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
     } catch (error) {
       console.error('Failed to submit work log:', error);
       setError('Failed to submit work log. Please try again.');
-      alert('Failed to submit work log: ' + (error as Error).message);
     } finally {
       setSubmitting(false);
     }
@@ -308,7 +309,6 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
     } catch (error) {
       console.error('Failed to delete work log:', error);
       setError('Failed to delete work log. Please try again.');
-      alert('Failed to delete work log: ' + (error as Error).message);
       setConfirmDelete(null);
     }
   };
@@ -439,6 +439,11 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
   const [loadingIssueSuggestions, setLoadingIssueSuggestions] = useState(false);
   const [loadingCauseSuggestions, setLoadingCauseSuggestions] = useState(false);
 
+  // Keep loading behavior consistent with AccountManagement
+  useEffect(() => {
+    setIsLoading(!!loading);
+  }, [loading]);
+
   // Search for issue suggestions
   useEffect(() => {
     const fetchIssueSuggestions = async () => {
@@ -547,7 +552,10 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-semibold">Work Log Management</h2>
+          <h2 className="text-2xl font-semibold flex items-center gap-2">
+            <Clock className="w-7 h-7 text-primary-600" />
+            Work Log Management
+          </h2>
           <p className="text-sm text-muted-foreground mt-1">
             Track and manage issue logs with consistent filtering, sorting, and pagination
           </p>
@@ -566,12 +574,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
         </PermissionGuard>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
-        <div className="card p-4"><p className="text-sm text-muted-foreground">Total</p><p className="text-2xl font-semibold text-foreground">{data.length}</p></div>
-        <div className="card p-4"><p className="text-sm text-muted-foreground">Pending</p><p className="text-2xl font-semibold text-warning">{data.filter((l) => l.status === 'pending').length}</p></div>
-        <div className="card p-4"><p className="text-sm text-muted-foreground">In Progress</p><p className="text-2xl font-semibold text-info">{data.filter((l) => l.status === 'in-progress').length}</p></div>
-        <div className="card p-4"><p className="text-sm text-muted-foreground">Resolved</p><p className="text-2xl font-semibold text-success">{data.filter((l) => l.status === 'resolved').length}</p></div>
-      </div>
+
 
       <SearchFilterBar
         queryParams={queryParams}
@@ -606,49 +609,57 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
         showResults={true}
       />
 
-      {error && (
-        <div className="p-4 bg-error-background border border-error-border rounded-lg flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
-          <div className="flex-1">
-            <p className="font-medium text-error-foreground">Error</p>
-            <p className="text-sm text-error-foreground">{error}</p>
+      <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+              <p className="text-muted-foreground">Loading work logs...</p>
+            </div>
           </div>
-        </div>
-      )}
-
-      <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden">
-        <table className="w-full">
+        )}
+        {error && !isLoading && (
+          <div className="p-4 bg-error-background border border-error-border flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium text-error-foreground">Error</p>
+              <p className="text-sm text-error-foreground">{error}</p>
+            </div>
+          </div>
+        )}
+        {!isLoading && !error && (
+          <table className="w-full">
           <thead className="bg-muted border-b border-border">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Date</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Operator</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Requester</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Department</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Issue</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Status</th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Date</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Operator</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Requester</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Department</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Issue</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Status</th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {paginatedResult.items.length > 0 ? paginatedResult.items.map((log) => (
               <React.Fragment key={log.id}>
-                <tr className="hover:bg-accent">
-                  <td className="px-4 py-3 text-sm text-foreground">{new Date(log.reportDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
-                  <td className="px-4 py-3 text-sm text-foreground">{(log.operators || []).join(', ')}</td>
-                  <td className="px-4 py-3 text-sm text-foreground">{(log.requesters || []).join(', ') || 'None'}</td>
-                  <td className="px-4 py-3 text-sm text-foreground">{log.department}</td>
-                  <td className="px-4 py-3 text-sm"><button onClick={() => toggleRow(log.id)} className="text-left hover:text-primary-600 dark:hover:text-primary-400 line-clamp-2 text-foreground">{log.issue}</button></td>
-                  <td className="px-4 py-3 text-sm">
+                <tr className="hover:bg-accent transition-colors">
+                  <td className="px-6 py-4 text-sm text-foreground">{new Date(log.reportDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+                  <td className="px-6 py-4 text-sm text-foreground">{(log.operators || []).join(', ')}</td>
+                  <td className="px-6 py-4 text-sm text-foreground">{(log.requesters || []).join(', ') || 'None'}</td>
+                  <td className="px-6 py-4 text-sm text-foreground">{log.department}</td>
+                  <td className="px-6 py-4 text-sm"><button onClick={() => toggleRow(log.id)} className="text-left hover:text-primary-600 line-clamp-2 text-foreground transition-colors">{log.issue}</button></td>
+                  <td className="px-6 py-4 text-sm">
                     <span className={getStatusBadge(log.status)}>
                       {getStatusIcon(log.status)}
                       {getStatusLabel(log.status)}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-sm text-right">
+                  <td className="px-6 py-4 text-sm text-right">
                     <div className="inline-flex items-center gap-2">
                       <button 
                         onClick={() => toggleRow(log.id)} 
-                        className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors min-w-16px min-h-16px"
+                        className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors"
                         title={expandedRows.has(log.id) ? "Collapse details" : "Expand details"}
                       >
                         {expandedRows.has(log.id) ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -659,7 +670,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                       >
                         <button 
                           onClick={() => openForm(log)} 
-                          className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors min-w-16px min-h-16px"
+                          className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors"
                           title="Edit work log"
                         >
                           <Edit className="w-4 h-4" />
@@ -671,7 +682,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                       >
                         <button 
                           onClick={() => setConfirmDelete(log.id)} 
-                          className="text-error-foreground inline-flex items-center justify-center hover:text-error-foreground transition-colors min-w-16px min-h-16px"
+                          className="text-error-foreground inline-flex items-center justify-center hover:text-error-foreground transition-colors"
                           title="Delete work log"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -682,7 +693,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                 </tr>
                 {expandedRows.has(log.id) && (
                   <tr className="bg-muted">
-                    <td colSpan={7} className="px-4 py-4">
+                    <td colSpan={7} className="px-6 py-4">
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div><p className="font-medium mb-1 text-muted-foreground">Area:</p><p className="text-muted-foreground">{log.area || 'N/A'}</p></div>
                         <div><p className="font-medium mb-1 text-muted-foreground">Cause:</p><p className="text-muted-foreground">{log.cause || 'N/A'}</p></div>
@@ -697,66 +708,33 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
             )) : (
               <tr>
                 <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground">
-                  <p className="text-lg font-medium">No work logs found</p>
-                  <p className="text-sm mt-1">Try adjusting your search or status filter</p>
+                    <Clock className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
+                    <p className="text-lg font-medium">No work logs found</p>
+                    <p className="text-sm mt-1">Try adjusting your search or status filter</p>
                 </td>
               </tr>
             )}
           </tbody>
         </table>
-
-        {paginatedResult.totalPages > 1 && (
-          <div className="card p-4 flex items-center justify-between border-t border-border rounded-none">
-            <div className="text-sm text-muted-foreground">
-              Page <span className="font-medium">{paginatedResult.page}</span> of{' '}
-              <span className="font-medium">{paginatedResult.totalPages}</span> ({' '}
-              <span className="font-medium">{paginatedResult.totalCount}</span> total items)
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() =>
-                  setQueryParams({
-                    ...queryParams,
-                    page: Math.max(1, (queryParams.page || 1) - 1),
-                  })
-                }
-                disabled={!paginatedResult.hasPreviousPage}
-                className="flex items-center gap-1 px-3 py-2 border border-input rounded-lg bg-card hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
-              >
-                <span>Previous</span>
-              </button>
-
-              <input
-                type="number"
-                min="1"
-                max={paginatedResult.totalPages}
-                value={queryParams.page || 1}
-                onChange={(e) => {
-                  const pageNum = Math.min(
-                    Math.max(1, parseInt(e.target.value) || 1),
-                    paginatedResult.totalPages
-                  );
-                  setQueryParams({ ...queryParams, page: pageNum });
-                }}
-                className="w-12 px-2 py-2 border border-input rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-card text-foreground"
-              />
-
-              <button
-                onClick={() =>
-                  setQueryParams({
-                    ...queryParams,
-                    page: Math.min(paginatedResult.totalPages, (queryParams.page || 1) + 1),
-                  })
-                }
-                disabled={!paginatedResult.hasNextPage}
-                className="flex items-center gap-1 px-3 py-2 border border-input rounded-lg bg-card hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
-              >
-                <span>Next</span>
-              </button>
-            </div>
-          </div>
         )}
+
       </div>
+
+      {paginatedResult && !isLoading && !error && (
+        <PaginationBar
+          page={paginatedResult.page}
+          totalPages={paginatedResult.totalPages}
+          totalCount={paginatedResult.totalCount}
+          hasPreviousPage={paginatedResult.hasPreviousPage}
+          hasNextPage={paginatedResult.hasNextPage}
+          onPageChange={(page) =>
+            setQueryParams((prev) => ({
+              ...prev,
+              page: Math.min(Math.max(1, page), paginatedResult.totalPages),
+            }))
+          }
+        />
+      )}
 
       {showForm && (
         <PermissionGuard 
@@ -771,9 +749,39 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
             </div>
           }
         >
-          <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4">
-            <div className="bg-card rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="px-6 py-4 border-b border-border flex justify-between sticky top-0 bg-card z-60"><h3 className="text-lg font-semibold text-foreground">{editing ? 'Edit' : 'New'} Work Log</h3><button onClick={() => setShowForm(false)} className="hover:text-muted-foreground"><X className="w-6 h-6" /></button></div>
+          <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4 overflow-y-auto">
+            <div className="bg-card rounded-lg max-w-6xl w-full my-4 max-h-[90vh] overflow-y-auto">
+              <div className="px-6 py-4 border-b border-border flex justify-between items-center sticky top-0 bg-card z-10">
+                <div>
+                  <h3 className="text-lg font-semibold flex items-center gap-2 text-foreground">
+                    <Clock className="w-5 h-5 text-primary-600" />
+                    {editing ? 'Edit Work Log' : 'Create New Work Log'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    Record issue details and assign operators/requesters
+                  </p>
+                </div>
+                <button onClick={() => setShowForm(false)} className="hover:text-muted-foreground transition-colors text-foreground">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {error && (
+                <div className="mx-6 mt-4 p-4 bg-error-background border border-error-border rounded-lg flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-medium text-error-foreground">Error</p>
+                    <p className="text-sm text-error-foreground mt-0.5">{error}</p>
+                  </div>
+                  <button
+                    onClick={() => setError(null)}
+                    className="text-error-foreground hover:text-error-foreground transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -879,8 +887,22 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
                 <textarea value={formData.note} onChange={(e) => setFormData({ ...formData, note: e.target.value })} rows={2} className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none" />
               </div>
               <div className="flex gap-3">
-                <button type="submit" className="btn-primary flex-1 px-4 py-2">
-                  {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : editing ? 'Update' : 'Create'}
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="btn-primary flex-1 px-4 py-2 flex items-center justify-center gap-2"
+                >
+                  {submitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      {editing ? 'Update Work Log' : 'Create Work Log'}
+                    </>
+                  )}
                 </button>
                 <button type="button" onClick={() => setShowForm(false)} className="btn-secondary flex-1 px-4 py-2">Cancel</button>
               </div>
