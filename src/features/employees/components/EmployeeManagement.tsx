@@ -16,11 +16,12 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit, Trash2, X, ChevronLeft, ChevronRight, User, AlertCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, X, User, AlertCircle } from 'lucide-react';
 import { employeesApi } from '@/services/api/employees';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import type { Employee, Department, AreaDto, EmployeesQueryParams, PaginatedResult, ListEmployeeDto } from '@/types/data';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { PaginationBar } from '@/components/common/PaginationBar';
 
 interface Props {
   data: Employee[];
@@ -137,26 +138,6 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
     setConfirmDelete(null);
     // Refresh data after deletion
     fetchEmployees();
-  };
-
-  // Pagination controls
-  const handlePrevPage = () => {
-    if (paginatedResult && paginatedResult.page > 1) {
-      setQueryParams({ ...queryParams, page: queryParams.page! - 1 });
-    }
-  };
-
-  const handleNextPage = () => {
-    if (paginatedResult && paginatedResult.page < paginatedResult.totalPages) {
-      setQueryParams({ ...queryParams, page: queryParams.page! + 1 });
-    }
-  };
-
-  const handlePageInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value) && value >= 1 && paginatedResult && value <= paginatedResult.totalPages) {
-      setQueryParams({ ...queryParams, page: value });
-    }
   };
 
   return (
@@ -287,44 +268,19 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
 
       {/* Pagination Controls */}
       {paginatedResult && !isLoading && !error && (
-        <div className="card p-4 flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            Page <span className="font-medium">{paginatedResult.page}</span> of{' '}
-            <span className="font-medium">{paginatedResult.totalPages}</span> ({' '}
-            <span className="font-medium">{paginatedResult.totalCount}</span> total items)
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handlePrevPage}
-              disabled={!paginatedResult.hasPreviousPage}
-              className="flex items-center gap-1 px-3 py-2 border border-input rounded-lg bg-card hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
-              aria-label="Previous page"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span>Previous</span>
-            </button>
-
-            <input
-              type="number"
-              min="1"
-              max={paginatedResult.totalPages}
-              value={queryParams.page || 1}
-              onChange={handlePageInput}
-              className="w-12 px-2 py-2 border border-input rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-card text-foreground"
-              aria-label="Go to page"
-            />
-
-            <button
-              onClick={handleNextPage}
-              disabled={!paginatedResult.hasNextPage}
-              className="flex items-center gap-1 px-3 py-2 border border-input rounded-lg bg-card hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
-              aria-label="Next page"
-            >
-              <span>Next</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+        <PaginationBar
+          page={queryParams.page || 1}
+          totalPages={paginatedResult.totalPages}
+          totalCount={paginatedResult.totalCount}
+          hasPreviousPage={paginatedResult.hasPreviousPage}
+          hasNextPage={paginatedResult.hasNextPage}
+          onPageChange={(page) =>
+            setQueryParams((prev) => ({
+              ...prev,
+              page: Math.min(Math.max(1, page), paginatedResult.totalPages),
+            }))
+          }
+        />
       )}
 
       {/* Form Modal */}
