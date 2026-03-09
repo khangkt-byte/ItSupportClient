@@ -97,11 +97,6 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
     fetchEmployees();
   }, [fetchEmployees]);
 
-  // Fetch employees when query parameters change
-  useEffect(() => {
-    fetchEmployees();
-  }, [fetchEmployees]);
-
   // Handle department filter change
   const handleDepartmentFilterChange = (value: string) => {
     setDepartmentFilter(value);
@@ -186,7 +181,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
         </button>
       </div>
 
-      {/* Search, Filter, Sort Bar - Enterprise Style */}
+      {/* Search, Filter, Sort Bar */}
       <SearchFilterBar
         queryParams={queryParams}
         onQueryChange={setQueryParams}
@@ -211,7 +206,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
         showResults={true}
       />
 
-      {/* Table */}
+      {/* Employees Table */}
       <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
         {isLoading && (
           <div className="flex items-center justify-center py-12">
@@ -235,46 +230,45 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
         {!isLoading && !error && (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-muted/50 border-b border-border">
+              <thead className="bg-muted border-b border-border">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Employee Code</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Phone</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Position</th>
-                <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Employee Code</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Phone</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Email</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Position</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Actions</th>
               </tr>
               </thead>
-              <tbody className="divide-y divide-border bg-card">
+              <tbody className="divide-y divide-border">
               {!paginatedResult || paginatedResult.items.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
-                    <div className="flex flex-col items-center gap-2">
-                      <p className="text-lg font-medium">No employees found</p>
-                      <p className="text-sm">Try adjusting your search or filters</p>
-                    </div>
+                    <User className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
+                    <p className="text-lg font-medium">No employees found</p>
+                    <p className="text-sm mt-1">Try adjusting your search or filters</p>
                   </td>
                 </tr>
               ) : (
                 paginatedResult.items.map((item) => (
-                  <tr key={item.empId} className="group hover:bg-accent/50 transition-colors">
+                  <tr key={item.empId} className="hover:bg-accent transition-colors">
                     <td className="px-6 py-4 text-sm font-mono text-foreground">{item.empCode || 'N/A'}</td>
                     <td className="px-6 py-4 text-sm font-medium text-foreground">{item.fullName}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{item.phoneNumber || 'N/A'}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{item.email || 'N/A'}</td>
                     <td className="px-6 py-4 text-sm text-muted-foreground">{item.position || 'N/A'}</td>
                     <td className="px-6 py-4 text-sm text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="inline-flex items-center gap-2">
                         <button 
                           onClick={() => openForm(item as Employee)} 
-                          className="p-1.5 text-primary-600 hover:text-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded transition-all"
+                          className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors"
                           title="Edit employee"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => setConfirmDelete(item as Employee)} 
-                          className="p-1.5 text-error-foreground hover:bg-error-background/50 rounded transition-all"
+                          className="text-error-foreground inline-flex items-center justify-center hover:text-error-foreground transition-colors"
                           title="Delete employee"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -289,54 +283,57 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
           </div>
         )}
 
-        {/* Pagination Controls - Microsoft 365 style */}
-        {paginatedResult && paginatedResult.totalPages > 1 && !isLoading && !error && (
-          <div className="flex items-center justify-between px-6 py-3 border-t border-border bg-muted/20">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handlePrevPage}
-                disabled={paginatedResult.page === 1}
-                className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-md text-foreground bg-background border border-input hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                aria-label="Previous page"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                Previous
-              </button>
-              <button
-                onClick={handleNextPage}
-                disabled={paginatedResult.page >= paginatedResult.totalPages}
-                className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-md text-foreground bg-background border border-input hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                aria-label="Next page"
-              >
-                Next
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>Page</span>
-              <input
-                type="number"
-                min="1"
-                max={paginatedResult.totalPages}
-                value={paginatedResult.page}
-                onChange={handlePageInput}
-                className="w-16 px-2 py-1 text-center border border-input rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                aria-label="Go to page"
-              />
-              <span>of {paginatedResult.totalPages}</span>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Pagination Controls */}
+      {paginatedResult && !isLoading && !error && (
+        <div className="card p-4 flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Page <span className="font-medium">{paginatedResult.page}</span> of{' '}
+            <span className="font-medium">{paginatedResult.totalPages}</span> ({' '}
+            <span className="font-medium">{paginatedResult.totalCount}</span> total items)
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handlePrevPage}
+              disabled={!paginatedResult.hasPreviousPage}
+              className="flex items-center gap-1 px-3 py-2 border border-input rounded-lg bg-card hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
+              aria-label="Previous page"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Previous</span>
+            </button>
+
+            <input
+              type="number"
+              min="1"
+              max={paginatedResult.totalPages}
+              value={queryParams.page || 1}
+              onChange={handlePageInput}
+              className="w-12 px-2 py-2 border border-input rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-card text-foreground"
+              aria-label="Go to page"
+            />
+
+            <button
+              onClick={handleNextPage}
+              disabled={!paginatedResult.hasNextPage}
+              className="flex items-center gap-1 px-3 py-2 border border-input rounded-lg bg-card hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
+              aria-label="Next page"
+            >
+              <span>Next</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4">
-          <div className="card max-w-2xl w-full">
-            <div className="px-6 py-4 border-b border-border flex justify-between items-center">
-              <h3 className="text-lg font-semibold">{editing ? 'Edit' : 'Add'} Employee</h3>
-              <button onClick={() => setShowForm(false)} className="hover:text-muted-foreground">
+        <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-card rounded-lg max-w-2xl w-full my-4 max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-border flex justify-between items-center sticky top-0 bg-card z-10">
+              <h3 className="text-lg font-semibold text-foreground">{editing ? 'Edit' : 'Add'} Employee</h3>
+              <button onClick={() => setShowForm(false)} className="hover:text-muted-foreground transition-colors text-foreground">
                 <X className="w-6 h-6" />
               </button>
             </div>
