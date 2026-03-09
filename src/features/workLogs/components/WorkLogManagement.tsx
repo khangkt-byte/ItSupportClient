@@ -331,7 +331,11 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
       resolved: <CheckCircle2 {...iconProps} />,
       cancelled: <XCircle {...iconProps} />,
     };
-    return icons[status] || null;
+    const icon = icons[status];
+    if (!icon) return null;
+
+    // Keep icon footprint consistent across different Lucide glyphs.
+    return <span className="inline-flex w-3 h-3 shrink-0 items-center justify-center">{icon}</span>;
   };
 
   const getStatusBadge = (status: WorkStatus) => {
