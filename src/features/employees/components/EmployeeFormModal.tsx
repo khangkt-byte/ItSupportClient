@@ -1,5 +1,7 @@
+import { useMemo } from 'react';
 import { X } from 'lucide-react';
-import type { Employee } from '@/types/data';
+import type { Employee, Department, AreaDto } from '@/types/data';
+import { SearchableCombobox } from '@/components/common/SearchableCombobox';
 
 export interface EmployeeFormData {
   empCode: string;
@@ -7,6 +9,8 @@ export interface EmployeeFormData {
   phoneNumber: string;
   email: string;
   position: string;
+  department: string;
+  area: string;
 }
 
 interface Props {
@@ -17,17 +21,37 @@ interface Props {
   onChange: (value: EmployeeFormData) => void;
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
+  departments: Department[];
+  areas: AreaDto[];
 }
 
-export function EmployeeFormModal({ isOpen, loading, editing, formData, onChange, onSubmit, onClose }: Props) {
+export function EmployeeFormModal({ isOpen, loading, editing, formData, onChange, onSubmit, onClose, departments, areas }: Props) {
   if (!isOpen) return null;
+
+  const departmentOptions = useMemo(
+    () =>
+      departments.map((dept) => ({
+        value: dept.name,
+        label: dept.name,
+      })),
+    [departments]
+  );
+
+  const areaOptions = useMemo(
+    () =>
+      areas.map((area) => ({
+        value: area.name,
+        label: area.name,
+      })),
+    [areas]
+  );
 
   return (
     <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4 overflow-y-auto">
       <div className="bg-card rounded-lg max-w-2xl w-full my-4 max-h-[90vh] overflow-y-auto">
         <div className="px-6 py-4 border-b border-border flex justify-between items-center sticky top-0 bg-card z-10">
           <h3 className="text-lg font-semibold text-foreground">{editing ? 'Edit' : 'Add'} Employee</h3>
-          <button onClick={onClose} disabled={loading} className="hover:text-muted-foreground transition-colors text-foreground">
+          <button onClick={onClose} disabled={loading} className="hover:text-muted-foreground transition-colors text-foreground disabled:opacity-50 disabled:cursor-not-allowed">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -45,7 +69,7 @@ export function EmployeeFormModal({ isOpen, loading, editing, formData, onChange
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Full Name *</label>
+              <label className="block text-sm font-medium mb-1">Full Name <span className="text-error-foreground">*</span></label>
               <input
                 type="text"
                 required
@@ -78,6 +102,28 @@ export function EmployeeFormModal({ isOpen, loading, editing, formData, onChange
                 disabled={loading}
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 text-muted-foreground">
+                Department
+              </label>
+              <SearchableCombobox
+                options={departmentOptions}
+                value={formData.department}
+                onChange={(value) => onChange({ ...formData, department: value })}
+                placeholder="Select department..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 text-muted-foreground">
+                Area
+              </label>
+              <SearchableCombobox
+                options={areaOptions}
+                value={formData.area}
+                onChange={(value) => onChange({ ...formData, area: value })}
+                placeholder="Select area..."
+              />
+            </div>
             <div className="col-span-2">
               <label className="block text-sm font-medium mb-1">Position</label>
               <input
@@ -105,7 +151,7 @@ export function EmployeeFormModal({ isOpen, loading, editing, formData, onChange
                 <>{editing ? 'Update' : 'Create'} Employee</>
               )}
             </button>
-            <button type="button" onClick={onClose} disabled={loading} className="btn-secondary flex-1 px-4 py-2">
+            <button type="button" onClick={onClose} disabled={loading} className="btn-secondary flex-1 px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed">
               Cancel
             </button>
           </div>

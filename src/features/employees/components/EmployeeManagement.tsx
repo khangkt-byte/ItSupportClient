@@ -58,6 +58,8 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
     phoneNumber: '', 
     email: '', 
     position: '',
+    department: '',
+    area: '',
   });
 
   // UI states
@@ -87,9 +89,11 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       fullName: item.fullName, 
       phoneNumber: item.phoneNumber || '', 
       email: item.email || '', 
-      position: item.position || '' 
+      position: item.position || '',
+      department: item.department || '',
+      area: item.area || '',
     } : { 
-      empCode: '', fullName: '', phoneNumber: '', email: '', position: '' 
+      empCode: '', fullName: '', phoneNumber: '', email: '', position: '', department: '', area: ''
     });
     setShowForm(true);
   };
@@ -100,6 +104,10 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       setIsMutating(true);
       setError(null);
 
+      // Find department and area IDs from names
+      const selectedDept = departments.find((dept) => dept.name === formData.department);
+      const selectedArea = areas.find((area) => area.name === formData.area);
+
       if (editing) {
         // Update existing employee
         const updateData = {
@@ -107,6 +115,8 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
           phoneNumber: formData.phoneNumber || null,
           email: formData.email || null,
           position: formData.position || null,
+          dptId: selectedDept?.dptId,
+          areaId: selectedArea?.areaId,
         };
         await employeesApi.update(editing.empId, updateData);
       } else {
@@ -117,12 +127,14 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
           phoneNumber: formData.phoneNumber || null,
           email: formData.email || null,
           position: formData.position || null,
+          dptId: selectedDept?.dptId,
+          areaId: selectedArea?.areaId,
         };
         await employeesApi.create(createData);
       }
 
       setShowForm(false);
-      setFormData({ empCode: '', fullName: '', phoneNumber: '', email: '', position: '' });
+      setFormData({ empCode: '', fullName: '', phoneNumber: '', email: '', position: '', department: '', area: '' });
       // Refresh data after submission
       await fetchEmployees();
     } catch (err) {
@@ -232,6 +244,8 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
         onChange={setFormData}
         onSubmit={handleSubmit}
         onClose={() => setShowForm(false)}
+        departments={departments}
+        areas={areas}
       />
 
       <ConfirmDialog
