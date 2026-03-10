@@ -54,6 +54,7 @@ export function RoleManagement({ data, setData }: Props) {
   const [isMutating, setIsMutating] = useState(false);
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<RoleDto | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const { hasPermission } = usePermission();
 
@@ -107,6 +108,7 @@ export function RoleManagement({ data, setData }: Props) {
     if (!confirmDelete) return;
 
     try {
+      setDeleteLoading(true);
       // Use deleteSingle for single role deletion
       await rolesApi.deleteSingle(confirmDelete.roleId);
       await Promise.all([fetchRoles(), syncDataManagerRoles()]);
@@ -115,6 +117,8 @@ export function RoleManagement({ data, setData }: Props) {
       const message = err instanceof Error ? err.message : 'Failed to delete role';
       setMutationError(message);
       setConfirmDelete(null);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -202,8 +206,13 @@ export function RoleManagement({ data, setData }: Props) {
 
       <ConfirmDialog
         isOpen={!!confirmDelete}
-        onClose={() => setConfirmDelete(null)}
+        onClose={() => {
+          if (deleteLoading) return;
+          setConfirmDelete(null);
+        }}
         onConfirm={handleDelete}
+        isLoading={deleteLoading}
+        loadingLabel="Deleting..."
         action="delete"
         title="Delete role"
         description={`Are you sure you want to delete "${confirmDelete?.name}"? This action cannot be undone.`}

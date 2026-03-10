@@ -31,6 +31,7 @@ export function DepartmentManagement({ data, setData }: Props) {
   const [editing, setEditing] = useState<Department | null>(null);
   const [formData, setFormData] = useState<DepartmentFormData>({ name: '', description: '' });
   const [confirmDelete, setConfirmDelete] = useState<Department | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [isMutating, setIsMutating] = useState(false);
   const { loading: queryLoading, error, setError, paginatedResult, fetchDepartments } = useDepartmentQuery(queryParams);
   const loading = queryLoading || isMutating;
@@ -92,7 +93,7 @@ export function DepartmentManagement({ data, setData }: Props) {
   const handleDelete = async () => {
     if (!confirmDelete) return;
 
-    setIsMutating(true);
+    setDeleteLoading(true);
     try {
       await departmentApi.delete(confirmDelete.id);
       await Promise.all([fetchDepartments(), syncDataManagerDepartments()]);
@@ -107,7 +108,7 @@ export function DepartmentManagement({ data, setData }: Props) {
       }
       setConfirmDelete(null);
     } finally {
-      setIsMutating(false);
+      setDeleteLoading(false);
     }
   };
 
@@ -201,8 +202,13 @@ export function DepartmentManagement({ data, setData }: Props) {
 
       <ConfirmDialog
         isOpen={!!confirmDelete}
-        onClose={() => setConfirmDelete(null)}
+        onClose={() => {
+          if (deleteLoading) return;
+          setConfirmDelete(null);
+        }}
         onConfirm={handleDelete}
+        isLoading={deleteLoading}
+        loadingLabel="Deleting..."
         action="delete"
         title="Delete department"
         description={`Are you sure you want to delete "${confirmDelete?.name}"? This department may have employees or issue logs.`}

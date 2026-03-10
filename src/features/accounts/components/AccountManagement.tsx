@@ -62,6 +62,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
   const [isMutating, setIsMutating] = useState(false);
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [confirmState, setConfirmState] = useState<ConfirmState>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const { hasPermission } = usePermission();
 
@@ -260,6 +261,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
   };
 
   const closeConfirm = () => {
+    if (deleteLoading) return;
     setConfirmState(null);
   };
 
@@ -284,13 +286,18 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
   const handleConfirmAction = async () => {
     if (!confirmState) return;
 
-    if (confirmState.action === 'delete') {
-      await handleDelete(confirmState.accountId);
-    } else {
-      await handleLockToggle(confirmState.accountId, confirmState.isLocked);
-    }
+    try {
+      if (confirmState.action === 'delete') {
+        setDeleteLoading(true);
+        await handleDelete(confirmState.accountId);
+      } else {
+        await handleLockToggle(confirmState.accountId, confirmState.isLocked);
+      }
 
-    closeConfirm();
+      closeConfirm();
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   return (
@@ -401,6 +408,8 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
         isOpen={!!confirmState}
         onClose={closeConfirm}
         onConfirm={handleConfirmAction}
+        isLoading={deleteLoading}
+        loadingLabel={confirmState?.action === 'delete' ? 'Deleting...' : undefined}
         action={confirmState?.action || 'custom'}
         title={confirmTitle}
         description={confirmDescription}

@@ -65,6 +65,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
   // UI states
   const [isMutating, setIsMutating] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<Employee | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Additional filter state for UI
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
@@ -148,7 +149,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
   const handleDelete = async () => {
     if (!confirmDelete) return;
     try {
-      setIsMutating(true);
+      setDeleteLoading(true);
       setError(null);
       await employeesApi.deleteSingle(confirmDelete.empId);
       setConfirmDelete(null);
@@ -158,7 +159,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       console.error('Failed to delete employee:', err);
       setError('Failed to delete employee. Please try again.');
     } finally {
-      setIsMutating(false);
+      setDeleteLoading(false);
     }
   };
 
@@ -250,8 +251,13 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
 
       <ConfirmDialog
         isOpen={!!confirmDelete}
-        onClose={() => setConfirmDelete(null)}
+        onClose={() => {
+          if (deleteLoading) return;
+          setConfirmDelete(null);
+        }}
         onConfirm={handleDelete}
+        isLoading={deleteLoading}
+        loadingLabel="Deleting..."
         action="delete"
         title="Delete employee"
         description={`Are you sure you want to delete "${confirmDelete?.fullName}"? This action cannot be undone.`}

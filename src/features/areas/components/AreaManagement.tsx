@@ -29,6 +29,7 @@ export function AreaManagement({ data, setData }: Props) {
   const [editing, setEditing] = useState<Area | null>(null);
   const [formData, setFormData] = useState<AreaFormData>({ name: '', description: '' });
   const [confirmDelete, setConfirmDelete] = useState<Area | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -96,12 +97,15 @@ export function AreaManagement({ data, setData }: Props) {
     if (!confirmDelete) return;
 
     try {
+      setDeleteLoading(true);
       await areasApi.deleteSingle(confirmDelete.areaId);
       await Promise.all([fetchAreas(), syncDataManagerAreas()]);
       setConfirmDelete(null);
     } catch (err: any) {
       alert(err.message || 'Failed to delete area');
       setConfirmDelete(null);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -175,8 +179,13 @@ export function AreaManagement({ data, setData }: Props) {
 
       <ConfirmDialog
         isOpen={!!confirmDelete}
-        onClose={() => setConfirmDelete(null)}
+        onClose={() => {
+          if (deleteLoading) return;
+          setConfirmDelete(null);
+        }}
         onConfirm={handleDelete}
+        isLoading={deleteLoading}
+        loadingLabel="Deleting..."
         action="delete"
         title="Delete area"
         description={`Are you sure you want to delete "${confirmDelete?.name}"? This action cannot be undone.`}
