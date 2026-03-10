@@ -131,6 +131,8 @@ export interface ListEmployeeDto {
   email: string | null;
   phoneNumber: string | null;
   position: string | null;
+  dptId: number;
+  areaId: number;
   createdAt: string;
 }
 

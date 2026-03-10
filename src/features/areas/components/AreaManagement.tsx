@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit, Trash2, X, MapPin, AlertCircle } from 'lucide-react';
+import { Plus, MapPin } from 'lucide-react';
 import type { Area, AreasQueryParams, PaginatedResult, AreaDto } from '@/types/data';
 import { areasApi } from '@/services/api/areas';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
+import { PaginationBar } from '@/components/common/PaginationBar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { AreaTable } from './AreaTable';
+import { AreaFormModal, type AreaFormData } from './AreaFormModal';
 
 interface Props {
   data: Area[];
@@ -11,6 +14,7 @@ interface Props {
 }
 
 export function AreaManagement({ data, setData }: Props) {
+  void data;
   const [queryParams, setQueryParams] = useState<AreasQueryParams>({
     page: 1,
     pageSize: 10,
@@ -23,8 +27,9 @@ export function AreaManagement({ data, setData }: Props) {
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Area | null>(null);
-  const [formData, setFormData] = useState({ name: '', description: '' });
+  const [formData, setFormData] = useState<AreaFormData>({ name: '', description: '' });
   const [confirmDelete, setConfirmDelete] = useState<Area | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -92,12 +97,15 @@ export function AreaManagement({ data, setData }: Props) {
     if (!confirmDelete) return;
 
     try {
+      setDeleteLoading(true);
       await areasApi.deleteSingle(confirmDelete.areaId);
       await Promise.all([fetchAreas(), syncDataManagerAreas()]);
       setConfirmDelete(null);
     } catch (err: any) {
       alert(err.message || 'Failed to delete area');
       setConfirmDelete(null);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -135,177 +143,49 @@ export function AreaManagement({ data, setData }: Props) {
         showResults={true}
       />
 
-      <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
-        {isLoading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
-              <p className="text-muted-foreground">Loading areas...</p>
-            </div>
-          </div>
-        )}
-
-        {error && !showForm && !isLoading && (
-          <div className="p-4 bg-error-background border border-error-border flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
-            <div className="flex-1">
-              <p className="font-medium text-error-foreground">Error</p>
-              <p className="text-sm text-error-foreground">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {!isLoading && !error && (
-          <table className="w-full">
-            <thead className="bg-muted border-b border-border">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Area Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Description</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Created</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {(paginatedResult?.items || []).length > 0 ? (
-                (paginatedResult?.items || []).map((item) => (
-                  <tr key={item.areaId} className="hover:bg-accent transition-colors">
-                    <td className="px-6 py-4 text-sm font-medium text-foreground">{item.name}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{item.description || 'N/A'}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                      {new Date(item.createdAt).toLocaleDateString('en-GB', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                      })}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-right">
-                      <div className="inline-flex items-center gap-2">
-                        <button
-                          onClick={() => openForm({ ...item, id: String(item.areaId) } as Area)}
-                          className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors"
-                          title="Edit area"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => setConfirmDelete({ ...item, id: String(item.areaId) } as Area)}
-                          className="text-error-foreground inline-flex items-center justify-center hover:text-error-foreground transition-colors"
-                          title="Delete area"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-muted-foreground">
-                    <MapPin className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
-                    <p className="text-lg font-medium">No areas found</p>
-                    <p className="text-sm mt-1">Create your first area to get started</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        )}
-      </div>
+      <AreaTable
+        isLoading={isLoading}
+        error={showForm ? null : error}
+        items={paginatedResult?.items || []}
+        onEdit={(item) => openForm({ ...item, id: String(item.areaId) } as Area)}
+        onDelete={(item) => setConfirmDelete({ ...item, id: String(item.areaId) } as Area)}
+      />
 
       {paginatedResult && !isLoading && (
-        <div className="card p-4 flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            Page <span className="font-medium">{paginatedResult.page}</span> of{' '}
-            <span className="font-medium">{paginatedResult.totalPages}</span> ({' '}
-            <span className="font-medium">{paginatedResult.totalCount}</span> total items)
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() =>
-                setQueryParams({
-                  ...queryParams,
-                  page: Math.max(1, (queryParams.page || 1) - 1),
-                })
-              }
-              disabled={!paginatedResult.hasPreviousPage}
-              className="flex items-center gap-1 px-3 py-2 border border-input rounded-lg bg-card hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
-            >
-              <span>Previous</span>
-            </button>
-
-            <input
-              type="number"
-              min="1"
-              max={paginatedResult.totalPages}
-              value={queryParams.page || 1}
-              onChange={(e) => {
-                const pageNum = Math.min(
-                  Math.max(1, parseInt(e.target.value) || 1),
-                  paginatedResult.totalPages
-                );
-                setQueryParams({ ...queryParams, page: pageNum });
-              }}
-              className="w-12 px-2 py-2 border border-input rounded text-center text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-card text-foreground"
-            />
-
-            <button
-              onClick={() =>
-                setQueryParams({
-                  ...queryParams,
-                  page: Math.min(paginatedResult.totalPages, (queryParams.page || 1) + 1),
-                })
-              }
-              disabled={!paginatedResult.hasNextPage}
-              className="flex items-center gap-1 px-3 py-2 border border-input rounded-lg bg-card hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-foreground"
-            >
-              <span>Next</span>
-            </button>
-          </div>
-        </div>
+        <PaginationBar
+          page={paginatedResult.page}
+          totalPages={paginatedResult.totalPages}
+          totalCount={paginatedResult.totalCount}
+          hasPreviousPage={paginatedResult.hasPreviousPage}
+          hasNextPage={paginatedResult.hasNextPage}
+          onPageChange={(page) =>
+            setQueryParams((prev) => ({
+              ...prev,
+              page: Math.min(Math.max(1, page), paginatedResult.totalPages),
+            }))
+          }
+        />
       )}
 
-      {showForm && (
-        <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4">
-          <div className="bg-card border border-border rounded-lg p-6 shadow-sm w-full max-w-xl">
-            <div className="px-6 py-4 border-b border-border flex justify-between">
-              <h3 className="text-lg font-semibold text-foreground">{editing ? 'Edit' : 'Add'}</h3>
-              <button onClick={() => setShowForm(false)} className="hover:text-muted-foreground text-foreground transition-colors">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <input
-                type="text"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Name *"
-                className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
-              />
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Description"
-                rows={3}
-                className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
-              />
-              <div className="flex gap-3">
-                <button type="submit" className="btn-primary flex-1 px-4 py-2">
-                  {editing ? 'Update' : 'Create'}
-                </button>
-                <button type="button" onClick={() => setShowForm(false)} className="btn-secondary flex-1 px-4 py-2">
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <AreaFormModal
+        isOpen={showForm}
+        editing={editing}
+        formData={formData}
+        isLoading={isLoading}
+        onChange={setFormData}
+        onSubmit={handleSubmit}
+        onClose={() => setShowForm(false)}
+      />
 
       <ConfirmDialog
         isOpen={!!confirmDelete}
-        onClose={() => setConfirmDelete(null)}
+        onClose={() => {
+          if (deleteLoading) return;
+          setConfirmDelete(null);
+        }}
         onConfirm={handleDelete}
+        isLoading={deleteLoading}
+        loadingLabel="Deleting..."
         action="delete"
         title="Delete area"
         description={`Are you sure you want to delete "${confirmDelete?.name}"? This action cannot be undone.`}

@@ -31,75 +31,27 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { BrandTheme, palettes, SemanticTokens } from '@/constants/palettes';
 import { applyThemeTokens, GLOBAL_SEMANTIC_TOKENS, DARK_SEMANTIC_TOKENS } from '@/utils/themeTokens';
+import {
+  getActualAppearance,
+  isValidBrandColor,
+  isValidTheme,
+  resolveSystemAppearance,
+} from '@/features/theme/hooks/themeHelpers';
+import type {
+  AccessibilityMode,
+  Appearance,
+  BrandColorTheme,
+  Theme,
+  UseThemeReturn,
+} from '@/features/theme/hooks/themeTypes';
 
-/**
- * Appearance type - respects system preference or explicit choice
- * - light: Always light appearance
- * - dark: Always dark appearance
- * - auto: Follow system preference (prefers-color-scheme)
- * @type {string} Appearance
- * @reference https://developer.apple.com/design/human-interface-guidelines/dark-mode/
- */
-export type Appearance = 'light' | 'dark' | 'auto';
-
-/**
- * Brand color type - independent from appearance
- * Can be combined with any appearance (light + purple, dark + purple, etc.)
- * @type {string} BrandColorTheme
- */
-export type BrandColorTheme = 'default' | BrandTheme;
-
-/**
- * Legacy Theme type union - kept for backwards compatibility
- * Combines appearance and brand color into single value
- * @deprecated Use Appearance and BrandColorTheme separately
- * @type {string} Theme
- */
-export type Theme = 'light' | 'dark' | BrandTheme;
-
-/**
- * Accessibility mode options
- * - default: Standard color contrast (WCAG AA minimum 4.5:1)
- * - highContrast: Enhanced contrast for visibility impaired (WCAG AAA minimum 7:1)
- * @type {string} AccessibilityMode
- * @reference https://www.w3.org/TR/WCAG21-Understanding/contrast-enhanced.html
- */
-export type AccessibilityMode = 'default' | 'highContrast';
-
-/**
- * Theme state and methods interface
- * @interface UseThemeReturn
- */
-export interface UseThemeReturn {
-  /** Current appearance setting (light/dark/auto) - independent from brand color */
-  appearance: Appearance;
-  /** Current brand color choice - independent from appearance */
-  brandColor: BrandColorTheme;
-  /** Legacy: Current active theme (for backwards compatibility) */
-  theme: Theme;
-  /** System's resolved appearance (if auto, returns actual light/dark detected) */
-  resolvedAppearance: 'light' | 'dark';
-  /** Current accessibility mode */
-  accessibilityMode: AccessibilityMode;
-  /** Whether reduced motion is preferred by user */
-  prefersReducedMotion: boolean;
-  /** Change appearance setting (light/dark/auto) independently */
-  setAppearance: (appearance: Appearance) => void;
-  /** Change brand color independently */
-  setBrandColor: (brandColor: BrandColorTheme) => void;
-  /** Legacy: Change active theme and persist selection (deprecated - use setAppearance + setBrandColor) */
-  changeTheme: (theme: Theme) => void;
-  /** Set accessibility mode for current theme */
-  setAccessibilityMode: (mode: AccessibilityMode) => void;
-  /** Get semantic tokens for current theme */
-  getSemanticTokens: () => SemanticTokens | null;
-  /** Get primary color of current theme */
-  getPrimaryColor: () => string | null;
-  /** Get secondary color of current theme if available */
-  getSecondaryColor: () => string | null;
-  /** Reset to default theme and mode */
-  resetToDefaults: () => void;
-}
+export type {
+  AccessibilityMode,
+  Appearance,
+  BrandColorTheme,
+  Theme,
+  UseThemeReturn,
+} from '@/features/theme/hooks/themeTypes';
 
 /**
  * Custom hook for theme management
@@ -272,12 +224,21 @@ export const useTheme = (): UseThemeReturn => {
    */
   useEffect(() => {
     // Load saved preferences (NEW: appearance + brandColor stored separately)
-    const savedAppearance = localStorage.getItem('appearance') as Appearance | null;
-    const savedBrandColor = localStorage.getItem('brandColor') as BrandColorTheme | null;
+    const rawSavedAppearance = localStorage.getItem('appearance');
+    const rawSavedBrandColor = localStorage.getItem('brandColor');
     const savedAccessibility = localStorage.getItem('a11y') as AccessibilityMode | null;
 
     // Fallback: Check legacy 'theme' for migration
     const savedTheme = localStorage.getItem('theme') as Theme | null;
+
+    const savedAppearance =
+      rawSavedAppearance === 'light' || rawSavedAppearance === 'dark' || rawSavedAppearance === 'auto'
+        ? rawSavedAppearance
+        : null;
+
+    const savedBrandColor = rawSavedBrandColor && isValidBrandColor(rawSavedBrandColor)
+      ? rawSavedBrandColor
+      : null;
 
     // Initialize appearance
     let initialAppearance: Appearance = savedAppearance || 'auto';
@@ -294,13 +255,10 @@ export const useTheme = (): UseThemeReturn => {
     }
 
     // Detect system preference for auto mode
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const systemResolvedAppearance: 'light' | 'dark' = systemPrefersDark ? 'dark' : 'light';
+    const systemResolvedAppearance = resolveSystemAppearance();
 
     // Resolve actual appearance
-    const actualAppearance: 'light' | 'dark' = initialAppearance === 'auto'
-      ? systemResolvedAppearance
-      : initialAppearance as 'light' | 'dark';
+    const actualAppearance = getActualAppearance(initialAppearance, systemResolvedAppearance);
 
     // Compute combined theme (for legacy applyThemeTokens)
     const computedTheme = computeTheme(initialAppearance, initialBrandColor, actualAppearance);
@@ -407,10 +365,12 @@ export const useTheme = (): UseThemeReturn => {
     const handleStorageChange = (e: StorageEvent) => {
       // NEW: Handle appearance changes
       if (e.key === 'appearance' && e.newValue) {
-        const newAppearance = e.newValue as Appearance;
-        const actualAppearance: 'light' | 'dark' = newAppearance === 'auto'
-          ? resolvedAppearance
-          : newAppearance as 'light' | 'dark';
+        if (e.newValue !== 'light' && e.newValue !== 'dark' && e.newValue !== 'auto') {
+          return;
+        }
+
+        const newAppearance = e.newValue;
+        const actualAppearance = getActualAppearance(newAppearance, resolvedAppearance);
         const computedTheme = computeTheme(newAppearance, brandColor, actualAppearance);
 
         setAppearanceState(newAppearance);
@@ -420,10 +380,12 @@ export const useTheme = (): UseThemeReturn => {
 
       // NEW: Handle brand color changes
       if (e.key === 'brandColor' && e.newValue) {
-        const newBrandColor = e.newValue as BrandColorTheme;
-        const actualAppearance: 'light' | 'dark' = appearance === 'auto'
-          ? resolvedAppearance
-          : appearance as 'light' | 'dark';
+        if (!isValidBrandColor(e.newValue)) {
+          return;
+        }
+
+        const newBrandColor = e.newValue;
+        const actualAppearance = getActualAppearance(appearance, resolvedAppearance);
         const computedTheme = computeTheme(appearance, newBrandColor, actualAppearance);
 
         setBrandColorState(newBrandColor);
@@ -433,12 +395,9 @@ export const useTheme = (): UseThemeReturn => {
 
       // Legacy: Handle theme changes (for backwards compatibility)
       if (e.key === 'theme' && e.newValue) {
-        const newTheme = e.newValue as Theme;
-        const allAvailableThemes: Theme[] = ['light', 'dark', ...Object.keys(palettes) as BrandTheme[]];
-        if (allAvailableThemes.includes(newTheme)) {
-          const actualAppearance: 'light' | 'dark' = appearance === 'auto'
-            ? resolvedAppearance
-            : appearance as 'light' | 'dark';
+        const newTheme = e.newValue;
+        if (isValidTheme(newTheme)) {
+          const actualAppearance = getActualAppearance(appearance, resolvedAppearance);
           setTheme(newTheme);
           applyTheme(newTheme, actualAppearance, brandColor, accessibilityMode);
         }
@@ -447,9 +406,7 @@ export const useTheme = (): UseThemeReturn => {
       // Accessibility mode changes
       if (e.key === 'a11y' && e.newValue) {
         const newMode = e.newValue as AccessibilityMode;
-        const actualAppearance: 'light' | 'dark' = appearance === 'auto'
-          ? resolvedAppearance
-          : appearance as 'light' | 'dark';
+        const actualAppearance = getActualAppearance(appearance, resolvedAppearance);
         setAccessibilityMode(newMode);
         applyTheme(theme, actualAppearance, brandColor, newMode);
       }
@@ -497,9 +454,7 @@ export const useTheme = (): UseThemeReturn => {
       const startTime = performance.now();
 
       // Resolve actual appearance if auto
-      const actualAppearance: 'light' | 'dark' = newAppearance === 'auto'
-        ? resolvedAppearance
-        : newAppearance as 'light' | 'dark';
+      const actualAppearance = getActualAppearance(newAppearance, resolvedAppearance);
 
       // Compute combined theme
       const computedTheme = computeTheme(newAppearance, brandColor, actualAppearance);
@@ -593,16 +548,13 @@ export const useTheme = (): UseThemeReturn => {
       const startTime = performance.now();
 
       // Validate brand color exists
-      const allBrandColors: BrandColorTheme[] = ['default', ...Object.keys(palettes) as BrandTheme[]];
-      if (!allBrandColors.includes(newBrandColor)) {
+      if (!isValidBrandColor(newBrandColor)) {
         console.warn(`Invalid brand color: ${newBrandColor}`);
         return;
       }
 
       // Resolve actual appearance
-      const actualAppearance: 'light' | 'dark' = appearance === 'auto'
-        ? resolvedAppearance
-        : appearance as 'light' | 'dark';
+      const actualAppearance = getActualAppearance(appearance, resolvedAppearance);
 
       // Compute combined theme
       const computedTheme = computeTheme(appearance, newBrandColor, actualAppearance);
@@ -688,8 +640,7 @@ export const useTheme = (): UseThemeReturn => {
   const changeTheme = useCallback(
     (newTheme: Theme) => {
       // Validate theme exists
-      const allAvailableThemes: Theme[] = ['light', 'dark', ...Object.keys(palettes) as BrandTheme[]];
-      if (!allAvailableThemes.includes(newTheme)) {
+      if (!isValidTheme(newTheme)) {
         console.warn(`Invalid theme: ${newTheme}`);
         return;
       }
@@ -707,9 +658,7 @@ export const useTheme = (): UseThemeReturn => {
       }
 
       // Resolve actual appearance
-      const actualAppearance: 'light' | 'dark' = newAppearance === 'auto'
-        ? resolvedAppearance
-        : newAppearance as 'light' | 'dark';
+      const actualAppearance = getActualAppearance(newAppearance, resolvedAppearance);
 
       // Add transition animation if user allows motion
       if (!prefersReducedMotion) {
@@ -774,9 +723,7 @@ export const useTheme = (): UseThemeReturn => {
   const setAccessibilityModeHandler = useCallback(
     (mode: AccessibilityMode) => {
       // Resolve actual appearance
-      const actualAppearance: 'light' | 'dark' = appearance === 'auto'
-        ? resolvedAppearance
-        : appearance as 'light' | 'dark';
+      const actualAppearance = getActualAppearance(appearance, resolvedAppearance);
 
       setAccessibilityMode(mode);
       applyTheme(theme, actualAppearance, brandColor, mode);
@@ -875,8 +822,7 @@ export const useTheme = (): UseThemeReturn => {
    * @internal
    */
   const resetToDefaults = useCallback(() => {
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const systemResolved: 'light' | 'dark' = systemPrefersDark ? 'dark' : 'light';
+    const systemResolved = resolveSystemAppearance();
 
     setAppearanceState('auto');
     setBrandColorState('default');

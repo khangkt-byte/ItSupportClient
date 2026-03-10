@@ -98,10 +98,17 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
             <button
               type="submit"
-              className="w-full bg-primary-600 text-primary-foreground py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium"
+              className="w-full bg-primary-600 text-primary-foreground py-3 rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               disabled={isLoading}
             >
-              {isLoading ? 'Signing In...' : 'Sign In'}
+              {isLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  Signing In...
+                </>
+              ) : (
+                'Sign In'
+              )}
             </button>
           </form>
 
