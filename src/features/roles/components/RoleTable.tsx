@@ -78,7 +78,7 @@ export function RoleTable({
                         {canEdit && (
                           <button
                             onClick={() => onEdit(item)}
-                            className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors"
+                            className="w-4 h-4 text-primary-600 inline-flex items-center justify-center rounded-md hover:bg-accent hover:text-primary-800 transition-colors shrink-0"
                             title="Edit role"
                           >
                             <Edit className="w-4 h-4" />
@@ -87,7 +87,7 @@ export function RoleTable({
                         {canDelete && (
                           <button
                             onClick={() => onDelete(item)}
-                            className="text-error-foreground inline-flex items-center justify-center hover:text-error-foreground transition-colors"
+                            className="w-4 h-4 text-error-foreground inline-flex items-center justify-center rounded-md hover:bg-accent hover:text-error-foreground transition-colors shrink-0"
                             title="Delete role"
                           >
                             <Trash2 className="w-4 h-4" />

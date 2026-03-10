@@ -2,16 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, ChevronDown, ChevronUp, Save, Shield, X } from 'lucide-react';
 import { rolesApi } from '@/services/api/roles';
 import type { ClaimDto, RoleDto } from '@/types/data';
+import { groupClaimsByCategory } from '@/features/roles/utils/claimGrouping';
 
 export interface RoleFormData {
   name: string;
   description: string;
   selectedClaimIds: number[];
-}
-
-interface ClaimGroup {
-  category: string;
-  claims: ClaimDto[];
 }
 
 interface RoleFormModalProps {
@@ -22,29 +18,6 @@ interface RoleFormModalProps {
   onSubmit: (formData: RoleFormData) => Promise<void>;
   onClose: () => void;
   onClearError: () => void;
-}
-
-function groupClaimsByCategory(claims: ClaimDto[]): ClaimGroup[] {
-  const groups = new Map<string, ClaimDto[]>();
-
-  claims.forEach((claim) => {
-    const fallbackCategory = claim.claim?.split('.')?.[0];
-    const category = claim.category || fallbackCategory || 'Other';
-
-    if (!groups.has(category)) {
-      groups.set(category, []);
-    }
-
-    groups.get(category)?.push(claim);
-  });
-
-  return Array.from(groups.entries())
-    .map(([category, grouped]) => ({ category, claims: grouped }))
-    .sort((a, b) => {
-      if (a.category === 'Admin') return -1;
-      if (b.category === 'Admin') return 1;
-      return a.category.localeCompare(b.category);
-    });
 }
 
 function getInitialFormData(editing: RoleDto | null): RoleFormData {

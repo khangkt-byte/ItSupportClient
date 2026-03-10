@@ -92,14 +92,14 @@ export function AccountTable({
                         <>
                           <button
                             onClick={() => onEdit(item.accountId)}
-                            className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors"
+                            className="w-4 h-4 text-primary-600 inline-flex items-center justify-center rounded-md hover:bg-accent hover:text-primary-800 transition-colors shrink-0"
                             title="Edit account"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => onLockToggle(item.accountId)}
-                            className={`inline-flex items-center justify-center transition-colors ${
+                            className={`w-4 h-4 inline-flex items-center justify-center rounded-md hover:bg-accent transition-colors shrink-0 ${
                               item.isLocked
                                 ? 'text-success-foreground hover:text-success-foreground'
                                 : 'text-warning-foreground hover:text-warning-foreground'
@@ -113,7 +113,7 @@ export function AccountTable({
                       {canDelete && (
                         <button
                           onClick={() => onDelete(item.accountId)}
-                          className="text-error-foreground inline-flex items-center justify-center hover:text-error-foreground transition-colors"
+                          className="w-4 h-4 text-error-foreground inline-flex items-center justify-center rounded-md hover:bg-accent hover:text-error-foreground transition-colors shrink-0"
                           title="Delete account"
                         >
                           <Trash2 className="w-4 h-4" />
