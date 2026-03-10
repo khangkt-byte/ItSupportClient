@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Clock, Plus } from 'lucide-react';
-import type { Area, Department, Employee, IssueLogDto, WorkLog, WorkStatus, WorkLogsQueryParams } from '@/types/data';
-import { workLogsApi } from '@/services/api';
-import { workLogToCreateDto } from '@/utils/workLogAdapter';
+import type { Area, Department, Employee, WorkLog, WorkLogsQueryParams } from '@/types/data';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { PermissionGuard } from '@/components/common/PermissionGuard';
@@ -12,6 +10,7 @@ import { WorkLogFormModal, type WorkLogFormData } from '@/features/workLogs/comp
 import { WorkLogImportExportPanel } from '@/features/workLogs/components/WorkLogImportExportPanel';
 import { WorkLogTable } from '@/features/workLogs/components/WorkLogTable';
 import { useFilteredWorkLogs } from '@/features/workLogs/hooks/useFilteredWorkLogs';
+import { useWorkLogMutations } from '@/features/workLogs/hooks/useWorkLogMutations';
 
 interface Props {
   data: WorkLog[];
@@ -36,10 +35,21 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<WorkLog | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const paginatedResult = useFilteredWorkLogs(data, queryParams);
+  const {
+    submitting,
+    error,
+    setError,
+    submitWorkLog,
+    deleteWorkLog,
+  } = useWorkLogMutations({
+    data,
+    setData,
+    currentUser,
+    departments,
+    areas,
+  });
 
   const openForm = (log?: WorkLog) => {
     setError(null);
@@ -48,93 +58,18 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
   };
 
   const handleSubmit = async (formData: WorkLogFormData) => {
-    setSubmitting(true);
-    setError(null);
-    
-    try {
-      // Find department and area IDs
-      const dept = departments.find(d => d.name === formData.department);
-      const areaObj = areas.find(a => a.name === formData.area);
-      
-      // Convert formData to WorkLog format first, then to CreateIssueLogDto using adapter
-      const workLogData: Partial<WorkLog> = {
-        operators: [formData.operators[0] || currentUser],
-        requesters: formData.requesters,
-        dptId: dept?.dptId,
-        areaId: areaObj?.areaId,
-        issue: formData.issue,
-        cause: formData.cause || undefined,
-        fixDescription: formData.fixDescription || undefined,
-        permanentFix: formData.permanentFix || undefined,
-        note: formData.note || undefined,
-        reportDate: formData.reportDate,
-        status: formData.status as WorkStatus
-      };
-      
-      // Use adapter to convert to API DTO
-      const createDto = workLogToCreateDto(workLogData);
-
-      if (editing) {
-        // For update, use UpdateIssueLogDto
-        await workLogsApi.update(editing.id, createDto);
-        // Refresh the data by converting the response back to WorkLog
-        const updatedWorkLog: WorkLog = {
-          ...editing,
-          reportDate: createDto.dateReported,
-          operators: formData.operators,
-          requesters: formData.requesters,
-          department: formData.department,
-          area: formData.area,
-          issue: formData.issue,
-          cause: formData.cause,
-          fixDescription: formData.fixDescription,
-          permanentFix: formData.permanentFix,
-          note: formData.note,
-          status: formData.status
-        };
-        setData(data.map((l) => (l.id === editing.id ? updatedWorkLog : l)));
-      } else {
-        // Create new log
-        const newLog: IssueLogDto = await workLogsApi.create(createDto);
-        // Convert IssueLogDto to WorkLog
-        const newWorkLog: WorkLog = {
-          ...newLog,
-          id: newLog.issLogId,
-          reportDate: newLog.dateReported,
-          operators: formData.operators,
-          requesters: formData.requesters,
-          department: formData.department,
-          area: formData.area,
-          issue: newLog.issueDescription,
-          cause: newLog.cause || '',
-          fixDescription: newLog.resolution || '',
-          permanentFix: newLog.permanentFix || '',
-          note: newLog.notes || '',
-          status: newLog.status as WorkStatus || 'pending'
-        };
-        setData([newWorkLog, ...data]);
-      }
-      
+    const success = await submitWorkLog(formData, editing);
+    if (success) {
       setShowForm(false);
       setEditing(null);
-    } catch (error) {
-      console.error('Failed to submit work log:', error);
-      setError('Failed to submit work log. Please try again.');
-    } finally {
-      setSubmitting(false);
     }
   };
 
   const handleDelete = async () => {
     if (!confirmDelete) return;
-    
-    try {
-      await workLogsApi.deleteSingle(confirmDelete);
-      setData(data.filter((l) => l.id !== confirmDelete));
-      setConfirmDelete(null);
-    } catch (error) {
-      console.error('Failed to delete work log:', error);
-      setError('Failed to delete work log. Please try again.');
+
+    const success = await deleteWorkLog(confirmDelete);
+    if (success) {
       setConfirmDelete(null);
     }
   };
