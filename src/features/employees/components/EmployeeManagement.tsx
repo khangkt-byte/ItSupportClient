@@ -122,22 +122,60 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
     setShowForm(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Call API to create/update employee
-    console.log('Submit employee:', formData);
-    setShowForm(false);
-    // Refresh data after submission
-    fetchEmployees();
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      if (editing) {
+        // Update existing employee
+        const updateData = {
+          fullName: formData.fullName,
+          phoneNumber: formData.phoneNumber || null,
+          email: formData.email || null,
+          position: formData.position || null,
+        };
+        await employeesApi.update(editing.empId, updateData);
+      } else {
+        // Create new employee
+        const createData = {
+          empCode: formData.empCode || null,
+          fullName: formData.fullName,
+          phoneNumber: formData.phoneNumber || null,
+          email: formData.email || null,
+          position: formData.position || null,
+        };
+        await employeesApi.create(createData);
+      }
+
+      setShowForm(false);
+      setFormData({ empCode: '', fullName: '', phoneNumber: '', email: '', position: '' });
+      // Refresh data after submission
+      await fetchEmployees();
+    } catch (err) {
+      console.error('Failed to save employee:', err);
+      setError(`Failed to ${editing ? 'update' : 'create'} employee. Please try again.`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!confirmDelete) return;
-    // TODO: Call API to delete employee
-    console.log('Delete employee:', confirmDelete.empId);
-    setConfirmDelete(null);
-    // Refresh data after deletion
-    fetchEmployees();
+    try {
+      setIsLoading(true);
+      setError(null);
+      await employeesApi.deleteSingle(confirmDelete.empId);
+      setConfirmDelete(null);
+      // Refresh data after deletion
+      await fetchEmployees();
+    } catch (err) {
+      console.error('Failed to delete employee:', err);
+      setError('Failed to delete employee. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
