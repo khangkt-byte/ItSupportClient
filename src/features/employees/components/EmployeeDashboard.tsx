@@ -15,10 +15,16 @@ interface Props {
 export function EmployeeDashboard({ user, onLogout, currentView }: Props) {
   const dataManager = useDataManager();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
-  const handleLogout = () => {
-    onLogout();
-    setShowLogoutConfirm(false);
+  const handleLogout = async () => {
+    setLogoutLoading(true);
+    try {
+      onLogout();
+    } finally {
+      setLogoutLoading(false);
+      setShowLogoutConfirm(false);
+    }
   };
 
   // Show loading if data is still being fetched
@@ -93,10 +99,11 @@ export function EmployeeDashboard({ user, onLogout, currentView }: Props) {
         </div>
         <button
           onClick={() => setShowLogoutConfirm(true)}
-          className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 flex items-center gap-2"
+          disabled={logoutLoading}
+          className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           <LogOut className="w-4 h-4" />
-          Logout
+          {logoutLoading ? 'Logging out...' : 'Logout'}
         </button>
       </div>
 
@@ -105,8 +112,13 @@ export function EmployeeDashboard({ user, onLogout, currentView }: Props) {
 
       <ConfirmDialog
         isOpen={showLogoutConfirm}
-        onClose={() => setShowLogoutConfirm(false)}
+        onClose={() => {
+          if (logoutLoading) return;
+          setShowLogoutConfirm(false);
+        }}
         onConfirm={handleLogout}
+        isLoading={logoutLoading}
+        loadingLabel="Logging out..."
         action="logout"
         title="Logout"
         description="Are you sure you want to logout?"
