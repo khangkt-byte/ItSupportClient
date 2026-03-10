@@ -179,23 +179,44 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
 
   const openForm = (item?: Account) => {
     setEditing(item || null);
-    setFormData(
-      item
-        ? {
-            employeeId: item.employeeId,
-            username: item.username,
-            password: '', // Never pre-fill password
-            selectedRoleIds: [], // TODO: Load from account's roles
-            selectedClaimIds: [] // TODO: Load from account's direct claims
-          }
-        : {
-            employeeId: '',
-            username: '',
-            password: '',
-            selectedRoleIds: [],
-            selectedClaimIds: []
-          }
-    );
+    
+    if (item) {
+      // Edit existing account - pre-populate form with current values
+      const selectedRoleIds = item.roles?.map(r => r.roleId) || [];
+      
+      // Extract direct claims (claims not in any selected role)
+      const roleClaimIds = new Set<number>();
+      selectedRoleIds.forEach(roleId => {
+        const role = roles.find(r => r.roleId === roleId);
+        role?.claims?.forEach(claim => roleClaimIds.add(claim.claimId));
+      });
+      
+      // Direct claims are those selected but NOT inherited from roles
+      const selectedClaimIds = availableClaims
+        .filter(claim => selectedRoleIds.some(roleId => {
+          const role = roles.find(r => r.roleId === roleId);
+          return role?.claims?.some(c => c.claimId === claim.claimId);
+        }))
+        .map(c => c.claimId);
+      
+      setFormData({
+        employeeId: item.employeeId,
+        username: item.username,
+        password: '', // Never pre-fill password
+        selectedRoleIds,
+        selectedClaimIds
+      });
+    } else {
+      // Create new account
+      setFormData({
+        employeeId: '',
+        username: '',
+        password: '',
+        selectedRoleIds: [],
+        selectedClaimIds: []
+      });
+    }
+    
     setFormStep('basic');
     setError(null);
     setShowForm(true);
