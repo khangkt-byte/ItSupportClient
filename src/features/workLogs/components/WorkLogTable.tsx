@@ -1,9 +1,14 @@
-import { useState, JSX } from 'react';
+import { useState } from 'react';
 import React from 'react';
-import { AlertCircle, CheckCircle2, ChevronDown, ChevronUp, Clock, Edit, PlayCircle, Trash2, XCircle } from 'lucide-react';
+import { AlertCircle, ChevronDown, ChevronUp, Clock, Edit, Trash2 } from 'lucide-react';
 import { PermissionGuard } from '@/components/common/PermissionGuard';
 import { Permissions } from '@/config/permissions';
-import type { PaginatedResult, WorkLog, WorkStatus } from '@/types/data';
+import type { PaginatedResult, WorkLog } from '@/types/data';
+import {
+  getWorkLogStatusBadgeClass,
+  getWorkLogStatusIcon,
+  getWorkLogStatusLabel,
+} from '@/features/workLogs/utils/workLogStatus';
 
 interface WorkLogTableProps {
   paginatedResult: PaginatedResult<WorkLog>;
@@ -20,41 +25,6 @@ export function WorkLogTable({ paginatedResult, isLoading, error, onEdit, onDele
     const newExpanded = new Set(expandedRows);
     newExpanded.has(id) ? newExpanded.delete(id) : newExpanded.add(id);
     setExpandedRows(newExpanded);
-  };
-
-  const getStatusLabel = (status: WorkStatus) => {
-    const labels: Record<string, string> = {
-      pending: 'PENDING',
-      'in-progress': 'IN PROGRESS',
-      resolved: 'RESOLVED',
-      cancelled: 'CANCELLED',
-    };
-    return labels[status] || status?.toUpperCase() || 'UNKNOWN';
-  };
-
-  const getStatusIcon = (status: WorkStatus) => {
-    const iconProps = { className: 'w-3 h-3', strokeWidth: 2.5 };
-    const icons: Record<string, JSX.Element> = {
-      pending: <Clock {...iconProps} />,
-      'in-progress': <PlayCircle {...iconProps} />,
-      resolved: <CheckCircle2 {...iconProps} />,
-      cancelled: <XCircle {...iconProps} />,
-    };
-    const icon = icons[status];
-    if (!icon) return null;
-
-    return <span className="inline-flex w-3 h-3 shrink-0 items-center justify-center">{icon}</span>;
-  };
-
-  const getStatusBadge = (status: WorkStatus) => {
-    const base = 'inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium leading-4 tracking-wide transition-colors';
-    const styles: Record<string, string> = {
-      pending: 'bg-warning-background text-warning-foreground ring-1 ring-inset ring-warning-border',
-      'in-progress': 'bg-info-background text-info-foreground ring-1 ring-inset ring-info-border',
-      resolved: 'bg-success-background text-success-foreground ring-1 ring-inset ring-success-border',
-      cancelled: 'bg-muted text-muted-foreground ring-1 ring-inset ring-border',
-    };
-    return `${base} ${styles[status] || 'bg-muted text-muted-foreground ring-1 ring-inset ring-border'}`;
   };
 
   return (
@@ -115,9 +85,9 @@ export function WorkLogTable({ paginatedResult, isLoading, error, onEdit, onDele
                       </button>
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      <span className={getStatusBadge(log.status)}>
-                        {getStatusIcon(log.status)}
-                        {getStatusLabel(log.status)}
+                      <span className={getWorkLogStatusBadgeClass(log.status)}>
+                        {getWorkLogStatusIcon(log.status)}
+                        {getWorkLogStatusLabel(log.status)}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-right">
