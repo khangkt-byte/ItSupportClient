@@ -25,11 +25,12 @@ import { PaginationBar } from '@/components/common/PaginationBar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { accountsApi } from '@/services/api/accounts';
 import { rolesApi } from '@/services/api/roles';
-import type { Account, Employee, RoleDto, AccountsQueryParams, PaginatedResult, ListAccountDto } from '@/types/data';
+import type { Account, Employee, RoleDto } from '@/types/data';
 import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 import { AccountTable } from '@/features/accounts/components/AccountTable';
 import { AccountFormModal, type AccountFormData } from '@/features/accounts/components/AccountFormModal';
+import { useAccountQuery } from '@/features/accounts/hooks/useAccountQuery';
 
 interface Props {
   data: Account[];
@@ -47,47 +48,22 @@ type ConfirmState = {
 } | null;
 
 export function AccountManagement({ data, setData, employees, roles }: Props) {
-  // Query Parameters state (includes server-side filters)
-  const [queryParams, setQueryParams] = useState<AccountsQueryParams>({
-    page: 1,
-    pageSize: 10,
-    search: '',
-    sortBy: 'username',
-    isDescending: false,
-    isLocked: null, // null = all, true = locked only, false = active only
-  });
-
-  // Paginated result state
-  const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<ListAccountDto> | null>(null);
+  const {
+    queryParams,
+    setQueryParams,
+    paginatedResult,
+    queryLoading,
+    queryError,
+    fetchAccounts,
+  } = useAccountQuery();
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Account | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isMutating, setIsMutating] = useState(false);
+  const [mutationError, setMutationError] = useState<string | null>(null);
   const [confirmState, setConfirmState] = useState<ConfirmState>(null);
 
   const { hasPermission } = usePermission();
-
-  // Fetch accounts with current query parameters (server-side filtering)
-  const fetchAccounts = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const result = await accountsApi.getAll(queryParams);
-      setPaginatedResult(result);
-    } catch (err) {
-      console.error('Failed to fetch accounts:', err);
-      setError('Failed to load accounts');
-      setPaginatedResult(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [queryParams]);
-
-  useEffect(() => {
-    void fetchAccounts();
-  }, [fetchAccounts]);
 
   // Ensure roles display is accurate by fetching account details if needed
   useEffect(() => {
@@ -139,25 +115,25 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
 
   const openCreateForm = () => {
     setEditing(null);
-    setError(null);
+    setMutationError(null);
     setShowForm(true);
   };
 
   const openEditForm = (accountId: string) => {
     const account = data.find((item) => item.accountId === accountId) || null;
     if (!account) {
-      setError('Unable to load account details for editing.');
+      setMutationError('Unable to load account details for editing.');
       return;
     }
 
     setEditing(account);
-    setError(null);
+    setMutationError(null);
     setShowForm(true);
   };
 
   const handleFormSubmit = async (formData: AccountFormData) => {
-    setIsLoading(true);
-    setError(null);
+    setIsMutating(true);
+    setMutationError(null);
 
     try {
       const employee = employees.find((e) => e.employeeId === formData.employeeId);
@@ -231,11 +207,14 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to save account. Please try again.';
       console.error('Failed to save account:', err);
-      setError(message);
+      setMutationError(message);
     } finally {
-      setIsLoading(false);
+      setIsMutating(false);
     }
   };
+
+  const isLoading = queryLoading || isMutating;
+  const tableError = showForm ? null : mutationError || queryError;
 
   const handleDelete = async (accountId: string) => {
     try {
@@ -374,7 +353,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
       <AccountTable
         items={paginatedResult?.items || []}
         isLoading={isLoading}
-        error={error}
+        error={tableError}
         canEdit={hasPermission(Permissions.Account.Edit)}
         canDelete={hasPermission(Permissions.Account.Delete)}
         onEdit={openEditForm}
@@ -408,14 +387,14 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
         editing={editing}
         employees={employees}
         roles={roles}
-        isSubmitting={isLoading}
-        error={error}
+        isSubmitting={isMutating}
+        error={mutationError}
         onSubmit={handleFormSubmit}
         onClose={() => {
           setShowForm(false);
           setEditing(null);
         }}
-        onClearError={() => setError(null)}
+        onClearError={() => setMutationError(null)}
       />
 
       <ConfirmDialog
