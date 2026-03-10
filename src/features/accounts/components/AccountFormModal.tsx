@@ -194,8 +194,12 @@ export function AccountFormModal({
               selectedClaimIds={formData.selectedClaimIds}
               availableRoles={roles}
               availableClaims={availableClaims}
-              onRolesChange={(roleIds) => setFormData({ ...formData, selectedRoleIds: roleIds })}
-              onClaimsChange={(claimIds) => setFormData({ ...formData, selectedClaimIds: claimIds })}
+              onRolesChange={(roleIds) =>
+                setFormData((prev) => ({ ...prev, selectedRoleIds: roleIds }))
+              }
+              onClaimsChange={(claimIds) =>
+                setFormData((prev) => ({ ...prev, selectedClaimIds: claimIds }))
+              }
             />
 
             <div className="flex gap-3 pt-4 border-t border-border">
