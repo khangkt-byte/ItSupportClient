@@ -4,7 +4,7 @@ import type { User } from '@/types/data';
 import { useDataManager } from '@/hooks/useDataManager';
 import { WorkLogManagement } from '@/features/workLogs/components/WorkLogManagement';
 import { EmployeeManagement } from '@/features/employees/components/EmployeeManagement';
-import { DepartmentManagement } from '@/features/areas/components/DepartmentManagement';
+import { DepartmentManagement } from '@/features/departments/components/DepartmentManagement';
 import { AreaManagement } from '@/features/areas/components/AreaManagement';
 import { AccountManagement } from '@/features/accounts/components/AccountManagement';
 import { RoleManagement } from '@/features/roles/components/RoleManagement';
