@@ -115,6 +115,18 @@ export function FlexibleMultiSelect({
     }
   };
 
+  const handleInputBlur = () => {
+    // When user clicks outside, accept the custom input value
+    if (inputValue.trim() && allowCustom) {
+      const trimmedValue = inputValue.trim();
+      if (!values.includes(trimmedValue)) {
+        onChange([...values, trimmedValue]);
+      }
+      setInputValue('');
+    }
+    setShowSuggestions(false);
+  };
+
   // Scroll highlighted item into view
   useEffect(() => {
     if (highlightedIndex >= 0 && dropdownRef.current) {
@@ -165,6 +177,7 @@ export function FlexibleMultiSelect({
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onFocus={handleFocus}
+            onBlur={handleInputBlur}
             placeholder={values.length === 0 ? placeholder : ''}
             className="flex-1 min-w-30 outline-none bg-transparent text-foreground placeholder-placeholder"
           />
@@ -225,7 +238,7 @@ export function FlexibleMultiSelect({
 
       {allowCustom && (
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          Select from list or press Enter to add custom name
+          Select from list, press Enter, or click outside to add custom name
         </p>
       )}
     </div>

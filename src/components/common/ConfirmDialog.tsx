@@ -17,6 +17,8 @@ interface ConfirmDialogProps {
   title: string;
   description: string;
   confirmLabel?: string;
+  loadingLabel?: string;
+  isLoading?: boolean;
   icon?: React.ReactNode;
 }
 
@@ -28,6 +30,8 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel,
+  loadingLabel,
+  isLoading = false,
   icon
 }: ConfirmDialogProps) {
   if (!isOpen) return null;
@@ -90,7 +94,8 @@ export function ConfirmDialog({
           </div>
           <button
             onClick={onClose}
-            className="cursor-pointer hover:text-muted-foreground transition-colors text-foreground"
+            disabled={isLoading}
+            className="cursor-pointer hover:text-muted-foreground transition-colors text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <X className="w-6 h-6" />
           </button>
@@ -105,15 +110,24 @@ export function ConfirmDialog({
         <div className="p-4 border-t border-border flex gap-3">
           <button
             onClick={onClose}
-            className="btn-secondary flex-1 px-4 py-2"
+            disabled={isLoading}
+            className="btn-secondary flex-1 px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className={`flex-1 px-4 py-2 rounded-lg text-destructive-foreground cursor-pointer transition-colors ${getButtonClass()}`}
+            disabled={isLoading}
+            className={`flex-1 px-4 py-2 rounded-lg text-destructive-foreground cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${getButtonClass()}`}
           >
-            {getConfirmLabel()}
+            {isLoading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                {loadingLabel || 'Processing...'}
+              </>
+            ) : (
+              getConfirmLabel()
+            )}
           </button>
         </div>
       </div>

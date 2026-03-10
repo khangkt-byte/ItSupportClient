@@ -89,12 +89,19 @@ export function useDataManager() {
 
   // Transform ListEmployeeDto to Employee
   const employees = {
-    data: employeesRaw.data.map(emp => ({
-      ...emp,
-      id: emp.empId,
-      employeeId: emp.empCode || emp.empId,
-      deleteDate: null
-    } as Employee)),
+    data: employeesRaw.data.map(emp => {
+      // Look up department and area names from the lookup data
+      const dept = departmentsRaw.data.find(d => d.dptId === emp.dptId);
+      const area = areasRaw.data.find(a => a.areaId === emp.areaId);
+      return {
+        ...emp,
+        id: emp.empId,
+        employeeId: emp.empCode || emp.empId,
+        department: dept?.name || '',
+        area: area?.name || '',
+        deleteDate: null
+      } as Employee;
+    }),
     setData: (newData: Employee[]) => {
       employeesRaw.setData(newData as ListEmployeeDto[]);
     },
