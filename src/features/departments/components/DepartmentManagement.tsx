@@ -1,11 +1,14 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit, Trash2, X, Building2, AlertCircle } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { Building2, Plus } from 'lucide-react';
 import { toast } from 'sonner';
-import type { Department, CreateDepartmentDto, UpdateDepartmentDto, DepartmentsQueryParams, PaginatedResult, DepartmentDto } from '@/types/data';
+import type { Department, CreateDepartmentDto, DepartmentsQueryParams, UpdateDepartmentDto } from '@/types/data';
 import { departmentApi } from '@/services/api/departments';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { useDepartmentQuery } from '../hooks/useDepartmentQuery';
+import { DepartmentTable } from './DepartmentTable';
+import { DepartmentFormModal, type DepartmentFormData } from './DepartmentFormModal';
 
 interface Props {
   data: Department[];
@@ -22,30 +25,15 @@ export function DepartmentManagement({ data, setData }: Props) {
     sortBy: 'name',
     isDescending: false,
   });
-  const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<DepartmentDto> | null>(null);
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Department | null>(null);
-  const [formData, setFormData] = useState({ name: '', description: '' });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [formData, setFormData] = useState<DepartmentFormData>({ name: '', description: '' });
   const [confirmDelete, setConfirmDelete] = useState<Department | null>(null);
-
-  const fetchDepartments = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await departmentApi.getAll(queryParams);
-      setPaginatedResult(result);
-    } catch (err) {
-      console.error('Failed to fetch departments:', err);
-      setError('Failed to load departments');
-      setPaginatedResult(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [queryParams]);
+  const [isMutating, setIsMutating] = useState(false);
+  const { loading: queryLoading, error, setError, paginatedResult, fetchDepartments } = useDepartmentQuery(queryParams);
+  const loading = queryLoading || isMutating;
 
   const syncDataManagerDepartments = useCallback(async () => {
     const allDepartments = await departmentApi.getAll({ page: 1, pageSize: 1000, sortBy: 'name', isDescending: false });
@@ -59,10 +47,6 @@ export function DepartmentManagement({ data, setData }: Props) {
     );
   }, [setData]);
 
-  useEffect(() => {
-    fetchDepartments();
-  }, [fetchDepartments]);
-
   const openForm = (item?: Department) => {
     setEditing(item || null);
     setFormData(item ? { name: item.name, description: item.description } : { name: '', description: '' });
@@ -72,7 +56,7 @@ export function DepartmentManagement({ data, setData }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setIsMutating(true);
     setError(null);
 
     try {
@@ -101,14 +85,14 @@ export function DepartmentManagement({ data, setData }: Props) {
       setError(message);
       toast.error(message);
     } finally {
-      setLoading(false);
+      setIsMutating(false);
     }
   };
 
   const handleDelete = async () => {
     if (!confirmDelete) return;
 
-    setLoading(true);
+    setIsMutating(true);
     try {
       await departmentApi.delete(confirmDelete.id);
       await Promise.all([fetchDepartments(), syncDataManagerDepartments()]);
@@ -123,7 +107,7 @@ export function DepartmentManagement({ data, setData }: Props) {
       }
       setConfirmDelete(null);
     } finally {
-      setLoading(false);
+      setIsMutating(false);
     }
   };
 
@@ -167,94 +151,27 @@ export function DepartmentManagement({ data, setData }: Props) {
         showResults={true}
       />
 
-      <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
-        {loading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
-              <p className="text-muted-foreground">Loading departments...</p>
-            </div>
-          </div>
-        )}
-
-        {error && !showForm && !loading && (
-          <div className="p-4 bg-error-background border border-error-border flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
-            <div className="flex-1">
-              <p className="font-medium text-error-foreground">Error</p>
-              <p className="text-sm text-error-foreground">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {!loading && !error && (
-          <table className="w-full">
-            <thead className="bg-muted border-b border-border">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Department Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Description</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Employees</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Issues</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {(paginatedResult?.items || []).length > 0 ? (
-                (paginatedResult?.items || []).map((item) => (
-                  <tr key={item.dptId} className="hover:bg-accent transition-colors">
-                    <td className="px-6 py-4 text-sm font-medium text-foreground">{item.name}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{item.description || 'N/A'}</td>
-                    <td className="px-6 py-4 text-sm text-foreground">{item.employeeCount}</td>
-                    <td className="px-6 py-4 text-sm text-foreground">{item.issueLogCount}</td>
-                    <td className="px-6 py-4 text-sm text-right">
-                      <div className="inline-flex items-center gap-2">
-                        <button
-                          onClick={() =>
-                            openForm({
-                              id: item.dptId,
-                              dptId: item.dptId,
-                              name: item.name,
-                              description: item.description || '',
-                            })
-                          }
-                          disabled={loading}
-                          className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors disabled:opacity-50"
-                          title="Edit department"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() =>
-                            setConfirmDelete({
-                              id: item.dptId,
-                              dptId: item.dptId,
-                              name: item.name,
-                              description: item.description || '',
-                            })
-                          }
-                          disabled={loading}
-                          className="text-error-foreground inline-flex items-center justify-center hover:text-error-foreground transition-colors disabled:opacity-50"
-                          title="Delete department"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
-                    <Building2 className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
-                    <p className="text-lg font-medium">No departments found</p>
-                    <p className="text-sm mt-1">Create your first department to get started</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        )}
-      </div>
+      <DepartmentTable
+        loading={loading}
+        error={showForm ? null : error}
+        items={paginatedResult?.items || []}
+        onEdit={(item) =>
+          openForm({
+            id: item.dptId,
+            dptId: item.dptId,
+            name: item.name,
+            description: item.description || '',
+          })
+        }
+        onDelete={(item) =>
+          setConfirmDelete({
+            id: item.dptId,
+            dptId: item.dptId,
+            name: item.name,
+            description: item.description || '',
+          })
+        }
+      />
 
       {paginatedResult && !loading && (
         <PaginationBar
@@ -272,71 +189,15 @@ export function DepartmentManagement({ data, setData }: Props) {
         />
       )}
 
-      {showForm && (
-        <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4">
-          <div className="bg-card rounded-lg max-w-md w-full shadow-xl">
-            <div className="px-6 py-4 border-b border-border flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-foreground">
-                {editing ? 'Edit Department' : 'Add Department'}
-              </h3>
-              <button
-                onClick={() => setShowForm(false)}
-                disabled={loading}
-                className="text-placeholder hover:text-muted-foreground disabled:opacity-50 cursor-pointer transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">
-                  Name <span className="text-error-foreground">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g., IT Department"
-                  className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
-                  disabled={loading}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Description</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Optional description"
-                  rows={3}
-                  className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder resize-none transition-colors"
-                  disabled={loading}
-                />
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 px-4 py-2 bg-primary-600 text-primary-foreground rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
-                >
-                  {loading ? 'Saving...' : editing ? 'Update' : 'Create'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowForm(false)}
-                  disabled={loading}
-                  className="btn-secondary flex-1 px-4 py-2"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <DepartmentFormModal
+        isOpen={showForm}
+        editing={editing}
+        loading={loading}
+        formData={formData}
+        onChange={setFormData}
+        onSubmit={handleSubmit}
+        onClose={() => setShowForm(false)}
+      />
 
       <ConfirmDialog
         isOpen={!!confirmDelete}
