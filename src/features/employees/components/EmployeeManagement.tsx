@@ -15,27 +15,22 @@
  * - Pagination with configurable page sizes (10, 20, 50, 100)
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit, Trash2, X, User, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+import { Plus, User } from 'lucide-react';
 import { employeesApi } from '@/services/api/employees';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
-import type { Employee, Department, AreaDto, EmployeesQueryParams, PaginatedResult, ListEmployeeDto } from '@/types/data';
+import type { Employee, Department, AreaDto, EmployeesQueryParams } from '@/types/data';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { PaginationBar } from '@/components/common/PaginationBar';
+import { EmployeeTable } from './EmployeeTable';
+import { EmployeeFormModal, type EmployeeFormData } from './EmployeeFormModal';
+import { useEmployeeQuery } from '../hooks/useEmployeeQuery';
 
 interface Props {
   data: Employee[];
   setData: (items: Employee[]) => void;
   departments: Department[];
   areas: AreaDto[];
-}
-
-interface EmployeeFormData {
-  empCode: string;
-  fullName: string;
-  phoneNumber: string;
-  email: string;
-  position: string;
 }
 
 export function EmployeeManagement({ data, setData, departments, areas }: Props) {
@@ -54,9 +49,6 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
     areaId: null, // null = all areas
   });
 
-  // Paginated result from server
-  const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<ListEmployeeDto> | null>(null);
-
   // Form states
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Employee | null>(null);
@@ -69,34 +61,14 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
   });
 
   // UI states
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isMutating, setIsMutating] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<Employee | null>(null);
 
   // Additional filter state for UI
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
 
-  // Fetch employees from server with current query parameters
-  const fetchEmployees = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const result = await employeesApi.getAll(queryParams);
-      setPaginatedResult(result);
-    } catch (err) {
-      console.error('Failed to fetch employees:', err);
-      setError('Failed to load employees');
-      setPaginatedResult(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [queryParams]);
-
-  // Fetch employees when query parameters change
-  useEffect(() => {
-    fetchEmployees();
-  }, [fetchEmployees]);
+  const { loading: queryLoading, error, setError, paginatedResult, fetchEmployees } = useEmployeeQuery(queryParams);
+  const isLoading = queryLoading || isMutating;
 
   // Handle department filter change
   const handleDepartmentFilterChange = (value: string) => {
@@ -125,7 +97,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      setIsLoading(true);
+      setIsMutating(true);
       setError(null);
 
       if (editing) {
@@ -157,14 +129,14 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       console.error('Failed to save employee:', err);
       setError(`Failed to ${editing ? 'update' : 'create'} employee. Please try again.`);
     } finally {
-      setIsLoading(false);
+      setIsMutating(false);
     }
   };
 
   const handleDelete = async () => {
     if (!confirmDelete) return;
     try {
-      setIsLoading(true);
+      setIsMutating(true);
       setError(null);
       await employeesApi.deleteSingle(confirmDelete.empId);
       setConfirmDelete(null);
@@ -174,7 +146,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       console.error('Failed to delete employee:', err);
       setError('Failed to delete employee. Please try again.');
     } finally {
-      setIsLoading(false);
+      setIsMutating(false);
     }
   };
 
@@ -226,83 +198,13 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       />
 
       {/* Employees Table */}
-      <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
-        {isLoading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
-              <p className="text-muted-foreground">Loading employees...</p>
-            </div>
-          </div>
-        )}
-
-        {error && !isLoading && (
-          <div className="p-4 bg-error-background border border-error-border flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
-            <div className="flex-1">
-              <p className="font-medium text-error-foreground">Error</p>
-              <p className="text-sm text-error-foreground">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {!isLoading && !error && (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-muted border-b border-border">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Employee Code</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Phone</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Position</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Actions</th>
-              </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-              {!paginatedResult || paginatedResult.items.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
-                    <User className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
-                    <p className="text-lg font-medium">No employees found</p>
-                    <p className="text-sm mt-1">Try adjusting your search or filters</p>
-                  </td>
-                </tr>
-              ) : (
-                paginatedResult.items.map((item) => (
-                  <tr key={item.empId} className="hover:bg-accent transition-colors">
-                    <td className="px-6 py-4 text-sm font-mono text-foreground">{item.empCode || 'N/A'}</td>
-                    <td className="px-6 py-4 text-sm font-medium text-foreground">{item.fullName}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{item.phoneNumber || 'N/A'}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{item.email || 'N/A'}</td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{item.position || 'N/A'}</td>
-                    <td className="px-6 py-4 text-sm text-right">
-                      <div className="inline-flex items-center gap-2">
-                        <button 
-                          onClick={() => openForm(item as Employee)} 
-                          className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors"
-                          title="Edit employee"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button 
-                          onClick={() => setConfirmDelete(item as Employee)} 
-                          className="text-error-foreground inline-flex items-center justify-center hover:text-error-foreground transition-colors"
-                          title="Delete employee"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-      </div>
+      <EmployeeTable
+        loading={isLoading}
+        error={showForm ? null : error}
+        items={paginatedResult?.items || []}
+        onEdit={(item) => openForm(item as Employee)}
+        onDelete={(item) => setConfirmDelete(item as Employee)}
+      />
 
       {/* Pagination Controls */}
       {paginatedResult && !isLoading && !error && (
@@ -322,88 +224,15 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       )}
 
       {/* Form Modal */}
-      {showForm && (
-        <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-card rounded-lg max-w-2xl w-full my-4 max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-border flex justify-between items-center sticky top-0 bg-card z-10">
-              <h3 className="text-lg font-semibold text-foreground">{editing ? 'Edit' : 'Add'} Employee</h3>
-              <button onClick={() => setShowForm(false)} className="hover:text-muted-foreground transition-colors text-foreground">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Employee Code</label>
-                  <input
-                    type="text"
-                    value={formData.empCode}
-                    onChange={(e) => setFormData({ ...formData, empCode: e.target.value })}
-                    placeholder="EMP001"
-                    className="input-base"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Full Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    placeholder="John Doe"
-                    className="input-base"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Phone Number</label>
-                  <input
-                    type="tel"
-                    value={formData.phoneNumber}
-                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                    placeholder="081-234-5678"
-                    className="input-base"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Email</label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="john@company.com"
-                    className="input-base"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium mb-1">Position</label>
-                  <input
-                    type="text"
-                    value={formData.position}
-                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                    placeholder="IT Support"
-                    className="input-base"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="submit"
-                  className="flex-1 px-4 py-2 bg-primary-600 text-primary-foreground rounded-lg hover:bg-primary-700"
-                >
-                  {editing ? 'Update' : 'Create'} Employee
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowForm(false)}
-                  className="btn-secondary flex-1 px-4 py-2"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <EmployeeFormModal
+        isOpen={showForm}
+        loading={isLoading}
+        editing={editing}
+        formData={formData}
+        onChange={setFormData}
+        onSubmit={handleSubmit}
+        onClose={() => setShowForm(false)}
+      />
 
       <ConfirmDialog
         isOpen={!!confirmDelete}
