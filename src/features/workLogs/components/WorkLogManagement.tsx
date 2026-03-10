@@ -57,7 +57,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
 
   const [formData, setFormData] = useState({
     reportDate: new Date().toISOString().slice(0, 10),
-    operators: [currentUser], // Changed to array
+    operators: [] as string[], // Changed to array
     requesters: [] as string[], // Changed to array
     department: '',
     area: '',
@@ -207,7 +207,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
       status: log.status,
     } : {
       reportDate: new Date().toISOString().slice(0, 10),
-      operators: [currentUser],
+      operators: [],
       requesters: [],
       department: '',
       area: '',
@@ -744,7 +744,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
         <PermissionGuard 
           permission={editing ? Permissions.IssueLog.Edit : Permissions.IssueLog.Create}
           fallback={
-            <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4">
+            <div className="fixed inset-0 bg-overlay flex items-center justify-center z-60 p-4 overflow-y-auto h-screen w-screen">
               <div className="bg-card rounded-lg p-6 max-w-sm text-center">
                 <h3 className="text-lg font-semibold text-error-foreground mb-2">Access Denied</h3>
                 <p className="text-muted-foreground mb-4">You don't have permission to {editing ? 'edit' : 'create'} work logs.</p>
@@ -753,7 +753,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
             </div>
           }
         >
-          <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="fixed inset-0 bg-overlay flex items-center justify-center z-60 p-4 overflow-y-auto h-screen w-screen">
             <div className="bg-card rounded-lg max-w-6xl w-full my-4 max-h-[90vh] overflow-y-auto">
               <div className="px-6 py-4 border-b border-border flex justify-between items-center sticky top-0 bg-card z-10">
                 <div>
@@ -964,7 +964,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
       </div>
 
       {showImportDialog && validationResult && (
-        <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-overlay flex items-center justify-center z-60 p-4 overflow-y-auto h-screen w-screen">
           <div className="bg-card rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b flex justify-between sticky top-0 bg-card z-60">
               <h3 className="text-lg font-semibold">Import Validation</h3>
