@@ -36,6 +36,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<WorkLog | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const paginatedResult = useFilteredWorkLogs(data, queryParams);
   const {
     submitting,
@@ -68,9 +69,14 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
   const handleDelete = async () => {
     if (!confirmDelete) return;
 
-    const success = await deleteWorkLog(confirmDelete);
-    if (success) {
-      setConfirmDelete(null);
+    setDeleteLoading(true);
+    try {
+      const success = await deleteWorkLog(confirmDelete);
+      if (success) {
+        setConfirmDelete(null);
+      }
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -174,6 +180,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
         error={error}
         onSubmit={handleSubmit}
         onClose={() => {
+          if (submitting) return;
           setShowForm(false);
           setEditing(null);
         }}
@@ -190,8 +197,13 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
 
       <ConfirmDialog
         isOpen={!!confirmDelete}
-        onClose={() => setConfirmDelete(null)}
+        onClose={() => {
+          if (deleteLoading) return;
+          setConfirmDelete(null);
+        }}
         onConfirm={handleDelete}
+        isLoading={deleteLoading}
+        loadingLabel="Deleting..."
         action="delete"
         title="Delete work log"
         description="Are you sure you want to delete this work log? This action cannot be undone."

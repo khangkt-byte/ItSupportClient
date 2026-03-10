@@ -149,7 +149,8 @@ export function RoleFormModal({
           </div>
           <button
             onClick={onClose}
-            className="cursor-pointer hover:text-muted-foreground transition-colors text-foreground"
+            disabled={isSubmitting}
+            className="cursor-pointer hover:text-muted-foreground transition-colors text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <X className="w-6 h-6" />
           </button>
@@ -316,7 +317,7 @@ export function RoleFormModal({
                 </>
               )}
             </button>
-            <button type="button" onClick={onClose} className="btn-secondary flex-1 px-4 py-2">
+            <button type="button" onClick={onClose} disabled={isSubmitting} className="btn-secondary flex-1 px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed">
               Cancel
             </button>
           </div>

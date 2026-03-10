@@ -24,7 +24,7 @@ export function AreaFormModal({ isOpen, editing, formData, isLoading, onChange, 
       <div className="bg-card border border-border rounded-lg p-6 shadow-sm w-full max-w-xl">
         <div className="px-6 py-4 border-b border-border flex justify-between">
           <h3 className="text-lg font-semibold text-foreground">{editing ? 'Edit' : 'Add'}</h3>
-          <button onClick={onClose} className="hover:text-muted-foreground text-foreground transition-colors">
+          <button onClick={onClose} disabled={isLoading} className="hover:text-muted-foreground text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -45,8 +45,15 @@ export function AreaFormModal({ isOpen, editing, formData, isLoading, onChange, 
             className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
           />
           <div className="flex gap-3">
-            <button type="submit" className="btn-primary flex-1 px-4 py-2" disabled={isLoading}>
-              {editing ? 'Update' : 'Create'}
+            <button type="submit" className="btn-primary flex-1 px-4 py-2 flex items-center justify-center gap-2" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>{editing ? 'Update' : 'Create'}</>
+              )}
             </button>
             <button type="button" onClick={onClose} className="btn-secondary flex-1 px-4 py-2" disabled={isLoading}>
               Cancel
