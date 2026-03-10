@@ -19,17 +19,18 @@
  * - GET /api/roles/claims - Get all available claims
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Plus, Shield } from 'lucide-react';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { rolesApi } from '@/services/api/roles';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
-import type { Role, RoleDto, RolesQueryParams, PaginatedResult } from '@/types/data';
+import type { Role, RoleDto, RolesQueryParams } from '@/types/data';
 import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { RoleTable } from '@/features/roles/components/RoleTable';
 import { RoleFormModal, type RoleFormData } from '@/features/roles/components/RoleFormModal';
+import { useRoleQuery } from '@/features/roles/hooks/useRoleQuery';
 
 interface Props {
   data: Role[];
@@ -38,63 +39,44 @@ interface Props {
 
 export function RoleManagement({ data, setData }: Props) {
   void data;
-  const [queryParams, setQueryParams] = useState<RolesQueryParams>({
-    page: 1,
-    pageSize: 10,
-    search: '',
-    sortBy: 'name',
-    isDescending: false,
-  });
-  const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<RoleDto> | null>(null);
+  const {
+    queryParams,
+    setQueryParams,
+    paginatedResult,
+    queryLoading,
+    queryError,
+    fetchRoles,
+  } = useRoleQuery();
   const [roleFilter, setRoleFilter] = useState<string>('all');
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<RoleDto | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isMutating, setIsMutating] = useState(false);
+  const [mutationError, setMutationError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<RoleDto | null>(null);
 
   const { hasPermission } = usePermission();
-
-  const fetchRoles = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const result = await rolesApi.getAll(queryParams);
-      setPaginatedResult(result);
-    } catch (err) {
-      console.error('Failed to fetch roles:', err);
-      setError('Failed to load roles');
-      setPaginatedResult(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [queryParams]);
 
   const syncDataManagerRoles = useCallback(async () => {
     const allRoles = await rolesApi.getAll({ page: 1, pageSize: 1000, sortBy: 'name', isDescending: false });
     setData(allRoles.items.map((role) => ({ ...role, id: String(role.roleId) } as Role)));
   }, [setData]);
 
-  useEffect(() => {
-    void fetchRoles();
-  }, [fetchRoles]);
-
   const openCreateForm = () => {
     setEditing(null);
-    setError(null);
+    setMutationError(null);
     setShowForm(true);
   };
 
   const openEditForm = (item: RoleDto) => {
     setEditing(item);
-    setError(null);
+    setMutationError(null);
     setShowForm(true);
   };
 
   const handleSubmit = async (formData: RoleFormData) => {
-    setIsLoading(true);
-    setError(null);
+    setIsMutating(true);
+    setMutationError(null);
 
     try {
       const roleData = {
@@ -115,9 +97,9 @@ export function RoleManagement({ data, setData }: Props) {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to save role. Please try again.';
       console.error('Failed to save role:', err);
-      setError(message);
+      setMutationError(message);
     } finally {
-      setIsLoading(false);
+      setIsMutating(false);
     }
   };
 
@@ -131,10 +113,13 @@ export function RoleManagement({ data, setData }: Props) {
       setConfirmDelete(null);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to delete role';
-      alert(message);
+      setMutationError(message);
       setConfirmDelete(null);
     }
   };
+
+  const isLoading = queryLoading || isMutating;
+  const tableError = showForm ? null : mutationError || queryError;
 
   return (
     <div className="space-y-6">
@@ -179,7 +164,7 @@ export function RoleManagement({ data, setData }: Props) {
       <RoleTable
         items={paginatedResult?.items || []}
         isLoading={isLoading}
-        error={showForm ? null : error}
+        error={tableError}
         canEdit={hasPermission(Permissions.Role.Edit)}
         canDelete={hasPermission(Permissions.Role.Delete)}
         onEdit={openEditForm}
@@ -205,14 +190,14 @@ export function RoleManagement({ data, setData }: Props) {
       <RoleFormModal
         isOpen={showForm}
         editing={editing}
-        error={error}
-        isSubmitting={isLoading}
+        error={mutationError}
+        isSubmitting={isMutating}
         onSubmit={handleSubmit}
         onClose={() => {
           setShowForm(false);
           setEditing(null);
         }}
-        onClearError={() => setError(null)}
+        onClearError={() => setMutationError(null)}
       />
 
       <ConfirmDialog
