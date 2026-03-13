@@ -101,6 +101,8 @@ export type {
  */
 export const useTheme = (): UseThemeReturn => {
   const THEME_TRANSITION_MS = 150;
+  const THEME_TRANSITION_DOM_LIMIT = 1400;
+  const VIEW_TRANSITION_DOM_LIMIT = 900;
 
   // NEW: Combinatorial state (Option A)
   const [appearance, setAppearanceState] = useState<Appearance>('auto');
@@ -237,26 +239,26 @@ export const useTheme = (): UseThemeReturn => {
         return;
       }
 
+      // Skip animation paths on large trees to avoid expensive full-page snapshots/repaints.
+      const nodeCount = document.body?.getElementsByTagName('*').length ?? 0;
+      if (nodeCount > THEME_TRANSITION_DOM_LIMIT) {
+        mutation();
+        return;
+      }
+
       const doc = document as ViewTransitionDocument;
 
-      if (typeof doc.startViewTransition === 'function') {
+      if (typeof doc.startViewTransition === 'function' && nodeCount <= VIEW_TRANSITION_DOM_LIMIT) {
         doc.startViewTransition(() => {
           mutation();
         });
         return;
       }
 
-      // Skip broad fallback transitions on very large DOM trees to avoid jank.
-      const nodeCount = document.getElementsByTagName('*').length;
-      if (nodeCount > 1400) {
-        mutation();
-        return;
-      }
-
       triggerThemeTransition();
       mutation();
     },
-    [prefersReducedMotion, triggerThemeTransition]
+    [prefersReducedMotion, triggerThemeTransition, THEME_TRANSITION_DOM_LIMIT, VIEW_TRANSITION_DOM_LIMIT]
   );
 
   /**
@@ -508,6 +510,11 @@ export const useTheme = (): UseThemeReturn => {
       // Compute combined theme
       const computedTheme = computeTheme(newAppearance, brandColor, actualAppearance);
 
+      // No-op when selection is unchanged to avoid redundant renders and DOM work.
+      if (newAppearance === appearance && computedTheme === theme) {
+        return;
+      }
+
       runThemeMutation(() => {
         // Update state
         setAppearanceState(newAppearance);
@@ -548,7 +555,7 @@ export const useTheme = (): UseThemeReturn => {
         }
       }
     },
-    [brandColor, resolvedAppearance, accessibilityMode, applyTheme, computeTheme, runThemeMutation]
+    [appearance, theme, brandColor, resolvedAppearance, accessibilityMode, applyTheme, computeTheme, runThemeMutation]
   );
 
   /**
@@ -596,6 +603,11 @@ export const useTheme = (): UseThemeReturn => {
       // Compute combined theme
       const computedTheme = computeTheme(appearance, newBrandColor, actualAppearance);
 
+      // No-op when selection is unchanged to avoid redundant renders and DOM work.
+      if (newBrandColor === brandColor && computedTheme === theme) {
+        return;
+      }
+
       runThemeMutation(() => {
         // Update state
         setBrandColorState(newBrandColor);
@@ -636,7 +648,7 @@ export const useTheme = (): UseThemeReturn => {
         }
       }
     },
-    [appearance, resolvedAppearance, accessibilityMode, applyTheme, computeTheme, runThemeMutation]
+    [appearance, theme, brandColor, resolvedAppearance, accessibilityMode, applyTheme, computeTheme, runThemeMutation]
   );
 
   /**
@@ -667,6 +679,10 @@ export const useTheme = (): UseThemeReturn => {
       // Validate theme exists
       if (!isValidTheme(newTheme)) {
         console.warn(`Invalid theme: ${newTheme}`);
+        return;
+      }
+
+      if (newTheme === theme) {
         return;
       }
 
@@ -719,7 +735,7 @@ export const useTheme = (): UseThemeReturn => {
         console.error('Failed to dispatch theme change event:', error);
       }
     },
-    [accessibilityMode, resolvedAppearance, applyTheme, runThemeMutation]
+    [theme, accessibilityMode, resolvedAppearance, applyTheme, runThemeMutation]
   );
 
   /**
@@ -734,6 +750,10 @@ export const useTheme = (): UseThemeReturn => {
    */
   const setAccessibilityModeHandler = useCallback(
     (mode: AccessibilityMode) => {
+      if (mode === accessibilityMode) {
+        return;
+      }
+
       // Resolve actual appearance
       const actualAppearance = getActualAppearance(appearance, resolvedAppearance);
 
@@ -750,7 +770,7 @@ export const useTheme = (): UseThemeReturn => {
         })
       );
     },
-    [theme, appearance, resolvedAppearance, brandColor, applyTheme]
+    [accessibilityMode, theme, appearance, resolvedAppearance, brandColor, applyTheme]
   );
 
   /**

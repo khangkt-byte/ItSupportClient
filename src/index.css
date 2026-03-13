@@ -38,10 +38,16 @@ html.theme-transition .main-content,
 html.theme-transition button,
 html.theme-transition input,
 html.theme-transition textarea,
-html.theme-transition select,
-html.theme-transition svg,
-html.theme-transition path {
+html.theme-transition select {
   transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease !important;
+}
+
+/* Measurement mode: isolate raw theme mutation cost from UI animation noise. */
+html.theme-benchmarking *,
+html.theme-benchmarking *::before,
+html.theme-benchmarking *::after {
+  transition: none !important;
+  animation: none !important;
 }
 
 /**
@@ -56,9 +62,7 @@ html.theme-transition path {
   html.theme-transition button,
   html.theme-transition input,
   html.theme-transition textarea,
-  html.theme-transition select,
-  html.theme-transition svg,
-  html.theme-transition path {
+  html.theme-transition select {
     transition-duration: 0ms !important;
   }
 }
@@ -191,20 +195,6 @@ html[data-a11y="highContrast"] {
   --color-demo-dark: #121212;
   --color-demo-primary: #2563eb;
   --color-demo-grey: #1f2937;
-}
-
-/* High Contrast mode overrides - WCAG AAA compliance (21:1) */
-html[data-a11y="highContrast"] {
-  /* 
-   * High Contrast color overrides automatically applied from:
-   * src/constants/palettes.ts → highContrastLightSemanticTokens
-   * 
-   * All semantic colors override to pure black/white for 21:1 contrast ratio.
-   * This is the SSOT (Single Source of Truth) for all color definitions.
-   * 
-   * Override Tailwind hard-coded color utilities (text-green-*, bg-*, etc.)
-   * which bypass CSS variables - force them to pure black for accessibility
-   */
 }
 
 /* Override Tailwind color utilities in light HC mode */
