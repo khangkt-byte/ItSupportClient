@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Clock, Plus } from 'lucide-react';
-import type { Area, Department, Employee, WorkLog, WorkLogsQueryParams } from '@/types/data';
+import type { Area, Department, Employee, WorkLog } from '@/types/data';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { PermissionGuard } from '@/components/common/PermissionGuard';
@@ -9,51 +9,51 @@ import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { WorkLogFormModal, type WorkLogFormData } from '@/features/workLogs/components/WorkLogFormModal';
 import { WorkLogImportExportPanel } from '@/features/workLogs/components/WorkLogImportExportPanel';
 import { WorkLogTable } from '@/features/workLogs/components/WorkLogTable';
-import { useFilteredWorkLogs } from '@/features/workLogs/hooks/useFilteredWorkLogs';
+import { useWorkLogQuery } from '@/features/workLogs/hooks/useWorkLogQuery';
 import { useWorkLogMutations } from '@/features/workLogs/hooks/useWorkLogMutations';
 
 interface Props {
-  data: WorkLog[];
-  setData: (logs: WorkLog[]) => void;
   currentUser: string;
-  loading?: boolean;
   employees: Employee[];
   departments: Department[];
   areas: Area[];
 }
 
-export function WorkLogManagement({ data, setData, currentUser, employees, departments, areas, loading }: Props) {
-  const [isLoading, setIsLoading] = useState<boolean>(!!loading);
-  const [queryParams, setQueryParams] = useState<WorkLogsQueryParams>({
-    page: 1,
-    pageSize: 20,
-    search: '',
-    sortBy: 'reportDate',
-    isDescending: true,
-    status: null,
-  });
+export function WorkLogManagement({ currentUser, employees, departments, areas }: Props) {
+  const {
+    queryParams,
+    setQueryParams,
+    paginatedResult,
+    loading,
+    error: queryError,
+    setError: setQueryError,
+    refetch,
+  } = useWorkLogQuery();
+
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<WorkLog | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const paginatedResult = useFilteredWorkLogs(data, queryParams);
+
   const {
     submitting,
-    error,
-    setError,
+    error: mutationError,
+    setError: setMutationError,
     submitWorkLog,
     deleteWorkLog,
   } = useWorkLogMutations({
-    data,
-    setData,
     currentUser,
     departments,
     areas,
+    refetch,
   });
 
+  const error = queryError || mutationError;
+  const setError = queryError ? setQueryError : setMutationError;
+
   const openForm = (log?: WorkLog) => {
-    setError(null);
+    setMutationError(null);
     setEditing(log || null);
     setShowForm(true);
   };
@@ -72,17 +72,11 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
     setDeleteLoading(true);
     try {
       const success = await deleteWorkLog(confirmDelete);
-      if (success) {
-        setConfirmDelete(null);
-      }
+      if (success) setConfirmDelete(null);
     } finally {
       setDeleteLoading(false);
     }
   };
-
-  useEffect(() => {
-    setIsLoading(!!loading);
-  }, [loading]);
 
   return (
     <div className="space-y-6">
@@ -114,8 +108,8 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
 
       <SearchFilterBar
         queryParams={queryParams}
-        onQueryChange={(params) => setQueryParams(params as WorkLogsQueryParams)}
-        paginatedResult={paginatedResult}
+        onQueryChange={setQueryParams}
+        paginatedResult={paginatedResult ?? undefined}
         filterOptions={[
           { label: 'All Status', value: 'all' },
           { label: 'Pending', value: 'pending' },
@@ -146,14 +140,14 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
       />
 
       <WorkLogTable
-        paginatedResult={paginatedResult}
-        isLoading={isLoading}
+        paginatedResult={paginatedResult ?? { page: 1, pageSize: 20, totalCount: 0, totalPages: 0, hasPreviousPage: false, hasNextPage: false, items: [] }}
+        isLoading={loading}
         error={error}
         onEdit={(log) => openForm(log)}
         onDelete={(id) => setConfirmDelete(id)}
       />
 
-      {paginatedResult && !isLoading && !error && (
+      {paginatedResult && !loading && !error && (
         <PaginationBar
           page={paginatedResult.page}
           totalPages={paginatedResult.totalPages}
@@ -188,8 +182,8 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
       />
 
       <WorkLogImportExportPanel
-        data={data}
-        setData={setData}
+        currentItems={paginatedResult?.items ?? []}
+        refetch={refetch}
         employees={employees}
         departments={departments}
         areas={areas}

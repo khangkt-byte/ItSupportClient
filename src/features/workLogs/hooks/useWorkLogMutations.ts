@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { workLogsApi } from '@/services/api';
 import { workLogToCreateDto } from '@/utils/workLogAdapter';
-import type { Area, Department, IssueLogDto, WorkLog, WorkStatus } from '@/types/data';
+import type { Area, Department, WorkLog, WorkStatus } from '@/types/data';
 
 export interface WorkLogMutationFormData {
     reportDate: string;
@@ -18,37 +18,18 @@ export interface WorkLogMutationFormData {
 }
 
 interface UseWorkLogMutationsParams {
-    data: WorkLog[];
-    setData: (logs: WorkLog[]) => void;
     currentUser: string;
     departments: Department[];
     areas: Area[];
-}
-
-function mapIssueLogDtoToWorkLog(dto: IssueLogDto, formData: WorkLogMutationFormData): WorkLog {
-    return {
-        ...dto,
-        id: dto.issLogId,
-        reportDate: dto.dateReported,
-        operators: formData.operators,
-        requesters: formData.requesters,
-        department: formData.department,
-        area: formData.area,
-        issue: dto.issueDescription,
-        cause: dto.cause || '',
-        fixDescription: dto.resolution || '',
-        permanentFix: dto.permanentFix || '',
-        note: dto.notes || '',
-        status: (dto.status as WorkStatus) || 'pending',
-    };
+    /** Called after every successful create / update / delete to reload the list. */
+    refetch: () => Promise<void>;
 }
 
 export function useWorkLogMutations({
-    data,
-    setData,
     currentUser,
     departments,
     areas,
+    refetch,
 }: UseWorkLogMutationsParams) {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -80,29 +61,11 @@ export function useWorkLogMutations({
 
                 if (editing) {
                     await workLogsApi.update(editing.id, createDto);
-
-                    const updatedWorkLog: WorkLog = {
-                        ...editing,
-                        reportDate: createDto.dateReported,
-                        operators: formData.operators,
-                        requesters: formData.requesters,
-                        department: formData.department,
-                        area: formData.area,
-                        issue: formData.issue,
-                        cause: formData.cause,
-                        fixDescription: formData.fixDescription,
-                        permanentFix: formData.permanentFix,
-                        note: formData.note,
-                        status: formData.status,
-                    };
-
-                    setData(data.map((item) => (item.id === editing.id ? updatedWorkLog : item)));
                 } else {
-                    const created = await workLogsApi.create(createDto);
-                    const newWorkLog = mapIssueLogDtoToWorkLog(created, formData);
-                    setData([newWorkLog, ...data]);
+                    await workLogsApi.create(createDto);
                 }
 
+                await refetch();
                 return true;
             } catch (mutationError) {
                 console.error('Failed to submit work log:', mutationError);
@@ -112,14 +75,14 @@ export function useWorkLogMutations({
                 setSubmitting(false);
             }
         },
-        [areas, currentUser, data, departments, setData]
+        [areas, currentUser, departments, refetch]
     );
 
     const deleteWorkLog = useCallback(
         async (workLogId: string): Promise<boolean> => {
             try {
                 await workLogsApi.deleteSingle(workLogId);
-                setData(data.filter((item) => item.id !== workLogId));
+                await refetch();
                 return true;
             } catch (mutationError) {
                 console.error('Failed to delete work log:', mutationError);
@@ -127,7 +90,7 @@ export function useWorkLogMutations({
                 return false;
             }
         },
-        [data, setData]
+        [refetch]
     );
 
     return {

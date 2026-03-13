@@ -3,6 +3,7 @@ import { LogOut } from 'lucide-react';
 import type { User } from '@/types/data';
 import { useDataManager } from '@/hooks/useDataManager';
 import { WorkLogManagement } from '@/features/workLogs/components/WorkLogManagement';
+import { useWorkLogSummary } from '@/features/workLogs/hooks/useWorkLogSummary';
 import { EmployeeManagement } from '@/features/employees/components/EmployeeManagement';
 import { DepartmentManagement } from '@/features/departments/components/DepartmentManagement';
 import { AreaManagement } from '@/features/areas/components/AreaManagement';
@@ -21,6 +22,7 @@ interface Props {
 
 export function AdminDashboard({ user, onLogout, currentView }: Props) {
   const dataManager = useDataManager();
+  const workLogSummary = useWorkLogSummary(currentView === 'admin');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
@@ -35,7 +37,7 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
   };
 
   // Show loading if data is still being fetched
-  if (dataManager.employees.loading || dataManager.workLogs.loading) {
+  if (dataManager.employees.loading) {
     return (
       <LoadingState className="min-h-100" />
     );
@@ -56,7 +58,9 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
                 <div className="p-4 rounded-lg bg-primary-100 dark:bg-primary-900/20">
                   <p className="text-sm text-muted-foreground">Total Work Logs</p>
-                  <p className="text-2xl font-bold text-primary-600">{dataManager.workLogs.data.length}</p>
+                  <p className="text-2xl font-bold text-primary-600">
+                    {workLogSummary.loading ? '...' : workLogSummary.totalCount}
+                  </p>
                 </div>
                 <div className="p-4 rounded-lg bg-success-background">
                   <p className="text-sm text-muted-foreground">Total Employees</p>
@@ -73,8 +77,6 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
       case 'workLogs':
         return (
           <WorkLogManagement
-            data={dataManager.workLogs.data}
-            setData={dataManager.workLogs.setData}
             currentUser={user.fullName}
             employees={dataManager.employees.data}
             departments={dataManager.departments.data}
