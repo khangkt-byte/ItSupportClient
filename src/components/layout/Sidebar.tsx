@@ -161,6 +161,19 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
               )}
             </div>
           )}
+
+          <button
+            onClick={() => onNavigate('my-account')}
+            className={`w-full min-h-12 rounded-lg flex items-center border-none px-3.75 whitespace-nowrap transition-all duration-300 ${currentView === 'my-account' ? 'text-primary-foreground bg-(--sidebar-color-hover-primary)' : 'hover:bg-(--sidebar-color-hover-secondary) bg-(--sidebar-color-bg-secondary) text-(--sidebar-color-text-primary)'}`}
+            title="My account"
+          >
+            <div className="flex gap-2.5 items-center flex-1">
+              <span className="material-symbols-rounded">manage_accounts</span>
+              <span className={`text-base transition-opacity duration-300 ${collapsed ? 'opacity-0 w-0 overflow-hidden absolute' : 'opacity-100'}`}>
+                My Account
+              </span>
+            </div>
+          </button>
         </div>
       </aside>
     </>

@@ -3,6 +3,7 @@ import { LogOut } from 'lucide-react';
 import type { User } from '@/types/data';
 import { useDataManager } from '@/hooks/useDataManager';
 import { WorkLogManagement } from '@/features/workLogs/components/WorkLogManagement';
+import { MyAccountManagement } from '@/features/myAccount/components/MyAccountManagement';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 
 interface Props {
@@ -77,6 +78,8 @@ export function EmployeeDashboard({ user, onLogout, currentView }: Props) {
             areas={dataManager.areas.data}
           />
         );
+      case 'my-account':
+        return <MyAccountManagement />;
       default:
         return (
           <div>
@@ -96,6 +99,7 @@ export function EmployeeDashboard({ user, onLogout, currentView }: Props) {
         <div>
           <p className="text-sm text-muted-foreground">Logged in as</p>
           <p className="font-medium">{user.fullName} ({user.role})</p>
+          <p className="text-xs text-muted-foreground">{user.email || 'No email'}</p>
         </div>
         <button
           onClick={() => setShowLogoutConfirm(true)}

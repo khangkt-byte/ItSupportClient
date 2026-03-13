@@ -7,6 +7,7 @@ import { EmployeeManagement } from '@/features/employees/components/EmployeeMana
 import { DepartmentManagement } from '@/features/departments/components/DepartmentManagement';
 import { AreaManagement } from '@/features/areas/components/AreaManagement';
 import { AccountManagement } from '@/features/accounts/components/AccountManagement';
+import { MyAccountManagement } from '@/features/myAccount/components/MyAccountManagement';
 import { RoleManagement } from '@/features/roles/components/RoleManagement';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 
@@ -116,6 +117,8 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
             roles={dataManager.roles.data}
           />
         );
+      case 'my-account':
+        return <MyAccountManagement />;
       case 'roles':
         return (
           <RoleManagement
@@ -142,6 +145,7 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
         <div>
           <p className="text-sm text-muted-foreground">Logged in as</p>
           <p className="font-medium">{user.fullName} ({user.role})</p>
+          <p className="text-xs text-muted-foreground">{user.email || 'No email'}</p>
         </div>
         <button
           onClick={() => setShowLogoutConfirm(true)}
