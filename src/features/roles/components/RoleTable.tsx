@@ -1,5 +1,6 @@
 import { AlertCircle, Edit, Shield, Trash2 } from 'lucide-react';
 import type { RoleDto } from '@/types/data';
+import { LoadingState } from '@/components/common/LoadingState';
 
 interface RoleTableProps {
   items: RoleDto[];
@@ -23,12 +24,7 @@ export function RoleTable({
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
       {isLoading && (
-        <div className="flex items-center justify-center py-12">
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
-            <p className="text-muted-foreground">Loading roles...</p>
-          </div>
-        </div>
+        <LoadingState className="py-12" spinnerSize="md" label="Loading roles..." />
       )}
 
       {error && !isLoading && (

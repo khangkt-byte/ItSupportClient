@@ -12,6 +12,7 @@
 
 import { ReactNode } from 'react';
 import { usePermission } from '@/hooks/usePermission';
+import { LoadingState } from '@/components/common/LoadingState';
 
 interface ProtectedRouteProps {
   /** Child component to render if authorized */
@@ -59,7 +60,7 @@ export function ProtectedRoute({
 
   // Show loading state
   if (isLoading) {
-    return <>{loadingComponent ?? <div>Loading...</div>}</>;
+    return <>{loadingComponent ?? <LoadingState className="min-h-40" spinnerSize="md" label="Loading permissions..." />}</>;
   }
 
   // Check permissions if specified
@@ -98,7 +99,7 @@ export function AdminRoute({
   const { isLoading, isAdmin } = usePermission();
 
   if (isLoading) {
-    return <>{loadingComponent ?? <div>Loading...</div>}</>;
+    return <>{loadingComponent ?? <LoadingState className="min-h-40" spinnerSize="md" label="Loading permissions..." />}</>;
   }
 
   if (!isAdmin) {

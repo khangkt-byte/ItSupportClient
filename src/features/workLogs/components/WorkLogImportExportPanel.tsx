@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react';
-import { Download, FileSpreadsheet, Loader2, Upload, X } from 'lucide-react';
+import { Download, FileSpreadsheet, Upload, X } from 'lucide-react';
 import type { Area, Department, DuplicateHandling, Employee, ImportValidationResult, WorkLog } from '@/types/data';
 import { exportWorkLogsToExcel, validateImportedWorkLogs, importWorkLogsFromExcel, downloadExcelTemplate } from '@/utils/excelUtils';
 import { ImportValidation } from '@/features/workLogs/components/ImportValidation';
 import { ImportWizard } from '@/features/workLogs/components/ImportWizard';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 interface WorkLogImportExportPanelProps {
   data: WorkLog[];
@@ -117,7 +118,7 @@ export function WorkLogImportExportPanel({
           >
             {importing ? (
               <>
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <LoadingSpinner size="sm" tone="current" className="w-5 h-5" />
                 Importing...
               </>
             ) : (

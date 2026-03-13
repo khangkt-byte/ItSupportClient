@@ -6,6 +6,7 @@ import { SearchableCombobox } from '@/components/common/SearchableCombobox';
 import { FlexibleMultiSelect } from '@/components/common/FlexibleMultiSelect';
 import { AutocompleteInput, type Suggestion } from '@/components/common/AutocompleteInput';
 import { PermissionGuard } from '@/components/common/PermissionGuard';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Permissions } from '@/config/permissions';
 
 export interface WorkLogFormData {
@@ -450,7 +451,7 @@ export function WorkLogFormModal({
               >
                 {submitting ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <LoadingSpinner size="sm" tone="inverse" />
                     Saving...
                   </>
                 ) : (

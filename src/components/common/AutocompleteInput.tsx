@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Check } from 'lucide-react';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 export interface Suggestion {
   id: number; // Changed from string to number to match API
@@ -204,7 +205,7 @@ export function AutocompleteInput({
         {/* Loading indicator */}
         {loading && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+            <LoadingSpinner size="sm" />
           </div>
         )}
       </div>

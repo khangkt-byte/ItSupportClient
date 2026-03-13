@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Eye, EyeOff, FileText } from 'lucide-react';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 interface LoginPageProps {
   onLogin: (username: string, password: string) => Promise<boolean>;
@@ -103,7 +104,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             >
               {isLoading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  <LoadingSpinner size="sm" tone="current" />
                   Signing In...
                 </>
               ) : (

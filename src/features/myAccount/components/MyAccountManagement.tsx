@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { accountsApi } from '@/services/api/accounts';
 import { employeesApi } from '@/services/api/employees';
 import type { ChangePasswordDto, LoginHistoryDto, ProfileDto } from '@/types/data';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { LoadingState } from '@/components/common/LoadingState';
 
 interface PasswordFormState {
   currentPassword: string;
@@ -145,12 +147,7 @@ export function MyAccountManagement() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-100">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading account data...</p>
-        </div>
-      </div>
+      <LoadingState className="min-h-100" label="Loading account data..." />
     );
   }
 
@@ -270,9 +267,7 @@ export function MyAccountManagement() {
             disabled={passwordSaving}
             className="h-10 px-4 rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
           >
-            {passwordSaving && (
-              <span className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" aria-hidden="true" />
-            )}
+            {passwordSaving && <LoadingSpinner size="sm" tone="inverse" />}
             {passwordSaving ? 'Updating...' : 'Change Password'}
           </button>
         </section>
@@ -299,9 +294,7 @@ export function MyAccountManagement() {
               disabled={historyRefreshing}
               className="h-9 px-3 rounded-md border border-border bg-background hover:bg-accent text-sm inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {historyRefreshing && (
-                <span className="inline-block w-3.5 h-3.5 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin" aria-hidden="true" />
-              )}
+              {historyRefreshing && <LoadingSpinner size="sm" tone="current" />}
               {historyRefreshing ? 'Refreshing...' : 'Refresh'}
             </button>
           </div>

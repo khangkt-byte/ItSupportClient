@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AlertCircle, Save, User, X } from 'lucide-react';
 import { PermissionEditor } from '@/components/common/PermissionEditor';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { rolesApi } from '@/services/api/roles';
 import type { Account, ClaimDto, Employee, RoleDto } from '@/types/data';
 
@@ -214,7 +215,7 @@ export function AccountFormModal({
               >
                 {isSubmitting ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <LoadingSpinner size="sm" tone="inverse" />
                     Saving...
                   </>
                 ) : (

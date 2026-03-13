@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import type { Area } from '@/types/data';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 export interface AreaFormData {
   name: string;
@@ -48,7 +49,7 @@ export function AreaFormModal({ isOpen, editing, formData, isLoading, onChange, 
             <button type="submit" className="btn-primary flex-1 px-4 py-2 flex items-center justify-center gap-2" disabled={isLoading}>
               {isLoading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <LoadingSpinner size="sm" tone="inverse" />
                   Saving...
                 </>
               ) : (

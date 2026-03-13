@@ -4,6 +4,7 @@ import { AdminDashboard } from '@/features/dashboard/components/AdminDashboard';
 import { EmployeeDashboard } from '@/features/employees/components/EmployeeDashboard';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { ThemeValidationTest } from '@/features/theme/components/ThemeValidationTest';
+import { LoadingState } from '@/components/common/LoadingState';
 import { authApi } from '@/services/api/auth';
 import { SecurityValidator } from '@/utils/securityChecks';
 import type { User } from '@/types/data';
@@ -144,12 +145,7 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-muted">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
+      <LoadingState className="min-h-screen bg-muted" />
     );
   }
 

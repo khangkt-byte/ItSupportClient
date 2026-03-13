@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, ChevronDown, ChevronUp, Save, Shield, X } from 'lucide-react';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { rolesApi } from '@/services/api/roles';
 import type { ClaimDto, RoleDto } from '@/types/data';
 import { groupClaimsByCategory } from '@/features/roles/utils/claimGrouping';
@@ -307,7 +308,7 @@ export function RoleFormModal({
             >
               {isSubmitting ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <LoadingSpinner size="sm" tone="inverse" />
                   Saving...
                 </>
               ) : (

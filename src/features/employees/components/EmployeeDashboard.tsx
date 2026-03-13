@@ -5,6 +5,7 @@ import { useDataManager } from '@/hooks/useDataManager';
 import { WorkLogManagement } from '@/features/workLogs/components/WorkLogManagement';
 import { MyAccountManagement } from '@/features/myAccount/components/MyAccountManagement';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { LoadingState } from '@/components/common/LoadingState';
 
 interface Props {
   user: User;
@@ -31,12 +32,7 @@ export function EmployeeDashboard({ user, onLogout, currentView }: Props) {
   // Show loading if data is still being fetched
   if (dataManager.workLogs.loading) {
     return (
-      <div className="flex items-center justify-center min-h-100">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
+      <LoadingState className="min-h-100" />
     );
   }
 

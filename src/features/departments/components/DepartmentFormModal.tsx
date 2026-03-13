@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import type { Department } from '@/types/data';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 export interface DepartmentFormData {
   name: string;
@@ -69,7 +70,7 @@ export function DepartmentFormModal({ isOpen, editing, loading, formData, onChan
             >
               {loading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <LoadingSpinner size="sm" tone="inverse" />
                   Saving...
                 </>
               ) : (

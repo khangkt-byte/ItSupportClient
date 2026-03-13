@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select';
 import type { WCAGViolation, ColorEntry } from '@/utils/accessibilityReport';
 import { AccessibilityViolationRow } from '@/features/accessibility/components/AccessibilityViolationRow';
+import { LoadingState } from '@/components/common/LoadingState';
 
 /**
  * AccessibilityReportViewer Component
@@ -60,12 +61,7 @@ export function AccessibilityReportViewer() {
 
     if (isLoading) {
         return (
-            <div className="flex items-center justify-center p-8">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-3" />
-                    <p className="text-muted-foreground">Generating accessibility report...</p>
-                </div>
-            </div>
+            <LoadingState className="p-8" spinnerSize="md" label="Generating accessibility report..." />
         );
     }
 

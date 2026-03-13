@@ -12,6 +12,7 @@
 
 import { AlertCircle, Shield, X } from 'lucide-react';
 import type { RoleDto } from '@/types/data';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 interface RoleUnlinkConfirmDialogProps {
   isOpen: boolean;
@@ -121,7 +122,7 @@ export function RoleUnlinkConfirmDialog({
           >
             {isLoading ? (
               <>
-                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                <LoadingSpinner size="sm" tone="current" />
                 Processing...
               </>
             ) : (
