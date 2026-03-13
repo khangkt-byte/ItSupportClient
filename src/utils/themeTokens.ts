@@ -235,16 +235,6 @@ export function applyThemeTokens(
                 ...allVars,
                 ...generatePaletteVars(palette.neutral, 'color-neutral'),
             };
-
-            // Override semantic tokens if theme has custom ones
-            if (palette.semantic) {
-                // Use correct semantic variants based on appearance (light/dark)
-                const semanticVariants = isDark ? darkSemanticVariants : lightSemanticVariants;
-                allVars = {
-                    ...allVars,
-                    ...generateSemanticVars(palette.semantic, semanticVariants),
-                };
-            }
         }
     } else {
         // When brand is 'default', clear brand palette variables

@@ -12,7 +12,7 @@
  * 3. Commit both palettes.ts and this generated file
  * 
  * Generation info:
- * - Generated: 2026-03-13T09:40:36.525Z
+ * - Generated: 2026-03-13T09:56:23.910Z
  * - Themes: 10
  * - Source: scripts/generateThemeCSS.js
  * 
@@ -32,7 +32,7 @@
   --color-error: #ef4444;
   --color-warning: #f59e0b;
   --color-info: #3b82f6;
-  --color-disabled: #6b7280;
+  --color-disabled: #4b5563;
   --color-success-foreground: #166534;
   --color-success-background: #f0fdf4;
   --color-success-border: #bbf7d0;
@@ -58,7 +58,7 @@
   --color-error: #f87171;
   --color-warning: #fbbf24;
   --color-info: #60a5fa;
-  --color-disabled: #9ca3af;
+  --color-disabled: #a0a8b5;
   --color-success-foreground: #bbf7d0;
   --color-success-background: rgba(34, 197, 94, 0.2);
   --color-success-border: rgba(34, 197, 94, 0.3);

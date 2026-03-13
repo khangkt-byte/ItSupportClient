@@ -285,6 +285,7 @@ export const ThemeValidationTest: React.FC = () => {
         semanticBg: {} as Record<string, string>,
         semanticFg: {} as Record<string, string>,
         primary: {} as Record<string, string>,
+        background: '#ffffff',
       };
     }
 
@@ -306,6 +307,8 @@ export const ThemeValidationTest: React.FC = () => {
       return acc;
     }, {});
 
+    const background = styles.getPropertyValue('--color-background').trim() || (resolvedAppearance === 'dark' ? '#111827' : '#ffffff');
+
     const primary = PRIMARY_TONES.reduce<Record<string, string>>((acc, tone) => {
       acc[tone] = styles.getPropertyValue(`--color-primary-${tone}`).trim();
       return acc;
@@ -316,6 +319,7 @@ export const ThemeValidationTest: React.FC = () => {
       semanticBg,
       semanticFg,
       primary,
+      background,
     };
   }, [tokens, appearance, resolvedAppearance, brandColor]);
 
@@ -682,7 +686,7 @@ export const ThemeValidationTest: React.FC = () => {
               {/* Token Colors Display with WCAG Testing */}
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 {Object.entries(tokens).map(([key, value]) => {
-                  const bg = cssSnapshot.semanticBg[key] || 'hsl(var(--background))';
+                  const bg = cssSnapshot.semanticBg[key] || cssSnapshot.background;
                   const fg = cssSnapshot.semanticFg[key] || value;
                   
                   // Calculate contrast (WCAG 2.1 standard)

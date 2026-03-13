@@ -126,7 +126,7 @@ export const defaultSemanticTokens: SemanticTokens = {
     error: '#ef4444',      // Red-500
     warning: '#f59e0b',    // Amber-500
     info: '#3b82f6',       // Blue-500
-    disabled: '#6b7280',   // Gray-500
+    disabled: '#4b5563',   // Gray-600 (WCAG AAA on white surfaces)
 };
 
 /**
@@ -140,7 +140,7 @@ export const darkSemanticTokens: SemanticTokens = {
     error: '#f87171',      // Red-400
     warning: '#fbbf24',    // Amber-400
     info: '#60a5fa',       // Blue-400
-    disabled: '#9ca3af',   // Gray-400
+    disabled: '#a0a8b5',   // Custom cool gray (WCAG AAA on --color-background)
 };
 
 /**

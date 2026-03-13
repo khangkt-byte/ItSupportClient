@@ -720,19 +720,10 @@ export const useTheme = (): UseThemeReturn => {
    * @internal
    */
   const getSemanticTokens = useCallback((): SemanticTokens | null => {
-    // Use centralized semantic token constants (Phase 1 - SSOT)
-    if (theme === 'light') {
-      return GLOBAL_SEMANTIC_TOKENS;
-    }
-
-    if (theme === 'dark') {
-      return DARK_SEMANTIC_TOKENS;
-    }
-
-    // Brand themes use semantic tokens from palettes
-    const palette = palettes[theme as BrandTheme];
-    return palette.semantic || GLOBAL_SEMANTIC_TOKENS;
-  }, [theme]);
+    // Semantic tokens are appearance-based, independent from brand palette.
+    const actualAppearance = getActualAppearance(appearance, resolvedAppearance);
+    return actualAppearance === 'dark' ? DARK_SEMANTIC_TOKENS : GLOBAL_SEMANTIC_TOKENS;
+  }, [appearance, resolvedAppearance]);
 
   /**
    * Get primary color of current theme
