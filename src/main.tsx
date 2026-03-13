@@ -31,13 +31,11 @@
       root.setAttribute('data-appearance', appearance);
       root.setAttribute('data-brand', brand);
       root.setAttribute('data-theme', legacyTheme);
-      root.setAttribute('data-a11y', 'default');
 
       if (body) {
         body.setAttribute('data-appearance', appearance);
         body.setAttribute('data-brand', brand);
         body.setAttribute('data-theme', legacyTheme);
-        body.setAttribute('data-a11y', 'default');
       }
     } catch {
       // Ignore storage access errors in private mode or restricted environments.

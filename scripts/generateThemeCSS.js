@@ -137,61 +137,6 @@ function extractDarkSemanticTokens() {
   };
 }
 
-/**
- * Extract high contrast light semantic tokens from palettes.ts
- */
-function extractHighContrastLightSemanticTokens() {
-  const hcLightRegex = /export\s+const\s+highContrastLightSemanticTokens\s*:\s*SemanticTokens\s*=\s*\{[\s\S]*?success:\s*'(#[0-9a-fA-F]{6})',[\s\S]*?error:\s*'(#[0-9a-fA-F]{6})',[\s\S]*?warning:\s*'(#[0-9a-fA-F]{6})',[\s\S]*?info:\s*'(#[0-9a-fA-F]{6})',[\s\S]*?disabled:\s*'(#[0-9a-fA-F]{6})'/;
-  
-  const match = hcLightRegex.exec(palettesContent);
-  
-  if (match) {
-    return {
-      success: match[1],
-      error: match[2],
-      warning: match[3],
-      info: match[4],
-      disabled: match[5],
-    };
-  }
-  
-  console.warn('⚠️ Could not parse highContrastLightSemanticTokens from palettes.ts, using fallback');
-  return {
-    success: '#000000',
-    error: '#000000',
-    warning: '#000000',
-    info: '#000000',
-    disabled: '#808080',
-  };
-}
-
-/**
- * Extract high contrast dark semantic tokens from palettes.ts
- */
-function extractHighContrastDarkSemanticTokens() {
-  const hcDarkRegex = /export\s+const\s+highContrastDarkSemanticTokens\s*:\s*SemanticTokens\s*=\s*\{[\s\S]*?success:\s*'(#[0-9a-fA-F]{6})',[\s\S]*?error:\s*'(#[0-9a-fA-F]{6})',[\s\S]*?warning:\s*'(#[0-9a-fA-F]{6})',[\s\S]*?info:\s*'(#[0-9a-fA-F]{6})',[\s\S]*?disabled:\s*'(#[0-9a-fA-F]{6})'/;
-  
-  const match = hcDarkRegex.exec(palettesContent);
-  
-  if (match) {
-    return {
-      success: match[1],
-      error: match[2],
-      warning: match[3],
-      info: match[4],
-      disabled: match[5],
-    };
-  }
-  
-  console.warn('⚠️ Could not parse highContrastDarkSemanticTokens from palettes.ts, using fallback');
-  return {
-    success: '#ffffff',
-    error: '#ffffff',
-    warning: '#ffffff',
-    info: '#ffffff',
-    disabled: '#808080',
-  };
-}
 
 /**
  * Extract semantic variant tokens (foreground, background, border) from palettes.ts
@@ -249,10 +194,6 @@ function generateCSS() {
   const darkSemanticTokens = extractDarkSemanticTokens();
   const lightVariants = extractSemanticVariants('lightSemanticVariants');
   const darkVariants = extractSemanticVariants('darkSemanticVariants');
-  const hcLightSemanticTokens = extractHighContrastLightSemanticTokens();
-  const hcDarkSemanticTokens = extractHighContrastDarkSemanticTokens();
-  const hcLightVariants = extractSemanticVariants('highContrastLightVariants');
-  const hcDarkVariants = extractSemanticVariants('highContrastDarkVariants');
   
   const timestamp = new Date().toISOString();
   const themeCount = Object.keys(themes).length;
@@ -340,70 +281,6 @@ function generateCSS() {
     css += `  --color-info-foreground: ${darkVariants.infoForeground};\n`;
     css += `  --color-info-background: ${darkVariants.infoBackground};\n`;
     css += `  --color-info-border: ${darkVariants.infoBorder};\n`;
-  }
-
-  css += `}
-
-/* ========================================
- * HIGH CONTRAST LIGHT MODE SEMANTIC TOKENS
- * Source: palettes.ts → highContrastLightSemanticTokens + highContrastLightVariants
- * WCAG AAA 21:1 contrast ratio compliance
- * ======================================== */
-
-html[data-a11y="highContrast"] {
-  --color-success: ${hcLightSemanticTokens.success};
-  --color-error: ${hcLightSemanticTokens.error};
-  --color-warning: ${hcLightSemanticTokens.warning};
-  --color-info: ${hcLightSemanticTokens.info};
-  --color-disabled: ${hcLightSemanticTokens.disabled};
-`;
-
-  // Add HC light semantic variants
-  if (hcLightVariants) {
-    css += `  --color-success-foreground: ${hcLightVariants.successForeground};\n`;
-    css += `  --color-success-background: ${hcLightVariants.successBackground};\n`;
-    css += `  --color-success-border: ${hcLightVariants.successBorder};\n`;
-    css += `  --color-error-foreground: ${hcLightVariants.errorForeground};\n`;
-    css += `  --color-error-background: ${hcLightVariants.errorBackground};\n`;
-    css += `  --color-error-border: ${hcLightVariants.errorBorder};\n`;
-    css += `  --color-warning-foreground: ${hcLightVariants.warningForeground};\n`;
-    css += `  --color-warning-background: ${hcLightVariants.warningBackground};\n`;
-    css += `  --color-warning-border: ${hcLightVariants.warningBorder};\n`;
-    css += `  --color-info-foreground: ${hcLightVariants.infoForeground};\n`;
-    css += `  --color-info-background: ${hcLightVariants.infoBackground};\n`;
-    css += `  --color-info-border: ${hcLightVariants.infoBorder};\n`;
-  }
-
-  css += `}
-
-/* ========================================
- * HIGH CONTRAST DARK MODE SEMANTIC TOKENS
- * Source: palettes.ts → highContrastDarkSemanticTokens + highContrastDarkVariants
- * WCAG AAA 21:1 contrast ratio compliance
- * ======================================== */
-
-html[data-a11y="highContrast"][data-appearance="dark"] {
-  --color-success: ${hcDarkSemanticTokens.success};
-  --color-error: ${hcDarkSemanticTokens.error};
-  --color-warning: ${hcDarkSemanticTokens.warning};
-  --color-info: ${hcDarkSemanticTokens.info};
-  --color-disabled: ${hcDarkSemanticTokens.disabled};
-`;
-
-  // Add HC dark semantic variants
-  if (hcDarkVariants) {
-    css += `  --color-success-foreground: ${hcDarkVariants.successForeground};\n`;
-    css += `  --color-success-background: ${hcDarkVariants.successBackground};\n`;
-    css += `  --color-success-border: ${hcDarkVariants.successBorder};\n`;
-    css += `  --color-error-foreground: ${hcDarkVariants.errorForeground};\n`;
-    css += `  --color-error-background: ${hcDarkVariants.errorBackground};\n`;
-    css += `  --color-error-border: ${hcDarkVariants.errorBorder};\n`;
-    css += `  --color-warning-foreground: ${hcDarkVariants.warningForeground};\n`;
-    css += `  --color-warning-background: ${hcDarkVariants.warningBackground};\n`;
-    css += `  --color-warning-border: ${hcDarkVariants.warningBorder};\n`;
-    css += `  --color-info-foreground: ${hcDarkVariants.infoForeground};\n`;
-    css += `  --color-info-background: ${hcDarkVariants.infoBackground};\n`;
-    css += `  --color-info-border: ${hcDarkVariants.infoBorder};\n`;
   }
 
   css += `}

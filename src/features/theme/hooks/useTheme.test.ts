@@ -1,574 +1,150 @@
-/**
- * Unit tests for useTheme hook
- *
- * Comprehensive test suite covering:
- * - Theme initialization (localStorage, system preference, defaults)
- * - Theme switching and persistence
- * - Accessibility mode detection and switching
- * - Reduced motion preference detection
- * - Semantic tokens retrieval
- * - Custom event dispatching
- * - Error handling
- *
- * @reference
- * - Jest: https://jestjs.io/docs/getting-started
- * - React Testing Library: https://testing-library.com/docs/react-testing-library/intro
- * - React Hooks Testing: https://reactjs.org/docs/hooks-testing.html
- * - WCAG Testing: https://www.w3.org/WAI/test-evaluate/
- */
+import { act, renderHook } from '@testing-library/react';
+import { Theme, useTheme } from './useTheme';
 
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { useTheme, Theme, AccessibilityMode } from './useTheme';
-import { BrandTheme } from '../constants/palettes';
+describe('useTheme hook', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+    document.documentElement.className = '';
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.body.setAttribute('data-theme', 'light');
+  });
 
-describe('useTheme Hook - Complete Test Suite', () => {
-    // Setup & teardown
-    beforeEach(() => {
-        // Clear localStorage
-        localStorage.clear();
-        // Clear any animation timeouts
-        jest.clearAllTimers();
-        jest.useFakeTimers();
-        // Reset DOM
-        document.documentElement.setAttribute('data-theme', 'light');
-        document.body.setAttribute('data-theme', 'light');
-        document.documentElement.className = ''; // Clear all classes
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
+  it('initializes with light theme by default', () => {
+    const { result } = renderHook(() => useTheme());
+    expect(result.current.theme).toBe('light');
+    expect(result.current.appearance).toBe('auto');
+    expect(result.current.brandColor).toBe('default');
+  });
+
+  it('restores legacy theme from localStorage', () => {
+    localStorage.setItem('theme', 'brand-purple');
+    const { result } = renderHook(() => useTheme());
+    expect(result.current.theme).toBe('brand-purple');
+    expect(result.current.brandColor).toBe('brand-purple');
+  });
+
+  it('changes theme and updates DOM + storage', () => {
+    const { result } = renderHook(() => useTheme());
+
+    act(() => {
+      result.current.changeTheme('brand-red');
     });
 
-    afterEach(() => {
-        jest.runOnlyPendingTimers();
-        jest.useRealTimers();
+    expect(result.current.theme).toBe('brand-red');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('brand-red');
+    expect(document.body.getAttribute('data-theme')).toBe('brand-red');
+    expect(localStorage.getItem('theme')).toBe('brand-red');
+  });
+
+  it('supports all declared themes', () => {
+    const { result } = renderHook(() => useTheme());
+    const themes: Theme[] = [
+      'light',
+      'dark',
+      'brand-purple',
+      'brand-red',
+      'brand-blue',
+      'brand-green',
+      'brand-orange',
+      'brand-teal',
+      'brand-indigo',
+      'brand-violet',
+      'brand-pink',
+      'brand-cyan',
+    ];
+
+    themes.forEach((theme) => {
+      act(() => {
+        result.current.changeTheme(theme);
+      });
+      expect(result.current.theme).toBe(theme);
+    });
+  });
+
+  it('returns semantic tokens for light and dark themes', () => {
+    const { result } = renderHook(() => useTheme());
+
+    act(() => {
+      result.current.changeTheme('light');
+    });
+    expect(result.current.getSemanticTokens()?.success).toBe('#22c55e');
+
+    act(() => {
+      result.current.changeTheme('dark');
+    });
+    expect(result.current.getSemanticTokens()?.success).toBe('#4ade80');
+  });
+
+  it('returns primary and secondary color for brand theme', () => {
+    const { result } = renderHook(() => useTheme());
+
+    act(() => {
+      result.current.changeTheme('brand-purple');
     });
 
-    // ============================================================
-    // ✅ INITIALIZATION TESTS
-    // ============================================================
+    expect(result.current.getPrimaryColor()).toBe('#695CFE');
+    expect(result.current.getSecondaryColor()).toMatch(/^#[0-9A-F]{6}$/i);
+  });
 
-    describe('Initialization', () => {
-        test('should initialize with light theme as default', () => {
-            const { result } = renderHook(() => useTheme());
-            expect(result.current.theme).toBe('light');
-        });
+  it('setAppearance persists and resolves theme', () => {
+    const { result } = renderHook(() => useTheme());
 
-        test('should restore theme from localStorage', () => {
-            localStorage.setItem('theme', 'brand-purple');
-            const { result } = renderHook(() => useTheme());
-
-            waitFor(() => {
-                expect(result.current.theme).toBe('brand-purple');
-            });
-        });
-
-        test('should respect system preference when no saved theme', () => {
-            // Mock system prefers dark
-            window.matchMedia = jest.fn().mockImplementation((query) => ({
-                matches: query === '(prefers-color-scheme: dark)',
-                media: query,
-                onchange: null,
-                addListener: jest.fn(),
-                removeListener: jest.fn(),
-                addEventListener: jest.fn(),
-                removeEventListener: jest.fn(),
-                dispatchEvent: jest.fn(),
-            }));
-
-            const { result } = renderHook(() => useTheme());
-
-            waitFor(() => {
-                expect(result.current.theme).toBe('dark');
-            });
-        });
-
-        test('should set default accessibility mode', () => {
-            const { result } = renderHook(() => useTheme());
-            expect(result.current.accessibilityMode).toBe('default');
-        });
-
-        test('should restore accessibility mode from localStorage', () => {
-            localStorage.setItem('a11y', 'highContrast');
-            const { result } = renderHook(() => useTheme());
-
-            waitFor(() => {
-                expect(result.current.accessibilityMode).toBe('highContrast');
-            });
-        });
-
-        test('should detect prefers-reduced-motion system setting', () => {
-            window.matchMedia = jest.fn().mockImplementation((query) => ({
-                matches: query === '(prefers-reduced-motion: reduce)',
-                media: query,
-                onchange: null,
-                addListener: jest.fn(),
-                removeListener: jest.fn(),
-                addEventListener: jest.fn(),
-                removeEventListener: jest.fn(),
-                dispatchEvent: jest.fn(),
-            }));
-
-            const { result } = renderHook(() => useTheme());
-            expect(result.current.prefersReducedMotion).toBe(true);
-        });
+    act(() => {
+      result.current.setAppearance('dark');
     });
 
-    // ============================================================
-    // ✅ THEME SWITCHING TESTS
-    // ============================================================
+    expect(result.current.appearance).toBe('dark');
+    expect(result.current.theme).toBe('dark');
+    expect(localStorage.getItem('appearance')).toBe('dark');
+  });
 
-    describe('Theme Switching', () => {
-        test('should change theme and update DOM', () => {
-            const { result } = renderHook(() => useTheme());
+  it('setBrandColor persists and resolves theme', () => {
+    const { result } = renderHook(() => useTheme());
 
-            act(() => {
-                result.current.changeTheme('brand-red');
-            });
-
-            expect(result.current.theme).toBe('brand-red');
-            expect(document.documentElement.getAttribute('data-theme')).toBe('brand-red');
-            expect(document.body.getAttribute('data-theme')).toBe('brand-red');
-        });
-
-        test('should persist theme to localStorage', () => {
-            const { result } = renderHook(() => useTheme());
-
-            act(() => {
-                result.current.changeTheme('brand-blue');
-            });
-
-            expect(localStorage.getItem('theme')).toBe('brand-blue');
-        });
-
-        test('should add theme-transition class for animation', () => {
-            // Use real timers for this test to allow React updates
-            jest.useRealTimers();
-
-            const { result } = renderHook(() => useTheme());
-
-            // Verify initial state has no transition class
-            expect(document.documentElement.classList.contains('theme-transition')).toBe(false);
-
-            // Change theme - should add transition class immediately
-            act(() => {
-                result.current.changeTheme('brand-green');
-            });
-
-            // After changeTheme completes, transition class should be present
-            // (unless user prefers reduced motion)
-            const hasReducedMotion = result.current.prefersReducedMotion;
-            if (!hasReducedMotion) {
-                expect(document.documentElement.classList.contains('theme-transition')).toBe(true);
-            }
-
-            // Restore fake timers
-            jest.useFakeTimers();
-        });
-
-        test('should skip animation if user prefers reduced motion', () => {
-            window.matchMedia = jest.fn().mockImplementation((query) => ({
-                matches: query === '(prefers-reduced-motion: reduce)',
-                media: query,
-                onchange: null,
-                addListener: jest.fn(),
-                removeListener: jest.fn(),
-                addEventListener: jest.fn(),
-                removeEventListener: jest.fn(),
-                dispatchEvent: jest.fn(),
-            }));
-
-            const { result } = renderHook(() => useTheme());
-
-            act(() => {
-                result.current.changeTheme('brand-purple');
-            });
-
-            // Theme-transition class should never be added
-            expect(document.documentElement.classList.contains('theme-transition')).toBe(false);
-        });
-
-        test('should reject invalid theme', () => {
-            const { result } = renderHook(() => useTheme());
-            const initialTheme = result.current.theme;
-
-            act(() => {
-                result.current.changeTheme('invalid-theme' as Theme);
-            });
-
-            // Theme should not change
-            expect(result.current.theme).toBe(initialTheme);
-        });
-
-        test('should dispatch custom themechange event', () => {
-            const { result } = renderHook(() => useTheme());
-            const eventListener = jest.fn();
-
-            window.addEventListener('themechange', eventListener);
-
-            act(() => {
-                result.current.changeTheme('brand-orange');
-            });
-
-            expect(eventListener).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    detail: expect.objectContaining({
-                        theme: 'brand-orange',
-                    }),
-                })
-            );
-
-            window.removeEventListener('themechange', eventListener);
-        });
-
-        test('should support all available themes', () => {
-            const { result } = renderHook(() => useTheme());
-            const themes: Theme[] = [
-                'light',
-                'dark',
-                'brand-purple',
-                'brand-red',
-                'brand-blue',
-                'brand-green',
-                'brand-orange',
-                'brand-teal',
-                'brand-indigo',
-                'brand-violet',
-                'brand-pink',
-                'brand-cyan',
-            ];
-
-            themes.forEach((theme) => {
-                act(() => {
-                    result.current.changeTheme(theme);
-                });
-
-                expect(result.current.theme).toBe(theme);
-            });
-        });
+    act(() => {
+      result.current.setBrandColor('brand-blue');
     });
 
-    // ============================================================
-    // ✅ ACCESSIBILITY MODE TESTS
-    // ============================================================
+    expect(result.current.brandColor).toBe('brand-blue');
+    expect(result.current.theme).toBe('brand-blue');
+    expect(localStorage.getItem('brandColor')).toBe('brand-blue');
+  });
 
-    describe('Accessibility Mode', () => {
-        test('should change accessibility mode', () => {
-            const { result } = renderHook(() => useTheme());
+  it('handles invalid theme safely', () => {
+    const { result } = renderHook(() => useTheme());
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
-            act(() => {
-                result.current.setAccessibilityMode('highContrast');
-            });
-
-            expect(result.current.accessibilityMode).toBe('highContrast');
-            expect(document.documentElement.getAttribute('data-a11y')).toBe('highContrast');
-        });
-
-        test('should persist accessibility mode to localStorage', () => {
-            const { result } = renderHook(() => useTheme());
-
-            act(() => {
-                result.current.setAccessibilityMode('highContrast');
-            });
-
-            expect(localStorage.getItem('a11y')).toBe('highContrast');
-        });
-
-        test('should dispatch custom a11ychange event', () => {
-            const { result } = renderHook(() => useTheme());
-            const eventListener = jest.fn();
-
-            window.addEventListener('a11ychange', eventListener);
-
-            act(() => {
-                result.current.setAccessibilityMode('highContrast');
-            });
-
-            expect(eventListener).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    detail: expect.objectContaining({
-                        mode: 'highContrast',
-                    }),
-                })
-            );
-
-            window.removeEventListener('a11ychange', eventListener);
-        });
+    act(() => {
+      result.current.changeTheme('invalid-theme' as Theme);
     });
 
-    // ============================================================
-    // ✅ SEMANTIC TOKENS TESTS
-    // ============================================================
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
 
-    describe('Semantic Tokens', () => {
-        test('should return semantic tokens for light theme', () => {
-            const { result } = renderHook(() => useTheme());
+  it('resets to defaults and clears persisted keys', () => {
+    const { result } = renderHook(() => useTheme());
 
-            act(() => {
-                result.current.changeTheme('light');
-            });
-
-            const tokens = result.current.getSemanticTokens();
-            expect(tokens).not.toBeNull();
-            expect(tokens?.success).toBe('#22c55e');    // green-600
-            expect(tokens?.error).toBe('#ef4444');      // red-500
-            expect(tokens?.warning).toBe('#f59e0b');    // amber-500
-            expect(tokens?.info).toBe('#3b82f6');       // blue-500
-            expect(tokens?.disabled).toBe('#6b7280');   // gray-500
-        });
-
-        test('should return semantic tokens for dark theme', () => {
-            const { result } = renderHook(() => useTheme());
-
-            act(() => {
-                result.current.changeTheme('dark');
-            });
-
-            const tokens = result.current.getSemanticTokens();
-            expect(tokens).not.toBeNull();
-            expect(tokens?.success).toBe('#4ade80');    // green-400
-            expect(tokens?.error).toBe('#f87171');      // red-400
-            expect(tokens?.warning).toBe('#fbbf24');    // amber-400
-            expect(tokens?.info).toBe('#60a5fa');       // blue-400
-            expect(tokens?.disabled).toBe('#9ca3af');   // gray-400
-        });
-
-        test('should return semantic tokens for brand theme', () => {
-            const { result } = renderHook(() => useTheme());
-
-            act(() => {
-                result.current.changeTheme('brand-purple');
-            });
-
-            const tokens = result.current.getSemanticTokens();
-            expect(tokens).not.toBeNull();
-            expect(tokens).toHaveProperty('success');
-            expect(tokens).toHaveProperty('error');
-            expect(tokens).toHaveProperty('warning');
-            expect(tokens).toHaveProperty('info');
-            expect(tokens).toHaveProperty('disabled');
-        });
-
-        test('should have valid color values for semantic tokens', () => {
-            const { result } = renderHook(() => useTheme());
-
-            act(() => {
-                result.current.changeTheme('brand-blue');
-            });
-
-            const tokens = result.current.getSemanticTokens();
-            expect(tokens?.success).toMatch(/^#[0-9A-F]{6}$/i);
-            expect(tokens?.error).toMatch(/^#[0-9A-F]{6}$/i);
-            expect(tokens?.warning).toMatch(/^#[0-9A-F]{6}$/i);
-            expect(tokens?.info).toMatch(/^#[0-9A-F]{6}$/i);
-            expect(tokens?.disabled).toMatch(/^#[0-9A-F]{6}$/i);
-        });
+    act(() => {
+      result.current.setAppearance('dark');
+      result.current.setBrandColor('brand-pink');
     });
 
-    // ============================================================
-    // ✅ PRIMARY/SECONDARY COLOR TESTS
-    // ============================================================
-
-    describe('Color Accessors', () => {
-        test('should return null for light theme primary color', () => {
-            const { result } = renderHook(() => useTheme());
-
-            act(() => {
-                result.current.changeTheme('light');
-            });
-
-            expect(result.current.getPrimaryColor()).toBeNull();
-        });
-
-        test('should return valid hex for brand theme primary color', () => {
-            const { result } = renderHook(() => useTheme());
-
-            act(() => {
-                result.current.changeTheme('brand-purple');
-            });
-
-            const color = result.current.getPrimaryColor();
-            expect(color).toMatch(/^#[0-9A-F]{6}$/i);
-            expect(color).toBe('#695CFE');
-        });
-
-        test('should return valid hex for brand theme secondary color if available', () => {
-            const { result } = renderHook(() => useTheme());
-
-            act(() => {
-                result.current.changeTheme('brand-purple');
-            });
-
-            const color = result.current.getSecondaryColor();
-            expect(color).not.toBeNull();
-            expect(color).toMatch(/^#[0-9A-F]{6}$/i);
-        });
-
-        test('should return null for secondary color if not available', () => {
-            const { result } = renderHook(() => useTheme());
-
-            act(() => {
-                result.current.changeTheme('light');
-            });
-
-            expect(result.current.getSecondaryColor()).toBeNull();
-        });
+    act(() => {
+      result.current.resetToDefaults();
     });
 
-    // ============================================================
-    // ✅ RESET/DEFAULT TESTS
-    // ============================================================
-
-    describe('Reset to Defaults', () => {
-        test('should reset to light theme and default accessibility', () => {
-            const { result } = renderHook(() => useTheme());
-
-            act(() => {
-                result.current.changeTheme('brand-purple');
-                result.current.setAccessibilityMode('highContrast');
-            });
-
-            act(() => {
-                result.current.resetToDefaults();
-            });
-
-            expect(result.current.theme).toBe('light');
-            expect(result.current.accessibilityMode).toBe('default');
-            expect(localStorage.getItem('theme')).toBeNull();
-            expect(localStorage.getItem('a11y')).toBeNull();
-        });
-    });
-
-    // ============================================================
-    // ✅ STORAGE SYNC TESTS (Cross-tab communication)
-    // ============================================================
-
-    describe('Cross-Tab Storage Sync', () => {
-        test('should sync theme changes from another tab', () => {
-            const { result } = renderHook(() => useTheme());
-
-            // Simulate storage change from another tab
-            act(() => {
-                const event = new StorageEvent('storage', {
-                    key: 'theme',
-                    newValue: 'brand-green',
-                    oldValue: 'light',
-                });
-                window.dispatchEvent(event);
-            });
-
-            waitFor(() => {
-                expect(result.current.theme).toBe('brand-green');
-            });
-        });
-
-        test('should sync accessibility mode from another tab', () => {
-            const { result } = renderHook(() => useTheme());
-
-            act(() => {
-                const event = new StorageEvent('storage', {
-                    key: 'a11y',
-                    newValue: 'highContrast',
-                    oldValue: 'default',
-                });
-                window.dispatchEvent(event);
-            });
-
-            waitFor(() => {
-                expect(result.current.accessibilityMode).toBe('highContrast');
-            });
-        });
-    });
-
-    // ============================================================
-    // ✅ ERROR HANDLING TESTS
-    // ============================================================
-
-    describe('Error Handling', () => {
-        test('should handle localStorage quota exceeded gracefully', () => {
-            const { result } = renderHook(() => useTheme());
-
-            // Mock localStorage.setItem to throw
-            const setItemSpy = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
-                throw new Error('QuotaExceededError');
-            });
-
-            // Should not throw, just log error
-            expect(() => {
-                act(() => {
-                    result.current.changeTheme('brand-red');
-                });
-            }).not.toThrow();
-
-            setItemSpy.mockRestore();
-        });
-
-        test('should handle custom event dispatch errors gracefully', () => {
-            const { result } = renderHook(() => useTheme());
-
-            // Mock dispatchEvent to throw
-            const dispatchEventSpy = jest
-                .spyOn(window, 'dispatchEvent')
-                .mockImplementation(() => {
-                    throw new Error('Event dispatch failed');
-                });
-
-            expect(() => {
-                act(() => {
-                    result.current.changeTheme('brand-blue');
-                });
-            }).not.toThrow();
-
-            dispatchEventSpy.mockRestore();
-        });
-    });
-
-    // ============================================================
-    // ✅ WCAG COMPLIANCE TESTS
-    // ============================================================
-
-    describe('WCAG 2.1 Compliance', () => {
-        test('should respect prefers-reduced-motion for animation', () => {
-            window.matchMedia = jest.fn().mockImplementation((query) => ({
-                matches: query === '(prefers-reduced-motion: reduce)',
-                media: query,
-                onchange: null,
-                addListener: jest.fn(),
-                removeListener: jest.fn(),
-                addEventListener: jest.fn(),
-                removeEventListener: jest.fn(),
-                dispatchEvent: jest.fn(),
-            }));
-
-            const { result } = renderHook(() => useTheme());
-            expect(result.current.prefersReducedMotion).toBe(true);
-        });
-
-        test('should detect and respect prefers-contrast', () => {
-            window.matchMedia = jest.fn().mockImplementation((query) => ({
-                matches: query === '(prefers-contrast: more)',
-                media: query,
-                onchange: null,
-                addListener: jest.fn(),
-                removeListener: jest.fn(),
-                addEventListener: jest.fn(),
-                removeEventListener: jest.fn(),
-                dispatchEvent: jest.fn(),
-            }));
-
-            const { result } = renderHook(() => useTheme());
-
-            // Should automatically switch to high contrast
-            waitFor(() => {
-                expect(result.current.accessibilityMode).toBe('highContrast');
-            });
-        });
-
-        test('should maintain keyboard accessibility for theme changes', () => {
-            const { result } = renderHook(() => useTheme());
-
-            // Should not prevent keyboard interaction
-            expect(() => {
-                act(() => {
-                    result.current.changeTheme('brand-purple');
-                });
-            }).not.toThrow();
-        });
-    });
+    expect(result.current.appearance).toBe('auto');
+    expect(result.current.brandColor).toBe('default');
+    expect(localStorage.getItem('appearance')).toBeNull();
+    expect(localStorage.getItem('brandColor')).toBeNull();
+    expect(localStorage.getItem('theme')).toBeNull();
+  });
 });

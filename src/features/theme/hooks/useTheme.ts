@@ -1,31 +1,28 @@
 /**
  * Theme Management Hook
  *
- * Custom React hook for managing application themes with full accessibility support.
- * Implements Material Design 3 color system and WCAG 2.1 Level AA standards.
+ * Custom React hook for managing application themes.
+ * Implements a token-driven Material Design 3 color system.
  *
  * @module useTheme
  * @description
- * Manages theme state, persistence, and accessibility modes. Supports:
+ * Manages theme state and persistence. Supports:
  * - Theme switching (light, dark, brand themes)
  * - localStorage persistence
- * - System preference detection (prefers-color-scheme, prefers-contrast)
+ * - System preference detection (prefers-color-scheme)
  * - Reduced motion awareness
  * - Custom event dispatching
  * - Semantic tokens
  *
  * @reference
  * - React Hooks: https://react.dev/reference/react/hooks
- * - WCAG 2.1: https://www.w3.org/WAI/WCAG21/quickref/
  * - Material Design 3: https://m3.material.io/
  * - MDN prefers-color-scheme: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme
- * - MDN prefers-contrast: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-contrast
  * - MDN prefers-reduced-motion: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion
  *
  * @example
- * const { theme, changeTheme, accessibilityMode } = useTheme();
+ * const { theme, changeTheme } = useTheme();
  * changeTheme('brand-purple');
- * setAccessibilityMode('highContrast');
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -38,7 +35,6 @@ import {
   resolveSystemAppearance,
 } from '@/features/theme/hooks/themeHelpers';
 import type {
-  AccessibilityMode,
   Appearance,
   BrandColorTheme,
   Theme,
@@ -46,7 +42,6 @@ import type {
 } from '@/features/theme/hooks/themeTypes';
 
 export type {
-  AccessibilityMode,
   Appearance,
   BrandColorTheme,
   Theme,
@@ -62,7 +57,7 @@ export type {
  * @description
  * This hook provides complete theme management with:
  * 1. Multi-theme support (light, dark, 10 brand themes)
- * 2. Accessibility-first approach (high contrast, reduced motion)
+ * 2. Motion-aware transitions
  * 3. localStorage persistence
  * 4. System preference detection
  * 5. Semantic tokens generation
@@ -111,7 +106,6 @@ export const useTheme = (): UseThemeReturn => {
 
   // Legacy state for backwards compatibility
   const [theme, setTheme] = useState<Theme>('light');
-  const accessibilityMode: AccessibilityMode = 'default';
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -173,7 +167,6 @@ export const useTheme = (): UseThemeReturn => {
    * @param {Theme} nextTheme - Theme to apply (computed from appearance + brand)
    * @param {('light'|'dark')} currentAppearance - Resolved appearance value
    * @param {BrandColorTheme} currentBrand - Brand color selection
-   * @param {AccessibilityMode} [mode='default'] - Accessibility mode
    *
    * @reference
    * - HTML data attributes: https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes
@@ -187,8 +180,7 @@ export const useTheme = (): UseThemeReturn => {
     (
       nextTheme: Theme,
       currentAppearance: 'light' | 'dark',
-      currentBrand: BrandColorTheme,
-      _mode: AccessibilityMode = 'default'
+      currentBrand: BrandColorTheme
     ) => {
       try {
         // Apply attributes immediately to avoid extra frame delay during theme toggles.
@@ -200,9 +192,6 @@ export const useTheme = (): UseThemeReturn => {
         // Legacy: Set combined theme attribute for backwards compatibility
         document.documentElement.setAttribute('data-theme', nextTheme);
         document.body.setAttribute('data-theme', nextTheme);
-        document.documentElement.setAttribute('data-a11y', 'default');
-        document.body.setAttribute('data-a11y', 'default');
-
         // Apply all CSS variables from design tokens (Phase 1 - Runtime Injection)
         // This handles primary palette + semantic tokens + foreground/background/border
         // ALL values sourced from palettes.ts via themeTokens.ts
@@ -318,7 +307,7 @@ export const useTheme = (): UseThemeReturn => {
     setResolvedAppearance(actualAppearance);
     setTheme(computedTheme);
     // Apply to DOM
-    applyTheme(computedTheme, actualAppearance, initialBrandColor, 'default');
+    applyTheme(computedTheme, actualAppearance, initialBrandColor);
   }, [applyTheme, computeTheme]);
 
   /**
@@ -342,7 +331,7 @@ export const useTheme = (): UseThemeReturn => {
       if (appearance === 'auto') {
         const computedTheme = computeTheme(appearance, brandColor, systemResolvedAppearance);
         setTheme(computedTheme);
-        applyTheme(computedTheme, systemResolvedAppearance, brandColor, accessibilityMode);
+        applyTheme(computedTheme, systemResolvedAppearance, brandColor);
       }
     };
 
@@ -351,7 +340,7 @@ export const useTheme = (): UseThemeReturn => {
     return () => {
       colorSchemeMediaQuery.removeEventListener('change', handleColorSchemeChange);
     };
-  }, [appearance, brandColor, accessibilityMode, applyTheme, computeTheme]);
+  }, [appearance, brandColor, applyTheme, computeTheme]);
 
   /**
    * Detect reduced motion preference
@@ -400,7 +389,7 @@ export const useTheme = (): UseThemeReturn => {
 
         setAppearanceState(newAppearance);
         setTheme(computedTheme);
-        applyTheme(computedTheme, actualAppearance, brandColor, accessibilityMode);
+        applyTheme(computedTheme, actualAppearance, brandColor);
       }
 
       // NEW: Handle brand color changes
@@ -415,7 +404,7 @@ export const useTheme = (): UseThemeReturn => {
 
         setBrandColorState(newBrandColor);
         setTheme(computedTheme);
-        applyTheme(computedTheme, actualAppearance, newBrandColor, accessibilityMode);
+        applyTheme(computedTheme, actualAppearance, newBrandColor);
       }
 
       // Legacy: Handle theme changes (for backwards compatibility)
@@ -424,7 +413,7 @@ export const useTheme = (): UseThemeReturn => {
         if (isValidTheme(newTheme)) {
           const actualAppearance = getActualAppearance(appearance, resolvedAppearance);
           setTheme(newTheme);
-          applyTheme(newTheme, actualAppearance, brandColor, accessibilityMode);
+          applyTheme(newTheme, actualAppearance, brandColor);
         }
       }
 
@@ -434,7 +423,7 @@ export const useTheme = (): UseThemeReturn => {
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [theme, appearance, brandColor, resolvedAppearance, accessibilityMode, applyTheme, computeTheme]);
+  }, [theme, appearance, brandColor, resolvedAppearance, applyTheme, computeTheme]);
 
   /**
    * NEW: Set appearance independently (light/dark/auto)
@@ -486,7 +475,7 @@ export const useTheme = (): UseThemeReturn => {
         // Update state
         setAppearanceState(newAppearance);
         setTheme(computedTheme);
-        applyTheme(computedTheme, actualAppearance, brandColor, accessibilityMode);
+        applyTheme(computedTheme, actualAppearance, brandColor);
       });
 
       // Persist to localStorage
@@ -522,7 +511,7 @@ export const useTheme = (): UseThemeReturn => {
         }
       }
     },
-    [appearance, theme, brandColor, resolvedAppearance, accessibilityMode, applyTheme, computeTheme, runThemeMutation]
+    [appearance, theme, brandColor, resolvedAppearance, applyTheme, computeTheme, runThemeMutation]
   );
 
   /**
@@ -579,7 +568,7 @@ export const useTheme = (): UseThemeReturn => {
         // Update state
         setBrandColorState(newBrandColor);
         setTheme(computedTheme);
-        applyTheme(computedTheme, actualAppearance, newBrandColor, accessibilityMode);
+        applyTheme(computedTheme, actualAppearance, newBrandColor);
       });
 
       // Persist to localStorage
@@ -615,7 +604,7 @@ export const useTheme = (): UseThemeReturn => {
         }
       }
     },
-    [appearance, theme, brandColor, resolvedAppearance, accessibilityMode, applyTheme, computeTheme, runThemeMutation]
+    [appearance, theme, brandColor, resolvedAppearance, applyTheme, computeTheme, runThemeMutation]
   );
 
   /**
@@ -673,7 +662,7 @@ export const useTheme = (): UseThemeReturn => {
         setAppearanceState(newAppearance);
         setBrandColorState(newBrandColor);
         setTheme(newTheme);
-        applyTheme(newTheme, actualAppearance, newBrandColor, accessibilityMode);
+        applyTheme(newTheme, actualAppearance, newBrandColor);
       });
 
       // Persist to localStorage
@@ -693,7 +682,7 @@ export const useTheme = (): UseThemeReturn => {
               theme: newTheme,
               appearance: newAppearance,
               brandColor: newBrandColor,
-              accessibilityMode,
+
               timestamp: Date.now(),
             },
           })
@@ -702,27 +691,9 @@ export const useTheme = (): UseThemeReturn => {
         console.error('Failed to dispatch theme change event:', error);
       }
     },
-    [theme, accessibilityMode, resolvedAppearance, applyTheme, runThemeMutation]
+    [theme, resolvedAppearance, applyTheme, runThemeMutation]
   );
 
-  /**
-   * Set accessibility mode
-   *
-   * @param {AccessibilityMode} mode - Mode to set
-   *
-   * @reference
-   * - WCAG 2.1 Contrast Enhanced: https://www.w3.org/TR/WCAG21/#contrast-enhanced
-   *
-   * @internal
-   */
-  const setAccessibilityModeHandler = useCallback(
-    (mode: AccessibilityMode) => {
-      if (mode !== 'default') {
-        console.warn('Accessibility mode has been removed. Using default mode only.');
-      }
-    },
-    []
-  );
 
   /**
    * Get semantic tokens for current theme
@@ -796,7 +767,7 @@ export const useTheme = (): UseThemeReturn => {
   }, [theme]);
 
   /**
-   * Reset theme and accessibility to defaults
+   * Reset theme preferences to defaults
    * NEW: Resets to auto appearance + default brand color
    *
    * @reference
@@ -811,7 +782,7 @@ export const useTheme = (): UseThemeReturn => {
     setBrandColorState('default');
     setResolvedAppearance(systemResolved);
     setTheme(systemResolved);
-    applyTheme(systemResolved, systemResolved, 'default', 'default');
+    applyTheme(systemResolved, systemResolved, 'default');
     localStorage.removeItem('appearance');
     localStorage.removeItem('brandColor');
     localStorage.removeItem('theme'); // Legacy
@@ -834,15 +805,12 @@ export const useTheme = (): UseThemeReturn => {
     // Legacy: For backwards compatibility
     theme,
     // Common state
-    accessibilityMode,
     prefersReducedMotion,
     // NEW: Combinatorial setters (Option A)
     setAppearance,
     setBrandColor,
     // Legacy: For backwards compatibility
     changeTheme,
-    // Common methods
-    setAccessibilityMode: setAccessibilityModeHandler,
     getSemanticTokens,
     getPrimaryColor,
     getSecondaryColor,
