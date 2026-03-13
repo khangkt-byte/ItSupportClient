@@ -19,7 +19,6 @@
     try {
       const savedAppearance = localStorage.getItem('appearance');
       const savedBrand = localStorage.getItem('brandColor');
-      const savedA11y = localStorage.getItem('a11y');
       const savedLegacyTheme = localStorage.getItem('theme');
 
       const appearance = resolveAppearance(savedAppearance);
@@ -29,18 +28,16 @@
       const legacyTheme = savedLegacyTheme && (savedLegacyTheme === 'light' || savedLegacyTheme === 'dark' || savedLegacyTheme.startsWith('brand-'))
         ? savedLegacyTheme
         : appearance;
-      const a11y = savedA11y === 'highContrast' ? 'highContrast' : 'default';
-
       root.setAttribute('data-appearance', appearance);
       root.setAttribute('data-brand', brand);
       root.setAttribute('data-theme', legacyTheme);
-      root.setAttribute('data-a11y', a11y);
+      root.setAttribute('data-a11y', 'default');
 
       if (body) {
         body.setAttribute('data-appearance', appearance);
         body.setAttribute('data-brand', brand);
         body.setAttribute('data-theme', legacyTheme);
-        body.setAttribute('data-a11y', a11y);
+        body.setAttribute('data-a11y', 'default');
       }
     } catch {
       // Ignore storage access errors in private mode or restricted environments.

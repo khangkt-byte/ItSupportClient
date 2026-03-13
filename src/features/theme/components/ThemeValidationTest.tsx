@@ -60,8 +60,6 @@ export const ThemeValidationTest: React.FC = () => {
     resolvedAppearance,
     setAppearance,
     setBrandColor,
-    accessibilityMode,
-    setAccessibilityMode,
     getSemanticTokens,
     getPrimaryColor,
     prefersReducedMotion,
@@ -319,7 +317,7 @@ export const ThemeValidationTest: React.FC = () => {
       semanticFg,
       primary,
     };
-  }, [tokens, appearance, resolvedAppearance, brandColor, accessibilityMode]);
+  }, [tokens, appearance, resolvedAppearance, brandColor]);
 
   /**
    * Status badge component for testing
@@ -421,19 +419,11 @@ export const ThemeValidationTest: React.FC = () => {
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Accessibility</h3>
-            <p className="text-lg font-bold text-gray-900 dark:text-gray-100 capitalize mb-2">
-              {accessibilityMode === 'highContrast' ? 'High Contrast' : 'Default'}
-            </p>
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Motion</h3>
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
               Motion: {prefersReducedMotion ? '⚠️ Reduced' : '✅ Normal'}
             </p>
-            <button
-              onClick={() => setAccessibilityMode(accessibilityMode === 'default' ? 'highContrast' : 'default')}
-              className="w-full px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm"
-            >
-              Toggle High Contrast
-            </button>
+            <p className="text-sm text-gray-500 dark:text-gray-400">High contrast mode has been removed.</p>
           </div>
         </div>
 

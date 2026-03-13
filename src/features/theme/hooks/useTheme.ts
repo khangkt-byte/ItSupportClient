@@ -111,7 +111,7 @@ export const useTheme = (): UseThemeReturn => {
 
   // Legacy state for backwards compatibility
   const [theme, setTheme] = useState<Theme>('light');
-  const [accessibilityMode, setAccessibilityMode] = useState<AccessibilityMode>('default');
+  const accessibilityMode: AccessibilityMode = 'default';
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -188,7 +188,7 @@ export const useTheme = (): UseThemeReturn => {
       nextTheme: Theme,
       currentAppearance: 'light' | 'dark',
       currentBrand: BrandColorTheme,
-      mode: AccessibilityMode = 'default'
+      _mode: AccessibilityMode = 'default'
     ) => {
       try {
         // Apply attributes immediately to avoid extra frame delay during theme toggles.
@@ -200,8 +200,8 @@ export const useTheme = (): UseThemeReturn => {
         // Legacy: Set combined theme attribute for backwards compatibility
         document.documentElement.setAttribute('data-theme', nextTheme);
         document.body.setAttribute('data-theme', nextTheme);
-        document.documentElement.setAttribute('data-a11y', mode);
-        document.body.setAttribute('data-a11y', mode);
+        document.documentElement.setAttribute('data-a11y', 'default');
+        document.body.setAttribute('data-a11y', 'default');
 
         // Apply all CSS variables from design tokens (Phase 1 - Runtime Injection)
         // This handles primary palette + semantic tokens + foreground/background/border
@@ -277,8 +277,6 @@ export const useTheme = (): UseThemeReturn => {
     // Load saved preferences (NEW: appearance + brandColor stored separately)
     const rawSavedAppearance = localStorage.getItem('appearance');
     const rawSavedBrandColor = localStorage.getItem('brandColor');
-    const savedAccessibility = localStorage.getItem('a11y') as AccessibilityMode | null;
-
     // Fallback: Check legacy 'theme' for migration
     const savedTheme = localStorage.getItem('theme') as Theme | null;
 
@@ -319,10 +317,8 @@ export const useTheme = (): UseThemeReturn => {
     setBrandColorState(initialBrandColor);
     setResolvedAppearance(actualAppearance);
     setTheme(computedTheme);
-    setAccessibilityMode(savedAccessibility || 'default');
-
     // Apply to DOM
-    applyTheme(computedTheme, actualAppearance, initialBrandColor, savedAccessibility || 'default');
+    applyTheme(computedTheme, actualAppearance, initialBrandColor, 'default');
   }, [applyTheme, computeTheme]);
 
   /**
@@ -358,47 +354,25 @@ export const useTheme = (): UseThemeReturn => {
   }, [appearance, brandColor, accessibilityMode, applyTheme, computeTheme]);
 
   /**
-   * Detect system accessibility preferences
+   * Detect reduced motion preference
    *
    * @reference
-   * - prefers-contrast: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-contrast
    * - prefers-reduced-motion: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion
    *
    * @internal
    */
   useEffect(() => {
-    // High contrast preference detection
-    const highContrastMediaQuery = window.matchMedia('(prefers-contrast: more)');
-    const prefersHighContrast = highContrastMediaQuery.matches;
-
-    if (prefersHighContrast) {
-      setAccessibilityMode('highContrast');
-      document.documentElement.setAttribute('data-a11y', 'highContrast');
-    }
-
-    // Reduced motion preference detection
     const reducedMotionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     const prefersReducedMotion = reducedMotionMediaQuery.matches;
     setPrefersReducedMotion(prefersReducedMotion);
-
-    // Handle changes in system preferences
-    const handleContrastChange = (e: MediaQueryListEvent) => {
-      const newMode: AccessibilityMode = e.matches ? 'highContrast' : 'default';
-      setAccessibilityMode(newMode);
-      document.documentElement.setAttribute('data-a11y', newMode);
-      localStorage.setItem('a11y', newMode);
-    };
 
     const handleReducedMotionChange = (e: MediaQueryListEvent) => {
       setPrefersReducedMotion(e.matches);
     };
 
-    // Modern browsers use addEventListener, older ones use addListener
-    highContrastMediaQuery.addEventListener('change', handleContrastChange);
     reducedMotionMediaQuery.addEventListener('change', handleReducedMotionChange);
 
     return () => {
-      highContrastMediaQuery.removeEventListener('change', handleContrastChange);
       reducedMotionMediaQuery.removeEventListener('change', handleReducedMotionChange);
     };
   }, []);
@@ -454,13 +428,6 @@ export const useTheme = (): UseThemeReturn => {
         }
       }
 
-      // Accessibility mode changes
-      if (e.key === 'a11y' && e.newValue) {
-        const newMode = e.newValue as AccessibilityMode;
-        const actualAppearance = getActualAppearance(appearance, resolvedAppearance);
-        setAccessibilityMode(newMode);
-        applyTheme(theme, actualAppearance, brandColor, newMode);
-      }
     };
 
     window.addEventListener('storage', handleStorageChange);
@@ -750,27 +717,11 @@ export const useTheme = (): UseThemeReturn => {
    */
   const setAccessibilityModeHandler = useCallback(
     (mode: AccessibilityMode) => {
-      if (mode === accessibilityMode) {
-        return;
+      if (mode !== 'default') {
+        console.warn('Accessibility mode has been removed. Using default mode only.');
       }
-
-      // Resolve actual appearance
-      const actualAppearance = getActualAppearance(appearance, resolvedAppearance);
-
-      setAccessibilityMode(mode);
-      applyTheme(theme, actualAppearance, brandColor, mode);
-      localStorage.setItem('a11y', mode);
-
-      window.dispatchEvent(
-        new CustomEvent('a11ychange', {
-          detail: {
-            mode,
-            timestamp: Date.now(),
-          },
-        })
-      );
     },
-    [accessibilityMode, theme, appearance, resolvedAppearance, brandColor, applyTheme]
+    []
   );
 
   /**
@@ -860,12 +811,10 @@ export const useTheme = (): UseThemeReturn => {
     setBrandColorState('default');
     setResolvedAppearance(systemResolved);
     setTheme(systemResolved);
-    setAccessibilityMode('default');
     applyTheme(systemResolved, systemResolved, 'default', 'default');
     localStorage.removeItem('appearance');
     localStorage.removeItem('brandColor');
     localStorage.removeItem('theme'); // Legacy
-    localStorage.removeItem('a11y');
   }, [applyTheme]);
 
   // Cleanup on unmount
