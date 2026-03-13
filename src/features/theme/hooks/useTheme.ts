@@ -100,6 +100,8 @@ export type {
  * ```
  */
 export const useTheme = (): UseThemeReturn => {
+  const THEME_TRANSITION_MS = 150;
+
   // NEW: Combinatorial state (Option A)
   const [appearance, setAppearanceState] = useState<Appearance>('auto');
   const [brandColor, setBrandColorState] = useState<BrandColorTheme>('default');
@@ -109,7 +111,11 @@ export const useTheme = (): UseThemeReturn => {
   const [theme, setTheme] = useState<Theme>('light');
   const [accessibilityMode, setAccessibilityMode] = useState<AccessibilityMode>('default');
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  type ViewTransitionDocument = Document & {
+    startViewTransition?: (updateCallback: () => void) => unknown;
+  };
 
   /**
    * Compute actual theme string from appearance + brand color combination
@@ -183,20 +189,17 @@ export const useTheme = (): UseThemeReturn => {
       mode: AccessibilityMode = 'default'
     ) => {
       try {
-        // PERFORMANCE: Batch DOM operations in requestAnimationFrame
-        requestAnimationFrame(() => {
-          // NEW: Set combinatorial attributes
-          document.documentElement.setAttribute('data-appearance', currentAppearance);
-          document.body.setAttribute('data-appearance', currentAppearance);
-          document.documentElement.setAttribute('data-brand', currentBrand);
-          document.body.setAttribute('data-brand', currentBrand);
+        // Apply attributes immediately to avoid extra frame delay during theme toggles.
+        document.documentElement.setAttribute('data-appearance', currentAppearance);
+        document.body.setAttribute('data-appearance', currentAppearance);
+        document.documentElement.setAttribute('data-brand', currentBrand);
+        document.body.setAttribute('data-brand', currentBrand);
 
-          // Legacy: Set combined theme attribute for backwards compatibility
-          document.documentElement.setAttribute('data-theme', nextTheme);
-          document.body.setAttribute('data-theme', nextTheme);
-          document.documentElement.setAttribute('data-a11y', mode);
-          document.body.setAttribute('data-a11y', mode);
-        });
+        // Legacy: Set combined theme attribute for backwards compatibility
+        document.documentElement.setAttribute('data-theme', nextTheme);
+        document.body.setAttribute('data-theme', nextTheme);
+        document.documentElement.setAttribute('data-a11y', mode);
+        document.body.setAttribute('data-a11y', mode);
 
         // Apply all CSS variables from design tokens (Phase 1 - Runtime Injection)
         // This handles primary palette + semantic tokens + foreground/background/border
@@ -208,6 +211,52 @@ export const useTheme = (): UseThemeReturn => {
       }
     },
     []
+  );
+
+  const triggerThemeTransition = useCallback(() => {
+    if (prefersReducedMotion) {
+      return;
+    }
+
+    document.documentElement.classList.add('theme-transition');
+
+    if (transitionTimeoutRef.current) {
+      clearTimeout(transitionTimeoutRef.current);
+    }
+
+    transitionTimeoutRef.current = setTimeout(() => {
+      document.documentElement.classList.remove('theme-transition');
+      transitionTimeoutRef.current = null;
+    }, THEME_TRANSITION_MS);
+  }, [prefersReducedMotion, THEME_TRANSITION_MS]);
+
+  const runThemeMutation = useCallback(
+    (mutation: () => void) => {
+      if (prefersReducedMotion) {
+        mutation();
+        return;
+      }
+
+      const doc = document as ViewTransitionDocument;
+
+      if (typeof doc.startViewTransition === 'function') {
+        doc.startViewTransition(() => {
+          mutation();
+        });
+        return;
+      }
+
+      // Skip broad fallback transitions on very large DOM trees to avoid jank.
+      const nodeCount = document.getElementsByTagName('*').length;
+      if (nodeCount > 1400) {
+        mutation();
+        return;
+      }
+
+      triggerThemeTransition();
+      mutation();
+    },
+    [prefersReducedMotion, triggerThemeTransition]
   );
 
   /**
@@ -459,24 +508,12 @@ export const useTheme = (): UseThemeReturn => {
       // Compute combined theme
       const computedTheme = computeTheme(newAppearance, brandColor, actualAppearance);
 
-      // Add transition animation if user allows motion
-      if (!prefersReducedMotion) {
-        document.documentElement.classList.add('theme-transition');
-
-        if (transitionTimeoutRef.current) {
-          clearTimeout(transitionTimeoutRef.current);
-        }
-
-        // PERFORMANCE: Reduced from 300ms to 150ms (matches CSS transition)
-        transitionTimeoutRef.current = setTimeout(() => {
-          document.documentElement.classList.remove('theme-transition');
-        }, 150);
-      }
-
-      // Update state
-      setAppearanceState(newAppearance);
-      setTheme(computedTheme);
-      applyTheme(computedTheme, actualAppearance, brandColor, accessibilityMode);
+      runThemeMutation(() => {
+        // Update state
+        setAppearanceState(newAppearance);
+        setTheme(computedTheme);
+        applyTheme(computedTheme, actualAppearance, brandColor, accessibilityMode);
+      });
 
       // Persist to localStorage
       try {
@@ -511,7 +548,7 @@ export const useTheme = (): UseThemeReturn => {
         }
       }
     },
-    [brandColor, resolvedAppearance, accessibilityMode, prefersReducedMotion, applyTheme, computeTheme]
+    [brandColor, resolvedAppearance, accessibilityMode, applyTheme, computeTheme, runThemeMutation]
   );
 
   /**
@@ -559,24 +596,12 @@ export const useTheme = (): UseThemeReturn => {
       // Compute combined theme
       const computedTheme = computeTheme(appearance, newBrandColor, actualAppearance);
 
-      // Add transition animation if user allows motion
-      if (!prefersReducedMotion) {
-        document.documentElement.classList.add('theme-transition');
-
-        if (transitionTimeoutRef.current) {
-          clearTimeout(transitionTimeoutRef.current);
-        }
-
-        // PERFORMANCE: Reduced from 300ms to 150ms (matches CSS transition)
-        transitionTimeoutRef.current = setTimeout(() => {
-          document.documentElement.classList.remove('theme-transition');
-        }, 150);
-      }
-
-      // Update state
-      setBrandColorState(newBrandColor);
-      setTheme(computedTheme);
-      applyTheme(computedTheme, actualAppearance, newBrandColor, accessibilityMode);
+      runThemeMutation(() => {
+        // Update state
+        setBrandColorState(newBrandColor);
+        setTheme(computedTheme);
+        applyTheme(computedTheme, actualAppearance, newBrandColor, accessibilityMode);
+      });
 
       // Persist to localStorage
       try {
@@ -611,7 +636,7 @@ export const useTheme = (): UseThemeReturn => {
         }
       }
     },
-    [appearance, resolvedAppearance, accessibilityMode, prefersReducedMotion, applyTheme, computeTheme]
+    [appearance, resolvedAppearance, accessibilityMode, applyTheme, computeTheme, runThemeMutation]
   );
 
   /**
@@ -660,26 +685,13 @@ export const useTheme = (): UseThemeReturn => {
       // Resolve actual appearance
       const actualAppearance = getActualAppearance(newAppearance, resolvedAppearance);
 
-      // Add transition animation if user allows motion
-      if (!prefersReducedMotion) {
-        document.documentElement.classList.add('theme-transition');
-
-        // Clear any pending timeout
-        if (transitionTimeoutRef.current) {
-          clearTimeout(transitionTimeoutRef.current);
-        }
-
-        // Remove transition class after animation completes
-        transitionTimeoutRef.current = setTimeout(() => {
-          document.documentElement.classList.remove('theme-transition');
-        }, 300);
-      }
-
-      // Update state
-      setAppearanceState(newAppearance);
-      setBrandColorState(newBrandColor);
-      setTheme(newTheme);
-      applyTheme(newTheme, actualAppearance, newBrandColor, accessibilityMode);
+      runThemeMutation(() => {
+        // Update state
+        setAppearanceState(newAppearance);
+        setBrandColorState(newBrandColor);
+        setTheme(newTheme);
+        applyTheme(newTheme, actualAppearance, newBrandColor, accessibilityMode);
+      });
 
       // Persist to localStorage
       try {
@@ -707,7 +719,7 @@ export const useTheme = (): UseThemeReturn => {
         console.error('Failed to dispatch theme change event:', error);
       }
     },
-    [accessibilityMode, resolvedAppearance, prefersReducedMotion, applyTheme]
+    [accessibilityMode, resolvedAppearance, applyTheme, runThemeMutation]
   );
 
   /**

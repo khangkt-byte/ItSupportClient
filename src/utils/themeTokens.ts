@@ -138,21 +138,12 @@ export function generateSemanticVars(
  */
 export function applyCSSVars(vars: Record<string, string>): void {
     const root = document.documentElement;
-
-    // PERFORMANCE OPTIMIZATION 1: Use DocumentFragment for batched updates
-    // Avoids multiple style recalculations (Chrome DevTools best practice)
-    // Reference: https://web.dev/avoid-large-complex-layouts-and-layout-thrashing/
-
-    // PERFORMANCE OPTIMIZATION 2: Batch all setProperty calls
-    // Modern browsers optimize when changes are grouped
     const entries = Object.entries(vars);
 
-    // Use requestAnimationFrame to batch DOM writes
-    // Reference: https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
-    requestAnimationFrame(() => {
-        entries.forEach(([name, value]) => {
-            root.style.setProperty(name, value);
-        });
+    // Apply synchronously to avoid an extra frame where attributes changed
+    // but CSS variables are still from the previous theme.
+    entries.forEach(([name, value]) => {
+        root.style.setProperty(name, value);
     });
 }
 
@@ -184,9 +175,17 @@ export function applyThemeTokens(
     appearance?: 'light' | 'dark',
     brand?: 'default' | BrandTheme
 ): void {
-    // PERFORMANCE OPTIMIZATION: Use performance.mark for monitoring
-    // Reference: https://developer.mozilla.org/en-US/docs/Web/API/Performance/mark
-    performance.mark('theme-change-start');
+    const canMeasurePerformance =
+        typeof performance !== 'undefined' &&
+        typeof performance.mark === 'function' &&
+        typeof performance.measure === 'function' &&
+        typeof performance.getEntriesByName === 'function';
+
+    if (canMeasurePerformance) {
+        // PERFORMANCE OPTIMIZATION: Use performance.mark for monitoring
+        // Reference: https://developer.mozilla.org/en-US/docs/Web/API/Performance/mark
+        performance.mark('theme-change-start');
+    }
 
     let allVars: Record<string, string> = {};
 
@@ -249,32 +248,31 @@ export function applyThemeTokens(
         }
     } else {
         // When brand is 'default', clear brand palette variables
-        // PERFORMANCE: Use requestAnimationFrame for batched DOM operations
-        requestAnimationFrame(() => {
-            const root = document.documentElement;
-            const tones = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950'];
+        const root = document.documentElement;
+        const tones = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950'];
 
-            // Clear palettes in one batch
-            tones.forEach(tone => {
-                root.style.removeProperty(`--color-primary-${tone}`);
-                root.style.removeProperty(`--color-secondary-${tone}`);
-                root.style.removeProperty(`--color-neutral-${tone}`);
-            });
+        // Clear palettes in one batch
+        tones.forEach(tone => {
+            root.style.removeProperty(`--color-primary-${tone}`);
+            root.style.removeProperty(`--color-secondary-${tone}`);
+            root.style.removeProperty(`--color-neutral-${tone}`);
         });
     }
 
     // Apply all variables at once (already batched in applyCSSVars)
     applyCSSVars(allVars);
 
-    // PERFORMANCE MONITORING: Measure theme change duration
-    performance.mark('theme-change-end');
-    performance.measure('theme-change', 'theme-change-start', 'theme-change-end');
+    if (canMeasurePerformance) {
+        // PERFORMANCE MONITORING: Measure theme change duration
+        performance.mark('theme-change-end');
+        performance.measure('theme-change', 'theme-change-start', 'theme-change-end');
 
-    // Log performance in development mode
-    if (process.env.NODE_ENV === 'development') {
-        const measure = performance.getEntriesByName('theme-change')[0];
-        if (measure && measure.duration > 16) { // 60fps threshold
-            console.warn(`⚠️ Theme change took ${measure.duration.toFixed(2)}ms (target: <16ms for 60fps)`);
+        // Log performance in development mode
+        if (process.env.NODE_ENV === 'development') {
+            const measure = performance.getEntriesByName('theme-change')[0];
+            if (measure && measure.duration > 16) { // 60fps threshold
+                console.warn(`Theme change took ${measure.duration.toFixed(2)}ms (target: <16ms for 60fps)`);
+            }
         }
     }
 }

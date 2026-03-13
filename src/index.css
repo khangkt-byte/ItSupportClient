@@ -27,18 +27,21 @@
  * @reference https://web.dev/articles/animations-guide
  * 
  * PERFORMANCE OPTIMIZATION:
- * - Use will-change hint for GPU acceleration (Chrome/Safari best practice)
  * - Reduced transition time: 150ms (was 300ms)
+ * - Scope transition to theme-relevant elements (avoid full DOM repaint)
  * - Only transition color properties (cheapest to animate)
  */
-html.theme-transition,
-html.theme-transition *,
-html.theme-transition *::before,
-html.theme-transition *::after {
+html.theme-transition body,
+html.theme-transition #root,
+html.theme-transition .app-layout,
+html.theme-transition .main-content,
+html.theme-transition button,
+html.theme-transition input,
+html.theme-transition textarea,
+html.theme-transition select,
+html.theme-transition svg,
+html.theme-transition path {
   transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease !important;
-  
-  /* GPU acceleration hint - Chrome DevTools best practice */
-  will-change: background-color, color, border-color;
 }
 
 /**
@@ -46,10 +49,16 @@ html.theme-transition *::after {
  * @reference https://www.w3.org/WAI/WCAG21/Understanding/animation-from-interactions.html
  */
 @media (prefers-reduced-motion: reduce) {
-  html.theme-transition,
-  html.theme-transition *,
-  html.theme-transition *::before,
-  html.theme-transition *::after {
+  html.theme-transition body,
+  html.theme-transition #root,
+  html.theme-transition .app-layout,
+  html.theme-transition .main-content,
+  html.theme-transition button,
+  html.theme-transition input,
+  html.theme-transition textarea,
+  html.theme-transition select,
+  html.theme-transition svg,
+  html.theme-transition path {
     transition-duration: 0ms !important;
   }
 }
