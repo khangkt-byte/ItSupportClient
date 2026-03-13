@@ -1,13 +1,23 @@
-import { useState, useEffect } from 'react';
-import { LoginPage } from '@/features/auth/components/LoginPage';
-import { AdminDashboard } from '@/features/dashboard/components/AdminDashboard';
-import { EmployeeDashboard } from '@/features/employees/components/EmployeeDashboard';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { ThemeValidationTest } from '@/features/theme/components/ThemeValidationTest';
 import { LoadingState } from '@/components/common/LoadingState';
 import { authApi } from '@/services/api/auth';
 import { SecurityValidator } from '@/utils/securityChecks';
 import type { User } from '@/types/data';
+
+// Route-level lazy chunks — loaded only when first navigated to
+const LoginPage = lazy(() =>
+  import('@/features/auth/components/LoginPage').then(m => ({ default: m.LoginPage }))
+);
+const AdminDashboard = lazy(() =>
+  import('@/features/dashboard/components/AdminDashboard').then(m => ({ default: m.AdminDashboard }))
+);
+const EmployeeDashboard = lazy(() =>
+  import('@/features/employees/components/EmployeeDashboard').then(m => ({ default: m.EmployeeDashboard }))
+);
+const ThemeValidationTest = lazy(() =>
+  import('@/features/theme/components/ThemeValidationTest')
+);
 
 // IT Support Work Log Management System
 // Version: 3.0.0 - Permission System & Enterprise Security
@@ -161,7 +171,11 @@ export default function App() {
   }
 
   if (!isAuthenticated || !user) {
-    return <LoginPage onLogin={handleLogin} />;
+    return (
+      <Suspense fallback={<LoadingState className="min-h-screen bg-muted" />}>
+        <LoginPage onLogin={handleLogin} />
+      </Suspense>
+    );
   }
 
   return (
@@ -172,24 +186,25 @@ export default function App() {
         userRole={user.role}
       />
       <div className="main-content">
-        {/* Phase 3: Testing Page */}
-        {currentView === 'test-themes' ? (
-          <ThemeValidationTest />
-        ) : user.role === 'admin' ? (
-          <AdminDashboard 
-            user={user} 
-            onLogout={handleLogout} 
-            currentView={currentView}
-            onNavigate={handleNavigate}
-          />
-        ) : (
-          <EmployeeDashboard 
-            user={user} 
-            onLogout={handleLogout} 
-            currentView={currentView}
-            onNavigate={handleNavigate}
-          />
-        )}
+        <Suspense fallback={<LoadingState />}>
+          {currentView === 'test-themes' ? (
+            <ThemeValidationTest />
+          ) : user.role === 'admin' ? (
+            <AdminDashboard 
+              user={user} 
+              onLogout={handleLogout} 
+              currentView={currentView}
+              onNavigate={handleNavigate}
+            />
+          ) : (
+            <EmployeeDashboard 
+              user={user} 
+              onLogout={handleLogout} 
+              currentView={currentView}
+              onNavigate={handleNavigate}
+            />
+          )}
+        </Suspense>
       </div>
     </div>
   );

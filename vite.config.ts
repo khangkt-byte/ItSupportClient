@@ -56,6 +56,31 @@ export default defineConfig({
   build: {
     target: 'esnext',
     outDir: 'build',
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+          // Heavy charting library + its D3 transitive deps
+          if (id.includes('/recharts/') || id.includes('/d3-') || id.includes('/d3/')) {
+            return 'vendor-recharts';
+          }
+          // All Radix UI primitives
+          if (id.includes('/@radix-ui/')) {
+            return 'vendor-radix';
+          }
+          // React core (react, react-dom, scheduler)
+          if (/node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) {
+            return 'vendor-react';
+          }
+          // Icon library
+          if (id.includes('/lucide-react/')) {
+            return 'vendor-lucide';
+          }
+          // Everything else (cmdk, vaul, sonner, embla, etc.)
+          return 'vendor-misc';
+        },
+      },
+    },
   },
   server: {
     port: 3000,
