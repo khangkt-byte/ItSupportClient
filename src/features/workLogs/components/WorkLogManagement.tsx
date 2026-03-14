@@ -169,7 +169,7 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
         employees={employees}
         departments={departments}
         areas={areas}
-        submitting={submitting}
+        isSubmitting={submitting}
         error={error}
         onSubmit={handleSubmit}
         onClose={() => {

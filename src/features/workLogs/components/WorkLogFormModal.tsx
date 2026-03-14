@@ -30,7 +30,7 @@ interface WorkLogFormModalProps {
   employees: Employee[];
   departments: Department[];
   areas: Area[];
-  submitting: boolean;
+  isSubmitting: boolean;
   error: string | null;
   onSubmit: (formData: WorkLogFormData) => Promise<void>;
   onClose: () => void;
@@ -76,7 +76,7 @@ export function WorkLogFormModal({
   employees,
   departments,
   areas,
-  submitting,
+  isSubmitting,
   error,
   onSubmit,
   onClose,
@@ -290,7 +290,7 @@ export function WorkLogFormModal({
                 Record issue details and assign operators/requesters
               </p>
             </div>
-            <button onClick={onClose} disabled={submitting} className="hover:text-muted-foreground transition-colors text-foreground disabled:opacity-50 disabled:cursor-not-allowed">
+            <button onClick={onClose} disabled={isSubmitting} className="hover:text-muted-foreground transition-colors text-foreground disabled:opacity-50 disabled:cursor-not-allowed">
               <X className="w-6 h-6" />
             </button>
           </div>
@@ -304,7 +304,7 @@ export function WorkLogFormModal({
               </div>
               <button
                 onClick={onClearError}
-                disabled={submitting}
+                disabled={isSubmitting}
                 className="text-error-foreground hover:text-error-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <X className="w-4 h-4" />
@@ -448,10 +448,10 @@ export function WorkLogFormModal({
             <div className="flex gap-3">
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={isSubmitting}
                 className="btn-primary flex-1 px-4 py-2 flex items-center justify-center gap-2"
               >
-                {submitting ? (
+                {isSubmitting ? (
                   <>
                     <LoadingSpinner size="sm" tone="inverse" />
                     Saving...
@@ -466,7 +466,7 @@ export function WorkLogFormModal({
               <button
                 type="button"
                 onClick={onClose}
-                disabled={submitting}
+                disabled={isSubmitting}
                 className="btn-secondary flex-1 px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
