@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { areasApi } from '@/services/api/areas';
 import type { AreaDto, AreasQueryParams, PaginatedResult } from '@/types/data';
-import { getApiErrorMessage } from '@/utils/apiValidation';
+import { getApiErrorMessage } from '@/utils/apiErrors';
 
 export function useAreaQuery() {
     const [queryParams, setQueryParams] = useState<AreasQueryParams>({

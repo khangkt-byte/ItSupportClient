@@ -8,7 +8,7 @@ import { PaginationBar } from '@/components/common/PaginationBar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
-import { parseApiError, type ValidationErrors } from '@/utils/apiValidation';
+import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
 import { AreaTable } from '@/features/areas/components/AreaTable';
 import { AreaFormModal, type AreaFormData } from '@/features/areas/components/AreaFormModal';
 
