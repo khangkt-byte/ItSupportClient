@@ -8,10 +8,10 @@ export interface DepartmentFormData {
   description: string;
 }
 
-interface Props {
+interface DepartmentFormModalProps {
   isOpen: boolean;
   editing: Department | null;
-  isLoading: boolean;
+  isSubmitting: boolean;
   error: string | null;
   validationErrors: ValidationErrors | null;
   formData: DepartmentFormData;
@@ -24,7 +24,7 @@ interface Props {
 export function DepartmentFormModal({
   isOpen,
   editing,
-  isLoading,
+  isSubmitting,
   error,
   validationErrors,
   formData,
@@ -32,7 +32,7 @@ export function DepartmentFormModal({
   onSubmit,
   onClose,
   onClearError,
-}: Props) {
+}: DepartmentFormModalProps) {
   if (!isOpen) return null;
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -65,7 +65,7 @@ export function DepartmentFormModal({
           <h3 className="text-lg font-semibold text-foreground">{editing ? 'Edit Department' : 'Add Department'}</h3>
           <button
             onClick={onClose}
-            disabled={isLoading}
+            disabled={isSubmitting}
             className="text-placeholder hover:text-muted-foreground disabled:opacity-50 cursor-pointer transition-colors"
           >
             <X className="w-6 h-6" />
@@ -92,7 +92,7 @@ export function DepartmentFormModal({
             </div>
             <button
               onClick={onClearError}
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="text-error-foreground hover:text-error-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <X className="w-4 h-4" />
@@ -112,7 +112,7 @@ export function DepartmentFormModal({
               onChange={(e) => onChange({ ...formData, name: e.target.value })}
               placeholder="e.g., IT Department"
               className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
-              disabled={isLoading}
+              disabled={isSubmitting}
             />
             {nameErrors.length > 0 && (
               <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
@@ -131,17 +131,17 @@ export function DepartmentFormModal({
               placeholder="Optional description"
               rows={3}
               className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder resize-none transition-colors"
-              disabled={isLoading}
+              disabled={isSubmitting}
             />
           </div>
 
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="flex-1 px-4 py-2 bg-primary-600 text-primary-foreground rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors flex items-center justify-center gap-2"
             >
-              {isLoading ? (
+              {isSubmitting ? (
                 <>
                   <LoadingSpinner size="sm" tone="inverse" />
                   Saving...
@@ -150,7 +150,7 @@ export function DepartmentFormModal({
                 <>{editing ? 'Update' : 'Create'}</>
               )}
             </button>
-            <button type="button" onClick={onClose} disabled={isLoading} className="btn-secondary flex-1 px-4 py-2">
+            <button type="button" onClick={onClose} disabled={isSubmitting} className="btn-secondary flex-1 px-4 py-2">
               Cancel
             </button>
           </div>

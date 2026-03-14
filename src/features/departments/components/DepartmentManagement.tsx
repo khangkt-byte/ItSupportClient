@@ -21,30 +21,34 @@ export function DepartmentManagement() {
   const [confirmDelete, setConfirmDelete] = useState<Department | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isMutating, setIsMutating] = useState(false);
+  const [mutationError, setMutationError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
   const {
     queryParams,
     setQueryParams,
     loading: queryLoading,
-    error,
-    setError,
+    error: queryError,
+    setError: setQueryError,
     paginatedResult,
     refetch,
   } = useDepartmentQuery();
   const isLoading = queryLoading || isMutating;
+  const tableError = showForm ? null : mutationError || queryError;
   const { hasPermission } = usePermission();
 
   const openForm = (item?: Department) => {
     setEditing(item || null);
     setFormData(item ? { name: item.name, description: item.description } : { name: '', description: '' });
-    setError(null);
+    setQueryError(null);
+    setMutationError(null);
     setValidationErrors(null);
     setShowForm(true);
   };
 
   const handleSubmit = async (nextFormData: DepartmentFormData) => {
     setIsMutating(true);
-    setError(null);
+    setQueryError(null);
+    setMutationError(null);
     setValidationErrors(null);
 
     try {
@@ -68,7 +72,7 @@ export function DepartmentManagement() {
     } catch (submitError: unknown) {
       console.error('Failed to save department:', submitError);
       const parsedError = parseApiError(submitError);
-      setError(parsedError.message || 'Failed to save department');
+      setMutationError(parsedError.message || 'Failed to save department');
       setValidationErrors(parsedError.fieldErrors);
     } finally {
       setIsMutating(false);
@@ -80,14 +84,15 @@ export function DepartmentManagement() {
 
     setDeleteLoading(true);
     try {
-      setError(null);
+      setQueryError(null);
+      setMutationError(null);
       await departmentsApi.deleteSingle(confirmDelete.id);
       await refetch();
       setConfirmDelete(null);
     } catch (deleteError: unknown) {
       console.error('Failed to delete department:', deleteError);
       const parsedError = parseApiError(deleteError);
-      setError(parsedError.message || 'Failed to delete department');
+      setMutationError(parsedError.message || 'Failed to delete department');
       setConfirmDelete(null);
     } finally {
       setDeleteLoading(false);
@@ -138,7 +143,7 @@ export function DepartmentManagement() {
 
       <DepartmentTable
         isLoading={isLoading}
-        error={showForm ? null : error}
+        error={tableError}
         items={paginatedResult?.items || []}
         canEdit={hasPermission(Permissions.Department.Edit)}
         canDelete={hasPermission(Permissions.Department.Delete)}
@@ -179,8 +184,8 @@ export function DepartmentManagement() {
       <DepartmentFormModal
         isOpen={showForm}
         editing={editing}
-        isLoading={isLoading}
-        error={error}
+        isSubmitting={isMutating}
+        error={mutationError}
         validationErrors={validationErrors}
         formData={formData}
         onChange={setFormData}
@@ -190,7 +195,7 @@ export function DepartmentManagement() {
           setShowForm(false);
         }}
         onClearError={() => {
-          setError(null);
+          setMutationError(null);
           setValidationErrors(null);
         }}
       />
