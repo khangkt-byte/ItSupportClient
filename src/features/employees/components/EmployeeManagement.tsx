@@ -51,6 +51,7 @@ export function EmployeeManagement({ departments, areas }: Props) {
 
   // UI states
   const [isMutating, setIsMutating] = useState(false);
+  const [mutationError, setMutationError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Employee | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
@@ -62,12 +63,13 @@ export function EmployeeManagement({ departments, areas }: Props) {
     queryParams,
     setQueryParams,
     loading: queryLoading,
-    error,
-    setError,
+    error: queryError,
+    setError: setQueryError,
     paginatedResult,
     refetch,
   } = useEmployeeQuery();
   const isLoading = queryLoading || isMutating;
+  const tableError = showForm ? null : mutationError || queryError;
   const { hasPermission } = usePermission();
 
   // Handle department filter change
@@ -93,7 +95,8 @@ export function EmployeeManagement({ departments, areas }: Props) {
     } : { 
       empCode: '', fullName: '', phoneNumber: '', email: '', position: '', department: '', area: ''
     });
-    setError(null);
+    setQueryError(null);
+    setMutationError(null);
     setValidationErrors(null);
     setShowForm(true);
   };
@@ -101,7 +104,8 @@ export function EmployeeManagement({ departments, areas }: Props) {
   const handleSubmit = async (nextFormData: EmployeeFormData) => {
     try {
       setIsMutating(true);
-      setError(null);
+      setQueryError(null);
+      setMutationError(null);
       setValidationErrors(null);
 
       // Find department and area IDs from names
@@ -140,7 +144,7 @@ export function EmployeeManagement({ departments, areas }: Props) {
     } catch (submitError: unknown) {
       console.error('Failed to save employee:', submitError);
       const parsedError = parseApiError(submitError);
-      setError(parsedError.message || `Failed to ${editing ? 'update' : 'create'} employee`);
+      setMutationError(parsedError.message || `Failed to ${editing ? 'update' : 'create'} employee`);
       setValidationErrors(parsedError.fieldErrors);
     } finally {
       setIsMutating(false);
@@ -151,7 +155,8 @@ export function EmployeeManagement({ departments, areas }: Props) {
     if (!confirmDelete) return;
     try {
       setDeleteLoading(true);
-      setError(null);
+      setQueryError(null);
+      setMutationError(null);
       await employeesApi.deleteSingle(confirmDelete.empId);
       setConfirmDelete(null);
       // Refresh data after deletion
@@ -159,7 +164,7 @@ export function EmployeeManagement({ departments, areas }: Props) {
     } catch (deleteError: unknown) {
       console.error('Failed to delete employee:', deleteError);
       const parsedError = parseApiError(deleteError);
-      setError(parsedError.message || 'Failed to delete employee');
+      setMutationError(parsedError.message || 'Failed to delete employee');
     } finally {
       setDeleteLoading(false);
     }
@@ -218,7 +223,7 @@ export function EmployeeManagement({ departments, areas }: Props) {
       {/* Employees Table */}
       <EmployeeTable
         isLoading={isLoading}
-        error={showForm ? null : error}
+        error={tableError}
         items={paginatedResult?.items || []}
         canEdit={hasPermission(Permissions.Employee.Edit)}
         canDelete={hasPermission(Permissions.Employee.Delete)}
@@ -227,7 +232,7 @@ export function EmployeeManagement({ departments, areas }: Props) {
       />
 
       {/* Pagination Controls */}
-      {paginatedResult && !isLoading && !error && (
+      {paginatedResult && !isLoading && !tableError && (
         <PaginationBar
           page={queryParams.page || 1}
           totalPages={paginatedResult.totalPages}
@@ -246,9 +251,9 @@ export function EmployeeManagement({ departments, areas }: Props) {
       {/* Form Modal */}
       <EmployeeFormModal
         isOpen={showForm}
-        isLoading={isLoading}
+        isSubmitting={isMutating}
         editing={editing}
-        error={error}
+        error={mutationError}
         validationErrors={validationErrors}
         formData={formData}
         onChange={setFormData}
@@ -258,7 +263,7 @@ export function EmployeeManagement({ departments, areas }: Props) {
           setShowForm(false);
         }}
         onClearError={() => {
-          setError(null);
+          setMutationError(null);
           setValidationErrors(null);
         }}
         departments={departments}

@@ -15,9 +15,9 @@ export interface EmployeeFormData {
   area: string;
 }
 
-interface Props {
+interface EmployeeFormModalProps {
   isOpen: boolean;
-  isLoading: boolean;
+  isSubmitting: boolean;
   editing: Employee | null;
   error: string | null;
   validationErrors: ValidationErrors | null;
@@ -32,7 +32,7 @@ interface Props {
 
 export function EmployeeFormModal({
   isOpen,
-  isLoading,
+  isSubmitting,
   editing,
   error,
   validationErrors,
@@ -43,7 +43,7 @@ export function EmployeeFormModal({
   onClearError,
   departments,
   areas,
-}: Props) {
+}: EmployeeFormModalProps) {
   if (!isOpen) return null;
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -99,7 +99,7 @@ export function EmployeeFormModal({
       <div className="bg-card rounded-lg max-w-2xl w-full my-4 max-h-[90vh] overflow-y-auto">
         <div className="px-6 py-4 border-b border-border flex justify-between items-center sticky top-0 bg-card z-10">
           <h3 className="text-lg font-semibold text-foreground">{editing ? 'Edit' : 'Add'} Employee</h3>
-          <button onClick={onClose} disabled={isLoading} className="hover:text-muted-foreground transition-colors text-foreground disabled:opacity-50 disabled:cursor-not-allowed">
+          <button onClick={onClose} disabled={isSubmitting} className="hover:text-muted-foreground transition-colors text-foreground disabled:opacity-50 disabled:cursor-not-allowed">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -123,7 +123,7 @@ export function EmployeeFormModal({
             </div>
             <button
               onClick={onClearError}
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="text-error-foreground hover:text-error-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <X className="w-4 h-4" />
@@ -140,7 +140,7 @@ export function EmployeeFormModal({
                 onChange={(e) => onChange({ ...formData, empCode: e.target.value })}
                 placeholder="EMP001"
                 className="input-base"
-                disabled={isLoading}
+                disabled={isSubmitting}
               />
               {empCodeErrors.length > 0 && (
                 <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
@@ -159,7 +159,7 @@ export function EmployeeFormModal({
                 onChange={(e) => onChange({ ...formData, fullName: e.target.value })}
                 placeholder="John Doe"
                 className="input-base"
-                disabled={isLoading}
+                disabled={isSubmitting}
               />
               {fullNameErrors.length > 0 && (
                 <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
@@ -177,7 +177,7 @@ export function EmployeeFormModal({
                 onChange={(e) => onChange({ ...formData, phoneNumber: e.target.value })}
                 placeholder="081-234-5678"
                 className="input-base"
-                disabled={isLoading}
+                disabled={isSubmitting}
               />
               {phoneErrors.length > 0 && (
                 <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
@@ -195,7 +195,7 @@ export function EmployeeFormModal({
                 onChange={(e) => onChange({ ...formData, email: e.target.value })}
                 placeholder="john@company.com"
                 className="input-base"
-                disabled={isLoading}
+                disabled={isSubmitting}
               />
               {emailErrors.length > 0 && (
                 <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
@@ -235,17 +235,17 @@ export function EmployeeFormModal({
                 onChange={(e) => onChange({ ...formData, position: e.target.value })}
                 placeholder="IT Support"
                 className="input-base"
-                disabled={isLoading}
+                disabled={isSubmitting}
               />
             </div>
           </div>
           <div className="flex gap-3 pt-4">
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="flex-1 px-4 py-2 bg-primary-600 text-primary-foreground rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {isLoading ? (
+              {isSubmitting ? (
                 <>
                   <LoadingSpinner size="sm" tone="inverse" />
                   Saving...
@@ -254,7 +254,7 @@ export function EmployeeFormModal({
                 <>{editing ? 'Update' : 'Create'} Employee</>
               )}
             </button>
-            <button type="button" onClick={onClose} disabled={isLoading} className="btn-secondary flex-1 px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            <button type="button" onClick={onClose} disabled={isSubmitting} className="btn-secondary flex-1 px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed">
               Cancel
             </button>
           </div>
