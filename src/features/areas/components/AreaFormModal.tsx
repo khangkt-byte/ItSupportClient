@@ -16,7 +16,7 @@ interface Props {
   error: string | null;
   validationErrors: ValidationErrors | null;
   onChange: (data: AreaFormData) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (formData: AreaFormData) => Promise<void>;
   onClose: () => void;
   onClearError: () => void;
 }
@@ -34,6 +34,11 @@ export function AreaFormModal({
   onClearError,
 }: Props) {
   if (!isOpen) return null;
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await onSubmit(formData);
+  };
 
   const getFieldErrors = (fieldName: string): string[] => {
     if (!validationErrors) return [];
@@ -89,7 +94,7 @@ export function AreaFormModal({
             </button>
           </div>
         )}
-        <form onSubmit={onSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
           <input
             type="text"
             required

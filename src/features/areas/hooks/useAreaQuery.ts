@@ -40,7 +40,6 @@ export function useAreaQuery() {
         loading,
         error,
         setError,
-        fetchAreas,
         refetch: fetchAreas,
     };
 }

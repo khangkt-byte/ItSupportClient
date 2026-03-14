@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Plus, MapPin } from 'lucide-react';
 import type { Area, AreasQueryParams } from '@/types/data';
 import { areasApi } from '@/services/api/areas';
@@ -9,16 +9,10 @@ import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 import { parseApiError, type ValidationErrors } from '@/utils/apiValidation';
-import { AreaTable } from './AreaTable';
-import { AreaFormModal, type AreaFormData } from './AreaFormModal';
+import { AreaTable } from '@/features/areas/components/AreaTable';
+import { AreaFormModal, type AreaFormData } from '@/features/areas/components/AreaFormModal';
 
-interface Props {
-  data: Area[];
-  setData: (items: Area[]) => void;
-}
-
-export function AreaManagement({ data, setData }: Props) {
-  void data;
+export function AreaManagement() {
   const {
     queryParams,
     setQueryParams,
@@ -26,7 +20,7 @@ export function AreaManagement({ data, setData }: Props) {
     loading: queryLoading,
     error,
     setError,
-    fetchAreas,
+    refetch,
   } = useAreaQuery();
   const [areaFilter, setAreaFilter] = useState<string>('all');
 
@@ -42,11 +36,6 @@ export function AreaManagement({ data, setData }: Props) {
 
   const { hasPermission } = usePermission();
 
-  const syncDataManagerAreas = useCallback(async () => {
-    const allAreas = await areasApi.getAll({ page: 1, pageSize: 1000, sortBy: 'name', isDescending: false });
-    setData(allAreas.items.map((area) => ({ ...area, id: String(area.areaId) } as Area)));
-  }, [setData]);
-
   const openForm = (item?: Area) => {
     setEditing(item || null);
     setFormData(item ? { name: item.name, description: item.description || '' } : { name: '', description: '' });
@@ -55,8 +44,7 @@ export function AreaManagement({ data, setData }: Props) {
     setShowForm(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (nextFormData: AreaFormData) => {
     setIsMutating(true);
     setError(null);
     setValidationErrors(null);
@@ -64,17 +52,17 @@ export function AreaManagement({ data, setData }: Props) {
     try {
       if (editing) {
         await areasApi.update(editing.areaId, {
-          name: formData.name,
-          description: formData.description || null,
+          name: nextFormData.name,
+          description: nextFormData.description || null,
         });
       } else {
         await areasApi.create({
-          name: formData.name,
-          description: formData.description || null,
+          name: nextFormData.name,
+          description: nextFormData.description || null,
         });
       }
 
-      await Promise.all([fetchAreas(), syncDataManagerAreas()]);
+      await refetch();
       setShowForm(false);
       setFormData({ name: '', description: '' });
     } catch (submitError: unknown) {
@@ -94,7 +82,7 @@ export function AreaManagement({ data, setData }: Props) {
       setDeleteLoading(true);
       setError(null);
       await areasApi.deleteSingle(confirmDelete.areaId);
-      await Promise.all([fetchAreas(), syncDataManagerAreas()]);
+      await refetch();
       setConfirmDelete(null);
     } catch (deleteError: unknown) {
       console.error('Failed to delete area:', deleteError);
