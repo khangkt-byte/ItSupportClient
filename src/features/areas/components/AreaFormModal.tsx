@@ -8,11 +8,11 @@ export interface AreaFormData {
   description: string;
 }
 
-interface Props {
+interface AreaFormModalProps {
   isOpen: boolean;
   editing: Area | null;
   formData: AreaFormData;
-  isLoading: boolean;
+  isSubmitting: boolean;
   error: string | null;
   validationErrors: ValidationErrors | null;
   onChange: (data: AreaFormData) => void;
@@ -25,14 +25,14 @@ export function AreaFormModal({
   isOpen,
   editing,
   formData,
-  isLoading,
+  isSubmitting,
   error,
   validationErrors,
   onChange,
   onSubmit,
   onClose,
   onClearError,
-}: Props) {
+}: AreaFormModalProps) {
   if (!isOpen) return null;
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -63,7 +63,7 @@ export function AreaFormModal({
       <div className="bg-card border border-border rounded-lg p-6 shadow-sm w-full max-w-xl">
         <div className="px-6 py-4 border-b border-border flex justify-between">
           <h3 className="text-lg font-semibold text-foreground">{editing ? 'Edit' : 'Add'}</h3>
-          <button onClick={onClose} disabled={isLoading} className="hover:text-muted-foreground text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          <button onClick={onClose} disabled={isSubmitting} className="hover:text-muted-foreground text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -87,7 +87,7 @@ export function AreaFormModal({
             </div>
             <button
               onClick={onClearError}
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="text-error-foreground hover:text-error-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <X className="w-4 h-4" />
@@ -118,8 +118,8 @@ export function AreaFormModal({
             className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
           />
           <div className="flex gap-3">
-            <button type="submit" className="btn-primary flex-1 px-4 py-2 flex items-center justify-center gap-2" disabled={isLoading}>
-              {isLoading ? (
+            <button type="submit" className="btn-primary flex-1 px-4 py-2 flex items-center justify-center gap-2" disabled={isSubmitting}>
+              {isSubmitting ? (
                 <>
                   <LoadingSpinner size="sm" tone="inverse" />
                   Saving...
@@ -128,7 +128,7 @@ export function AreaFormModal({
                 <>{editing ? 'Update' : 'Create'}</>
               )}
             </button>
-            <button type="button" onClick={onClose} className="btn-secondary flex-1 px-4 py-2" disabled={isLoading}>
+            <button type="button" onClick={onClose} className="btn-secondary flex-1 px-4 py-2" disabled={isSubmitting}>
               Cancel
             </button>
           </div>

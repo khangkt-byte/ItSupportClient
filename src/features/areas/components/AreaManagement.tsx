@@ -18,8 +18,8 @@ export function AreaManagement() {
     setQueryParams,
     paginatedResult,
     loading: queryLoading,
-    error,
-    setError,
+    error: queryError,
+    setError: setQueryError,
     refetch,
   } = useAreaQuery();
   const [areaFilter, setAreaFilter] = useState<string>('all');
@@ -30,23 +30,27 @@ export function AreaManagement() {
   const [confirmDelete, setConfirmDelete] = useState<Area | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isMutating, setIsMutating] = useState(false);
+  const [mutationError, setMutationError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
 
   const isLoading = queryLoading || isMutating;
+  const tableError = showForm ? null : mutationError || queryError;
 
   const { hasPermission } = usePermission();
 
   const openForm = (item?: Area) => {
     setEditing(item || null);
     setFormData(item ? { name: item.name, description: item.description || '' } : { name: '', description: '' });
-    setError(null);
+    setQueryError(null);
+    setMutationError(null);
     setValidationErrors(null);
     setShowForm(true);
   };
 
   const handleSubmit = async (nextFormData: AreaFormData) => {
     setIsMutating(true);
-    setError(null);
+    setQueryError(null);
+    setMutationError(null);
     setValidationErrors(null);
 
     try {
@@ -68,7 +72,7 @@ export function AreaManagement() {
     } catch (submitError: unknown) {
       console.error('Failed to save area:', submitError);
       const parsedError = parseApiError(submitError);
-      setError(parsedError.message || 'Failed to save area');
+      setMutationError(parsedError.message || 'Failed to save area');
       setValidationErrors(parsedError.fieldErrors);
     } finally {
       setIsMutating(false);
@@ -80,14 +84,15 @@ export function AreaManagement() {
 
     try {
       setDeleteLoading(true);
-      setError(null);
+      setQueryError(null);
+      setMutationError(null);
       await areasApi.deleteSingle(confirmDelete.areaId);
       await refetch();
       setConfirmDelete(null);
     } catch (deleteError: unknown) {
       console.error('Failed to delete area:', deleteError);
       const parsedError = parseApiError(deleteError);
-      setError(parsedError.message || 'Failed to delete area');
+      setMutationError(parsedError.message || 'Failed to delete area');
       setConfirmDelete(null);
     } finally {
       setDeleteLoading(false);
@@ -136,7 +141,7 @@ export function AreaManagement() {
 
       <AreaTable
         isLoading={isLoading}
-        error={showForm ? null : error}
+        error={tableError}
         items={paginatedResult?.items || []}
         canEdit={hasPermission(Permissions.Area.Edit)}
         canDelete={hasPermission(Permissions.Area.Delete)}
@@ -164,8 +169,8 @@ export function AreaManagement() {
         isOpen={showForm}
         editing={editing}
         formData={formData}
-        isLoading={isLoading}
-        error={error}
+        isSubmitting={isMutating}
+        error={mutationError}
         validationErrors={validationErrors}
         onChange={setFormData}
         onSubmit={handleSubmit}
@@ -174,7 +179,7 @@ export function AreaManagement() {
           setShowForm(false);
         }}
         onClearError={() => {
-          setError(null);
+          setMutationError(null);
           setValidationErrors(null);
         }}
       />
