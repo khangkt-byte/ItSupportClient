@@ -15,7 +15,7 @@ interface AreaFormModalProps {
   isSubmitting: boolean;
   error: string | null;
   validationErrors: ValidationErrors | null;
-  onChange: (data: AreaFormData) => void;
+  onChange: (formData: AreaFormData) => void;
   onSubmit: (formData: AreaFormData) => Promise<void>;
   onClose: () => void;
   onClearError: () => void;

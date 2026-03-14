@@ -22,7 +22,7 @@ interface EmployeeFormModalProps {
   error: string | null;
   validationErrors: ValidationErrors | null;
   formData: EmployeeFormData;
-  onChange: (value: EmployeeFormData) => void;
+  onChange: (formData: EmployeeFormData) => void;
   onSubmit: (formData: EmployeeFormData) => Promise<void>;
   onClose: () => void;
   onClearError: () => void;

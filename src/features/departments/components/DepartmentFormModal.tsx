@@ -15,7 +15,7 @@ interface DepartmentFormModalProps {
   error: string | null;
   validationErrors: ValidationErrors | null;
   formData: DepartmentFormData;
-  onChange: (value: DepartmentFormData) => void;
+  onChange: (formData: DepartmentFormData) => void;
   onSubmit: (formData: DepartmentFormData) => Promise<void>;
   onClose: () => void;
   onClearError: () => void;

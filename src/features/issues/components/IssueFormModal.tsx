@@ -17,7 +17,7 @@ interface IssueFormModalProps {
   isSubmitting: boolean;
   error: string | null;
   validationErrors: ValidationErrors | null;
-  onChange: (data: IssueFormData) => void;
+  onChange: (formData: IssueFormData) => void;
   onSubmit: (formData: IssueFormData) => Promise<void>;
   onClose: () => void;
   onClearError: () => void;
