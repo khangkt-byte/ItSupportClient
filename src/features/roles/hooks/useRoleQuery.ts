@@ -39,6 +39,7 @@ export function useRoleQuery() {
         paginatedResult,
         loading,
         error,
-        fetchRoles,
+        setError,
+        refetch: fetchRoles,
     };
 }

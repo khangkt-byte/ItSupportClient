@@ -19,33 +19,28 @@
  * - GET /api/roles/claims - Get all available claims
  */
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Plus, Shield } from 'lucide-react';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { rolesApi } from '@/services/api/roles';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
-import type { Role, RoleDto, RolesQueryParams } from '@/types/data';
+import type { RoleDto, RolesQueryParams } from '@/types/data';
 import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { RoleTable } from '@/features/roles/components/RoleTable';
 import { RoleFormModal, type RoleFormData } from '@/features/roles/components/RoleFormModal';
 import { useRoleQuery } from '@/features/roles/hooks/useRoleQuery';
+import { parseApiError } from '@/utils/apiValidation';
 
-interface Props {
-  data: Role[];
-  setData: (items: Role[]) => void;
-}
-
-export function RoleManagement({ data, setData }: Props) {
-  void data;
+export function RoleManagement() {
   const {
     queryParams,
     setQueryParams,
     paginatedResult,
     loading,
     error,
-    fetchRoles,
+    refetch,
   } = useRoleQuery();
   const [roleFilter, setRoleFilter] = useState<string>('all');
 
@@ -57,11 +52,6 @@ export function RoleManagement({ data, setData }: Props) {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const { hasPermission } = usePermission();
-
-  const syncDataManagerRoles = useCallback(async () => {
-    const allRoles = await rolesApi.getAll({ page: 1, pageSize: 1000, sortBy: 'name', isDescending: false });
-    setData(allRoles.items.map((role) => ({ ...role, id: String(role.roleId) } as Role)));
-  }, [setData]);
 
   const openCreateForm = () => {
     setEditing(null);
@@ -92,11 +82,12 @@ export function RoleManagement({ data, setData }: Props) {
         await rolesApi.create(roleData);
       }
 
-      await Promise.all([fetchRoles(), syncDataManagerRoles()]);
+      await refetch();
       setShowForm(false);
       setEditing(null);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to save role. Please try again.';
+      const parsedError = parseApiError(err);
+      const message = parsedError.message || 'Failed to save role. Please try again.';
       console.error('Failed to save role:', err);
       setMutationError(message);
     } finally {
@@ -111,10 +102,11 @@ export function RoleManagement({ data, setData }: Props) {
       setDeleteLoading(true);
       // Use deleteSingle for single role deletion
       await rolesApi.deleteSingle(confirmDelete.roleId);
-      await Promise.all([fetchRoles(), syncDataManagerRoles()]);
+      await refetch();
       setConfirmDelete(null);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to delete role';
+      const parsedError = parseApiError(err);
+      const message = parsedError.message || 'Failed to delete role';
       setMutationError(message);
       setConfirmDelete(null);
     } finally {
