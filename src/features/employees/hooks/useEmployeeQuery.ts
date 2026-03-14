@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { employeesApi } from '@/services/api/employees';
 import type { EmployeesQueryParams, ListEmployeeDto, PaginatedResult } from '@/types/data';
-import { getApiErrorMessage } from '@/utils/apiValidation';
+import { getApiErrorMessage } from '@/utils/apiErrors';
 
 export function useEmployeeQuery() {
     const [queryParams, setQueryParams] = useState<EmployeesQueryParams>({

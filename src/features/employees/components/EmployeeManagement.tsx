@@ -24,7 +24,7 @@ import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
-import { parseApiError, type ValidationErrors } from '@/utils/apiValidation';
+import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
 import { EmployeeTable } from '@/features/employees/components/EmployeeTable';
 import { EmployeeFormModal, type EmployeeFormData } from '@/features/employees/components/EmployeeFormModal';
 import { useEmployeeQuery } from '@/features/employees/hooks/useEmployeeQuery';

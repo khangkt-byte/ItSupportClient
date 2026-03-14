@@ -1,9 +1,14 @@
 import { useMemo } from 'react';
-import { AlertCircle, X } from 'lucide-react';
+import { X } from 'lucide-react';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 import type { Employee, Department, AreaDto } from '@/types/data';
 import { SearchableCombobox } from '@/components/common/SearchableCombobox';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import type { ValidationErrors } from '@/utils/apiValidation';
+import {
+  getFieldErrorMessages,
+  getGeneralValidationMessages,
+  type ValidationErrors,
+} from '@/utils/apiErrors';
 
 export interface EmployeeFormData {
   empCode: string;
@@ -51,30 +56,16 @@ export function EmployeeFormModal({
     await onSubmit(formData);
   };
 
-  const getFieldErrors = (fieldName: string): string[] => {
-    if (!validationErrors) return [];
-
-    const directMatch = validationErrors[fieldName];
-    if (directMatch?.length) return directMatch;
-
-    const matchEntry = Object.entries(validationErrors).find(
-      ([key]) => key.toLowerCase() === fieldName.toLowerCase()
-    );
-
-    return matchEntry ? matchEntry[1] : [];
-  };
-
-  const fullNameErrors = getFieldErrors('FullName');
-  const empCodeErrors = getFieldErrors('EmpCode');
-  const emailErrors = getFieldErrors('Email');
-  const phoneErrors = getFieldErrors('PhoneNumber');
-
-  const generalValidationErrors = validationErrors
-    ? Object.entries(validationErrors).filter(([field]) => {
-      const key = field.toLowerCase();
-      return key !== 'fullname' && key !== 'empcode' && key !== 'email' && key !== 'phonenumber';
-    })
-    : [];
+  const fullNameErrors = getFieldErrorMessages(validationErrors, 'FullName');
+  const empCodeErrors = getFieldErrorMessages(validationErrors, 'EmpCode');
+  const emailErrors = getFieldErrorMessages(validationErrors, 'Email');
+  const phoneErrors = getFieldErrorMessages(validationErrors, 'PhoneNumber');
+  const generalValidationMessages = getGeneralValidationMessages(validationErrors, [
+    'FullName',
+    'EmpCode',
+    'Email',
+    'PhoneNumber',
+  ]);
 
   const departmentOptions = useMemo(
     () =>
@@ -104,31 +95,13 @@ export function EmployeeFormModal({
           </button>
         </div>
         {error && (
-          <div className="mx-6 mt-4 p-4 bg-error-background border border-error-border rounded-lg flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
-            <div className="flex-1">
-              <p className="font-medium text-error-foreground">Error</p>
-              <p className="text-sm text-error-foreground mt-0.5">{error}</p>
-              {generalValidationErrors.length > 0 && (
-                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
-                  {generalValidationErrors.map(([field, messages]) =>
-                    messages.map((message, index) => (
-                      <li key={`${field}-${index}`}>
-                        {field}: {message}
-                      </li>
-                    ))
-                  )}
-                </ul>
-              )}
-            </div>
-            <button
-              onClick={onClearError}
-              disabled={isSubmitting}
-              className="text-error-foreground hover:text-error-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+          <ErrorAlert
+            message={error}
+            details={generalValidationMessages}
+            onDismiss={onClearError}
+            dismissDisabled={isSubmitting}
+            className="mx-6 mt-4"
+          />
         )}
         <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
