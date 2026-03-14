@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import React from 'react';
 import { AlertCircle, ChevronDown, ChevronUp, Clock, Edit, Trash2 } from 'lucide-react';
-import { PermissionGuard } from '@/components/common/PermissionGuard';
 import { Permissions } from '@/config/permissions';
 import { LoadingState } from '@/components/common/LoadingState';
+import { usePermission } from '@/hooks/usePermission';
 import type { PaginatedResult, WorkLog } from '@/types/data';
 import {
   getWorkLogStatusBadgeClass,
@@ -21,6 +21,9 @@ interface WorkLogTableProps {
 
 export function WorkLogTable({ paginatedResult, isLoading, error, onEdit, onDelete }: WorkLogTableProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const { hasPermission } = usePermission();
+  const canEdit = hasPermission(Permissions.IssueLog.Edit);
+  const canDelete = hasPermission(Permissions.IssueLog.Delete);
 
   const toggleRow = (id: string) => {
     const newExpanded = new Set(expandedRows);
@@ -95,7 +98,7 @@ export function WorkLogTable({ paginatedResult, isLoading, error, onEdit, onDele
                         >
                           {expandedRows.has(log.id) ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                         </button>
-                        <PermissionGuard permission={Permissions.IssueLog.Edit} fallback={null}>
+                        {canEdit && (
                           <button
                             onClick={() => onEdit(log)}
                             className="w-4 h-4 text-primary-600 inline-flex items-center justify-center rounded-md hover:bg-accent hover:text-primary-800 transition-colors shrink-0"
@@ -103,8 +106,8 @@ export function WorkLogTable({ paginatedResult, isLoading, error, onEdit, onDele
                           >
                             <Edit className="w-4 h-4" />
                           </button>
-                        </PermissionGuard>
-                        <PermissionGuard permission={Permissions.IssueLog.Delete} fallback={null}>
+                        )}
+                        {canDelete && (
                           <button
                             onClick={() => onDelete(log.id)}
                             className="w-4 h-4 text-error-foreground inline-flex items-center justify-center rounded-md hover:bg-accent hover:text-error-foreground transition-colors shrink-0"
@@ -112,7 +115,7 @@ export function WorkLogTable({ paginatedResult, isLoading, error, onEdit, onDele
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
-                        </PermissionGuard>
+                        )}
                       </div>
                     </td>
                   </tr>

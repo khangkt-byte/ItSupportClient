@@ -224,7 +224,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
       await fetchAccounts();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to delete account';
-      alert(message);
+      setMutationError(message);
     }
   };
 
@@ -244,7 +244,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
       await fetchAccounts();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to update account status';
-      alert(message);
+      setMutationError(message);
     }
   };
 

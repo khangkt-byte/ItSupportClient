@@ -6,7 +6,7 @@ export { employeesApi } from './employees';
 export { areasApi } from './areas';
 export { rolesApi } from './roles';
 export { accountsApi } from './accounts';
-export { departmentApi } from './departments';
+export { departmentsApi } from './departments';
 export { issuesApi } from './issues';
 export { causesApi } from './causes';
 

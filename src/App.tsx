@@ -13,7 +13,7 @@ const AdminDashboard = lazy(() =>
   import('@/features/dashboard/components/AdminDashboard').then(m => ({ default: m.AdminDashboard }))
 );
 const EmployeeDashboard = lazy(() =>
-  import('@/features/employees/components/EmployeeDashboard').then(m => ({ default: m.EmployeeDashboard }))
+  import('@/features/dashboard/components/EmployeeDashboard').then(m => ({ default: m.EmployeeDashboard }))
 );
 const ThemeValidationTest = lazy(() =>
   import('@/features/theme/components/ThemeValidationTest')

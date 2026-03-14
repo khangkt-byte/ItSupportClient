@@ -19,7 +19,7 @@ import {
   accountsApi,
   rolesApi,
   issuesApi,
-  departmentApi, // Updated: singular name
+  departmentsApi,
 } from '@/services/api';
 
 function useApiData<T>(apiService: any) {
@@ -54,7 +54,7 @@ function useApiData<T>(apiService: any) {
 
 export function useDataManager() {
   const employeesRaw = useApiData<ListEmployeeDto>(employeesApi);
-  const departmentsRaw = useApiData<DepartmentDto>(departmentApi);
+  const departmentsRaw = useApiData<DepartmentDto>(departmentsApi);
   const areasRaw = useApiData<AreaDto>(areasApi);
   const accountsRaw = useApiData<ListAccountDto>(accountsApi);
   const rolesRaw = useApiData<RoleDto>(rolesApi);

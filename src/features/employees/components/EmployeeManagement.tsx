@@ -19,7 +19,7 @@ import { useState } from 'react';
 import { Plus, User } from 'lucide-react';
 import { employeesApi } from '@/services/api/employees';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
-import type { Employee, Department, AreaDto, EmployeesQueryParams } from '@/types/data';
+import type { Employee, Department, AreaDto } from '@/types/data';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { usePermission } from '@/hooks/usePermission';
@@ -40,17 +40,6 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
   void data;
   void setData;
   void areas;
-
-  // Server-side query parameters
-  const [queryParams, setQueryParams] = useState<EmployeesQueryParams>({
-    page: 1,
-    pageSize: 10,
-    search: '',
-    sortBy: 'fullName',
-    isDescending: false,
-    dptId: null, // null = all departments
-    areaId: null, // null = all areas
-  });
 
   // Form states
   const [showForm, setShowForm] = useState(false);
@@ -74,18 +63,26 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
   // Additional filter state for UI
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
 
-  const { loading: queryLoading, error, setError, paginatedResult, fetchEmployees } = useEmployeeQuery(queryParams);
+  const {
+    queryParams,
+    setQueryParams,
+    loading: queryLoading,
+    error,
+    setError,
+    paginatedResult,
+    fetchEmployees,
+  } = useEmployeeQuery();
   const isLoading = queryLoading || isMutating;
   const { hasPermission } = usePermission();
 
   // Handle department filter change
   const handleDepartmentFilterChange = (value: string) => {
     setDepartmentFilter(value);
-    setQueryParams({
-      ...queryParams,
+    setQueryParams((prev) => ({
+      ...prev,
       dptId: value === 'all' ? null : parseInt(value),
       page: 1,
-    });
+    }));
   };
 
   const openForm = (item?: Employee) => {

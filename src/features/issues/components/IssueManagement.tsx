@@ -25,14 +25,6 @@ interface IssueManagementProps {
 
 export function IssueManagement({ data, setData }: IssueManagementProps) {
   void data;
-
-  const [queryParams, setQueryParams] = useState<IssuesQueryParams>({
-    page: 1,
-    pageSize: 10,
-    search: '',
-    sortBy: 'name',
-    isDescending: false,
-  });
   const [issueFilter, setIssueFilter] = useState<string>('all');
 
   const [showForm, setShowForm] = useState(false);
@@ -50,7 +42,15 @@ export function IssueManagement({ data, setData }: IssueManagementProps) {
   const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
 
   const { hasPermission } = usePermission();
-  const { loading: queryLoading, error: queryError, paginatedResult, fetchIssues, setError } = useIssueQuery(queryParams);
+  const {
+    queryParams,
+    setQueryParams,
+    loading: queryLoading,
+    error: queryError,
+    paginatedResult,
+    fetchIssues,
+    setError,
+  } = useIssueQuery();
 
   const isLoading = queryLoading || isMutating;
   const tableError = showForm ? null : mutationError || queryError;

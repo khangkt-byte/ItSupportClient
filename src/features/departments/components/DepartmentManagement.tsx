@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { Building2, Plus } from 'lucide-react';
 import type { Department, CreateDepartmentDto, DepartmentsQueryParams, UpdateDepartmentDto } from '@/types/data';
-import { departmentApi } from '@/services/api/departments';
+import { departmentsApi } from '@/services/api/departments';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
@@ -19,14 +19,6 @@ interface Props {
 
 export function DepartmentManagement({ data, setData }: Props) {
   void data;
-
-  const [queryParams, setQueryParams] = useState<DepartmentsQueryParams>({
-    page: 1,
-    pageSize: 10,
-    search: '',
-    sortBy: 'name',
-    isDescending: false,
-  });
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
 
   const [showForm, setShowForm] = useState(false);
@@ -36,12 +28,20 @@ export function DepartmentManagement({ data, setData }: Props) {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isMutating, setIsMutating] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
-  const { loading: queryLoading, error, setError, paginatedResult, fetchDepartments } = useDepartmentQuery(queryParams);
+  const {
+    queryParams,
+    setQueryParams,
+    loading: queryLoading,
+    error,
+    setError,
+    paginatedResult,
+    fetchDepartments,
+  } = useDepartmentQuery();
   const loading = queryLoading || isMutating;
   const { hasPermission } = usePermission();
 
   const syncDataManagerDepartments = useCallback(async () => {
-    const allDepartments = await departmentApi.getAll({ page: 1, pageSize: 1000, sortBy: 'name', isDescending: false });
+    const allDepartments = await departmentsApi.getAll({ page: 1, pageSize: 1000, sortBy: 'name', isDescending: false });
     setData(
       allDepartments.items.map((dept) => ({
         id: dept.dptId,
@@ -72,13 +72,13 @@ export function DepartmentManagement({ data, setData }: Props) {
           name: formData.name,
           description: formData.description || null,
         };
-        await departmentApi.update(editing.id, updateDto);
+        await departmentsApi.update(editing.id, updateDto);
       } else {
         const createDto: CreateDepartmentDto = {
           name: formData.name,
           description: formData.description || null,
         };
-        await departmentApi.create(createDto);
+        await departmentsApi.create(createDto);
       }
 
       await Promise.all([fetchDepartments(), syncDataManagerDepartments()]);
@@ -100,7 +100,7 @@ export function DepartmentManagement({ data, setData }: Props) {
     setDeleteLoading(true);
     try {
       setError(null);
-      await departmentApi.delete(confirmDelete.id);
+      await departmentsApi.deleteSingle(confirmDelete.id);
       await Promise.all([fetchDepartments(), syncDataManagerDepartments()]);
       setConfirmDelete(null);
     } catch (deleteError: unknown) {

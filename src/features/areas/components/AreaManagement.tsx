@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Plus, MapPin } from 'lucide-react';
-import type { Area, AreasQueryParams, PaginatedResult, AreaDto } from '@/types/data';
+import type { Area, AreasQueryParams } from '@/types/data';
 import { areasApi } from '@/services/api/areas';
+import { useAreaQuery } from '@/features/areas/hooks/useAreaQuery';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
@@ -18,14 +19,15 @@ interface Props {
 
 export function AreaManagement({ data, setData }: Props) {
   void data;
-  const [queryParams, setQueryParams] = useState<AreasQueryParams>({
-    page: 1,
-    pageSize: 10,
-    search: '',
-    sortBy: 'name',
-    isDescending: false,
-  });
-  const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<AreaDto> | null>(null);
+  const {
+    queryParams,
+    setQueryParams,
+    paginatedResult,
+    loading: queryLoading,
+    error,
+    setError,
+    fetchAreas,
+  } = useAreaQuery();
   const [areaFilter, setAreaFilter] = useState<string>('all');
 
   const [showForm, setShowForm] = useState(false);
@@ -33,35 +35,17 @@ export function AreaManagement({ data, setData }: Props) {
   const [formData, setFormData] = useState<AreaFormData>({ name: '', description: '' });
   const [confirmDelete, setConfirmDelete] = useState<Area | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isMutating, setIsMutating] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
 
-  const { hasPermission } = usePermission();
+  const isLoading = queryLoading || isMutating;
 
-  const fetchAreas = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const result = await areasApi.getAll(queryParams);
-      setPaginatedResult(result);
-    } catch (err) {
-      console.error('Failed to fetch areas:', err);
-      setError('Failed to load areas');
-      setPaginatedResult(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [queryParams]);
+  const { hasPermission } = usePermission();
 
   const syncDataManagerAreas = useCallback(async () => {
     const allAreas = await areasApi.getAll({ page: 1, pageSize: 1000, sortBy: 'name', isDescending: false });
     setData(allAreas.items.map((area) => ({ ...area, id: String(area.areaId) } as Area)));
   }, [setData]);
-
-  useEffect(() => {
-    fetchAreas();
-  }, [fetchAreas]);
 
   const openForm = (item?: Area) => {
     setEditing(item || null);
@@ -73,7 +57,7 @@ export function AreaManagement({ data, setData }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsMutating(true);
     setError(null);
     setValidationErrors(null);
 
@@ -99,7 +83,7 @@ export function AreaManagement({ data, setData }: Props) {
       setError(parsedError.message || 'Failed to save area');
       setValidationErrors(parsedError.fieldErrors);
     } finally {
-      setIsLoading(false);
+      setIsMutating(false);
     }
   };
 

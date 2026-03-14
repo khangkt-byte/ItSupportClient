@@ -1,28 +1,28 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { IssueDto, IssuesQueryParams, PaginatedResult } from '@/types/data';
-import { issuesApi } from '@/services/api/issues';
+import { areasApi } from '@/services/api/areas';
+import type { AreaDto, AreasQueryParams, PaginatedResult } from '@/types/data';
 
-export function useIssueQuery() {
-    const [queryParams, setQueryParams] = useState<IssuesQueryParams>({
+export function useAreaQuery() {
+    const [queryParams, setQueryParams] = useState<AreasQueryParams>({
         page: 1,
         pageSize: 10,
         search: '',
         sortBy: 'name',
         isDescending: false,
     });
+    const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<AreaDto> | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<IssueDto> | null>(null);
 
-    const fetchIssues = useCallback(async () => {
+    const fetchAreas = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
-            const result = await issuesApi.getAll(queryParams);
+            const result = await areasApi.getAll(queryParams);
             setPaginatedResult(result);
         } catch (err) {
-            console.error('Failed to fetch issues:', err);
-            setError('Failed to load issues');
+            console.error('Failed to fetch areas:', err);
+            setError('Failed to load areas');
             setPaginatedResult(null);
         } finally {
             setLoading(false);
@@ -30,17 +30,17 @@ export function useIssueQuery() {
     }, [queryParams]);
 
     useEffect(() => {
-        fetchIssues();
-    }, [fetchIssues]);
+        void fetchAreas();
+    }, [fetchAreas]);
 
     return {
         queryParams,
         setQueryParams,
+        paginatedResult,
         loading,
         error,
         setError,
-        paginatedResult,
-        refetch: fetchIssues,
-        fetchIssues,
+        fetchAreas,
+        refetch: fetchAreas,
     };
 }

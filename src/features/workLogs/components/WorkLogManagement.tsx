@@ -3,9 +3,9 @@ import { Clock, Plus } from 'lucide-react';
 import type { Area, Department, Employee, WorkLog } from '@/types/data';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
-import { PermissionGuard } from '@/components/common/PermissionGuard';
 import { Permissions } from '@/config/permissions';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { usePermission } from '@/hooks/usePermission';
 import { WorkLogFormModal, type WorkLogFormData } from '@/features/workLogs/components/WorkLogFormModal';
 import { WorkLogImportExportPanel } from '@/features/workLogs/components/WorkLogImportExportPanel';
 import { WorkLogTable } from '@/features/workLogs/components/WorkLogTable';
@@ -51,6 +51,8 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
 
   const error = queryError || mutationError;
   const setError = queryError ? setQueryError : setMutationError;
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission(Permissions.IssueLog.Create);
 
   const openForm = (log?: WorkLog) => {
     setMutationError(null);
@@ -90,18 +92,15 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
             Track and manage issue logs with consistent filtering, sorting, and pagination
           </p>
         </div>
-        <PermissionGuard 
-          permission={Permissions.IssueLog.Create}
-          fallback={
-            <button disabled className="btn-primary px-4 py-2 flex items-center gap-2 opacity-50">
-              <Plus className="w-5 h-5" />New Work Log
-            </button>
-          }
-        >
+        {canCreate ? (
           <button onClick={() => openForm()} className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm">
             <Plus className="w-5 h-5" />New Work Log
           </button>
-        </PermissionGuard>
+        ) : (
+          <button disabled className="btn-primary px-4 py-2 flex items-center gap-2 opacity-50">
+            <Plus className="w-5 h-5" />New Work Log
+          </button>
+        )}
       </div>
 
 

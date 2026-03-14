@@ -2,7 +2,16 @@ import { useCallback, useEffect, useState } from 'react';
 import { employeesApi } from '@/services/api/employees';
 import type { EmployeesQueryParams, ListEmployeeDto, PaginatedResult } from '@/types/data';
 
-export function useEmployeeQuery(queryParams: EmployeesQueryParams) {
+export function useEmployeeQuery() {
+    const [queryParams, setQueryParams] = useState<EmployeesQueryParams>({
+        page: 1,
+        pageSize: 10,
+        search: '',
+        sortBy: 'fullName',
+        isDescending: false,
+        dptId: null,
+        areaId: null,
+    });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<ListEmployeeDto> | null>(null);
@@ -27,10 +36,13 @@ export function useEmployeeQuery(queryParams: EmployeesQueryParams) {
     }, [fetchEmployees]);
 
     return {
+        queryParams,
+        setQueryParams,
         loading,
         error,
         setError,
         paginatedResult,
+        refetch: fetchEmployees,
         fetchEmployees,
     };
 }

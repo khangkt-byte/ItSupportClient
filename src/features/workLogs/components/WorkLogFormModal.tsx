@@ -5,9 +5,9 @@ import { causesApi, issuesApi } from '@/services/api';
 import { SearchableCombobox } from '@/components/common/SearchableCombobox';
 import { FlexibleMultiSelect } from '@/components/common/FlexibleMultiSelect';
 import { AutocompleteInput, type Suggestion } from '@/components/common/AutocompleteInput';
-import { PermissionGuard } from '@/components/common/PermissionGuard';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Permissions } from '@/config/permissions';
+import { usePermission } from '@/hooks/usePermission';
 
 export interface WorkLogFormData {
   reportDate: string;
@@ -89,6 +89,8 @@ export function WorkLogFormModal({
   const [selectedCause, setSelectedCause] = useState<Suggestion | null>(null);
   const [loadingIssueSuggestions, setLoadingIssueSuggestions] = useState(false);
   const [loadingCauseSuggestions, setLoadingCauseSuggestions] = useState(false);
+  const { hasPermission } = usePermission();
+  const canSubmit = hasPermission(editing ? Permissions.IssueLog.Edit : Permissions.IssueLog.Create);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -256,26 +258,26 @@ export function WorkLogFormModal({
 
   if (!isOpen) return null;
 
-  return (
-    <PermissionGuard
-      permission={editing ? Permissions.IssueLog.Edit : Permissions.IssueLog.Create}
-      fallback={
-        <div className="fixed inset-0 bg-overlay flex items-center justify-center z-60 p-4 overflow-y-auto h-screen w-screen">
-          <div className="bg-card rounded-lg p-6 max-w-sm text-center">
-            <h3 className="text-lg font-semibold text-error-foreground mb-2">Access Denied</h3>
-            <p className="text-muted-foreground mb-4">
-              You don't have permission to {editing ? 'edit' : 'create'} work logs.
-            </p>
-            <button
-              onClick={onClose}
-              className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80"
-            >
-              Close
-            </button>
-          </div>
+  if (!canSubmit) {
+    return (
+      <div className="fixed inset-0 bg-overlay flex items-center justify-center z-60 p-4 overflow-y-auto h-screen w-screen">
+        <div className="bg-card rounded-lg p-6 max-w-sm text-center">
+          <h3 className="text-lg font-semibold text-error-foreground mb-2">Access Denied</h3>
+          <p className="text-muted-foreground mb-4">
+            You don't have permission to {editing ? 'edit' : 'create'} work logs.
+          </p>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80"
+          >
+            Close
+          </button>
         </div>
-      }
-    >
+      </div>
+    );
+  }
+
+  return (
       <div className="fixed inset-0 bg-overlay flex items-center justify-center z-60 p-4 overflow-y-auto h-screen w-screen">
         <div className="bg-card rounded-lg max-w-6xl w-full my-4 max-h-[90vh] overflow-y-auto">
           <div className="px-6 py-4 border-b border-border flex justify-between items-center sticky top-0 bg-card z-10">
@@ -473,6 +475,5 @@ export function WorkLogFormModal({
           </form>
         </div>
       </div>
-    </PermissionGuard>
   );
 }

@@ -69,20 +69,8 @@ class DepartmentAPI {
   }
 
   /**
-   * DELETE /api/departments/{dptId}
-   * Xóa phòng ban đơn lẻ
-   * 
-   * Business rules:
-   * - Không thể xóa nếu phòng ban có nhân viên (422)
-   * - Không thể xóa nếu phòng ban có nhật ký sự cố (422)
-   */
-  async delete(dptId: number): Promise<void> {
-    return apiClient.delete(`/api/departments/${dptId}`);
-  }
-
-  /**
    * DELETE /api/departments
-   * Xóa nhiều phòng ban
+   * Xóa phòng ban
    * 
    * Strategy: All-or-nothing (transaction-based)
    * - Nếu TẤT CẢ thành công → 200 OK với summary
@@ -93,10 +81,24 @@ class DepartmentAPI {
    * - Không thể xóa phòng ban có nhật ký sự cố (422)
    * - Transaction rollback nếu ANY item fails
    */
-  async bulkDelete(ids: number[], softDelete: boolean = true): Promise<BulkDeleteResultDto> {
+  async delete(ids: number[], softDelete: boolean = true): Promise<BulkDeleteResultDto> {
     const url = `/api/departments?softDelete=${softDelete}`;
     return apiClient.delete<BulkDeleteResultDto>(url, ids);
   }
+
+  /**
+   * Delete single department
+   */
+  async deleteSingle(id: number, softDelete: boolean = true): Promise<BulkDeleteResultDto> {
+    return this.delete([id], softDelete);
+  }
+
+  /**
+   * Backward-compatible alias. Prefer delete(ids, softDelete).
+   */
+  async bulkDelete(ids: number[], softDelete: boolean = true): Promise<BulkDeleteResultDto> {
+    return this.delete(ids, softDelete);
+  }
 }
 
-export const departmentApi = new DepartmentAPI();
+export const departmentsApi = new DepartmentAPI();

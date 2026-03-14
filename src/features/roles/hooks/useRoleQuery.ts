@@ -39,10 +39,6 @@ export function useRoleQuery() {
         paginatedResult,
         loading,
         error,
-        // Backward compatibility alias. Prefer `loading`.
-        queryLoading: loading,
-        // Backward compatibility alias. Prefer `error`.
-        queryError: error,
         fetchRoles,
     };
 }
