@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Eye, EyeOff, FileText } from 'lucide-react';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import type { LoginResponse } from '@/features/auth/types/auth';
 
@@ -92,11 +93,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               </div>
             </div>
 
-            {error && (
-              <div className="p-3 bg-error-background border border-error-border rounded-lg">
-                <p className="text-sm text-error-foreground">{error}</p>
-              </div>
-            )}
+            {error && <ErrorAlert message={error} />}
 
             <button
               type="submit"

@@ -16,7 +16,7 @@
 
 import { apiClient } from './common';
 import { JWTHelper } from '@/utils/jwtHelper';
-import { parseApiError } from '@/utils/apiValidation';
+import { parseApiError } from '@/utils/apiErrors';
 import type { ProfileDto } from '@/types/data';
 import type {
   LoginDto,
