@@ -15,7 +15,7 @@ import { Permissions } from '@/config/permissions';
 import { useIssueQuery } from '@/features/issues/hooks/useIssueQuery';
 import { IssueTable } from '@/features/issues/components/IssueTable';
 import { IssueFormModal, type IssueFormData } from '@/features/issues/components/IssueFormModal';
-import { parseApiError, type ValidationErrors } from '@/utils/apiValidation';
+import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
 
 export function IssueManagement() {
   const [issueFilter, setIssueFilter] = useState<string>('all');

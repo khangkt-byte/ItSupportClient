@@ -1,4 +1,5 @@
-import { AlertCircle, Bug, Edit, Trash2 } from 'lucide-react';
+import { Bug, Edit, Trash2 } from 'lucide-react';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 import type { IssueDto } from '@/types/data';
 import { LoadingState } from '@/components/common/LoadingState';
 
@@ -28,13 +29,7 @@ export function IssueTable({
       )}
 
       {error && !isLoading && (
-        <div className="p-4 bg-error-background border border-error-border flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
-          <div className="flex-1">
-            <p className="font-medium text-error-foreground">Error</p>
-            <p className="text-sm text-error-foreground">{error}</p>
-          </div>
-        </div>
+        <ErrorAlert message={error} className="m-4" />
       )}
 
       {!isLoading && !error && (

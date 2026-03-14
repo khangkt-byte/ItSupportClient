@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { IssueDto, IssuesQueryParams, PaginatedResult } from '@/types/data';
 import { issuesApi } from '@/services/api/issues';
-import { getApiErrorMessage } from '@/utils/apiValidation';
+import { getApiErrorMessage } from '@/utils/apiErrors';
 
 export function useIssueQuery() {
     const [queryParams, setQueryParams] = useState<IssuesQueryParams>({
