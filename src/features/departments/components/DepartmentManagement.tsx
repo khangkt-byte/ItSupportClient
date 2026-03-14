@@ -1,11 +1,13 @@
 import { useCallback, useState } from 'react';
 import { Building2, Plus } from 'lucide-react';
-import { toast } from 'sonner';
 import type { Department, CreateDepartmentDto, DepartmentsQueryParams, UpdateDepartmentDto } from '@/types/data';
 import { departmentApi } from '@/services/api/departments';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { usePermission } from '@/hooks/usePermission';
+import { Permissions } from '@/config/permissions';
+import { parseApiError, type ValidationErrors } from '@/utils/apiValidation';
 import { useDepartmentQuery } from '../hooks/useDepartmentQuery';
 import { DepartmentTable } from './DepartmentTable';
 import { DepartmentFormModal, type DepartmentFormData } from './DepartmentFormModal';
@@ -33,8 +35,10 @@ export function DepartmentManagement({ data, setData }: Props) {
   const [confirmDelete, setConfirmDelete] = useState<Department | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isMutating, setIsMutating] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
   const { loading: queryLoading, error, setError, paginatedResult, fetchDepartments } = useDepartmentQuery(queryParams);
   const loading = queryLoading || isMutating;
+  const { hasPermission } = usePermission();
 
   const syncDataManagerDepartments = useCallback(async () => {
     const allDepartments = await departmentApi.getAll({ page: 1, pageSize: 1000, sortBy: 'name', isDescending: false });
@@ -52,6 +56,7 @@ export function DepartmentManagement({ data, setData }: Props) {
     setEditing(item || null);
     setFormData(item ? { name: item.name, description: item.description } : { name: '', description: '' });
     setError(null);
+    setValidationErrors(null);
     setShowForm(true);
   };
 
@@ -59,6 +64,7 @@ export function DepartmentManagement({ data, setData }: Props) {
     e.preventDefault();
     setIsMutating(true);
     setError(null);
+    setValidationErrors(null);
 
     try {
       if (editing) {
@@ -67,24 +73,22 @@ export function DepartmentManagement({ data, setData }: Props) {
           description: formData.description || null,
         };
         await departmentApi.update(editing.id, updateDto);
-        toast.success('Department updated successfully');
       } else {
         const createDto: CreateDepartmentDto = {
           name: formData.name,
           description: formData.description || null,
         };
         await departmentApi.create(createDto);
-        toast.success('Department created successfully');
       }
 
       await Promise.all([fetchDepartments(), syncDataManagerDepartments()]);
       setShowForm(false);
       setFormData({ name: '', description: '' });
-    } catch (submitError: any) {
+    } catch (submitError: unknown) {
       console.error('Failed to save department:', submitError);
-      const message = submitError.message || 'Failed to save department';
-      setError(message);
-      toast.error(message);
+      const parsedError = parseApiError(submitError);
+      setError(parsedError.message || 'Failed to save department');
+      setValidationErrors(parsedError.fieldErrors);
     } finally {
       setIsMutating(false);
     }
@@ -95,17 +99,14 @@ export function DepartmentManagement({ data, setData }: Props) {
 
     setDeleteLoading(true);
     try {
+      setError(null);
       await departmentApi.delete(confirmDelete.id);
       await Promise.all([fetchDepartments(), syncDataManagerDepartments()]);
       setConfirmDelete(null);
-      toast.success('Department deleted successfully');
-    } catch (deleteError: any) {
+    } catch (deleteError: unknown) {
       console.error('Failed to delete department:', deleteError);
-      if (deleteError.message?.includes('employees') || deleteError.message?.includes('422')) {
-        toast.error('Cannot delete: Department has employees or issue logs');
-      } else {
-        toast.error(deleteError.message || 'Failed to delete department');
-      }
+      const parsedError = parseApiError(deleteError);
+      setError(parsedError.message || 'Failed to delete department');
       setConfirmDelete(null);
     } finally {
       setDeleteLoading(false);
@@ -124,14 +125,16 @@ export function DepartmentManagement({ data, setData }: Props) {
             Manage departments with searchable, sortable, and paginated data
           </p>
         </div>
-        <button
-          onClick={() => openForm()}
-          disabled={loading}
-          className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm"
-        >
-          <Plus className="w-5 h-5" />
-          Create Department
-        </button>
+        {hasPermission(Permissions.Department.Create) && (
+          <button
+            onClick={() => openForm()}
+            disabled={loading}
+            className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm"
+          >
+            <Plus className="w-5 h-5" />
+            Create Department
+          </button>
+        )}
       </div>
 
       <SearchFilterBar
@@ -156,6 +159,8 @@ export function DepartmentManagement({ data, setData }: Props) {
         loading={loading}
         error={showForm ? null : error}
         items={paginatedResult?.items || []}
+        canEdit={hasPermission(Permissions.Department.Edit)}
+        canDelete={hasPermission(Permissions.Department.Delete)}
         onEdit={(item) =>
           openForm({
             id: item.dptId,
@@ -194,10 +199,19 @@ export function DepartmentManagement({ data, setData }: Props) {
         isOpen={showForm}
         editing={editing}
         loading={loading}
+        error={error}
+        validationErrors={validationErrors}
         formData={formData}
         onChange={setFormData}
         onSubmit={handleSubmit}
-        onClose={() => setShowForm(false)}
+        onClose={() => {
+          if (loading) return;
+          setShowForm(false);
+        }}
+        onClearError={() => {
+          setError(null);
+          setValidationErrors(null);
+        }}
       />
 
       <ConfirmDialog

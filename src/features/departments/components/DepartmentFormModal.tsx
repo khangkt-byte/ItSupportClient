@@ -1,6 +1,7 @@
-import { X } from 'lucide-react';
+import { AlertCircle, X } from 'lucide-react';
 import type { Department } from '@/types/data';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import type { ValidationErrors } from '@/utils/apiValidation';
 
 export interface DepartmentFormData {
   name: string;
@@ -11,14 +12,46 @@ interface Props {
   isOpen: boolean;
   editing: Department | null;
   loading: boolean;
+  error: string | null;
+  validationErrors: ValidationErrors | null;
   formData: DepartmentFormData;
   onChange: (value: DepartmentFormData) => void;
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
+  onClearError: () => void;
 }
 
-export function DepartmentFormModal({ isOpen, editing, loading, formData, onChange, onSubmit, onClose }: Props) {
+export function DepartmentFormModal({
+  isOpen,
+  editing,
+  loading,
+  error,
+  validationErrors,
+  formData,
+  onChange,
+  onSubmit,
+  onClose,
+  onClearError,
+}: Props) {
   if (!isOpen) return null;
+
+  const getFieldErrors = (fieldName: string): string[] => {
+    if (!validationErrors) return [];
+
+    const directMatch = validationErrors[fieldName];
+    if (directMatch?.length) return directMatch;
+
+    const matchEntry = Object.entries(validationErrors).find(
+      ([key]) => key.toLowerCase() === fieldName.toLowerCase()
+    );
+
+    return matchEntry ? matchEntry[1] : [];
+  };
+
+  const nameErrors = getFieldErrors('Name');
+  const generalValidationErrors = validationErrors
+    ? Object.entries(validationErrors).filter(([field]) => field.toLowerCase() !== 'name')
+    : [];
 
   return (
     <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4">
@@ -34,6 +67,34 @@ export function DepartmentFormModal({ isOpen, editing, loading, formData, onChan
           </button>
         </div>
 
+        {error && (
+          <div className="mx-6 mt-4 p-4 bg-error-background border border-error-border rounded-lg flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium text-error-foreground">Error</p>
+              <p className="text-sm text-error-foreground mt-0.5">{error}</p>
+              {generalValidationErrors.length > 0 && (
+                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
+                  {generalValidationErrors.map(([field, messages]) =>
+                    messages.map((message, index) => (
+                      <li key={`${field}-${index}`}>
+                        {field}: {message}
+                      </li>
+                    ))
+                  )}
+                </ul>
+              )}
+            </div>
+            <button
+              onClick={onClearError}
+              disabled={loading}
+              className="text-error-foreground hover:text-error-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         <form onSubmit={onSubmit} className="p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium text-muted-foreground mb-1">
@@ -48,6 +109,13 @@ export function DepartmentFormModal({ isOpen, editing, loading, formData, onChan
               className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
               disabled={loading}
             />
+            {nameErrors.length > 0 && (
+              <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
+                {nameErrors.map((message, index) => (
+                  <li key={`name-${index}`}>{message}</li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <div>

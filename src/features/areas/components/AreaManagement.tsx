@@ -5,6 +5,9 @@ import { areasApi } from '@/services/api/areas';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { usePermission } from '@/hooks/usePermission';
+import { Permissions } from '@/config/permissions';
+import { parseApiError, type ValidationErrors } from '@/utils/apiValidation';
 import { AreaTable } from './AreaTable';
 import { AreaFormModal, type AreaFormData } from './AreaFormModal';
 
@@ -32,6 +35,9 @@ export function AreaManagement({ data, setData }: Props) {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
+
+  const { hasPermission } = usePermission();
 
   const fetchAreas = useCallback(async () => {
     try {
@@ -61,6 +67,7 @@ export function AreaManagement({ data, setData }: Props) {
     setEditing(item || null);
     setFormData(item ? { name: item.name, description: item.description || '' } : { name: '', description: '' });
     setError(null);
+    setValidationErrors(null);
     setShowForm(true);
   };
 
@@ -68,6 +75,7 @@ export function AreaManagement({ data, setData }: Props) {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setValidationErrors(null);
 
     try {
       if (editing) {
@@ -85,9 +93,11 @@ export function AreaManagement({ data, setData }: Props) {
       await Promise.all([fetchAreas(), syncDataManagerAreas()]);
       setShowForm(false);
       setFormData({ name: '', description: '' });
-    } catch (err: any) {
-      console.error('Failed to save area:', err);
-      setError(err.message || 'Failed to save area. Please try again.');
+    } catch (submitError: unknown) {
+      console.error('Failed to save area:', submitError);
+      const parsedError = parseApiError(submitError);
+      setError(parsedError.message || 'Failed to save area');
+      setValidationErrors(parsedError.fieldErrors);
     } finally {
       setIsLoading(false);
     }
@@ -98,11 +108,14 @@ export function AreaManagement({ data, setData }: Props) {
 
     try {
       setDeleteLoading(true);
+      setError(null);
       await areasApi.deleteSingle(confirmDelete.areaId);
       await Promise.all([fetchAreas(), syncDataManagerAreas()]);
       setConfirmDelete(null);
-    } catch (err: any) {
-      alert(err.message || 'Failed to delete area');
+    } catch (deleteError: unknown) {
+      console.error('Failed to delete area:', deleteError);
+      const parsedError = parseApiError(deleteError);
+      setError(parsedError.message || 'Failed to delete area');
       setConfirmDelete(null);
     } finally {
       setDeleteLoading(false);
@@ -121,10 +134,16 @@ export function AreaManagement({ data, setData }: Props) {
             Manage areas with searchable, sortable, and paginated data
           </p>
         </div>
-        <button onClick={() => openForm()} className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm">
-          <Plus className="w-5 h-5" />
-          Create Area
-        </button>
+        {hasPermission(Permissions.Area.Create) && (
+          <button
+            onClick={() => openForm()}
+            disabled={isLoading}
+            className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm"
+          >
+            <Plus className="w-5 h-5" />
+            Create Area
+          </button>
+        )}
       </div>
 
       <SearchFilterBar
@@ -147,6 +166,8 @@ export function AreaManagement({ data, setData }: Props) {
         isLoading={isLoading}
         error={showForm ? null : error}
         items={paginatedResult?.items || []}
+        canEdit={hasPermission(Permissions.Area.Edit)}
+        canDelete={hasPermission(Permissions.Area.Delete)}
         onEdit={(item) => openForm({ ...item, id: String(item.areaId) } as Area)}
         onDelete={(item) => setConfirmDelete({ ...item, id: String(item.areaId) } as Area)}
       />
@@ -172,9 +193,18 @@ export function AreaManagement({ data, setData }: Props) {
         editing={editing}
         formData={formData}
         isLoading={isLoading}
+        error={error}
+        validationErrors={validationErrors}
         onChange={setFormData}
         onSubmit={handleSubmit}
-        onClose={() => setShowForm(false)}
+        onClose={() => {
+          if (isLoading) return;
+          setShowForm(false);
+        }}
+        onClearError={() => {
+          setError(null);
+          setValidationErrors(null);
+        }}
       />
 
       <ConfirmDialog

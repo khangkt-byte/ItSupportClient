@@ -12,21 +12,21 @@ export function useAccountQuery() {
         isLocked: null,
     });
     const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<ListAccountDto> | null>(null);
-    const [queryLoading, setQueryLoading] = useState(false);
-    const [queryError, setQueryError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchAccounts = useCallback(async () => {
         try {
-            setQueryLoading(true);
-            setQueryError(null);
+            setLoading(true);
+            setError(null);
             const result = await accountsApi.getAll(queryParams);
             setPaginatedResult(result);
         } catch (error) {
             console.error('Failed to fetch accounts:', error);
-            setQueryError('Failed to load accounts');
+            setError('Failed to load accounts');
             setPaginatedResult(null);
         } finally {
-            setQueryLoading(false);
+            setLoading(false);
         }
     }, [queryParams]);
 
@@ -38,8 +38,12 @@ export function useAccountQuery() {
         queryParams,
         setQueryParams,
         paginatedResult,
-        queryLoading,
-        queryError,
+        loading,
+        error,
+        // Backward compatibility alias. Prefer `loading`.
+        queryLoading: loading,
+        // Backward compatibility alias. Prefer `error`.
+        queryError: error,
         fetchAccounts,
     };
 }

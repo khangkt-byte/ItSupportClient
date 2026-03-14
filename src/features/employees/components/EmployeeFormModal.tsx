@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
-import { X } from 'lucide-react';
+import { AlertCircle, X } from 'lucide-react';
 import type { Employee, Department, AreaDto } from '@/types/data';
 import { SearchableCombobox } from '@/components/common/SearchableCombobox';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import type { ValidationErrors } from '@/utils/apiValidation';
 
 export interface EmployeeFormData {
   empCode: string;
@@ -18,16 +19,57 @@ interface Props {
   isOpen: boolean;
   loading: boolean;
   editing: Employee | null;
+  error: string | null;
+  validationErrors: ValidationErrors | null;
   formData: EmployeeFormData;
   onChange: (value: EmployeeFormData) => void;
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
+  onClearError: () => void;
   departments: Department[];
   areas: AreaDto[];
 }
 
-export function EmployeeFormModal({ isOpen, loading, editing, formData, onChange, onSubmit, onClose, departments, areas }: Props) {
+export function EmployeeFormModal({
+  isOpen,
+  loading,
+  editing,
+  error,
+  validationErrors,
+  formData,
+  onChange,
+  onSubmit,
+  onClose,
+  onClearError,
+  departments,
+  areas,
+}: Props) {
   if (!isOpen) return null;
+
+  const getFieldErrors = (fieldName: string): string[] => {
+    if (!validationErrors) return [];
+
+    const directMatch = validationErrors[fieldName];
+    if (directMatch?.length) return directMatch;
+
+    const matchEntry = Object.entries(validationErrors).find(
+      ([key]) => key.toLowerCase() === fieldName.toLowerCase()
+    );
+
+    return matchEntry ? matchEntry[1] : [];
+  };
+
+  const fullNameErrors = getFieldErrors('FullName');
+  const empCodeErrors = getFieldErrors('EmpCode');
+  const emailErrors = getFieldErrors('Email');
+  const phoneErrors = getFieldErrors('PhoneNumber');
+
+  const generalValidationErrors = validationErrors
+    ? Object.entries(validationErrors).filter(([field]) => {
+      const key = field.toLowerCase();
+      return key !== 'fullname' && key !== 'empcode' && key !== 'email' && key !== 'phonenumber';
+    })
+    : [];
 
   const departmentOptions = useMemo(
     () =>
@@ -56,6 +98,33 @@ export function EmployeeFormModal({ isOpen, loading, editing, formData, onChange
             <X className="w-6 h-6" />
           </button>
         </div>
+        {error && (
+          <div className="mx-6 mt-4 p-4 bg-error-background border border-error-border rounded-lg flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium text-error-foreground">Error</p>
+              <p className="text-sm text-error-foreground mt-0.5">{error}</p>
+              {generalValidationErrors.length > 0 && (
+                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
+                  {generalValidationErrors.map(([field, messages]) =>
+                    messages.map((message, index) => (
+                      <li key={`${field}-${index}`}>
+                        {field}: {message}
+                      </li>
+                    ))
+                  )}
+                </ul>
+              )}
+            </div>
+            <button
+              onClick={onClearError}
+              disabled={loading}
+              className="text-error-foreground hover:text-error-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
         <form onSubmit={onSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -68,6 +137,13 @@ export function EmployeeFormModal({ isOpen, loading, editing, formData, onChange
                 className="input-base"
                 disabled={loading}
               />
+              {empCodeErrors.length > 0 && (
+                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
+                  {empCodeErrors.map((message, index) => (
+                    <li key={`empcode-${index}`}>{message}</li>
+                  ))}
+                </ul>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Full Name <span className="text-error-foreground">*</span></label>
@@ -80,6 +156,13 @@ export function EmployeeFormModal({ isOpen, loading, editing, formData, onChange
                 className="input-base"
                 disabled={loading}
               />
+              {fullNameErrors.length > 0 && (
+                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
+                  {fullNameErrors.map((message, index) => (
+                    <li key={`fullname-${index}`}>{message}</li>
+                  ))}
+                </ul>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Phone Number</label>
@@ -91,6 +174,13 @@ export function EmployeeFormModal({ isOpen, loading, editing, formData, onChange
                 className="input-base"
                 disabled={loading}
               />
+              {phoneErrors.length > 0 && (
+                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
+                  {phoneErrors.map((message, index) => (
+                    <li key={`phone-${index}`}>{message}</li>
+                  ))}
+                </ul>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Email</label>
@@ -102,6 +192,13 @@ export function EmployeeFormModal({ isOpen, loading, editing, formData, onChange
                 className="input-base"
                 disabled={loading}
               />
+              {emailErrors.length > 0 && (
+                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
+                  {emailErrors.map((message, index) => (
+                    <li key={`email-${index}`}>{message}</li>
+                  ))}
+                </ul>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1 text-muted-foreground">

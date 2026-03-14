@@ -18,7 +18,7 @@
  * - GET /api/roles/claims - Get all available claims
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, User } from 'lucide-react';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
@@ -52,8 +52,8 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
     queryParams,
     setQueryParams,
     paginatedResult,
-    queryLoading,
-    queryError,
+    loading,
+    error,
     fetchAccounts,
   } = useAccountQuery();
 
@@ -214,8 +214,8 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
     }
   };
 
-  const isLoading = queryLoading || isMutating;
-  const tableError = showForm ? null : mutationError || queryError;
+  const isLoading = loading || isMutating;
+  const tableError = showForm ? null : mutationError || error;
 
   const handleDelete = async (accountId: string) => {
     try {

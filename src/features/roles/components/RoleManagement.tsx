@@ -43,8 +43,8 @@ export function RoleManagement({ data, setData }: Props) {
     queryParams,
     setQueryParams,
     paginatedResult,
-    queryLoading,
-    queryError,
+    loading,
+    error,
     fetchRoles,
   } = useRoleQuery();
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -122,8 +122,8 @@ export function RoleManagement({ data, setData }: Props) {
     }
   };
 
-  const isLoading = queryLoading || isMutating;
-  const tableError = showForm ? null : mutationError || queryError;
+  const isLoading = loading || isMutating;
+  const tableError = showForm ? null : mutationError || error;
 
   return (
     <div className="space-y-6">

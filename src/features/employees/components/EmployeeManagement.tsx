@@ -22,6 +22,9 @@ import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import type { Employee, Department, AreaDto, EmployeesQueryParams } from '@/types/data';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { PaginationBar } from '@/components/common/PaginationBar';
+import { usePermission } from '@/hooks/usePermission';
+import { Permissions } from '@/config/permissions';
+import { parseApiError, type ValidationErrors } from '@/utils/apiValidation';
 import { EmployeeTable } from './EmployeeTable';
 import { EmployeeFormModal, type EmployeeFormData } from './EmployeeFormModal';
 import { useEmployeeQuery } from '../hooks/useEmployeeQuery';
@@ -66,12 +69,14 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
   const [isMutating, setIsMutating] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<Employee | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
 
   // Additional filter state for UI
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
 
   const { loading: queryLoading, error, setError, paginatedResult, fetchEmployees } = useEmployeeQuery(queryParams);
   const isLoading = queryLoading || isMutating;
+  const { hasPermission } = usePermission();
 
   // Handle department filter change
   const handleDepartmentFilterChange = (value: string) => {
@@ -96,6 +101,8 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
     } : { 
       empCode: '', fullName: '', phoneNumber: '', email: '', position: '', department: '', area: ''
     });
+    setError(null);
+    setValidationErrors(null);
     setShowForm(true);
   };
 
@@ -104,6 +111,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
     try {
       setIsMutating(true);
       setError(null);
+      setValidationErrors(null);
 
       // Find department and area IDs from names
       const selectedDept = departments.find((dept) => dept.name === formData.department);
@@ -138,9 +146,11 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       setFormData({ empCode: '', fullName: '', phoneNumber: '', email: '', position: '', department: '', area: '' });
       // Refresh data after submission
       await fetchEmployees();
-    } catch (err) {
-      console.error('Failed to save employee:', err);
-      setError(`Failed to ${editing ? 'update' : 'create'} employee. Please try again.`);
+    } catch (submitError: unknown) {
+      console.error('Failed to save employee:', submitError);
+      const parsedError = parseApiError(submitError);
+      setError(parsedError.message || `Failed to ${editing ? 'update' : 'create'} employee`);
+      setValidationErrors(parsedError.fieldErrors);
     } finally {
       setIsMutating(false);
     }
@@ -155,9 +165,10 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       setConfirmDelete(null);
       // Refresh data after deletion
       await fetchEmployees();
-    } catch (err) {
-      console.error('Failed to delete employee:', err);
-      setError('Failed to delete employee. Please try again.');
+    } catch (deleteError: unknown) {
+      console.error('Failed to delete employee:', deleteError);
+      const parsedError = parseApiError(deleteError);
+      setError(parsedError.message || 'Failed to delete employee');
     } finally {
       setDeleteLoading(false);
     }
@@ -176,13 +187,16 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
             Manage employee profiles with search, filter, and sorting controls
           </p>
         </div>
-        <button
-          onClick={() => openForm()}
-          className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm"
-        >
-          <Plus className="w-5 h-5" />
-          Add Employee
-        </button>
+        {hasPermission(Permissions.Employee.Create) && (
+          <button
+            onClick={() => openForm()}
+            disabled={isLoading}
+            className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm"
+          >
+            <Plus className="w-5 h-5" />
+            Add Employee
+          </button>
+        )}
       </div>
 
       {/* Search, Filter, Sort Bar */}
@@ -215,6 +229,8 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
         loading={isLoading}
         error={showForm ? null : error}
         items={paginatedResult?.items || []}
+        canEdit={hasPermission(Permissions.Employee.Edit)}
+        canDelete={hasPermission(Permissions.Employee.Delete)}
         onEdit={(item) => openForm(item as Employee)}
         onDelete={(item) => setConfirmDelete(item as Employee)}
       />
@@ -241,10 +257,19 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
         isOpen={showForm}
         loading={isLoading}
         editing={editing}
+        error={error}
+        validationErrors={validationErrors}
         formData={formData}
         onChange={setFormData}
         onSubmit={handleSubmit}
-        onClose={() => setShowForm(false)}
+        onClose={() => {
+          if (isLoading) return;
+          setShowForm(false);
+        }}
+        onClearError={() => {
+          setError(null);
+          setValidationErrors(null);
+        }}
         departments={departments}
         areas={areas}
       />

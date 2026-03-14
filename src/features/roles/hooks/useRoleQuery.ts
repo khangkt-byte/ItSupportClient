@@ -11,21 +11,21 @@ export function useRoleQuery() {
         isDescending: false,
     });
     const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<RoleDto> | null>(null);
-    const [queryLoading, setQueryLoading] = useState(false);
-    const [queryError, setQueryError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchRoles = useCallback(async () => {
         try {
-            setQueryLoading(true);
-            setQueryError(null);
+            setLoading(true);
+            setError(null);
             const result = await rolesApi.getAll(queryParams);
             setPaginatedResult(result);
         } catch (error) {
             console.error('Failed to fetch roles:', error);
-            setQueryError('Failed to load roles');
+            setError('Failed to load roles');
             setPaginatedResult(null);
         } finally {
-            setQueryLoading(false);
+            setLoading(false);
         }
     }, [queryParams]);
 
@@ -37,8 +37,12 @@ export function useRoleQuery() {
         queryParams,
         setQueryParams,
         paginatedResult,
-        queryLoading,
-        queryError,
+        loading,
+        error,
+        // Backward compatibility alias. Prefer `loading`.
+        queryLoading: loading,
+        // Backward compatibility alias. Prefer `error`.
+        queryError: error,
         fetchRoles,
     };
 }

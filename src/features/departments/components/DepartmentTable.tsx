@@ -6,11 +6,13 @@ interface Props {
   loading: boolean;
   error: string | null;
   items: DepartmentDto[];
+  canEdit: boolean;
+  canDelete: boolean;
   onEdit: (item: DepartmentDto) => void;
   onDelete: (item: DepartmentDto) => void;
 }
 
-export function DepartmentTable({ loading, error, items, onEdit, onDelete }: Props) {
+export function DepartmentTable({ loading, error, items, canEdit, canDelete, onEdit, onDelete }: Props) {
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
       {loading && (
@@ -48,22 +50,26 @@ export function DepartmentTable({ loading, error, items, onEdit, onDelete }: Pro
                   <td className="px-6 py-4 text-sm text-foreground">{item.issueLogCount}</td>
                   <td className="px-6 py-4 text-sm text-right">
                     <div className="inline-flex items-center gap-2">
-                      <button
-                        onClick={() => onEdit(item)}
-                        disabled={loading}
-                        className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors disabled:opacity-50"
-                        title="Edit department"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => onDelete(item)}
-                        disabled={loading}
-                        className="text-error-foreground inline-flex items-center justify-center hover:text-error-foreground transition-colors disabled:opacity-50"
-                        title="Delete department"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {canEdit && (
+                        <button
+                          onClick={() => onEdit(item)}
+                          disabled={loading}
+                          className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors disabled:opacity-50"
+                          title="Edit department"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          onClick={() => onDelete(item)}
+                          disabled={loading}
+                          className="text-error-foreground inline-flex items-center justify-center hover:text-error-foreground transition-colors disabled:opacity-50"
+                          title="Delete department"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

@@ -6,11 +6,13 @@ interface Props {
   isLoading: boolean;
   error: string | null;
   items: AreaDto[];
+  canEdit: boolean;
+  canDelete: boolean;
   onEdit: (item: AreaDto) => void;
   onDelete: (item: AreaDto) => void;
 }
 
-export function AreaTable({ isLoading, error, items, onEdit, onDelete }: Props) {
+export function AreaTable({ isLoading, error, items, canEdit, canDelete, onEdit, onDelete }: Props) {
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
       {isLoading && (
@@ -52,20 +54,24 @@ export function AreaTable({ isLoading, error, items, onEdit, onDelete }: Props) 
                   </td>
                   <td className="px-6 py-4 text-sm text-right">
                     <div className="inline-flex items-center gap-2">
-                      <button
-                        onClick={() => onEdit(item)}
-                        className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors"
-                        title="Edit area"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => onDelete(item)}
-                        className="text-error-foreground inline-flex items-center justify-center hover:text-error-foreground transition-colors"
-                        title="Delete area"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {canEdit && (
+                        <button
+                          onClick={() => onEdit(item)}
+                          className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors"
+                          title="Edit area"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          onClick={() => onDelete(item)}
+                          className="text-error-foreground inline-flex items-center justify-center hover:text-error-foreground transition-colors"
+                          title="Delete area"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
