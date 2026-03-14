@@ -16,16 +16,18 @@ export interface AccountFormData {
 interface AccountFormModalProps {
   isOpen: boolean;
   editing: Account | null;
+  formData: AccountFormData;
   employees: Employee[];
   roles: RoleDto[];
   isSubmitting: boolean;
   error: string | null;
+  onChange: (formData: AccountFormData) => void;
   onSubmit: (formData: AccountFormData) => Promise<void>;
   onClose: () => void;
   onClearError: () => void;
 }
 
-function getInitialFormData(editing: Account | null): AccountFormData {
+export function createAccountFormData(editing: Account | null): AccountFormData {
   if (editing) {
     return {
       employeeId: editing.employeeId,
@@ -48,23 +50,23 @@ function getInitialFormData(editing: Account | null): AccountFormData {
 export function AccountFormModal({
   isOpen,
   editing,
+  formData,
   employees,
   roles,
   isSubmitting,
   error,
+  onChange,
   onSubmit,
   onClose,
   onClearError,
 }: AccountFormModalProps) {
   const [formStep, setFormStep] = useState<'basic' | 'permissions'>('basic');
-  const [formData, setFormData] = useState<AccountFormData>(getInitialFormData(editing));
   const [availableClaims, setAvailableClaims] = useState<ClaimDto[]>([]);
 
   useEffect(() => {
     if (!isOpen) return;
 
     setFormStep('basic');
-    setFormData(getInitialFormData(editing));
   }, [isOpen, editing]);
 
   useEffect(() => {
@@ -134,7 +136,7 @@ export function AccountFormModal({
               <select
                 required
                 value={formData.employeeId}
-                onChange={(e) => setFormData({ ...formData, employeeId: e.target.value })}
+                onChange={(e) => onChange({ ...formData, employeeId: e.target.value })}
                 className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
                 disabled={!!editing}
               >
@@ -156,7 +158,7 @@ export function AccountFormModal({
                 type="text"
                 required
                 value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                onChange={(e) => onChange({ ...formData, username: e.target.value })}
                 placeholder="Enter username"
                 className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
               />
@@ -170,7 +172,7 @@ export function AccountFormModal({
                 type="password"
                 required={!editing}
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) => onChange({ ...formData, password: e.target.value })}
                 placeholder={editing ? 'Leave empty to keep current password' : 'Enter password'}
                 className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
               />
@@ -196,10 +198,10 @@ export function AccountFormModal({
               availableRoles={roles}
               availableClaims={availableClaims}
               onRolesChange={(roleIds) =>
-                setFormData((prev) => ({ ...prev, selectedRoleIds: roleIds }))
+                onChange({ ...formData, selectedRoleIds: roleIds })
               }
               onClaimsChange={(claimIds) =>
-                setFormData((prev) => ({ ...prev, selectedClaimIds: claimIds }))
+                onChange({ ...formData, selectedClaimIds: claimIds })
               }
             />
 

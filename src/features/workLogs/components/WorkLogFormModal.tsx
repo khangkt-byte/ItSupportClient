@@ -26,18 +26,19 @@ export interface WorkLogFormData {
 interface WorkLogFormModalProps {
   isOpen: boolean;
   editing: WorkLog | null;
-  currentUser: string;
+  formData: WorkLogFormData;
   employees: Employee[];
   departments: Department[];
   areas: Area[];
   isSubmitting: boolean;
   error: string | null;
+  onChange: (formData: WorkLogFormData) => void;
   onSubmit: (formData: WorkLogFormData) => Promise<void>;
   onClose: () => void;
   onClearError: () => void;
 }
 
-function getInitialFormData(editing: WorkLog | null): WorkLogFormData {
+export function createWorkLogFormData(editing: WorkLog | null): WorkLogFormData {
   if (editing) {
     return {
       reportDate: new Date(editing.reportDate).toISOString().slice(0, 10),
@@ -72,17 +73,17 @@ function getInitialFormData(editing: WorkLog | null): WorkLogFormData {
 export function WorkLogFormModal({
   isOpen,
   editing,
-  currentUser,
+  formData,
   employees,
   departments,
   areas,
   isSubmitting,
   error,
+  onChange,
   onSubmit,
   onClose,
   onClearError,
 }: WorkLogFormModalProps) {
-  const [formData, setFormData] = useState<WorkLogFormData>(getInitialFormData(editing));
   const [issueSuggestions, setIssueSuggestions] = useState<Suggestion[]>([]);
   const [causeSuggestions, setCauseSuggestions] = useState<Suggestion[]>([]);
   const [selectedIssue, setSelectedIssue] = useState<Suggestion | null>(null);
@@ -95,13 +96,11 @@ export function WorkLogFormModal({
   useEffect(() => {
     if (!isOpen) return;
 
-    const nextData = getInitialFormData(editing);
-    setFormData(nextData);
     setSelectedIssue(null);
     setSelectedCause(null);
     setIssueSuggestions([]);
     setCauseSuggestions([]);
-  }, [isOpen, editing, currentUser]);
+  }, [isOpen, editing]);
 
   const itEmployees = useMemo(
     () => employees.filter((emp) => emp.department === 'IT' && !emp.deleteDate),
@@ -322,7 +321,7 @@ export function WorkLogFormModal({
                   type="date"
                   required
                   value={formData.reportDate}
-                  onChange={(e) => setFormData({ ...formData, reportDate: e.target.value })}
+                  onChange={(e) => onChange({ ...formData, reportDate: e.target.value })}
                   className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                 />
               </div>
@@ -333,7 +332,7 @@ export function WorkLogFormModal({
                 <select
                   required
                   value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value as WorkStatus })}
+                  onChange={(e) => onChange({ ...formData, status: e.target.value as WorkStatus })}
                   className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                 >
                   <option value="pending">Pending</option>
@@ -349,7 +348,7 @@ export function WorkLogFormModal({
                 <FlexibleMultiSelect
                   options={operatorOptions}
                   values={formData.operators}
-                  onChange={(values) => setFormData({ ...formData, operators: values })}
+                  onChange={(values) => onChange({ ...formData, operators: values })}
                   placeholder="Select IT operators or type custom name..."
                   label=""
                   required
@@ -361,7 +360,7 @@ export function WorkLogFormModal({
                 <FlexibleMultiSelect
                   options={requesterOptions}
                   values={formData.requesters}
-                  onChange={(values) => setFormData({ ...formData, requesters: values })}
+                  onChange={(values) => onChange({ ...formData, requesters: values })}
                   placeholder="Select requesters or type custom name..."
                   label=""
                   allowCustom
@@ -374,7 +373,7 @@ export function WorkLogFormModal({
                 <SearchableCombobox
                   options={departmentOptions}
                   value={formData.department}
-                  onChange={(value) => setFormData({ ...formData, department: value })}
+                  onChange={(value) => onChange({ ...formData, department: value })}
                   placeholder="Select department..."
                   required
                 />
@@ -386,7 +385,7 @@ export function WorkLogFormModal({
                 <SearchableCombobox
                   options={areaOptions}
                   value={formData.area}
-                  onChange={(value) => setFormData({ ...formData, area: value })}
+                  onChange={(value) => onChange({ ...formData, area: value })}
                   placeholder="Select area..."
                   required
                 />
@@ -395,7 +394,7 @@ export function WorkLogFormModal({
 
             <AutocompleteInput
               value={formData.issue}
-              onChange={(value) => setFormData({ ...formData, issue: value })}
+              onChange={(value) => onChange({ ...formData, issue: value })}
               onSelect={handleIssueSelect}
               selectedSuggestion={selectedIssue}
               suggestions={issueSuggestions}
@@ -407,7 +406,7 @@ export function WorkLogFormModal({
             />
             <AutocompleteInput
               value={formData.cause}
-              onChange={(value) => setFormData({ ...formData, cause: value })}
+              onChange={(value) => onChange({ ...formData, cause: value })}
               onSelect={handleCauseSelect}
               selectedSuggestion={selectedCause}
               suggestions={causeSuggestions}
@@ -421,7 +420,7 @@ export function WorkLogFormModal({
               <label className="block text-sm font-medium mb-1 text-muted-foreground">Fix Description</label>
               <textarea
                 value={formData.fixDescription}
-                onChange={(e) => setFormData({ ...formData, fixDescription: e.target.value })}
+                onChange={(e) => onChange({ ...formData, fixDescription: e.target.value })}
                 rows={3}
                 className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
               />
@@ -430,7 +429,7 @@ export function WorkLogFormModal({
               <label className="block text-sm font-medium mb-1 text-muted-foreground">Permanent Fix</label>
               <textarea
                 value={formData.permanentFix}
-                onChange={(e) => setFormData({ ...formData, permanentFix: e.target.value })}
+                onChange={(e) => onChange({ ...formData, permanentFix: e.target.value })}
                 rows={2}
                 className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
               />
@@ -439,7 +438,7 @@ export function WorkLogFormModal({
               <label className="block text-sm font-medium mb-1 text-muted-foreground">Note</label>
               <textarea
                 value={formData.note}
-                onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                onChange={(e) => onChange({ ...formData, note: e.target.value })}
                 rows={2}
                 className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
               />

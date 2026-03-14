@@ -29,7 +29,11 @@ import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { RoleTable } from '@/features/roles/components/RoleTable';
-import { RoleFormModal, type RoleFormData } from '@/features/roles/components/RoleFormModal';
+import {
+  RoleFormModal,
+  createRoleFormData,
+  type RoleFormData,
+} from '@/features/roles/components/RoleFormModal';
 import { useRoleQuery } from '@/features/roles/hooks/useRoleQuery';
 import { parseApiError } from '@/utils/apiValidation';
 
@@ -46,6 +50,7 @@ export function RoleManagement() {
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<RoleDto | null>(null);
+  const [formData, setFormData] = useState<RoleFormData>(createRoleFormData(null));
   const [isMutating, setIsMutating] = useState(false);
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<RoleDto | null>(null);
@@ -55,12 +60,14 @@ export function RoleManagement() {
 
   const openCreateForm = () => {
     setEditing(null);
+    setFormData(createRoleFormData(null));
     setMutationError(null);
     setShowForm(true);
   };
 
   const openEditForm = (item: RoleDto) => {
     setEditing(item);
+    setFormData(createRoleFormData(item));
     setMutationError(null);
     setShowForm(true);
   };
@@ -85,6 +92,7 @@ export function RoleManagement() {
       await refetch();
       setShowForm(false);
       setEditing(null);
+      setFormData(createRoleFormData(null));
     } catch (err: unknown) {
       const parsedError = parseApiError(err);
       const message = parsedError.message || 'Failed to save role. Please try again.';
@@ -186,12 +194,15 @@ export function RoleManagement() {
       <RoleFormModal
         isOpen={showForm}
         editing={editing}
+        formData={formData}
         error={mutationError}
         isSubmitting={isMutating}
+        onChange={setFormData}
         onSubmit={handleSubmit}
         onClose={() => {
           setShowForm(false);
           setEditing(null);
+          setFormData(createRoleFormData(null));
         }}
         onClearError={() => setMutationError(null)}
       />

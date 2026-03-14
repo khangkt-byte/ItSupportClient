@@ -6,7 +6,11 @@ import { PaginationBar } from '@/components/common/PaginationBar';
 import { Permissions } from '@/config/permissions';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { usePermission } from '@/hooks/usePermission';
-import { WorkLogFormModal, type WorkLogFormData } from '@/features/workLogs/components/WorkLogFormModal';
+import {
+  WorkLogFormModal,
+  createWorkLogFormData,
+  type WorkLogFormData,
+} from '@/features/workLogs/components/WorkLogFormModal';
 import { WorkLogImportExportPanel } from '@/features/workLogs/components/WorkLogImportExportPanel';
 import { WorkLogTable } from '@/features/workLogs/components/WorkLogTable';
 import { useWorkLogQuery } from '@/features/workLogs/hooks/useWorkLogQuery';
@@ -33,6 +37,7 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<WorkLog | null>(null);
+  const [formData, setFormData] = useState<WorkLogFormData>(createWorkLogFormData(null));
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -56,7 +61,9 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
 
   const openForm = (log?: WorkLog) => {
     setMutationError(null);
-    setEditing(log || null);
+    const nextEditing = log || null;
+    setEditing(nextEditing);
+    setFormData(createWorkLogFormData(nextEditing));
     setShowForm(true);
   };
 
@@ -65,6 +72,7 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
     if (success) {
       setShowForm(false);
       setEditing(null);
+      setFormData(createWorkLogFormData(null));
     }
   };
 
@@ -165,17 +173,19 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
       <WorkLogFormModal
         isOpen={showForm}
         editing={editing}
-        currentUser={currentUser}
+        formData={formData}
         employees={employees}
         departments={departments}
         areas={areas}
         isSubmitting={submitting}
         error={error}
+        onChange={setFormData}
         onSubmit={handleSubmit}
         onClose={() => {
           if (submitting) return;
           setShowForm(false);
           setEditing(null);
+          setFormData(createWorkLogFormData(null));
         }}
         onClearError={() => setError(null)}
       />

@@ -29,7 +29,11 @@ import type { Account, Employee, RoleDto } from '@/types/data';
 import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 import { AccountTable } from '@/features/accounts/components/AccountTable';
-import { AccountFormModal, type AccountFormData } from '@/features/accounts/components/AccountFormModal';
+import {
+  AccountFormModal,
+  createAccountFormData,
+  type AccountFormData,
+} from '@/features/accounts/components/AccountFormModal';
 import { useAccountQuery } from '@/features/accounts/hooks/useAccountQuery';
 import { parseApiError } from '@/utils/apiValidation';
 
@@ -58,6 +62,7 @@ export function AccountManagement({ employees, roles }: Props) {
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Account | null>(null);
+  const [formData, setFormData] = useState<AccountFormData>(createAccountFormData(null));
   const [isMutating, setIsMutating] = useState(false);
   const [mutationError, setMutationError] = useState<string | null>(null);
   const [confirmState, setConfirmState] = useState<ConfirmState>(null);
@@ -67,6 +72,7 @@ export function AccountManagement({ employees, roles }: Props) {
 
   const openCreateForm = () => {
     setEditing(null);
+    setFormData(createAccountFormData(null));
     setMutationError(null);
     setShowForm(true);
   };
@@ -86,7 +92,7 @@ export function AccountManagement({ employees, roles }: Props) {
           employee.fullName === listAccount.empName
       );
 
-      setEditing({
+      const accountToEdit: Account = {
         id: detail.accountId,
         accountId: detail.accountId,
         username: detail.username,
@@ -104,7 +110,10 @@ export function AccountManagement({ employees, roles }: Props) {
         employeeName: detail.empName,
         employeeCode: detail.empCode,
         roles: detail.roles,
-      });
+      };
+
+      setEditing(accountToEdit);
+      setFormData(createAccountFormData(accountToEdit));
     } catch (loadError: unknown) {
       const parsedError = parseApiError(loadError);
       const message = parsedError.message || 'Unable to load account details for editing.';
@@ -152,6 +161,7 @@ export function AccountManagement({ employees, roles }: Props) {
 
       setShowForm(false);
       setEditing(null);
+      setFormData(createAccountFormData(null));
       await refetch();
     } catch (err: unknown) {
       const parsedError = parseApiError(err);
@@ -336,14 +346,17 @@ export function AccountManagement({ employees, roles }: Props) {
       <AccountFormModal
         isOpen={showForm}
         editing={editing}
+        formData={formData}
         employees={employees}
         roles={roles}
         isSubmitting={isMutating}
         error={mutationError}
+        onChange={setFormData}
         onSubmit={handleFormSubmit}
         onClose={() => {
           setShowForm(false);
           setEditing(null);
+          setFormData(createAccountFormData(null));
         }}
         onClearError={() => setMutationError(null)}
       />
