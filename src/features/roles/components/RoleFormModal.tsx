@@ -1,9 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, ChevronDown, ChevronUp, Save, Shield, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Save, Shield, X } from 'lucide-react';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { rolesApi } from '@/services/api/roles';
 import type { ClaimDto, RoleDto } from '@/types/data';
 import { groupClaimsByCategory } from '@/features/roles/utils/claimGrouping';
+import {
+  getFieldErrorMessages,
+  getGeneralValidationMessages,
+  type ValidationErrors,
+} from '@/utils/apiErrors';
 
 export interface RoleFormData {
   name: string;
@@ -16,6 +22,7 @@ interface RoleFormModalProps {
   editing: RoleDto | null;
   formData: RoleFormData;
   error: string | null;
+  validationErrors: ValidationErrors | null;
   isSubmitting: boolean;
   onChange: (formData: RoleFormData) => void;
   onSubmit: (formData: RoleFormData) => Promise<void>;
@@ -44,6 +51,7 @@ export function RoleFormModal({
   editing,
   formData,
   error,
+  validationErrors,
   isSubmitting,
   onChange,
   onSubmit,
@@ -135,6 +143,9 @@ export function RoleFormModal({
     await onSubmit(formData);
   };
 
+  const roleNameErrors = getFieldErrorMessages(validationErrors, 'Name');
+  const generalValidationMessages = getGeneralValidationMessages(validationErrors, ['Name']);
+
   if (!isOpen) return null;
 
   return (
@@ -160,16 +171,13 @@ export function RoleFormModal({
         </div>
 
         {error && (
-          <div className="mx-6 mt-4 p-4 bg-error-background border border-error-border rounded-lg flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
-            <div className="flex-1">
-              <p className="font-medium text-error-foreground">Error</p>
-              <p className="text-sm text-error-foreground mt-0.5">{error}</p>
-            </div>
-            <button onClick={onClearError} className="text-error-foreground hover:text-error-foreground transition-colors">
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+          <ErrorAlert
+            message={error}
+            details={generalValidationMessages}
+            onDismiss={onClearError}
+            dismissDisabled={isSubmitting}
+            className="mx-6 mt-4"
+          />
         )}
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -186,6 +194,13 @@ export function RoleFormModal({
                 placeholder="e.g., System Administrator"
                 className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
               />
+              {roleNameErrors.length > 0 && (
+                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
+                  {roleNameErrors.map((message, index) => (
+                    <li key={`role-name-${index}`}>{message}</li>
+                  ))}
+                </ul>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-muted-foreground mb-1">Description</label>

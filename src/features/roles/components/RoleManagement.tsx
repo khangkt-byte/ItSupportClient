@@ -35,7 +35,7 @@ import {
   type RoleFormData,
 } from '@/features/roles/components/RoleFormModal';
 import { useRoleQuery } from '@/features/roles/hooks/useRoleQuery';
-import { parseApiError } from '@/utils/apiValidation';
+import { createApiErrorState, type ValidationErrors } from '@/utils/apiErrors';
 
 export function RoleManagement() {
   const {
@@ -53,6 +53,7 @@ export function RoleManagement() {
   const [formData, setFormData] = useState<RoleFormData>(createRoleFormData(null));
   const [isMutating, setIsMutating] = useState(false);
   const [mutationError, setMutationError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<RoleDto | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -62,6 +63,7 @@ export function RoleManagement() {
     setEditing(null);
     setFormData(createRoleFormData(null));
     setMutationError(null);
+    setValidationErrors(null);
     setShowForm(true);
   };
 
@@ -69,12 +71,14 @@ export function RoleManagement() {
     setEditing(item);
     setFormData(createRoleFormData(item));
     setMutationError(null);
+    setValidationErrors(null);
     setShowForm(true);
   };
 
   const handleSubmit = async (formData: RoleFormData) => {
     setIsMutating(true);
     setMutationError(null);
+    setValidationErrors(null);
 
     try {
       const roleData = {
@@ -94,10 +98,10 @@ export function RoleManagement() {
       setEditing(null);
       setFormData(createRoleFormData(null));
     } catch (err: unknown) {
-      const parsedError = parseApiError(err);
-      const message = parsedError.message || 'Failed to save role. Please try again.';
       console.error('Failed to save role:', err);
-      setMutationError(message);
+      const errorState = createApiErrorState(err, 'Failed to save role. Please try again.');
+      setMutationError(errorState.message);
+      setValidationErrors(errorState.fieldErrors);
     } finally {
       setIsMutating(false);
     }
@@ -113,9 +117,9 @@ export function RoleManagement() {
       await refetch();
       setConfirmDelete(null);
     } catch (err: unknown) {
-      const parsedError = parseApiError(err);
-      const message = parsedError.message || 'Failed to delete role';
-      setMutationError(message);
+      const errorState = createApiErrorState(err, 'Failed to delete role.');
+      setMutationError(errorState.message);
+      setValidationErrors(errorState.fieldErrors);
       setConfirmDelete(null);
     } finally {
       setDeleteLoading(false);
@@ -196,6 +200,7 @@ export function RoleManagement() {
         editing={editing}
         formData={formData}
         error={mutationError}
+        validationErrors={validationErrors}
         isSubmitting={isMutating}
         onChange={setFormData}
         onSubmit={handleSubmit}
@@ -203,8 +208,12 @@ export function RoleManagement() {
           setShowForm(false);
           setEditing(null);
           setFormData(createRoleFormData(null));
+          setValidationErrors(null);
         }}
-        onClearError={() => setMutationError(null)}
+        onClearError={() => {
+          setMutationError(null);
+          setValidationErrors(null);
+        }}
       />
 
       <ConfirmDialog

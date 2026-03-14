@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { rolesApi } from '@/services/api/roles';
 import type { PaginatedResult, RoleDto, RolesQueryParams } from '@/types/data';
-import { getApiErrorMessage } from '@/utils/apiValidation';
+import { getApiErrorMessage } from '@/utils/apiErrors';
 
 export function useRoleQuery() {
     const [queryParams, setQueryParams] = useState<RolesQueryParams>({
