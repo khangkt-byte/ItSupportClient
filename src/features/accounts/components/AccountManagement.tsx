@@ -18,7 +18,7 @@
  * - GET /api/roles/claims - Get all available claims
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Plus, User } from 'lucide-react';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
@@ -31,10 +31,9 @@ import { Permissions } from '@/config/permissions';
 import { AccountTable } from '@/features/accounts/components/AccountTable';
 import { AccountFormModal, type AccountFormData } from '@/features/accounts/components/AccountFormModal';
 import { useAccountQuery } from '@/features/accounts/hooks/useAccountQuery';
+import { parseApiError } from '@/utils/apiValidation';
 
 interface Props {
-  data: Account[];
-  setData: (items: Account[]) => void;
   employees: Employee[];
   roles: RoleDto[];
 }
@@ -47,14 +46,14 @@ type ConfirmState = {
   isLocked: boolean;
 } | null;
 
-export function AccountManagement({ data, setData, employees, roles }: Props) {
+export function AccountManagement({ employees, roles }: Props) {
   const {
     queryParams,
     setQueryParams,
     paginatedResult,
     loading,
     error,
-    fetchAccounts,
+    refetch,
   } = useAccountQuery();
 
   const [showForm, setShowForm] = useState(false);
@@ -66,68 +65,53 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
 
   const { hasPermission } = usePermission();
 
-  // Ensure roles display is accurate by fetching account details if needed
-  useEffect(() => {
-    const missingRoles = data.filter(item => {
-      const hasRoles = (item as { roles?: RoleDto[] | null }).roles;
-      return !hasRoles && item.role === 'employee';
-    });
-
-    if (missingRoles.length === 0) return;
-
-    let isMounted = true;
-
-    const loadAccountRoles = async () => {
-      const updates = await Promise.all(
-        missingRoles.map(async (item) => {
-          try {
-            const detail = await accountsApi.getById(item.accountId);
-            const roles = detail.roles || null;
-            const roleDisplay = roles && roles.length > 0
-              ? roles.map(role => role.name).join(', ')
-              : 'No Role';
-            return { id: item.id, roles, roleDisplay };
-          } catch {
-            return null;
-          }
-        })
-      );
-
-      if (!isMounted) return;
-
-      const validUpdates = updates.filter(Boolean) as Array<{ id: string; roles: RoleDto[] | null; roleDisplay: string }>;
-      if (validUpdates.length === 0) return;
-
-      setData(
-        data.map((item) => {
-          const update = validUpdates.find((u) => u.id === item.id);
-          if (!update) return item;
-          return { ...item, roles: update.roles, role: update.roleDisplay };
-        })
-      );
-    };
-
-    void loadAccountRoles();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [data, setData]);
-
   const openCreateForm = () => {
     setEditing(null);
     setMutationError(null);
     setShowForm(true);
   };
 
-  const openEditForm = (accountId: string) => {
-    const account = data.find((item) => item.accountId === accountId) || null;
-    if (!account) {
+  const openEditForm = async (accountId: string) => {
+    const listAccount = paginatedResult?.items.find((item) => item.accountId === accountId) || null;
+    if (!listAccount) {
       setMutationError('Unable to load account details for editing.');
       return;
     }
 
-    setEditing(account);
+    try {
+      const detail = await accountsApi.getById(accountId);
+      const matchedEmployee = employees.find(
+        (employee) =>
+          employee.empCode === listAccount.empCode ||
+          employee.fullName === listAccount.empName
+      );
+
+      setEditing({
+        id: detail.accountId,
+        accountId: detail.accountId,
+        username: detail.username,
+        empName: detail.empName,
+        empCode: detail.empCode,
+        isLocked: detail.isLocked,
+        lastLoginAt: detail.lastLoginAt,
+        createdAt: detail.createdAt,
+        role:
+          detail.roles && detail.roles.length > 0
+            ? detail.roles.map((role) => role.name).join(', ')
+            : 'No Role',
+        password: '',
+        employeeId: matchedEmployee?.employeeId || detail.accountId,
+        employeeName: detail.empName,
+        employeeCode: detail.empCode,
+        roles: detail.roles,
+      });
+    } catch (loadError: unknown) {
+      const parsedError = parseApiError(loadError);
+      const message = parsedError.message || 'Unable to load account details for editing.';
+      setMutationError(message);
+      return;
+    }
+
     setMutationError(null);
     setShowForm(true);
   };
@@ -137,13 +121,6 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
     setMutationError(null);
 
     try {
-      const employee = employees.find((e) => e.employeeId === formData.employeeId);
-
-      const selectedRoles = roles.filter(role => formData.selectedRoleIds.includes(role.roleId));
-      const roleDisplay = selectedRoles.length > 0
-        ? selectedRoles.map(role => role.name).join(', ')
-        : 'No Role';
-
       if (editing) {
         await accountsApi.update(editing.accountId, {
           username: formData.username,
@@ -157,14 +134,6 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
             claimIds: formData.selectedClaimIds
           });
         }
-
-        setData(
-          data.map((i) =>
-            i.id === editing.id
-              ? { ...i, username: formData.username, roles: selectedRoles, role: roleDisplay }
-              : i
-          )
-        );
       } else {
         const created = await accountsApi.create({
           empId: formData.employeeId,
@@ -179,34 +148,14 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
             claimIds: formData.selectedClaimIds
           });
         }
-
-        setData([
-          ...data,
-          {
-            id: created.accountId,
-            accountId: created.accountId,
-            employeeId: formData.employeeId,
-            username: formData.username,
-            password: '', // Don't store password locally
-            role: roleDisplay,
-            roles: selectedRoles,
-            empName: employee?.fullName || '',
-            empCode: employee?.empCode || null,
-            employeeName: employee?.fullName || '',
-            employeeCode: employee?.empCode || null,
-            isLocked: false,
-            lastLoginAt: null,
-            createdAt: new Date().toISOString(),
-            deleteDate: null
-          }
-        ]);
       }
 
       setShowForm(false);
       setEditing(null);
-      await fetchAccounts();
+      await refetch();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to save account. Please try again.';
+      const parsedError = parseApiError(err);
+      const message = parsedError.message || 'Failed to save account. Please try again.';
       console.error('Failed to save account:', err);
       setMutationError(message);
     } finally {
@@ -220,10 +169,10 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
   const handleDelete = async (accountId: string) => {
     try {
       await accountsApi.deleteSingle(accountId);
-      setData(data.filter((i) => i.accountId !== accountId));
-      await fetchAccounts();
+      await refetch();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to delete account';
+      const parsedError = parseApiError(err);
+      const message = parsedError.message || 'Failed to delete account';
       setMutationError(message);
     }
   };
@@ -235,15 +184,10 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
       } else {
         await accountsApi.lock(accountId);
       }
-
-      setData(
-        data.map((i) =>
-          i.accountId === accountId ? { ...i, isLocked: !i.isLocked } : i
-        )
-      );
-      await fetchAccounts();
+      await refetch();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to update account status';
+      const parsedError = parseApiError(err);
+      const message = parsedError.message || 'Failed to update account status';
       setMutationError(message);
     }
   };

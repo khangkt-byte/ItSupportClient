@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { accountsApi } from '@/services/api/accounts';
 import { employeesApi } from '@/services/api/employees';
 import type { ChangePasswordDto, LoginHistoryDto, ProfileDto } from '@/types/data';
+import { parseApiError } from '@/utils/apiValidation';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { LoadingState } from '@/components/common/LoadingState';
 
@@ -61,8 +62,9 @@ export function MyAccountManagement() {
 
       setProfile(profileData);
       setLoginHistory(historyData);
-    } catch (loadError: any) {
-      setError(loadError?.message || 'Failed to load your account data.');
+    } catch (loadError: unknown) {
+      const parsedError = parseApiError(loadError);
+      setError(parsedError.message);
     } finally {
       setLoading(false);
     }
@@ -102,8 +104,9 @@ export function MyAccountManagement() {
       await accountsApi.changePassword(payload);
       setPasswordForm(INITIAL_PASSWORD_FORM);
       setSuccessMessage('Password changed successfully.');
-    } catch (passwordError: any) {
-      setError(passwordError?.message || 'Failed to change password.');
+    } catch (passwordError: unknown) {
+      const parsedError = parseApiError(passwordError);
+      setError(parsedError.message);
     } finally {
       setPasswordSaving(false);
     }

@@ -40,6 +40,7 @@ export function useAccountQuery() {
         paginatedResult,
         loading,
         error,
-        fetchAccounts,
+        setError,
+        refetch: fetchAccounts,
     };
 }
