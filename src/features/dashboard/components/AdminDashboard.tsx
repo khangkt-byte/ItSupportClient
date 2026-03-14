@@ -40,7 +40,7 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
   // Show loading if data is still being fetched
   if (dataManager.employees.loading) {
     return (
-      <LoadingState className="min-h-100" />
+      <LoadingState className="min-h-100" label="Loading dashboard..." />
     );
   }
 
@@ -50,26 +50,26 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
       case 'admin':
         return (
           <div>
-            <h1 className="text-2xl font-semibold mb-5">Admin Dashboard</h1>
-            <div className="card p-6">
-              <h2 className="text-xl font-semibold mb-4">Welcome, {user.fullName}!</h2>
+            <h1 className="text-2xl font-semibold mb-5 text-foreground">Admin Dashboard</h1>
+            <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
+              <h2 className="text-xl font-semibold mb-4 text-foreground">Welcome, {user.fullName}!</h2>
               <p className="text-muted-foreground mb-4">
                 You have full administrative access to the IT Support Management System.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-                <div className="p-4 rounded-lg bg-primary-100 dark:bg-primary-900/20">
+                <div className="bg-primary-50 dark:bg-primary-900/20 p-4 rounded-lg border border-primary-200 dark:border-primary-800">
                   <p className="text-sm text-muted-foreground">Total Work Logs</p>
-                  <p className="text-2xl font-bold text-primary-600">
+                  <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">
                     {workLogSummary.loading ? '...' : workLogSummary.totalCount}
                   </p>
                 </div>
-                <div className="p-4 rounded-lg bg-success-background">
+                <div className="bg-success-background p-4 rounded-lg border border-success-border">
                   <p className="text-sm text-muted-foreground">Total Employees</p>
                   <p className="text-2xl font-bold text-success-foreground">{dataManager.employees.data.length}</p>
                 </div>
-                <div className="p-4 rounded-lg bg-primary-100 dark:bg-primary-900/20">
+                <div className="bg-primary-50 dark:bg-primary-900/20 p-4 rounded-lg border border-primary-200 dark:border-primary-800">
                   <p className="text-sm text-muted-foreground">Total Areas</p>
-                  <p className="text-2xl font-bold text-primary-600">{dataManager.areas.data.length}</p>
+                  <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">{dataManager.areas.data.length}</p>
                 </div>
               </div>
             </div>
@@ -87,38 +87,21 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
       case 'employees':
         return (
           <EmployeeManagement
-            data={dataManager.employees.data}
-            setData={dataManager.employees.setData}
             departments={dataManager.departments.data}
             areas={dataManager.areas.data}
           />
         );
       case 'issues':
         return (
-          <IssueManagement
-            data={dataManager.issues.data}
-            setData={dataManager.issues.setData}
-          />
+          <IssueManagement />
         );
       case 'departments':
-        return (
-          <DepartmentManagement
-            data={dataManager.departments.data}
-            setData={dataManager.departments.setData}
-          />
-        );
+        return <DepartmentManagement />;
       case 'areas':
-        return (
-          <AreaManagement
-            data={dataManager.areas.data}
-            setData={dataManager.areas.setData}
-          />
-        );
+        return <AreaManagement />;
       case 'accounts':
         return (
           <AccountManagement
-            data={dataManager.accounts.data}
-            setData={dataManager.accounts.setData}
             employees={dataManager.employees.data}
             roles={dataManager.roles.data}
           />
@@ -126,17 +109,12 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
       case 'my-account':
         return <MyAccountManagement />;
       case 'roles':
-        return (
-          <RoleManagement
-            data={dataManager.roles.data}
-            setData={dataManager.roles.setData}
-          />
-        );
+        return <RoleManagement />;
       default:
         return (
           <div>
-            <h1 className="text-2xl font-semibold mb-5">Admin Dashboard</h1>
-            <div className="card p-6">
+            <h1 className="text-2xl font-semibold mb-5 text-foreground">Admin Dashboard</h1>
+            <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
               <p className="text-muted-foreground">Select a menu item to get started.</p>
             </div>
           </div>

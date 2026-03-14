@@ -223,12 +223,12 @@ const [queryParams, setQueryParams] = useState<AreasQueryParams>({
 **Current State:**
 - ❌ No pagination (displays all departments in grid)
 - ❌ No search functionality
-- ✅ Already uses API (departmentApi.getAll, create, update, delete)
+- ✅ Already uses API (departmentsApi.getAll, create, update, delete)
 
 **Migration Steps:**
 1. Update API call to pass queryParams:
 ```typescript
-const result = await departmentApi.getAll(queryParams);
+const result = await departmentsApi.getAll(queryParams);
 ```
 
 2. Add SearchFilterBar:
