@@ -35,7 +35,7 @@ import {
   type AccountFormData,
 } from '@/features/accounts/components/AccountFormModal';
 import { useAccountQuery } from '@/features/accounts/hooks/useAccountQuery';
-import { parseApiError } from '@/utils/apiValidation';
+import { createApiErrorState, type ValidationErrors } from '@/utils/apiErrors';
 
 interface Props {
   employees: Employee[];
@@ -65,6 +65,7 @@ export function AccountManagement({ employees, roles }: Props) {
   const [formData, setFormData] = useState<AccountFormData>(createAccountFormData(null));
   const [isMutating, setIsMutating] = useState(false);
   const [mutationError, setMutationError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
   const [confirmState, setConfirmState] = useState<ConfirmState>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -74,6 +75,7 @@ export function AccountManagement({ employees, roles }: Props) {
     setEditing(null);
     setFormData(createAccountFormData(null));
     setMutationError(null);
+    setValidationErrors(null);
     setShowForm(true);
   };
 
@@ -81,6 +83,7 @@ export function AccountManagement({ employees, roles }: Props) {
     const listAccount = paginatedResult?.items.find((item) => item.accountId === accountId) || null;
     if (!listAccount) {
       setMutationError('Unable to load account details for editing.');
+      setValidationErrors(null);
       return;
     }
 
@@ -115,19 +118,21 @@ export function AccountManagement({ employees, roles }: Props) {
       setEditing(accountToEdit);
       setFormData(createAccountFormData(accountToEdit));
     } catch (loadError: unknown) {
-      const parsedError = parseApiError(loadError);
-      const message = parsedError.message || 'Unable to load account details for editing.';
-      setMutationError(message);
+      const errorState = createApiErrorState(loadError, 'Unable to load account details for editing.');
+      setMutationError(errorState.message);
+      setValidationErrors(errorState.fieldErrors);
       return;
     }
 
     setMutationError(null);
+    setValidationErrors(null);
     setShowForm(true);
   };
 
   const handleFormSubmit = async (formData: AccountFormData) => {
     setIsMutating(true);
     setMutationError(null);
+    setValidationErrors(null);
 
     try {
       if (editing) {
@@ -164,10 +169,10 @@ export function AccountManagement({ employees, roles }: Props) {
       setFormData(createAccountFormData(null));
       await refetch();
     } catch (err: unknown) {
-      const parsedError = parseApiError(err);
-      const message = parsedError.message || 'Failed to save account. Please try again.';
       console.error('Failed to save account:', err);
-      setMutationError(message);
+      const errorState = createApiErrorState(err, 'Failed to save account. Please try again.');
+      setMutationError(errorState.message);
+      setValidationErrors(errorState.fieldErrors);
     } finally {
       setIsMutating(false);
     }
@@ -181,9 +186,9 @@ export function AccountManagement({ employees, roles }: Props) {
       await accountsApi.deleteSingle(accountId);
       await refetch();
     } catch (err: unknown) {
-      const parsedError = parseApiError(err);
-      const message = parsedError.message || 'Failed to delete account';
-      setMutationError(message);
+      const errorState = createApiErrorState(err, 'Failed to delete account.');
+      setMutationError(errorState.message);
+      setValidationErrors(errorState.fieldErrors);
     }
   };
 
@@ -196,9 +201,9 @@ export function AccountManagement({ employees, roles }: Props) {
       }
       await refetch();
     } catch (err: unknown) {
-      const parsedError = parseApiError(err);
-      const message = parsedError.message || 'Failed to update account status';
-      setMutationError(message);
+      const errorState = createApiErrorState(err, 'Failed to update account status.');
+      setMutationError(errorState.message);
+      setValidationErrors(errorState.fieldErrors);
     }
   };
 
@@ -351,14 +356,19 @@ export function AccountManagement({ employees, roles }: Props) {
         roles={roles}
         isSubmitting={isMutating}
         error={mutationError}
+        validationErrors={validationErrors}
         onChange={setFormData}
         onSubmit={handleFormSubmit}
         onClose={() => {
           setShowForm(false);
           setEditing(null);
           setFormData(createAccountFormData(null));
+          setValidationErrors(null);
         }}
-        onClearError={() => setMutationError(null)}
+        onClearError={() => {
+          setMutationError(null);
+          setValidationErrors(null);
+        }}
       />
 
       <ConfirmDialog

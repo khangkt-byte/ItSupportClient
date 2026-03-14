@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { accountsApi } from '@/services/api/accounts';
 import { employeesApi } from '@/services/api/employees';
 import type { ChangePasswordDto, LoginHistoryDto, ProfileDto } from '@/types/data';
-import { parseApiError } from '@/utils/apiValidation';
+import { createApiErrorState } from '@/utils/apiErrors';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { LoadingState } from '@/components/common/LoadingState';
 
@@ -63,8 +64,8 @@ export function MyAccountManagement() {
       setProfile(profileData);
       setLoginHistory(historyData);
     } catch (loadError: unknown) {
-      const parsedError = parseApiError(loadError);
-      setError(parsedError.message);
+      const errorState = createApiErrorState(loadError, 'Failed to load your account data.');
+      setError(errorState.message);
     } finally {
       setLoading(false);
     }
@@ -105,8 +106,8 @@ export function MyAccountManagement() {
       setPasswordForm(INITIAL_PASSWORD_FORM);
       setSuccessMessage('Password changed successfully.');
     } catch (passwordError: unknown) {
-      const parsedError = parseApiError(passwordError);
-      setError(parsedError.message);
+      const errorState = createApiErrorState(passwordError, 'Failed to change password.');
+      setError(errorState.message);
     } finally {
       setPasswordSaving(false);
     }
@@ -118,8 +119,9 @@ export function MyAccountManagement() {
       const history = await accountsApi.getLoginHistory();
       setLoginHistory(history);
       setHistoryPage(1);
-    } catch {
-      setError('Failed to refresh login history.');
+    } catch (refreshError: unknown) {
+      const errorState = createApiErrorState(refreshError, 'Failed to refresh login history.');
+      setError(errorState.message);
     } finally {
       setHistoryRefreshing(false);
     }
@@ -161,11 +163,7 @@ export function MyAccountManagement() {
         <p className="text-muted-foreground">View your profile information and manage account security.</p>
       </div>
 
-      {error && (
-        <div className="rounded-lg border border-error-border bg-error-background p-3 text-error-foreground text-sm">
-          {error}
-        </div>
-      )}
+      {error && <ErrorAlert message={error} />}
 
       {successMessage && (
         <div className="rounded-lg border border-success-border bg-success-background p-3 text-success-foreground text-sm">

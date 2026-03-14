@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { accountsApi } from '@/services/api/accounts';
 import type { AccountsQueryParams, ListAccountDto, PaginatedResult } from '@/types/data';
-import { getApiErrorMessage } from '@/utils/apiValidation';
+import { getApiErrorMessage } from '@/utils/apiErrors';
 
 export function useAccountQuery() {
     const [queryParams, setQueryParams] = useState<AccountsQueryParams>({

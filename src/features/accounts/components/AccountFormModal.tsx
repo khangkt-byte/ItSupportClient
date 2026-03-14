@@ -1,9 +1,15 @@
 import { useEffect, useState } from 'react';
-import { AlertCircle, Save, User, X } from 'lucide-react';
+import { Save, User, X } from 'lucide-react';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 import { PermissionEditor } from '@/components/common/PermissionEditor';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { rolesApi } from '@/services/api/roles';
 import type { Account, ClaimDto, Employee, RoleDto } from '@/types/data';
+import {
+  getFieldErrorMessages,
+  getGeneralValidationMessages,
+  type ValidationErrors,
+} from '@/utils/apiErrors';
 
 export interface AccountFormData {
   employeeId: string;
@@ -21,6 +27,7 @@ interface AccountFormModalProps {
   roles: RoleDto[];
   isSubmitting: boolean;
   error: string | null;
+  validationErrors: ValidationErrors | null;
   onChange: (formData: AccountFormData) => void;
   onSubmit: (formData: AccountFormData) => Promise<void>;
   onClose: () => void;
@@ -55,6 +62,7 @@ export function AccountFormModal({
   roles,
   isSubmitting,
   error,
+  validationErrors,
   onChange,
   onSubmit,
   onClose,
@@ -94,6 +102,16 @@ export function AccountFormModal({
     await onSubmit(formData);
   };
 
+  const employeeErrors = getFieldErrorMessages(validationErrors, 'EmpId', ['EmployeeId']);
+  const usernameErrors = getFieldErrorMessages(validationErrors, 'Username');
+  const passwordErrors = getFieldErrorMessages(validationErrors, 'Password');
+  const generalValidationMessages = getGeneralValidationMessages(validationErrors, [
+    'EmpId',
+    'EmployeeId',
+    'Username',
+    'Password',
+  ]);
+
   if (!isOpen) return null;
 
   return (
@@ -115,16 +133,13 @@ export function AccountFormModal({
         </div>
 
         {error && (
-          <div className="mx-6 mt-4 p-4 bg-error-background border border-error-border rounded-lg flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
-            <div className="flex-1">
-              <p className="font-medium text-error-foreground">Error</p>
-              <p className="text-sm text-error-foreground mt-0.5">{error}</p>
-            </div>
-            <button onClick={onClearError} className="text-error-foreground hover:text-error-foreground transition-colors">
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+          <ErrorAlert
+            message={error}
+            details={generalValidationMessages}
+            onDismiss={onClearError}
+            dismissDisabled={isSubmitting}
+            className="mx-6 mt-4"
+          />
         )}
 
         {formStep === 'basic' && (
@@ -147,6 +162,13 @@ export function AccountFormModal({
                   </option>
                 ))}
               </select>
+              {employeeErrors.length > 0 && (
+                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
+                  {employeeErrors.map((message, index) => (
+                    <li key={`employee-${index}`}>{message}</li>
+                  ))}
+                </ul>
+              )}
               {editing && <p className="text-xs text-muted-foreground mt-1">Employee cannot be changed</p>}
             </div>
 
@@ -162,6 +184,13 @@ export function AccountFormModal({
                 placeholder="Enter username"
                 className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
               />
+              {usernameErrors.length > 0 && (
+                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
+                  {usernameErrors.map((message, index) => (
+                    <li key={`username-${index}`}>{message}</li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <div>
@@ -176,6 +205,13 @@ export function AccountFormModal({
                 placeholder={editing ? 'Leave empty to keep current password' : 'Enter password'}
                 className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
               />
+              {passwordErrors.length > 0 && (
+                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
+                  {passwordErrors.map((message, index) => (
+                    <li key={`password-${index}`}>{message}</li>
+                  ))}
+                </ul>
+              )}
               {editing && <p className="text-xs text-muted-foreground mt-1">Leave empty to keep current password</p>}
             </div>
 
