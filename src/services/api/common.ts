@@ -187,7 +187,17 @@ class ApiClient {
     } catch (error) {
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
-          throw new Error('Request timeout');
+          const timeoutError = new Error('The request timed out. Please try again.');
+          (timeoutError as any).errorCode = 'REQUEST_TIMEOUT';
+          (timeoutError as any).errorCategory = 'transport';
+          throw timeoutError;
+        }
+
+        if (error instanceof TypeError) {
+          const networkError = new Error('Unable to reach the server. Check your connection and try again.');
+          (networkError as any).errorCode = 'NETWORK_ERROR';
+          (networkError as any).errorCategory = 'transport';
+          throw networkError;
         }
       }
       throw error;
@@ -227,7 +237,13 @@ class ApiClient {
     // ✅ Handle error responses
     let errorData: ApiError;
     try {
-      errorData = await response.json();
+      const rawBody = await response.text();
+      errorData = rawBody
+        ? JSON.parse(rawBody)
+        : {
+          error: response.statusText,
+          statusCode: response.status,
+        };
     } catch {
       errorData = {
         error: response.statusText,
@@ -255,6 +271,7 @@ class ApiClient {
     (error as any).data = errorData;
     (error as any).status = response.status;
     (error as any).headers = response.headers;
+    (error as any).response = response;
     throw error;
   }
 
