@@ -3,7 +3,7 @@ import type { ListEmployeeDto } from '@/types/data';
 import { LoadingState } from '@/components/common/LoadingState';
 
 interface Props {
-  loading: boolean;
+  isLoading: boolean;
   error: string | null;
   items: ListEmployeeDto[];
   canEdit: boolean;
@@ -12,14 +12,14 @@ interface Props {
   onDelete: (item: ListEmployeeDto) => void;
 }
 
-export function EmployeeTable({ loading, error, items, canEdit, canDelete, onEdit, onDelete }: Props) {
+export function EmployeeTable({ isLoading, error, items, canEdit, canDelete, onEdit, onDelete }: Props) {
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
-      {loading && (
+      {isLoading && (
         <LoadingState className="py-12" spinnerSize="md" label="Loading employees..." />
       )}
 
-      {error && !loading && (
+      {error && !isLoading && (
         <div className="p-4 bg-error-background border border-error-border flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
           <div className="flex-1">
@@ -29,7 +29,7 @@ export function EmployeeTable({ loading, error, items, canEdit, canDelete, onEdi
         </div>
       )}
 
-      {!loading && !error && (
+      {!isLoading && !error && (
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-muted border-b border-border">
@@ -64,7 +64,7 @@ export function EmployeeTable({ loading, error, items, canEdit, canDelete, onEdi
                         {canEdit && (
                           <button
                             onClick={() => onEdit(item)}
-                            disabled={loading}
+                            disabled={isLoading}
                             className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors disabled:opacity-50"
                             title="Edit employee"
                           >
@@ -74,7 +74,7 @@ export function EmployeeTable({ loading, error, items, canEdit, canDelete, onEdi
                         {canDelete && (
                           <button
                             onClick={() => onDelete(item)}
-                            disabled={loading}
+                            disabled={isLoading}
                             className="text-error-foreground inline-flex items-center justify-center hover:text-error-foreground transition-colors disabled:opacity-50"
                             title="Delete employee"
                           >

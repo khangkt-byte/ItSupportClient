@@ -32,17 +32,16 @@ export function useEmployeeQuery() {
     }, [queryParams]);
 
     useEffect(() => {
-        fetchEmployees();
+        void fetchEmployees();
     }, [fetchEmployees]);
 
     return {
         queryParams,
         setQueryParams,
+        paginatedResult,
         loading,
         error,
         setError,
-        paginatedResult,
         refetch: fetchEmployees,
-        fetchEmployees,
     };
 }

@@ -25,21 +25,16 @@ import { PaginationBar } from '@/components/common/PaginationBar';
 import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 import { parseApiError, type ValidationErrors } from '@/utils/apiValidation';
-import { EmployeeTable } from './EmployeeTable';
-import { EmployeeFormModal, type EmployeeFormData } from './EmployeeFormModal';
-import { useEmployeeQuery } from '../hooks/useEmployeeQuery';
+import { EmployeeTable } from '@/features/employees/components/EmployeeTable';
+import { EmployeeFormModal, type EmployeeFormData } from '@/features/employees/components/EmployeeFormModal';
+import { useEmployeeQuery } from '@/features/employees/hooks/useEmployeeQuery';
 
 interface Props {
-  data: Employee[];
-  setData: (items: Employee[]) => void;
   departments: Department[];
   areas: AreaDto[];
 }
 
-export function EmployeeManagement({ data, setData, departments, areas }: Props) {
-  void data;
-  void setData;
-  void areas;
+export function EmployeeManagement({ departments, areas }: Props) {
 
   // Form states
   const [showForm, setShowForm] = useState(false);
@@ -70,7 +65,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
     error,
     setError,
     paginatedResult,
-    fetchEmployees,
+    refetch,
   } = useEmployeeQuery();
   const isLoading = queryLoading || isMutating;
   const { hasPermission } = usePermission();
@@ -103,24 +98,23 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
     setShowForm(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (nextFormData: EmployeeFormData) => {
     try {
       setIsMutating(true);
       setError(null);
       setValidationErrors(null);
 
       // Find department and area IDs from names
-      const selectedDept = departments.find((dept) => dept.name === formData.department);
-      const selectedArea = areas.find((area) => area.name === formData.area);
+      const selectedDept = departments.find((dept) => dept.name === nextFormData.department);
+      const selectedArea = areas.find((area) => area.name === nextFormData.area);
 
       if (editing) {
         // Update existing employee
         const updateData = {
-          fullName: formData.fullName,
-          phoneNumber: formData.phoneNumber || null,
-          email: formData.email || null,
-          position: formData.position || null,
+          fullName: nextFormData.fullName,
+          phoneNumber: nextFormData.phoneNumber || null,
+          email: nextFormData.email || null,
+          position: nextFormData.position || null,
           dptId: selectedDept?.dptId,
           areaId: selectedArea?.areaId,
         };
@@ -128,11 +122,11 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       } else {
         // Create new employee
         const createData = {
-          empCode: formData.empCode || null,
-          fullName: formData.fullName,
-          phoneNumber: formData.phoneNumber || null,
-          email: formData.email || null,
-          position: formData.position || null,
+          empCode: nextFormData.empCode || null,
+          fullName: nextFormData.fullName,
+          phoneNumber: nextFormData.phoneNumber || null,
+          email: nextFormData.email || null,
+          position: nextFormData.position || null,
           dptId: selectedDept?.dptId,
           areaId: selectedArea?.areaId,
         };
@@ -142,7 +136,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       setShowForm(false);
       setFormData({ empCode: '', fullName: '', phoneNumber: '', email: '', position: '', department: '', area: '' });
       // Refresh data after submission
-      await fetchEmployees();
+      await refetch();
     } catch (submitError: unknown) {
       console.error('Failed to save employee:', submitError);
       const parsedError = parseApiError(submitError);
@@ -161,7 +155,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       await employeesApi.deleteSingle(confirmDelete.empId);
       setConfirmDelete(null);
       // Refresh data after deletion
-      await fetchEmployees();
+      await refetch();
     } catch (deleteError: unknown) {
       console.error('Failed to delete employee:', deleteError);
       const parsedError = parseApiError(deleteError);
@@ -223,7 +217,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
 
       {/* Employees Table */}
       <EmployeeTable
-        loading={isLoading}
+        isLoading={isLoading}
         error={showForm ? null : error}
         items={paginatedResult?.items || []}
         canEdit={hasPermission(Permissions.Employee.Edit)}
@@ -252,7 +246,7 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       {/* Form Modal */}
       <EmployeeFormModal
         isOpen={showForm}
-        loading={isLoading}
+        isLoading={isLoading}
         editing={editing}
         error={error}
         validationErrors={validationErrors}
