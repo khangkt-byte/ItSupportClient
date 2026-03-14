@@ -4,11 +4,12 @@ import type {
   AreaDto,
   ListAccountDto,
   RoleDto,
-  PaginatedResult,
+  IssueDto,
   Area, // Area type
   Employee, // Employee type
   Account, // Account type
   Role, // Role type
+  Issue, // Issue type
   DepartmentDto
 } from '@/types/data';
 import { useState, useEffect } from 'react';
@@ -17,6 +18,7 @@ import {
   areasApi,
   accountsApi,
   rolesApi,
+  issuesApi,
   departmentApi, // Updated: singular name
 } from '@/services/api';
 
@@ -56,6 +58,7 @@ export function useDataManager() {
   const areasRaw = useApiData<AreaDto>(areasApi);
   const accountsRaw = useApiData<ListAccountDto>(accountsApi);
   const rolesRaw = useApiData<RoleDto>(rolesApi);
+  const issuesRaw = useApiData<IssueDto>(issuesApi);
   // Transform DepartmentDto to Department
   const departments = {
     data: departmentsRaw.data.map(dept => ({
@@ -137,11 +140,24 @@ export function useDataManager() {
     loading: rolesRaw.loading
   };
 
+  // Transform IssueDto to Issue
+  const issues = {
+    data: issuesRaw.data.map(issue => ({
+      ...issue,
+      id: String(issue.issId)
+    } as Issue)),
+    setData: (newData: Issue[]) => {
+      issuesRaw.setData(newData as unknown as IssueDto[]);
+    },
+    loading: issuesRaw.loading
+  };
+
   return {
     employees,
     departments,
     areas,
     accounts,
     roles,
+    issues,
   };
 }

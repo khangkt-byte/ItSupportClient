@@ -46,6 +46,11 @@ export interface RolesQueryParams extends QueryParams {
   // Future: Add role-specific filters
 }
 
+// Issues
+export interface IssuesQueryParams extends QueryParams {
+  // Future: Add issue-specific filters
+}
+
 // Work Logs (Issue Logs)
 export interface WorkLogsQueryParams extends QueryParams {
   status?: string | null; // Filter by status (pending, in-progress, resolved, cancelled)
@@ -557,6 +562,7 @@ export type Account = ListAccountDto & {
   roles?: RoleDto[] | null;
   deleteDate?: string | null
 };
+export type Issue = IssueDto & { id: string };
 export type Area = AreaDto & { id: string };
 export type Device = { id: string; name: string; brand: string; model: string; serialNumber: string; deviceType: string; description: string };
 export type DeviceType = { id: string; name: string; description: string };

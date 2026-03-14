@@ -46,8 +46,15 @@ export interface RefreshTokenRequestDto {
  * Standard: RFC 7807 Problem Details
  */
 export interface ApiError {
-  error: string;
+  error?: string;
+  title?: string;
+  detail?: string;
+  status?: number;
+  instance?: string;
+  timestamp?: string;
   errorCode?: string;
+  errorCategory?: string;
+  errors?: Record<string, string[] | string>;
   message?: string;
   statusCode?: number;
 }

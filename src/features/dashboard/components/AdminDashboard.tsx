@@ -10,6 +10,7 @@ import { AreaManagement } from '@/features/areas/components/AreaManagement';
 import { AccountManagement } from '@/features/accounts/components/AccountManagement';
 import { MyAccountManagement } from '@/features/myAccount/components/MyAccountManagement';
 import { RoleManagement } from '@/features/roles/components/RoleManagement';
+import { IssueManagement } from '@/features/issues/components/IssueManagement';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { LoadingState } from '@/components/common/LoadingState';
 
@@ -90,6 +91,13 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
             setData={dataManager.employees.setData}
             departments={dataManager.departments.data}
             areas={dataManager.areas.data}
+          />
+        );
+      case 'issues':
+        return (
+          <IssueManagement
+            data={dataManager.issues.data}
+            setData={dataManager.issues.setData}
           />
         );
       case 'departments':

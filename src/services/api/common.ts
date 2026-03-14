@@ -244,7 +244,13 @@ class ApiClient {
     }
 
     // ✅ Throw error with data
-    const error = new Error(errorData.error || errorData.message || 'Request failed');
+    const error = new Error(
+      errorData.detail ||
+      errorData.message ||
+      errorData.title ||
+      errorData.error ||
+      'Request failed'
+    );
     (error as any).data = errorData;
     (error as any).status = response.status;
     throw error;

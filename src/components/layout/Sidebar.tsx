@@ -34,6 +34,7 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
   const adminMenuItems: MenuItem[] = [
     { id: 'admin', label: 'Dashboard', icon: 'dashboard' },
     { id: 'workLogs', label: 'Work Logs', icon: 'insert_chart' },
+    { id: 'issues', label: 'Issues', icon: 'bug_report' },
     { id: 'employees', label: 'Employees', icon: 'group' },
     { id: 'departments', label: 'Departments', icon: 'business' },
     { id: 'areas', label: 'Areas', icon: 'location_on' },
