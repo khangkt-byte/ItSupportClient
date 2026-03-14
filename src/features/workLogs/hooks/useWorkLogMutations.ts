@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { workLogsApi } from '@/services/api';
 import { workLogToCreateDto } from '@/utils/workLogAdapter';
+import { parseApiError } from '@/utils/apiValidation';
 import type { Area, Department, WorkLog, WorkStatus } from '@/types/data';
 
 export interface WorkLogMutationFormData {
@@ -69,7 +70,8 @@ export function useWorkLogMutations({
                 return true;
             } catch (mutationError) {
                 console.error('Failed to submit work log:', mutationError);
-                setError('Failed to submit work log. Please try again.');
+                const parsedError = parseApiError(mutationError);
+                setError(parsedError.message || 'Failed to submit work log. Please try again.');
                 return false;
             } finally {
                 setSubmitting(false);
@@ -86,7 +88,8 @@ export function useWorkLogMutations({
                 return true;
             } catch (mutationError) {
                 console.error('Failed to delete work log:', mutationError);
-                setError('Failed to delete work log. Please try again.');
+                const parsedError = parseApiError(mutationError);
+                setError(parsedError.message || 'Failed to delete work log. Please try again.');
                 return false;
             }
         },
