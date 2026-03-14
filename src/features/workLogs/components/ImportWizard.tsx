@@ -11,7 +11,7 @@ import {
 } from '@/utils/enhancedExcelUtils';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { getApiErrorMessage } from '@/utils/apiValidation';
+import { getApiErrorMessage } from '@/utils/apiErrors';
 
 interface Props {
   existingWorkLogs: WorkLog[];

@@ -44,7 +44,9 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
   const {
     submitting,
     error: mutationError,
+    validationErrors,
     setError: setMutationError,
+    setValidationErrors,
     submitWorkLog,
     deleteWorkLog,
   } = useWorkLogMutations({
@@ -61,6 +63,7 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
 
   const openForm = (log?: WorkLog) => {
     setMutationError(null);
+    setValidationErrors(null);
     const nextEditing = log || null;
     setEditing(nextEditing);
     setFormData(createWorkLogFormData(nextEditing));
@@ -179,6 +182,7 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
         areas={areas}
         isSubmitting={submitting}
         error={error}
+        validationErrors={validationErrors}
         onChange={setFormData}
         onSubmit={handleSubmit}
         onClose={() => {
@@ -187,7 +191,10 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
           setEditing(null);
           setFormData(createWorkLogFormData(null));
         }}
-        onClearError={() => setError(null)}
+        onClearError={() => {
+          setError(null);
+          setValidationErrors(null);
+        }}
       />
 
       <WorkLogImportExportPanel

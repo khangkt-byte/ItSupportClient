@@ -7,7 +7,7 @@ import { mapIssueLogToWorkLog } from '@/features/workLogs/hooks/useWorkLogQuery'
 import { ImportValidation } from '@/features/workLogs/components/ImportValidation';
 import { ImportWizard } from '@/features/workLogs/components/ImportWizard';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { getApiErrorMessage } from '@/utils/apiValidation';
+import { getApiErrorMessage } from '@/utils/apiErrors';
 
 interface WorkLogImportExportPanelProps {
   /** Current page items — used by ImportWizard for client-side duplicate detection. */

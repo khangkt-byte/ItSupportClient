@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import React from 'react';
-import { AlertCircle, ChevronDown, ChevronUp, Clock, Edit, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, Edit, Trash2 } from 'lucide-react';
 import { Permissions } from '@/config/permissions';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 import { LoadingState } from '@/components/common/LoadingState';
 import { usePermission } from '@/hooks/usePermission';
 import type { PaginatedResult, WorkLog } from '@/types/data';
@@ -38,13 +39,7 @@ export function WorkLogTable({ paginatedResult, isLoading, error, onEdit, onDele
       )}
 
       {error && !isLoading && (
-        <div className="p-4 bg-error-background border border-error-border flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
-          <div className="flex-1">
-            <p className="font-medium text-error-foreground">Error</p>
-            <p className="text-sm text-error-foreground">{error}</p>
-          </div>
-        </div>
+        <ErrorAlert message={error} className="m-4" />
       )}
 
       {!isLoading && !error && (

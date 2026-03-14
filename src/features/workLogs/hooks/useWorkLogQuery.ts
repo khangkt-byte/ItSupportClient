@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { workLogsApi } from '@/services/api';
 import type { IssueLogDto, PaginatedResult, WorkLog, WorkLogsQueryParams } from '@/types/data';
-import { getApiErrorMessage } from '@/utils/apiValidation';
+import { getApiErrorMessage } from '@/utils/apiErrors';
 
 /**
  * Map IssueLogDto (server shape) → WorkLog (UI shape).

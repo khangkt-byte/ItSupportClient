@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, Clock, Save, X } from 'lucide-react';
+import { Clock, Save, X } from 'lucide-react';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 import type { Area, Department, Employee, WorkLog, WorkStatus } from '@/types/data';
 import { causesApi, issuesApi } from '@/services/api';
 import { SearchableCombobox } from '@/components/common/SearchableCombobox';
@@ -8,6 +9,7 @@ import { AutocompleteInput, type Suggestion } from '@/components/common/Autocomp
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Permissions } from '@/config/permissions';
 import { usePermission } from '@/hooks/usePermission';
+import { getGeneralValidationMessages, type ValidationErrors } from '@/utils/apiErrors';
 
 export interface WorkLogFormData {
   reportDate: string;
@@ -32,6 +34,7 @@ interface WorkLogFormModalProps {
   areas: Area[];
   isSubmitting: boolean;
   error: string | null;
+  validationErrors: ValidationErrors | null;
   onChange: (formData: WorkLogFormData) => void;
   onSubmit: (formData: WorkLogFormData) => Promise<void>;
   onClose: () => void;
@@ -79,6 +82,7 @@ export function WorkLogFormModal({
   areas,
   isSubmitting,
   error,
+  validationErrors,
   onChange,
   onSubmit,
   onClose,
@@ -92,6 +96,7 @@ export function WorkLogFormModal({
   const [loadingCauseSuggestions, setLoadingCauseSuggestions] = useState(false);
   const { hasPermission } = usePermission();
   const canSubmit = hasPermission(editing ? Permissions.IssueLog.Edit : Permissions.IssueLog.Create);
+  const validationMessages = getGeneralValidationMessages(validationErrors);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -295,20 +300,13 @@ export function WorkLogFormModal({
           </div>
 
           {error && (
-            <div className="mx-6 mt-4 p-4 bg-error-background border border-error-border rounded-lg flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
-              <div className="flex-1">
-                <p className="font-medium text-error-foreground">Error</p>
-                <p className="text-sm text-error-foreground mt-0.5">{error}</p>
-              </div>
-              <button
-                onClick={onClearError}
-                disabled={isSubmitting}
-                className="text-error-foreground hover:text-error-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+            <ErrorAlert
+              message={error}
+              details={validationMessages}
+              onDismiss={onClearError}
+              dismissDisabled={isSubmitting}
+              className="mx-6 mt-4"
+            />
           )}
 
           <form onSubmit={handleFormSubmit} className="p-6 space-y-4">

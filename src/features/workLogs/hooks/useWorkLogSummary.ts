@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { workLogsApi } from '@/services/api';
-import { getApiErrorMessage } from '@/utils/apiValidation';
+import { getApiErrorMessage } from '@/utils/apiErrors';
 
 interface WorkLogSummary {
     totalCount: number;
