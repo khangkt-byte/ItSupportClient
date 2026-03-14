@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { Building2, Plus } from 'lucide-react';
 import type { Department, CreateDepartmentDto, DepartmentsQueryParams, UpdateDepartmentDto } from '@/types/data';
 import { departmentsApi } from '@/services/api/departments';
@@ -8,17 +8,11 @@ import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 import { parseApiError, type ValidationErrors } from '@/utils/apiValidation';
-import { useDepartmentQuery } from '../hooks/useDepartmentQuery';
-import { DepartmentTable } from './DepartmentTable';
-import { DepartmentFormModal, type DepartmentFormData } from './DepartmentFormModal';
+import { useDepartmentQuery } from '@/features/departments/hooks/useDepartmentQuery';
+import { DepartmentTable } from '@/features/departments/components/DepartmentTable';
+import { DepartmentFormModal, type DepartmentFormData } from '@/features/departments/components/DepartmentFormModal';
 
-interface Props {
-  data: Department[];
-  setData: (items: Department[]) => void;
-}
-
-export function DepartmentManagement({ data, setData }: Props) {
-  void data;
+export function DepartmentManagement() {
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
 
   const [showForm, setShowForm] = useState(false);
@@ -35,22 +29,10 @@ export function DepartmentManagement({ data, setData }: Props) {
     error,
     setError,
     paginatedResult,
-    fetchDepartments,
+    refetch,
   } = useDepartmentQuery();
-  const loading = queryLoading || isMutating;
+  const isLoading = queryLoading || isMutating;
   const { hasPermission } = usePermission();
-
-  const syncDataManagerDepartments = useCallback(async () => {
-    const allDepartments = await departmentsApi.getAll({ page: 1, pageSize: 1000, sortBy: 'name', isDescending: false });
-    setData(
-      allDepartments.items.map((dept) => ({
-        id: dept.dptId,
-        dptId: dept.dptId,
-        name: dept.name,
-        description: dept.description || '',
-      }))
-    );
-  }, [setData]);
 
   const openForm = (item?: Department) => {
     setEditing(item || null);
@@ -60,8 +42,7 @@ export function DepartmentManagement({ data, setData }: Props) {
     setShowForm(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (nextFormData: DepartmentFormData) => {
     setIsMutating(true);
     setError(null);
     setValidationErrors(null);
@@ -69,19 +50,19 @@ export function DepartmentManagement({ data, setData }: Props) {
     try {
       if (editing) {
         const updateDto: UpdateDepartmentDto = {
-          name: formData.name,
-          description: formData.description || null,
+          name: nextFormData.name,
+          description: nextFormData.description || null,
         };
         await departmentsApi.update(editing.id, updateDto);
       } else {
         const createDto: CreateDepartmentDto = {
-          name: formData.name,
-          description: formData.description || null,
+          name: nextFormData.name,
+          description: nextFormData.description || null,
         };
         await departmentsApi.create(createDto);
       }
 
-      await Promise.all([fetchDepartments(), syncDataManagerDepartments()]);
+      await refetch();
       setShowForm(false);
       setFormData({ name: '', description: '' });
     } catch (submitError: unknown) {
@@ -101,7 +82,7 @@ export function DepartmentManagement({ data, setData }: Props) {
     try {
       setError(null);
       await departmentsApi.deleteSingle(confirmDelete.id);
-      await Promise.all([fetchDepartments(), syncDataManagerDepartments()]);
+      await refetch();
       setConfirmDelete(null);
     } catch (deleteError: unknown) {
       console.error('Failed to delete department:', deleteError);
@@ -128,7 +109,7 @@ export function DepartmentManagement({ data, setData }: Props) {
         {hasPermission(Permissions.Department.Create) && (
           <button
             onClick={() => openForm()}
-            disabled={loading}
+            disabled={isLoading}
             className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm"
           >
             <Plus className="w-5 h-5" />
@@ -156,7 +137,7 @@ export function DepartmentManagement({ data, setData }: Props) {
       />
 
       <DepartmentTable
-        loading={loading}
+        isLoading={isLoading}
         error={showForm ? null : error}
         items={paginatedResult?.items || []}
         canEdit={hasPermission(Permissions.Department.Edit)}
@@ -179,7 +160,7 @@ export function DepartmentManagement({ data, setData }: Props) {
         }
       />
 
-      {paginatedResult && !loading && (
+      {paginatedResult && !isLoading && (
         <PaginationBar
           page={paginatedResult.page}
           totalPages={paginatedResult.totalPages}
@@ -198,14 +179,14 @@ export function DepartmentManagement({ data, setData }: Props) {
       <DepartmentFormModal
         isOpen={showForm}
         editing={editing}
-        loading={loading}
+        isLoading={isLoading}
         error={error}
         validationErrors={validationErrors}
         formData={formData}
         onChange={setFormData}
         onSubmit={handleSubmit}
         onClose={() => {
-          if (loading) return;
+          if (isLoading) return;
           setShowForm(false);
         }}
         onClearError={() => {

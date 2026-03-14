@@ -30,17 +30,16 @@ export function useDepartmentQuery() {
     }, [queryParams]);
 
     useEffect(() => {
-        fetchDepartments();
+        void fetchDepartments();
     }, [fetchDepartments]);
 
     return {
         queryParams,
         setQueryParams,
+        paginatedResult,
         loading,
         error,
         setError,
-        paginatedResult,
         refetch: fetchDepartments,
-        fetchDepartments,
     };
 }

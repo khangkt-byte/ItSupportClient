@@ -4,7 +4,7 @@
  * Based on OpenAPI Specification
  */
 
-import { apiClient } from './common';
+import { apiClient, buildQueryString } from './common';
 import type {
   DepartmentDto,
   CreateDepartmentDto,
@@ -15,83 +15,79 @@ import type {
   BulkDeleteResultDto
 } from '@/types/data';
 
-class DepartmentAPI {
+export const departmentsApi = {
   /**
    * GET /api/departments
-   * Lấy danh sách phòng ban (có phân trang)
+   * Get all departments with pagination
    */
   async getAll(params?: DepartmentsQueryParams): Promise<PaginatedResult<DepartmentDto>> {
-    const queryParams = new URLSearchParams();
+    const queryString = buildQueryString({
+      Page: params?.page || 1,
+      PageSize: params?.pageSize || 10,
+      SortBy: params?.sortBy,
+      IsDescending: params?.isDescending,
+      Search: params?.search,
+    });
 
-    if (params?.page) queryParams.append('Page', params.page.toString());
-    if (params?.pageSize) queryParams.append('PageSize', params.pageSize.toString());
-    if (params?.sortBy) queryParams.append('SortBy', params.sortBy);
-    if (params?.isDescending !== undefined) queryParams.append('IsDescending', params.isDescending.toString());
-    if (params?.search) queryParams.append('Search', params.search);
-
-    const url = `/api/departments${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-    return apiClient.get<PaginatedResult<DepartmentDto>>(url);
-  }
+    return apiClient.get<PaginatedResult<DepartmentDto>>(`/api/departments${queryString}`);
+  },
 
   /**
    * GET /api/departments/{id}
-   * Lấy thông tin phòng ban theo ID
+   * Get department by ID
    */
   async getById(id: number): Promise<DepartmentDto> {
     return apiClient.get<DepartmentDto>(`/api/departments/${id}`);
-  }
+  },
 
   /**
    * GET /api/departments/suggestions
-   * Lấy gợi ý phòng ban cho autocomplete/dropdown
+   * Get department suggestions for autocomplete
    */
   async getSuggestions(search?: string): Promise<DepartmentSuggestionDto[]> {
-    const url = search
-      ? `/api/departments/suggestions?search=${encodeURIComponent(search)}`
-      : '/api/departments/suggestions';
-    return apiClient.get<DepartmentSuggestionDto[]>(url);
-  }
+    const queryString = buildQueryString({ search });
+    return apiClient.get<DepartmentSuggestionDto[]>(`/api/departments/suggestions${queryString}`);
+  },
 
   /**
    * POST /api/departments
-   * Tạo phòng ban mới
+   * Create new department
    */
   async create(data: CreateDepartmentDto): Promise<DepartmentDto> {
     return apiClient.post<DepartmentDto>('/api/departments', data);
-  }
+  },
 
   /**
    * PUT /api/departments/{id}
-   * Cập nhật phòng ban
+   * Update department
    */
   async update(id: number, data: UpdateDepartmentDto): Promise<DepartmentDto> {
     return apiClient.put<DepartmentDto>(`/api/departments/${id}`, data);
-  }
+  },
 
   /**
    * DELETE /api/departments
-   * Xóa phòng ban
+   * Delete department(s)
    * 
    * Strategy: All-or-nothing (transaction-based)
-   * - Nếu TẤT CẢ thành công → 200 OK với summary
-   * - Nếu BẤT KỲ lỗi nào → Rollback, throw error (4xx/5xx)
+   * - If all succeed -> 200 OK with summary
+   * - If any item fails -> rollback and throw error (4xx/5xx)
    * 
    * Business rules:
-   * - Không thể xóa phòng ban có nhân viên (422)
-   * - Không thể xóa phòng ban có nhật ký sự cố (422)
-   * - Transaction rollback nếu ANY item fails
+   * - Cannot delete departments with active employees (422)
+   * - Cannot delete departments referenced by work logs (422)
    */
   async delete(ids: number[], softDelete: boolean = true): Promise<BulkDeleteResultDto> {
-    const url = `/api/departments?softDelete=${softDelete}`;
-    return apiClient.delete<BulkDeleteResultDto>(url, ids);
-  }
+    const queryString = buildQueryString({ softDelete });
+    return apiClient.delete<BulkDeleteResultDto>(`/api/departments${queryString}`, ids);
+  },
 
   /**
    * Delete single department
    */
   async deleteSingle(id: number, softDelete: boolean = true): Promise<BulkDeleteResultDto> {
     return this.delete([id], softDelete);
-  }
+  },
 
   /**
    * Backward-compatible alias. Prefer delete(ids, softDelete).
@@ -99,6 +95,4 @@ class DepartmentAPI {
   async bulkDelete(ids: number[], softDelete: boolean = true): Promise<BulkDeleteResultDto> {
     return this.delete(ids, softDelete);
   }
-}
-
-export const departmentsApi = new DepartmentAPI();
+};
