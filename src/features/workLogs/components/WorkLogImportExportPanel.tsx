@@ -7,6 +7,7 @@ import { mapIssueLogToWorkLog } from '@/features/workLogs/hooks/useWorkLogQuery'
 import { ImportValidation } from '@/features/workLogs/components/ImportValidation';
 import { ImportWizard } from '@/features/workLogs/components/ImportWizard';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { getApiErrorMessage } from '@/utils/apiValidation';
 
 interface WorkLogImportExportPanelProps {
   /** Current page items — used by ImportWizard for client-side duplicate detection. */
@@ -49,7 +50,7 @@ export function WorkLogImportExportPanel({
       setCurrentImportFile(file);
       setShowImportDialog(true);
     } catch (error) {
-      setImportError('Failed to validate Excel file: ' + (error as Error).message);
+      setImportError(getApiErrorMessage(error, 'Failed to validate Excel file'));
     } finally {
       setImporting(false);
       if (fileInputRef.current) {
@@ -79,7 +80,7 @@ export function WorkLogImportExportPanel({
       setCurrentImportFile(null);
       setDuplicateHandling('Skip');
     } catch (error) {
-      setImportError('Failed to import Excel file: ' + (error as Error).message);
+      setImportError(getApiErrorMessage(error, 'Failed to import Excel file'));
     } finally {
       setImporting(false);
     }

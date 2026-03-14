@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { workLogsApi } from '@/services/api';
 import type { IssueLogDto, PaginatedResult, WorkLog, WorkLogsQueryParams } from '@/types/data';
+import { getApiErrorMessage } from '@/utils/apiValidation';
 
 /**
  * Map IssueLogDto (server shape) → WorkLog (UI shape).
@@ -57,7 +58,7 @@ export function useWorkLogQuery() {
             });
         } catch (err) {
             console.error('Failed to fetch work logs:', err);
-            setError('Failed to load work logs');
+            setError(getApiErrorMessage(err, 'Failed to load work logs'));
             setPaginatedResult(null);
         } finally {
             setLoading(false);

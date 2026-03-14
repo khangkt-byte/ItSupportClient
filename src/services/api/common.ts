@@ -240,6 +240,7 @@ class ApiClient {
       const error = new Error('TOKEN_EXPIRED');
       (error as any).data = errorData;
       (error as any).status = response.status;
+      (error as any).headers = response.headers;
       throw error;
     }
 
@@ -253,6 +254,7 @@ class ApiClient {
     );
     (error as any).data = errorData;
     (error as any).status = response.status;
+    (error as any).headers = response.headers;
     throw error;
   }
 

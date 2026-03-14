@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { employeesApi } from '@/services/api/employees';
 import type { EmployeesQueryParams, ListEmployeeDto, PaginatedResult } from '@/types/data';
+import { getApiErrorMessage } from '@/utils/apiValidation';
 
 export function useEmployeeQuery() {
     const [queryParams, setQueryParams] = useState<EmployeesQueryParams>({
@@ -24,7 +25,7 @@ export function useEmployeeQuery() {
             setPaginatedResult(result);
         } catch (err) {
             console.error('Failed to fetch employees:', err);
-            setError('Failed to load employees');
+            setError(getApiErrorMessage(err, 'Failed to load employees'));
             setPaginatedResult(null);
         } finally {
             setLoading(false);

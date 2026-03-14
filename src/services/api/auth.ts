@@ -16,6 +16,7 @@
 
 import { apiClient } from './common';
 import { JWTHelper } from '@/utils/jwtHelper';
+import { parseApiError } from '@/utils/apiValidation';
 import type { ProfileDto } from '@/types/data';
 import type {
   LoginDto,
@@ -278,9 +279,10 @@ export const authApi = {
       return { success: true };
     } catch (error: any) {
       console.error('[Auth] ❌ Login failed:', error);
+      const parsedError = parseApiError(error);
       return {
         success: false,
-        error: error.message || 'Login failed'
+        error: parsedError.message || 'Login failed'
       };
     }
   },

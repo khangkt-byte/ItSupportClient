@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, X, AlertCircle, CheckCircle, AlertTriangle, FileSpreadsheet, ArrowLeft } from 'lucide-react';
+import { X, AlertCircle, CheckCircle, AlertTriangle, FileSpreadsheet, ArrowLeft } from 'lucide-react';
 import type { WorkLog, Employee, Department, Area } from '@/types/data';
 import { 
   validateWorkLogFile, 
@@ -7,11 +7,11 @@ import {
   type EnhancedValidationResult,
   type ImportOptions,
   type ImportResult,
-  type RowValidation,
   type FieldError
 } from '@/utils/enhancedExcelUtils';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { getApiErrorMessage } from '@/utils/apiValidation';
 
 interface Props {
   existingWorkLogs: WorkLog[];
@@ -97,7 +97,7 @@ export function ImportWizard({
       setValidationResult(result);
       setStep(2);
     } catch (err) {
-      setError('Validation failed: ' + (err as Error).message);
+      setError(getApiErrorMessage(err, 'Validation failed'));
     } finally {
       setValidating(false);
     }
@@ -126,13 +126,13 @@ export function ImportWizard({
         onImportComplete(result.importedLogs as WorkLog[]);
       }
     } catch (err) {
-      setError('Import failed: ' + (err as Error).message);
+      setError(getApiErrorMessage(err, 'Import failed'));
     } finally {
       setImporting(false);
     }
   };
 
-  const applySuggestion = (rowNumber: number, fieldName: string, suggestedValue: string, suggestedId?: string) => {
+  const applySuggestion = (rowNumber: number, fieldName: string, _suggestedValue: string, suggestedId?: string) => {
     if (!validationResult) return;
 
     // Update manual mappings

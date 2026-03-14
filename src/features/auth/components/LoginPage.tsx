@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Eye, EyeOff, FileText } from 'lucide-react';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import type { LoginResponse } from '@/features/auth/types/auth';
 
 interface LoginPageProps {
-  onLogin: (username: string, password: string) => Promise<boolean>;
+  onLogin: (username: string, password: string) => Promise<LoginResponse>;
 }
 
 export function LoginPage({ onLogin }: LoginPageProps) {
@@ -24,10 +25,10 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
     setIsLoading(true);
     try {
-      const success = await onLogin(username, password);
+      const response = await onLogin(username, password);
 
-      if (!success) {
-        setError('Invalid username or password');
+      if (!response.success) {
+        setError(response.error || 'Invalid username or password');
         setPassword('');
       }
     } catch (err) {

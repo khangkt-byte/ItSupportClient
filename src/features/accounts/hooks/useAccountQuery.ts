@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { accountsApi } from '@/services/api/accounts';
 import type { AccountsQueryParams, ListAccountDto, PaginatedResult } from '@/types/data';
+import { getApiErrorMessage } from '@/utils/apiValidation';
 
 export function useAccountQuery() {
     const [queryParams, setQueryParams] = useState<AccountsQueryParams>({
@@ -23,7 +24,7 @@ export function useAccountQuery() {
             setPaginatedResult(result);
         } catch (error) {
             console.error('Failed to fetch accounts:', error);
-            setError('Failed to load accounts');
+            setError(getApiErrorMessage(error, 'Failed to load accounts'));
             setPaginatedResult(null);
         } finally {
             setLoading(false);

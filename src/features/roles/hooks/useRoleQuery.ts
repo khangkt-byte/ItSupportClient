@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { rolesApi } from '@/services/api/roles';
 import type { PaginatedResult, RoleDto, RolesQueryParams } from '@/types/data';
+import { getApiErrorMessage } from '@/utils/apiValidation';
 
 export function useRoleQuery() {
     const [queryParams, setQueryParams] = useState<RolesQueryParams>({
@@ -22,7 +23,7 @@ export function useRoleQuery() {
             setPaginatedResult(result);
         } catch (error) {
             console.error('Failed to fetch roles:', error);
-            setError('Failed to load roles');
+            setError(getApiErrorMessage(error, 'Failed to load roles'));
             setPaginatedResult(null);
         } finally {
             setLoading(false);

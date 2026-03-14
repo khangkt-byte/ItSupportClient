@@ -4,6 +4,7 @@ import { LoadingState } from '@/components/common/LoadingState';
 import { authApi } from '@/services/api/auth';
 import { SecurityValidator } from '@/utils/securityChecks';
 import type { User } from '@/types/data';
+import type { LoginResponse } from '@/features/auth/types/auth';
 
 // Route-level lazy chunks — loaded only when first navigated to
 const LoginPage = lazy(() =>
@@ -94,7 +95,7 @@ export default function App() {
     }
   };
 
-  const handleLogin = async (username: string, password: string): Promise<boolean> => {
+  const handleLogin = async (username: string, password: string): Promise<LoginResponse> => {
     try {
       const response = await authApi.login({ identifier: username, password });
       
@@ -124,13 +125,19 @@ export default function App() {
         localStorage.setItem('user', JSON.stringify(userData));
 
         console.log('[App] ✅ Login successful');
-        return true;
+        return { success: true };
       }
-      
-      return false;
+
+      return {
+        success: false,
+        error: response.error || 'Login failed'
+      };
     } catch (error) {
       console.error('[App] Login error:', error);
-      return false;
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Login failed'
+      };
     }
   };
 

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { workLogsApi } from '@/services/api';
+import { getApiErrorMessage } from '@/utils/apiValidation';
 
 interface WorkLogSummary {
     totalCount: number;
@@ -34,7 +35,7 @@ export function useWorkLogSummary(enabled: boolean = true) {
             });
         } catch (summaryError) {
             console.error('Failed to fetch work log summary:', summaryError);
-            setError('Failed to load work log summary');
+            setError(getApiErrorMessage(summaryError, 'Failed to load work log summary'));
         } finally {
             setLoading(false);
         }

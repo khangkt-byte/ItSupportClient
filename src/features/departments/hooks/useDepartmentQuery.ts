@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { DepartmentDto, DepartmentsQueryParams, PaginatedResult } from '@/types/data';
 import { departmentsApi } from '@/services/api/departments';
+import { getApiErrorMessage } from '@/utils/apiValidation';
 
 export function useDepartmentQuery() {
     const [queryParams, setQueryParams] = useState<DepartmentsQueryParams>({
@@ -22,7 +23,7 @@ export function useDepartmentQuery() {
             setPaginatedResult(result);
         } catch (err) {
             console.error('Failed to fetch departments:', err);
-            setError('Failed to load departments');
+            setError(getApiErrorMessage(err, 'Failed to load departments'));
             setPaginatedResult(null);
         } finally {
             setLoading(false);

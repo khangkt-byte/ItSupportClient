@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { areasApi } from '@/services/api/areas';
 import type { AreaDto, AreasQueryParams, PaginatedResult } from '@/types/data';
+import { getApiErrorMessage } from '@/utils/apiValidation';
 
 export function useAreaQuery() {
     const [queryParams, setQueryParams] = useState<AreasQueryParams>({
@@ -22,7 +23,7 @@ export function useAreaQuery() {
             setPaginatedResult(result);
         } catch (err) {
             console.error('Failed to fetch areas:', err);
-            setError('Failed to load areas');
+            setError(getApiErrorMessage(err, 'Failed to load areas'));
             setPaginatedResult(null);
         } finally {
             setLoading(false);

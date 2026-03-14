@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { IssueDto, IssuesQueryParams, PaginatedResult } from '@/types/data';
 import { issuesApi } from '@/services/api/issues';
+import { getApiErrorMessage } from '@/utils/apiValidation';
 
 export function useIssueQuery() {
     const [queryParams, setQueryParams] = useState<IssuesQueryParams>({
@@ -22,7 +23,7 @@ export function useIssueQuery() {
             setPaginatedResult(result);
         } catch (err) {
             console.error('Failed to fetch issues:', err);
-            setError('Failed to load issues');
+            setError(getApiErrorMessage(err, 'Failed to load issues'));
             setPaginatedResult(null);
         } finally {
             setLoading(false);
