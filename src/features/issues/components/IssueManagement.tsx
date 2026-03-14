@@ -1,11 +1,10 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { Bug, Plus } from 'lucide-react';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import type {
   CreateIssueDto,
-  Issue,
   IssueDto,
   IssuesQueryParams,
   UpdateIssueDto,
@@ -18,13 +17,7 @@ import { IssueTable } from '@/features/issues/components/IssueTable';
 import { IssueFormModal, type IssueFormData } from '@/features/issues/components/IssueFormModal';
 import { parseApiError, type ValidationErrors } from '@/utils/apiValidation';
 
-interface IssueManagementProps {
-  data: Issue[];
-  setData: (items: Issue[]) => void;
-}
-
-export function IssueManagement({ data, setData }: IssueManagementProps) {
-  void data;
+export function IssueManagement() {
   const [issueFilter, setIssueFilter] = useState<string>('all');
 
   const [showForm, setShowForm] = useState(false);
@@ -48,23 +41,12 @@ export function IssueManagement({ data, setData }: IssueManagementProps) {
     loading: queryLoading,
     error: queryError,
     paginatedResult,
-    fetchIssues,
+    refetch,
     setError,
   } = useIssueQuery();
 
   const isLoading = queryLoading || isMutating;
   const tableError = showForm ? null : mutationError || queryError;
-
-  const syncDataManagerIssues = useCallback(async () => {
-    const allIssues = await issuesApi.getAll({
-      page: 1,
-      pageSize: 1000,
-      sortBy: 'name',
-      isDescending: false,
-    });
-
-    setData(allIssues.items.map((issue) => ({ ...issue, id: String(issue.issId) } as Issue)));
-  }, [setData]);
 
   const openForm = (item?: IssueDto) => {
     setEditing(item || null);
@@ -89,18 +71,17 @@ export function IssueManagement({ data, setData }: IssueManagementProps) {
     setShowForm(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (nextFormData: IssueFormData) => {
     setIsMutating(true);
     setMutationError(null);
     setValidationErrors(null);
     setError(null);
 
     const payload: CreateIssueDto | UpdateIssueDto = {
-      name: formData.name,
-      description: formData.description || null,
-      category: formData.category || null,
-      severity: formData.severity ? Number(formData.severity) : null,
+      name: nextFormData.name,
+      description: nextFormData.description || null,
+      category: nextFormData.category || null,
+      severity: nextFormData.severity ? Number(nextFormData.severity) : null,
     };
 
     try {
@@ -110,7 +91,7 @@ export function IssueManagement({ data, setData }: IssueManagementProps) {
         await issuesApi.create(payload as CreateIssueDto);
       }
 
-      await Promise.all([fetchIssues(), syncDataManagerIssues()]);
+      await refetch();
       setShowForm(false);
       setEditing(null);
       setFormData({ name: '', description: '', category: '', severity: '' });
@@ -130,11 +111,12 @@ export function IssueManagement({ data, setData }: IssueManagementProps) {
     setDeleteLoading(true);
     try {
       await issuesApi.deleteSingle(confirmDelete.issId);
-      await Promise.all([fetchIssues(), syncDataManagerIssues()]);
+      await refetch();
       setConfirmDelete(null);
-    } catch (deleteError: any) {
+    } catch (deleteError: unknown) {
       console.error('Failed to delete issue:', deleteError);
-      setMutationError(deleteError.message || 'Failed to delete issue');
+      const parsedError = parseApiError(deleteError);
+      setMutationError(parsedError.message || 'Failed to delete issue');
       setConfirmDelete(null);
     } finally {
       setDeleteLoading(false);
@@ -185,7 +167,7 @@ export function IssueManagement({ data, setData }: IssueManagementProps) {
 
       <IssueTable
         items={paginatedResult?.items || []}
-        loading={isLoading}
+        isLoading={isLoading}
         error={tableError}
         canEdit={hasPermission(Permissions.Issue.Edit)}
         canDelete={hasPermission(Permissions.Issue.Delete)}
@@ -213,7 +195,7 @@ export function IssueManagement({ data, setData }: IssueManagementProps) {
         isOpen={showForm}
         editing={editing}
         formData={formData}
-        loading={isLoading}
+        isLoading={isLoading}
         error={mutationError}
         validationErrors={validationErrors}
         onChange={setFormData}

@@ -30,17 +30,16 @@ export function useIssueQuery() {
     }, [queryParams]);
 
     useEffect(() => {
-        fetchIssues();
+        void fetchIssues();
     }, [fetchIssues]);
 
     return {
         queryParams,
         setQueryParams,
+        paginatedResult,
         loading,
         error,
         setError,
-        paginatedResult,
         refetch: fetchIssues,
-        fetchIssues,
     };
 }

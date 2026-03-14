@@ -4,7 +4,7 @@ import { LoadingState } from '@/components/common/LoadingState';
 
 interface IssueTableProps {
   items: IssueDto[];
-  loading: boolean;
+  isLoading: boolean;
   error: string | null;
   canEdit: boolean;
   canDelete: boolean;
@@ -14,7 +14,7 @@ interface IssueTableProps {
 
 export function IssueTable({
   items,
-  loading,
+  isLoading,
   error,
   canEdit,
   canDelete,
@@ -23,11 +23,11 @@ export function IssueTable({
 }: IssueTableProps) {
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
-      {loading && (
+      {isLoading && (
         <LoadingState className="py-12" spinnerSize="md" label="Loading issues..." />
       )}
 
-      {error && !loading && (
+      {error && !isLoading && (
         <div className="p-4 bg-error-background border border-error-border flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
           <div className="flex-1">
@@ -37,7 +37,7 @@ export function IssueTable({
         </div>
       )}
 
-      {!loading && !error && (
+      {!isLoading && !error && (
         <table className="w-full">
           <thead className="bg-muted border-b border-border">
             <tr>
