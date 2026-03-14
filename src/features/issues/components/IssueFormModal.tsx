@@ -14,7 +14,7 @@ interface IssueFormModalProps {
   isOpen: boolean;
   editing: IssueDto | null;
   formData: IssueFormData;
-  isLoading: boolean;
+  isSubmitting: boolean;
   error: string | null;
   validationErrors: ValidationErrors | null;
   onChange: (data: IssueFormData) => void;
@@ -27,7 +27,7 @@ export function IssueFormModal({
   isOpen,
   editing,
   formData,
-  isLoading,
+  isSubmitting,
   error,
   validationErrors,
   onChange,
@@ -72,7 +72,7 @@ export function IssueFormModal({
           <h3 className="text-lg font-semibold text-foreground">{editing ? 'Edit Issue' : 'Create Issue'}</h3>
           <button
             onClick={onClose}
-            disabled={isLoading}
+            disabled={isSubmitting}
             className="text-foreground hover:text-muted-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <X className="w-6 h-6" />
@@ -99,7 +99,7 @@ export function IssueFormModal({
             </div>
             <button
               onClick={onClearError}
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="text-error-foreground hover:text-error-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <X className="w-4 h-4" />
@@ -177,10 +177,10 @@ export function IssueFormModal({
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="btn-primary flex-1 px-4 py-2 flex items-center justify-center gap-2"
             >
-              {isLoading ? (
+              {isSubmitting ? (
                 <>
                   <LoadingSpinner size="sm" tone="inverse" />
                   Saving...
@@ -194,7 +194,7 @@ export function IssueFormModal({
             <button
               type="button"
               onClick={onClose}
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="btn-secondary flex-1 px-4 py-2"
             >
               Cancel

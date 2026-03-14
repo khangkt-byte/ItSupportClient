@@ -195,7 +195,7 @@ export function IssueManagement() {
         isOpen={showForm}
         editing={editing}
         formData={formData}
-        isLoading={isLoading}
+        isSubmitting={isMutating}
         error={mutationError}
         validationErrors={validationErrors}
         onChange={setFormData}
