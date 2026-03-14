@@ -7,7 +7,7 @@ import { PaginationBar } from '@/components/common/PaginationBar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
-import { parseApiError, type ValidationErrors } from '@/utils/apiValidation';
+import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
 import { useDepartmentQuery } from '@/features/departments/hooks/useDepartmentQuery';
 import { DepartmentTable } from '@/features/departments/components/DepartmentTable';
 import { DepartmentFormModal, type DepartmentFormData } from '@/features/departments/components/DepartmentFormModal';

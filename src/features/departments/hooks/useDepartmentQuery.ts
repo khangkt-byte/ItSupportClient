@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { DepartmentDto, DepartmentsQueryParams, PaginatedResult } from '@/types/data';
 import { departmentsApi } from '@/services/api/departments';
-import { getApiErrorMessage } from '@/utils/apiValidation';
+import { getApiErrorMessage } from '@/utils/apiErrors';
 
 export function useDepartmentQuery() {
     const [queryParams, setQueryParams] = useState<DepartmentsQueryParams>({
