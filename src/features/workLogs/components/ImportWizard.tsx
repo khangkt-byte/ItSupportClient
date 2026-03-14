@@ -37,6 +37,7 @@ export function ImportWizard({
   const [validationResult, setValidationResult] = useState<EnhancedValidationResult | null>(null);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [importOptions, setImportOptions] = useState<ImportOptions>({
@@ -66,8 +67,9 @@ export function ImportWizard({
       const droppedFile = e.dataTransfer.files[0];
       if (droppedFile.name.endsWith('.xlsx') || droppedFile.name.endsWith('.xls')) {
         setFile(droppedFile);
+        setError(null);
       } else {
-        alert('Please upload an Excel file (.xlsx or .xls)');
+        setError('Please upload an Excel file (.xlsx or .xls)');
       }
     }
   };
@@ -82,6 +84,7 @@ export function ImportWizard({
   const handleValidate = async () => {
     if (!file) return;
 
+    setError(null);
     setValidating(true);
     try {
       const result = await validateWorkLogFile(
@@ -93,8 +96,8 @@ export function ImportWizard({
       );
       setValidationResult(result);
       setStep(2);
-    } catch (error) {
-      alert('Validation failed: ' + (error as Error).message);
+    } catch (err) {
+      setError('Validation failed: ' + (err as Error).message);
     } finally {
       setValidating(false);
     }
@@ -122,8 +125,8 @@ export function ImportWizard({
       if (result.importedLogs.length > 0) {
         onImportComplete(result.importedLogs as WorkLog[]);
       }
-    } catch (error) {
-      alert('Import failed: ' + (error as Error).message);
+    } catch (err) {
+      setError('Import failed: ' + (err as Error).message);
     } finally {
       setImporting(false);
     }
@@ -185,6 +188,12 @@ export function ImportWizard({
         </div>
 
         <div className="p-6">
+          {error && (
+            <div className="mb-4 p-3 rounded-md bg-error-background border border-error-border text-error-foreground text-sm flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              {error}
+            </div>
+          )}
           {/* STEP 1: UPLOAD & VALIDATE */}
           {step === 1 && (
             <div className="space-y-6">

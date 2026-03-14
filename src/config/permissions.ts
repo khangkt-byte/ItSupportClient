@@ -106,7 +106,12 @@ export const Roles = {
 } as const;
 
 /**
- * Type definitions
+ * ValueOf<T>     — single-level value union (type-fest convention, npmjs.com/package/type-fest)
+ * DeepValueOf<T> — recursive extension: union of all deeply-nested primitive values.
+ *                  Uses a Recursive Conditional Type (TypeScript Handbook §Conditional Types).
  */
-export type Permission = typeof Permissions[keyof typeof Permissions];
-export type Role = typeof Roles[keyof typeof Roles];
+type ValueOf<T> = T[keyof T];
+type DeepValueOf<T> = T extends object ? ValueOf<{ [K in keyof T]: DeepValueOf<T[K]> }> : T;
+
+/** Union of all permission string literals, e.g. "Area.Create" | "Employee.Edit" | "Admin" | ... */
+export type Permission = DeepValueOf<typeof Permissions>;

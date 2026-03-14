@@ -33,11 +33,15 @@ export function WorkLogImportExportPanel({
   const [duplicateHandling, setDuplicateHandling] = useState<DuplicateHandling>('Skip');
   const [currentImportFile, setCurrentImportFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importSuccess, setImportSuccess] = useState<string | null>(null);
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setImportError(null);
+    setImportSuccess(null);
     setImporting(true);
     try {
       const validation = await validateImportedWorkLogs(file, currentItems);
@@ -45,7 +49,7 @@ export function WorkLogImportExportPanel({
       setCurrentImportFile(file);
       setShowImportDialog(true);
     } catch (error) {
-      alert('Failed to validate Excel file: ' + (error as Error).message);
+      setImportError('Failed to validate Excel file: ' + (error as Error).message);
     } finally {
       setImporting(false);
       if (fileInputRef.current) {
@@ -57,6 +61,7 @@ export function WorkLogImportExportPanel({
   const handleConfirmImport = async () => {
     if (!currentImportFile || !validationResult) return;
 
+    setImportError(null);
     setImporting(true);
     try {
       const importedLogs = await importWorkLogsFromExcel(
@@ -67,14 +72,14 @@ export function WorkLogImportExportPanel({
 
       const count = importedLogs?.length ?? 0;
       await refetch();
-      alert(count > 0 ? `Successfully imported ${count} work log(s)` : 'No work logs were imported');
+      setImportSuccess(count > 0 ? `Successfully imported ${count} work log(s)` : 'No work logs were imported');
 
       setShowImportDialog(false);
       setValidationResult(null);
       setCurrentImportFile(null);
       setDuplicateHandling('Skip');
     } catch (error) {
-      alert('Failed to import Excel file: ' + (error as Error).message);
+      setImportError('Failed to import Excel file: ' + (error as Error).message);
     } finally {
       setImporting(false);
     }
@@ -85,6 +90,7 @@ export function WorkLogImportExportPanel({
     setValidationResult(null);
     setCurrentImportFile(null);
     setDuplicateHandling('Skip');
+    setImportError(null);
   };
 
   return (
@@ -149,6 +155,15 @@ export function WorkLogImportExportPanel({
           className="hidden"
           accept=".xlsx, .xls"
         />
+        {(importError || importSuccess) && (
+          <div className={`mt-4 p-3 rounded-md text-sm border ${
+            importError
+              ? 'bg-destructive/10 text-destructive border-destructive/20'
+              : 'bg-success-background text-success-foreground border-success-border'
+          }`}>
+            {importError || importSuccess}
+          </div>
+        )}
         <p className="text-sm text-muted-foreground mt-4">
           <strong>Note:</strong> The Excel template follows your existing work log format with columns: Report Date,
           Operators (comma-separated for multiple), Requesters (comma-separated for multiple, optional), Department,
@@ -165,6 +180,11 @@ export function WorkLogImportExportPanel({
                 <X className="w-6 h-6" />
               </button>
             </div>
+            {importError && (
+              <div className="px-6 py-3 bg-destructive/10 text-destructive border-b border-destructive/20 text-sm">
+                {importError}
+              </div>
+            )}
             <div className="p-6">
               <ImportValidation
                 validationResult={validationResult}
