@@ -45,6 +45,7 @@ export function RoleManagement() {
     paginatedResult,
     loading,
     error: queryError,
+    setError: setQueryError,
     refetch,
   } = useRoleQuery();
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -61,6 +62,7 @@ export function RoleManagement() {
   const { hasPermission } = usePermission();
 
   const openForm = (item?: RoleDto) => {
+    setQueryError(null);
     setEditing(item ?? null);
     setFormData(createRoleFormData(item ?? null));
     setMutationError(null);
@@ -70,6 +72,7 @@ export function RoleManagement() {
 
   const handleSubmit = async (formData: RoleFormData) => {
     setIsMutating(true);
+    setQueryError(null);
     setMutationError(null);
     setValidationErrors(null);
 
@@ -105,6 +108,7 @@ export function RoleManagement() {
 
     try {
       setDeleteLoading(true);
+      setQueryError(null);
       // Use deleteSingle for single role deletion
       await rolesApi.deleteSingle(confirmDelete.roleId);
       await refetch();

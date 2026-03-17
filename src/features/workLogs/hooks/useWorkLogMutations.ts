@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { workLogsApi } from '@/services/api';
 import { workLogToCreateDto } from '@/utils/workLogAdapter';
-import { createApiErrorState, type ValidationErrors } from '@/utils/apiErrors';
+import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
 import type { Area, Department, WorkLog, WorkStatus } from '@/types/data';
 
 export interface WorkLogMutationFormData {
@@ -72,9 +72,9 @@ export function useWorkLogMutations({
                 return true;
             } catch (mutationError) {
                 console.error('Failed to submit work log:', mutationError);
-                const errorState = createApiErrorState(mutationError, 'Unable to submit work log. Please try again.');
-                setError(errorState.message);
-                setValidationErrors(errorState.fieldErrors);
+                const parsedError = parseApiError(mutationError);
+                setError(parsedError.message || 'Unable to submit work log. Please try again.');
+                setValidationErrors(parsedError.fieldErrors);
                 return false;
             } finally {
                 setSubmitting(false);
@@ -91,9 +91,9 @@ export function useWorkLogMutations({
                 return true;
             } catch (mutationError) {
                 console.error('Failed to delete work log:', mutationError);
-                const errorState = createApiErrorState(mutationError, 'Unable to delete work log. Please try again.');
-                setError(errorState.message);
-                setValidationErrors(errorState.fieldErrors);
+                const parsedError = parseApiError(mutationError);
+                setError(parsedError.message || 'Unable to delete work log. Please try again.');
+                setValidationErrors(parsedError.fieldErrors);
                 return false;
             }
         },

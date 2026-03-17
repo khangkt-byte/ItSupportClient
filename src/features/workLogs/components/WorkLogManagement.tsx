@@ -39,7 +39,7 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<WorkLog | null>(null);
   const [formData, setFormData] = useState<WorkLogFormData>(createWorkLogFormData(null));
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<WorkLog | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const {
@@ -61,6 +61,7 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
   const canCreate = hasPermission(Permissions.IssueLog.Create);
 
   const openForm = (log?: WorkLog) => {
+    setQueryError(null);
     setMutationError(null);
     setValidationErrors(null);
     const nextEditing = log || null;
@@ -70,6 +71,7 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
   };
 
   const handleSubmit = async (formData: WorkLogFormData) => {
+    setQueryError(null);
     const success = await submitWorkLog(formData, editing);
     if (success) {
       setShowForm(false);
@@ -83,7 +85,8 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
 
     setDeleteLoading(true);
     try {
-      const success = await deleteWorkLog(confirmDelete);
+      setQueryError(null);
+      const success = await deleteWorkLog(confirmDelete.id);
       if (success) setConfirmDelete(null);
     } finally {
       setDeleteLoading(false);
@@ -160,7 +163,7 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
         isLoading={loading}
         error={queryError}
         onEdit={(log) => openForm(log)}
-        onDelete={(id) => setConfirmDelete(id)}
+        onDelete={setConfirmDelete}
       />
 
       {paginatedResult && !loading && (
@@ -222,7 +225,7 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
         loadingLabel="Deleting..."
         action="delete"
         title="Delete work log"
-        description="Are you sure you want to delete this work log? This action cannot be undone."
+        description={`Are you sure you want to delete \"${confirmDelete?.issue}\"? This action cannot be undone.`}
       />
     </div>
   );

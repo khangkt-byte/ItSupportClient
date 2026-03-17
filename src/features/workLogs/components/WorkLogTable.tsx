@@ -17,7 +17,7 @@ interface WorkLogTableProps {
   isLoading: boolean;
   error: string | null;
   onEdit: (log: WorkLog) => void;
-  onDelete: (id: string) => void;
+  onDelete: (log: WorkLog) => void;
 }
 
 export function WorkLogTable({ paginatedResult, isLoading, error, onEdit, onDelete }: WorkLogTableProps) {
@@ -104,7 +104,7 @@ export function WorkLogTable({ paginatedResult, isLoading, error, onEdit, onDele
                         )}
                         {canDelete && (
                           <button
-                            onClick={() => onDelete(log.id)}
+                            onClick={() => onDelete(log)}
                             className="w-4 h-4 text-error-foreground inline-flex items-center justify-center rounded-md hover:bg-accent hover:text-error-foreground transition-colors shrink-0"
                             title="Delete work log"
                           >

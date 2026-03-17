@@ -58,6 +58,7 @@ export function AccountManagement({ employees, roles }: Props) {
     paginatedResult,
     loading,
     error: queryError,
+    setError: setQueryError,
     refetch,
   } = useAccountQuery();
 
@@ -73,6 +74,7 @@ export function AccountManagement({ employees, roles }: Props) {
   const { hasPermission } = usePermission();
 
   const openForm = (item?: Account) => {
+    setQueryError(null);
     setEditing(item ?? null);
     setFormData(createAccountFormData(item ?? null));
     setMutationError(null);
@@ -126,6 +128,7 @@ export function AccountManagement({ employees, roles }: Props) {
 
   const handleFormSubmit = async (formData: AccountFormData) => {
     setIsMutating(true);
+    setQueryError(null);
     setMutationError(null);
     setValidationErrors(null);
 
@@ -176,6 +179,7 @@ export function AccountManagement({ employees, roles }: Props) {
   const isLoading = loading || isMutating;
 
   const handleDelete = async (accountId: string) => {
+    setQueryError(null);
     try {
       await accountsApi.deleteSingle(accountId);
       await refetch();
@@ -187,6 +191,7 @@ export function AccountManagement({ employees, roles }: Props) {
   };
 
   const handleLockToggle = async (accountId: string, isLocked: boolean) => {
+    setQueryError(null);
     try {
       if (isLocked) {
         await accountsApi.unlock(accountId);
