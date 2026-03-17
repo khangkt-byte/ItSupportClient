@@ -14,6 +14,7 @@ interface Props {
   label?: string;
   required?: boolean;
   allowCustom?: boolean;
+  hasError?: boolean;
 }
 
 export function FlexibleMultiSelect({
@@ -23,7 +24,8 @@ export function FlexibleMultiSelect({
   placeholder = 'Select or type...',
   label,
   required = false,
-  allowCustom = true
+  allowCustom = true,
+  hasError = false,
 }: Props) {
   const [inputValue, setInputValue] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -148,7 +150,11 @@ export function FlexibleMultiSelect({
 
       <div className="relative">
         {/* Selected values + Input */}
-        <div className="w-full min-h-10.5 px-3 py-2 border border-input rounded-lg bg-card flex flex-wrap gap-2 items-center focus-within:ring-2 focus-within:ring-primary-500 focus-within:border-transparent">
+        <div className={`w-full min-h-10.5 px-3 py-2 border rounded-lg bg-card flex flex-wrap gap-2 items-center focus-within:ring-2 ${
+          hasError
+            ? 'border-error-border focus-within:ring-error-border/30 focus-within:border-error-border'
+            : 'border-input focus-within:ring-primary-500 focus-within:border-transparent'
+        }`}>
           {values.map((value) => {
             const option = options.find(opt => opt.value === value);
             const displayLabel = option ? option.label : value;

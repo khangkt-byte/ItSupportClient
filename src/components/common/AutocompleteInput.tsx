@@ -23,6 +23,7 @@ interface Props {
   showKbIndicator?: boolean;
   suggestionHeader?: string;
   className?: string;
+  hasError?: boolean;
 }
 
 export function AutocompleteInput({
@@ -37,7 +38,8 @@ export function AutocompleteInput({
   required = false,
   showKbIndicator = true,
   suggestionHeader = "💡 Suggested from Knowledge Base",
-  className = ''
+  className = '',
+  hasError = false,
 }: Props) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -152,7 +154,11 @@ export function AutocompleteInput({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           required={required}
-          className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 ${
+            hasError
+              ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+              : 'border-input focus:ring-primary-500 focus:border-transparent'
+          }`}
         />
 
         {/* Suggestions Dropdown */}

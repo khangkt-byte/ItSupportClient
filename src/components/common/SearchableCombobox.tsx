@@ -13,9 +13,18 @@ interface Props {
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
+  hasError?: boolean;
 }
 
-export function SearchableCombobox({ options, value, onChange, placeholder = 'Select...', required = false, disabled = false }: Props) {
+export function SearchableCombobox({
+  options,
+  value,
+  onChange,
+  placeholder = 'Select...',
+  required = false,
+  disabled = false,
+  hasError = false,
+}: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
@@ -50,7 +59,11 @@ export function SearchableCombobox({ options, value, onChange, placeholder = 'Se
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
-        className={`w-full px-3 py-2 border border-input rounded-lg flex items-center justify-between bg-card ${
+        className={`w-full px-3 py-2 border rounded-lg flex items-center justify-between bg-card ${
+          hasError
+            ? 'border-error-border ring-1 ring-error-border/30'
+            : 'border-input'
+        } ${
           disabled ? 'bg-muted cursor-not-allowed' : 'hover:border-border'
         }`}
       >
