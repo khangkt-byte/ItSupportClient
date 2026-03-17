@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import { ErrorAlert } from '@/components/common/ErrorAlert';
+import { FieldError } from '@/components/common/FieldError';
 import type { Area } from '@/types/data';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import {
@@ -47,6 +48,7 @@ export function AreaFormModal({
 
   const nameErrors = getFieldErrorMessages(validationErrors, 'Name');
   const generalValidationMessages = getGeneralValidationMessages(validationErrors, ['Name']);
+  const hasNameError = nameErrors.length > 0;
 
   return (
     <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4">
@@ -73,15 +75,13 @@ export function AreaFormModal({
             value={formData.name}
             onChange={(e) => onChange({ ...formData, name: e.target.value })}
             placeholder="Name *"
-            className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+            className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 transition-colors ${
+              hasNameError
+                ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                : 'border-input focus:ring-primary-500 focus:border-transparent'
+            }`}
           />
-          {nameErrors.length > 0 && (
-            <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
-              {nameErrors.map((message, index) => (
-                <li key={`name-${index}`}>{message}</li>
-              ))}
-            </ul>
-          )}
+          <FieldError messages={nameErrors} />
           <textarea
             value={formData.description}
             onChange={(e) => onChange({ ...formData, description: e.target.value })}

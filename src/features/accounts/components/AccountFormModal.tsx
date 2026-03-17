@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Save, User, X } from 'lucide-react';
 import { ErrorAlert } from '@/components/common/ErrorAlert';
+import { FieldError } from '@/components/common/FieldError';
 import { PermissionEditor } from '@/components/common/PermissionEditor';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { rolesApi } from '@/services/api/roles';
@@ -111,6 +112,9 @@ export function AccountFormModal({
     'Username',
     'Password',
   ]);
+  const hasEmployeeError = employeeErrors.length > 0;
+  const hasUsernameError = usernameErrors.length > 0;
+  const hasPasswordError = passwordErrors.length > 0;
 
   if (!isOpen) return null;
 
@@ -152,7 +156,11 @@ export function AccountFormModal({
                 required
                 value={formData.employeeId}
                 onChange={(e) => onChange({ ...formData, employeeId: e.target.value })}
-                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 bg-card text-foreground placeholder-placeholder transition-colors ${
+                  hasEmployeeError
+                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                }`}
                 disabled={!!editing}
               >
                 <option value="">Select employee...</option>
@@ -162,13 +170,7 @@ export function AccountFormModal({
                   </option>
                 ))}
               </select>
-              {employeeErrors.length > 0 && (
-                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
-                  {employeeErrors.map((message, index) => (
-                    <li key={`employee-${index}`}>{message}</li>
-                  ))}
-                </ul>
-              )}
+              <FieldError messages={employeeErrors} />
               {editing && <p className="text-xs text-muted-foreground mt-1">Employee cannot be changed</p>}
             </div>
 
@@ -182,15 +184,13 @@ export function AccountFormModal({
                 value={formData.username}
                 onChange={(e) => onChange({ ...formData, username: e.target.value })}
                 placeholder="Enter username"
-                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 bg-card text-foreground placeholder-placeholder transition-colors ${
+                  hasUsernameError
+                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                }`}
               />
-              {usernameErrors.length > 0 && (
-                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
-                  {usernameErrors.map((message, index) => (
-                    <li key={`username-${index}`}>{message}</li>
-                  ))}
-                </ul>
-              )}
+              <FieldError messages={usernameErrors} />
             </div>
 
             <div>
@@ -203,15 +203,13 @@ export function AccountFormModal({
                 value={formData.password}
                 onChange={(e) => onChange({ ...formData, password: e.target.value })}
                 placeholder={editing ? 'Leave empty to keep current password' : 'Enter password'}
-                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 bg-card text-foreground placeholder-placeholder transition-colors ${
+                  hasPasswordError
+                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                }`}
               />
-              {passwordErrors.length > 0 && (
-                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
-                  {passwordErrors.map((message, index) => (
-                    <li key={`password-${index}`}>{message}</li>
-                  ))}
-                </ul>
-              )}
+              <FieldError messages={passwordErrors} />
               {editing && <p className="text-xs text-muted-foreground mt-1">Leave empty to keep current password</p>}
             </div>
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, Save, Shield, X } from 'lucide-react';
 import { ErrorAlert } from '@/components/common/ErrorAlert';
+import { FieldError } from '@/components/common/FieldError';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { rolesApi } from '@/services/api/roles';
 import type { ClaimDto, RoleDto } from '@/types/data';
@@ -145,6 +146,7 @@ export function RoleFormModal({
 
   const roleNameErrors = getFieldErrorMessages(validationErrors, 'Name');
   const generalValidationMessages = getGeneralValidationMessages(validationErrors, ['Name']);
+  const hasRoleNameError = roleNameErrors.length > 0;
 
   if (!isOpen) return null;
 
@@ -192,15 +194,13 @@ export function RoleFormModal({
                 value={formData.name}
                 onChange={(e) => onChange({ ...formData, name: e.target.value })}
                 placeholder="e.g., System Administrator"
-                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 bg-card text-foreground placeholder-placeholder transition-colors ${
+                  hasRoleNameError
+                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                }`}
               />
-              {roleNameErrors.length > 0 && (
-                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
-                  {roleNameErrors.map((message, index) => (
-                    <li key={`role-name-${index}`}>{message}</li>
-                  ))}
-                </ul>
-              )}
+              <FieldError messages={roleNameErrors} />
             </div>
             <div>
               <label className="block text-sm font-medium text-muted-foreground mb-1">Description</label>

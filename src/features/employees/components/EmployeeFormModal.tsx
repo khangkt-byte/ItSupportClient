@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { X } from 'lucide-react';
 import { ErrorAlert } from '@/components/common/ErrorAlert';
+import { FieldError } from '@/components/common/FieldError';
 import type { Employee, Department, AreaDto } from '@/types/data';
 import { SearchableCombobox } from '@/components/common/SearchableCombobox';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
@@ -60,12 +61,23 @@ export function EmployeeFormModal({
   const empCodeErrors = getFieldErrorMessages(validationErrors, 'EmpCode');
   const emailErrors = getFieldErrorMessages(validationErrors, 'Email');
   const phoneErrors = getFieldErrorMessages(validationErrors, 'PhoneNumber');
+  const departmentErrors = getFieldErrorMessages(validationErrors, 'Department', ['DptId', 'DepartmentId']);
+  const areaErrors = getFieldErrorMessages(validationErrors, 'Area', ['AreaId']);
   const generalValidationMessages = getGeneralValidationMessages(validationErrors, [
     'FullName',
     'EmpCode',
     'Email',
     'PhoneNumber',
+    'Department',
+    'DptId',
+    'DepartmentId',
+    'Area',
+    'AreaId',
   ]);
+  const hasEmpCodeError = empCodeErrors.length > 0;
+  const hasFullNameError = fullNameErrors.length > 0;
+  const hasPhoneError = phoneErrors.length > 0;
+  const hasEmailError = emailErrors.length > 0;
 
   const departmentOptions = useMemo(
     () =>
@@ -112,16 +124,12 @@ export function EmployeeFormModal({
                 value={formData.empCode}
                 onChange={(e) => onChange({ ...formData, empCode: e.target.value })}
                 placeholder="EMP001"
-                className="input-base"
+                className={`input-base ${
+                  hasEmpCodeError ? 'border-error-border focus:ring-error-border/30 focus:border-error-border' : ''
+                }`}
                 disabled={isSubmitting}
               />
-              {empCodeErrors.length > 0 && (
-                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
-                  {empCodeErrors.map((message, index) => (
-                    <li key={`empcode-${index}`}>{message}</li>
-                  ))}
-                </ul>
-              )}
+              <FieldError messages={empCodeErrors} />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Full Name <span className="text-error-foreground">*</span></label>
@@ -131,16 +139,12 @@ export function EmployeeFormModal({
                 value={formData.fullName}
                 onChange={(e) => onChange({ ...formData, fullName: e.target.value })}
                 placeholder="John Doe"
-                className="input-base"
+                className={`input-base ${
+                  hasFullNameError ? 'border-error-border focus:ring-error-border/30 focus:border-error-border' : ''
+                }`}
                 disabled={isSubmitting}
               />
-              {fullNameErrors.length > 0 && (
-                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
-                  {fullNameErrors.map((message, index) => (
-                    <li key={`fullname-${index}`}>{message}</li>
-                  ))}
-                </ul>
-              )}
+              <FieldError messages={fullNameErrors} />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Phone Number</label>
@@ -149,16 +153,12 @@ export function EmployeeFormModal({
                 value={formData.phoneNumber}
                 onChange={(e) => onChange({ ...formData, phoneNumber: e.target.value })}
                 placeholder="081-234-5678"
-                className="input-base"
+                className={`input-base ${
+                  hasPhoneError ? 'border-error-border focus:ring-error-border/30 focus:border-error-border' : ''
+                }`}
                 disabled={isSubmitting}
               />
-              {phoneErrors.length > 0 && (
-                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
-                  {phoneErrors.map((message, index) => (
-                    <li key={`phone-${index}`}>{message}</li>
-                  ))}
-                </ul>
-              )}
+              <FieldError messages={phoneErrors} />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Email</label>
@@ -167,16 +167,12 @@ export function EmployeeFormModal({
                 value={formData.email}
                 onChange={(e) => onChange({ ...formData, email: e.target.value })}
                 placeholder="john@company.com"
-                className="input-base"
+                className={`input-base ${
+                  hasEmailError ? 'border-error-border focus:ring-error-border/30 focus:border-error-border' : ''
+                }`}
                 disabled={isSubmitting}
               />
-              {emailErrors.length > 0 && (
-                <ul className="mt-2 list-disc list-inside text-sm text-error-foreground space-y-1">
-                  {emailErrors.map((message, index) => (
-                    <li key={`email-${index}`}>{message}</li>
-                  ))}
-                </ul>
-              )}
+              <FieldError messages={emailErrors} />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1 text-muted-foreground">
@@ -187,7 +183,9 @@ export function EmployeeFormModal({
                 value={formData.department}
                 onChange={(value) => onChange({ ...formData, department: value })}
                 placeholder="Select department..."
+                hasError={departmentErrors.length > 0}
               />
+              <FieldError messages={departmentErrors} />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1 text-muted-foreground">
@@ -198,7 +196,9 @@ export function EmployeeFormModal({
                 value={formData.area}
                 onChange={(value) => onChange({ ...formData, area: value })}
                 placeholder="Select area..."
+                hasError={areaErrors.length > 0}
               />
+              <FieldError messages={areaErrors} />
             </div>
             <div className="col-span-2">
               <label className="block text-sm font-medium mb-1">Position</label>

@@ -4,6 +4,7 @@ import { employeesApi } from '@/services/api/employees';
 import type { ChangePasswordDto, LoginHistoryDto, ProfileDto } from '@/types/data';
 import { createApiErrorState } from '@/utils/apiErrors';
 import { ErrorAlert } from '@/components/common/ErrorAlert';
+import { FieldError } from '@/components/common/FieldError';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { LoadingState } from '@/components/common/LoadingState';
 
@@ -47,6 +48,11 @@ export function MyAccountManagement() {
   const [loading, setLoading] = useState(true);
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [historyRefreshing, setHistoryRefreshing] = useState(false);
+  const [passwordFieldErrors, setPasswordFieldErrors] = useState<Record<keyof PasswordFormState, string[]>>({
+    currentPassword: [],
+    newPassword: [],
+    confirmPassword: [],
+  });
 
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -77,19 +83,34 @@ export function MyAccountManagement() {
 
   const handlePasswordFieldChange = (field: keyof PasswordFormState, value: string) => {
     setPasswordForm((prev) => ({ ...prev, [field]: value }));
+    if (value && passwordFieldErrors[field].length > 0) {
+      setPasswordFieldErrors((prev) => ({ ...prev, [field]: [] }));
+    }
   };
 
   const handleChangePassword = async () => {
     setError(null);
     setSuccessMessage(null);
+    setPasswordFieldErrors({ currentPassword: [], newPassword: [], confirmPassword: [] });
 
-    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
-      setError('Please fill all password fields.');
+    const nextFieldErrors: Record<keyof PasswordFormState, string[]> = {
+      currentPassword: passwordForm.currentPassword ? [] : ['Please enter your current password.'],
+      newPassword: passwordForm.newPassword ? [] : ['Please enter a new password.'],
+      confirmPassword: passwordForm.confirmPassword ? [] : ['Please confirm your new password.'],
+    };
+
+    if (nextFieldErrors.currentPassword.length || nextFieldErrors.newPassword.length || nextFieldErrors.confirmPassword.length) {
+      setPasswordFieldErrors(nextFieldErrors);
+      setError('Please correct the highlighted password fields.');
       return;
     }
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setError('Confirm password does not match new password.');
+      setPasswordFieldErrors((prev) => ({
+        ...prev,
+        confirmPassword: ['Confirm password does not match new password.'],
+      }));
+      setError('Please correct the highlighted password fields.');
       return;
     }
 
@@ -104,6 +125,7 @@ export function MyAccountManagement() {
     try {
       await accountsApi.changePassword(payload);
       setPasswordForm(INITIAL_PASSWORD_FORM);
+      setPasswordFieldErrors({ currentPassword: [], newPassword: [], confirmPassword: [] });
       setSuccessMessage('Password changed successfully.');
     } catch (passwordError: unknown) {
       const errorState = createApiErrorState(passwordError, 'Unable to change password. Please try again.');
@@ -238,8 +260,13 @@ export function MyAccountManagement() {
                 type="password"
                 value={passwordForm.currentPassword}
                 onChange={(event) => handlePasswordFieldChange('currentPassword', event.target.value)}
-                className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                className={`w-full h-10 rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 ${
+                  passwordFieldErrors.currentPassword.length > 0
+                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                }`}
               />
+              <FieldError messages={passwordFieldErrors.currentPassword} />
             </div>
 
             <div>
@@ -248,8 +275,13 @@ export function MyAccountManagement() {
                 type="password"
                 value={passwordForm.newPassword}
                 onChange={(event) => handlePasswordFieldChange('newPassword', event.target.value)}
-                className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                className={`w-full h-10 rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 ${
+                  passwordFieldErrors.newPassword.length > 0
+                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                }`}
               />
+              <FieldError messages={passwordFieldErrors.newPassword} />
             </div>
 
             <div>
@@ -258,8 +290,13 @@ export function MyAccountManagement() {
                 type="password"
                 value={passwordForm.confirmPassword}
                 onChange={(event) => handlePasswordFieldChange('confirmPassword', event.target.value)}
-                className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                className={`w-full h-10 rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 ${
+                  passwordFieldErrors.confirmPassword.length > 0
+                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                }`}
               />
+              <FieldError messages={passwordFieldErrors.confirmPassword} />
             </div>
           </div>
 

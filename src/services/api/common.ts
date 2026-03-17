@@ -157,7 +157,9 @@ class ApiClient {
       // ✅ Handle CSRF token expiry with exponential backoff
       if (response.status === 403 && retryCount < this.maxRetries) {
         try {
-          const error = await response.json();
+          // Read from a clone so the original response body remains available
+          // for the centralized error parser in handleResponse.
+          const error = await response.clone().json();
           if (error.errorCode === 'CSRF_TOKEN_MISSING' ||
             error.errorCode === 'CSRF_TOKEN_INVALID') {
 

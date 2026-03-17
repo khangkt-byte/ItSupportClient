@@ -12,6 +12,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { getApiErrorMessage } from '@/utils/apiErrors';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 
 interface Props {
   existingWorkLogs: WorkLog[];
@@ -188,12 +189,7 @@ export function ImportWizard({
         </div>
 
         <div className="p-6">
-          {error && (
-            <div className="mb-4 p-3 rounded-md bg-error-background border border-error-border text-error-foreground text-sm flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              {error}
-            </div>
-          )}
+          {error && <ErrorAlert message={error} className="mb-4" />}
           {/* STEP 1: UPLOAD & VALIDATE */}
           {step === 1 && (
             <div className="space-y-6">

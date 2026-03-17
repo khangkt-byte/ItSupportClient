@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Eye, EyeOff, FileText } from 'lucide-react';
 import { ErrorAlert } from '@/components/common/ErrorAlert';
+import { FieldError } from '@/components/common/FieldError';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import type { LoginResponse } from '@/features/auth/types/auth';
 
@@ -12,15 +13,26 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{ username: string[]; password: string[] }>({
+    username: [],
+    password: [],
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setFieldErrors({ username: [], password: [] });
 
-    if (!username || !password) {
-      setError('Please enter username and password');
+    const nextFieldErrors = {
+      username: username ? [] : ['Please enter a username.'],
+      password: password ? [] : ['Please enter a password.'],
+    };
+
+    if (nextFieldErrors.username.length > 0 || nextFieldErrors.password.length > 0) {
+      setFieldErrors(nextFieldErrors);
+      setError('Please correct the highlighted fields.');
       return;
     }
 
@@ -61,11 +73,22 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 id="username"
                 type="text"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => {
+                  const nextValue = e.target.value;
+                  setUsername(nextValue);
+                  if (nextValue && fieldErrors.username.length > 0) {
+                    setFieldErrors((prev) => ({ ...prev, username: [] }));
+                  }
+                }}
                 required
-                className="w-full px-4 py-3 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                  fieldErrors.username.length > 0
+                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                }`}
                 placeholder="Enter your username"
               />
+              <FieldError messages={fieldErrors.username} />
             </div>
 
             <div>
@@ -77,9 +100,19 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    const nextValue = e.target.value;
+                    setPassword(nextValue);
+                    if (nextValue && fieldErrors.password.length > 0) {
+                      setFieldErrors((prev) => ({ ...prev, password: [] }));
+                    }
+                  }}
                   required
-                  className="w-full px-4 py-3 pr-12 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:outline-none focus:ring-2 ${
+                    fieldErrors.password.length > 0
+                      ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                      : 'border-input focus:ring-primary-500 focus:border-transparent'
+                  }`}
                   placeholder="Enter your password"
                 />
                 <button
@@ -91,6 +124,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
+              <FieldError messages={fieldErrors.password} />
             </div>
 
             {error && <ErrorAlert message={error} />}

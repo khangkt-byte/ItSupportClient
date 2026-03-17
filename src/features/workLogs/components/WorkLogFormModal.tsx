@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Clock, Save, X } from 'lucide-react';
 import { ErrorAlert } from '@/components/common/ErrorAlert';
+import { FieldError } from '@/components/common/FieldError';
 import type { Area, Department, Employee, WorkLog, WorkStatus } from '@/types/data';
 import { causesApi, issuesApi } from '@/services/api';
 import { SearchableCombobox } from '@/components/common/SearchableCombobox';
@@ -9,7 +10,11 @@ import { AutocompleteInput, type Suggestion } from '@/components/common/Autocomp
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Permissions } from '@/config/permissions';
 import { usePermission } from '@/hooks/usePermission';
-import { getGeneralValidationMessages, type ValidationErrors } from '@/utils/apiErrors';
+import {
+  getFieldErrorMessages,
+  getGeneralValidationMessages,
+  type ValidationErrors,
+} from '@/utils/apiErrors';
 
 export interface WorkLogFormData {
   reportDate: string;
@@ -96,7 +101,36 @@ export function WorkLogFormModal({
   const [loadingCauseSuggestions, setLoadingCauseSuggestions] = useState(false);
   const { hasPermission } = usePermission();
   const canSubmit = hasPermission(editing ? Permissions.IssueLog.Edit : Permissions.IssueLog.Create);
-  const validationMessages = getGeneralValidationMessages(validationErrors);
+  const reportDateErrors = getFieldErrorMessages(validationErrors, 'ReportDate');
+  const statusErrors = getFieldErrorMessages(validationErrors, 'Status');
+  const operatorErrors = getFieldErrorMessages(validationErrors, 'Operators', ['OperatorIds']);
+  const requesterErrors = getFieldErrorMessages(validationErrors, 'Requesters', ['RequesterIds']);
+  const departmentErrors = getFieldErrorMessages(validationErrors, 'Department', ['DepartmentId', 'DptId']);
+  const areaErrors = getFieldErrorMessages(validationErrors, 'Area', ['AreaId']);
+  const issueErrors = getFieldErrorMessages(validationErrors, 'Issue', ['IssueDescription']);
+  const causeErrors = getFieldErrorMessages(validationErrors, 'Cause');
+  const fixDescriptionErrors = getFieldErrorMessages(validationErrors, 'FixDescription');
+  const permanentFixErrors = getFieldErrorMessages(validationErrors, 'PermanentFix');
+  const noteErrors = getFieldErrorMessages(validationErrors, 'Note');
+  const validationMessages = getGeneralValidationMessages(validationErrors, [
+    'ReportDate',
+    'Status',
+    'Operators',
+    'OperatorIds',
+    'Requesters',
+    'RequesterIds',
+    'Department',
+    'DepartmentId',
+    'DptId',
+    'Area',
+    'AreaId',
+    'Issue',
+    'IssueDescription',
+    'Cause',
+    'FixDescription',
+    'PermanentFix',
+    'Note',
+  ]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -320,8 +354,13 @@ export function WorkLogFormModal({
                   required
                   value={formData.reportDate}
                   onChange={(e) => onChange({ ...formData, reportDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                  className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground focus:ring-2 transition-colors ${
+                    reportDateErrors.length > 0
+                      ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                      : 'border-input focus:ring-primary-500 focus:border-transparent'
+                  }`}
                 />
+                <FieldError messages={reportDateErrors} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1 text-muted-foreground">
@@ -331,13 +370,18 @@ export function WorkLogFormModal({
                   required
                   value={formData.status}
                   onChange={(e) => onChange({ ...formData, status: e.target.value as WorkStatus })}
-                  className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                  className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground focus:ring-2 transition-colors ${
+                    statusErrors.length > 0
+                      ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                      : 'border-input focus:ring-primary-500 focus:border-transparent'
+                  }`}
                 >
                   <option value="pending">Pending</option>
                   <option value="in-progress">In Progress</option>
                   <option value="resolved">Resolved</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
+                <FieldError messages={statusErrors} />
               </div>
               <div className="col-span-2">
                 <label className="block text-sm font-medium mb-1 text-muted-foreground">
@@ -351,7 +395,9 @@ export function WorkLogFormModal({
                   label=""
                   required
                   allowCustom
+                  hasError={operatorErrors.length > 0}
                 />
+                <FieldError messages={operatorErrors} />
               </div>
               <div className="col-span-2">
                 <label className="block text-sm font-medium mb-1 text-muted-foreground">Requesters</label>
@@ -362,7 +408,9 @@ export function WorkLogFormModal({
                   placeholder="Select requesters or type custom name..."
                   label=""
                   allowCustom
+                  hasError={requesterErrors.length > 0}
                 />
+                <FieldError messages={requesterErrors} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1 text-muted-foreground">
@@ -374,7 +422,9 @@ export function WorkLogFormModal({
                   onChange={(value) => onChange({ ...formData, department: value })}
                   placeholder="Select department..."
                   required
+                  hasError={departmentErrors.length > 0}
                 />
+                <FieldError messages={departmentErrors} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1 text-muted-foreground">
@@ -386,7 +436,9 @@ export function WorkLogFormModal({
                   onChange={(value) => onChange({ ...formData, area: value })}
                   placeholder="Select area..."
                   required
+                  hasError={areaErrors.length > 0}
                 />
+                <FieldError messages={areaErrors} />
               </div>
             </div>
 
@@ -401,7 +453,9 @@ export function WorkLogFormModal({
               required
               placeholder="Start typing to see suggestions from knowledge base..."
               suggestionHeader=""
+              hasError={issueErrors.length > 0}
             />
+            <FieldError messages={issueErrors} />
             <AutocompleteInput
               value={formData.cause}
               onChange={(value) => onChange({ ...formData, cause: value })}
@@ -412,7 +466,9 @@ export function WorkLogFormModal({
               label="Cause"
               placeholder={selectedIssue ? `Common causes for "${selectedIssue.name}"...` : 'Start typing to see suggestions...'}
               suggestionHeader={selectedIssue ? `Common Causes for "${selectedIssue.name}"` : 'Suggested Causes'}
+              hasError={causeErrors.length > 0}
             />
+            <FieldError messages={causeErrors} />
 
             <div>
               <label className="block text-sm font-medium mb-1 text-muted-foreground">Fix Description</label>
@@ -420,8 +476,13 @@ export function WorkLogFormModal({
                 value={formData.fixDescription}
                 onChange={(e) => onChange({ ...formData, fixDescription: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
+                className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 transition-colors resize-none ${
+                  fixDescriptionErrors.length > 0
+                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                }`}
               />
+              <FieldError messages={fixDescriptionErrors} />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1 text-muted-foreground">Permanent Fix</label>
@@ -429,8 +490,13 @@ export function WorkLogFormModal({
                 value={formData.permanentFix}
                 onChange={(e) => onChange({ ...formData, permanentFix: e.target.value })}
                 rows={2}
-                className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
+                className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 transition-colors resize-none ${
+                  permanentFixErrors.length > 0
+                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                }`}
               />
+              <FieldError messages={permanentFixErrors} />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1 text-muted-foreground">Note</label>
@@ -438,8 +504,13 @@ export function WorkLogFormModal({
                 value={formData.note}
                 onChange={(e) => onChange({ ...formData, note: e.target.value })}
                 rows={2}
-                className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
+                className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 transition-colors resize-none ${
+                  noteErrors.length > 0
+                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                }`}
               />
+              <FieldError messages={noteErrors} />
             </div>
 
             <div className="flex gap-3">
