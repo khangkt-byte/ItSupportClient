@@ -11,7 +11,7 @@ import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
 import { AreaTable } from '@/features/areas/components/AreaTable';
-import { AreaFormModal, type AreaFormData } from '@/features/areas/components/AreaFormModal';
+import { AreaFormModal, createAreaFormData, type AreaFormData } from '@/features/areas/components/AreaFormModal';
 
 export function AreaManagement() {
   const {
@@ -27,7 +27,7 @@ export function AreaManagement() {
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Area | null>(null);
-  const [formData, setFormData] = useState<AreaFormData>({ name: '', description: '' });
+  const [formData, setFormData] = useState<AreaFormData>(createAreaFormData(null));
   const [confirmDelete, setConfirmDelete] = useState<Area | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isMutating, setIsMutating] = useState(false);
@@ -40,7 +40,7 @@ export function AreaManagement() {
 
   const openForm = (item?: Area) => {
     setEditing(item || null);
-    setFormData(item ? { name: item.name, description: item.description || '' } : { name: '', description: '' });
+    setFormData(createAreaFormData(item ?? null));
     setQueryError(null);
     setMutationError(null);
     setValidationErrors(null);
@@ -68,7 +68,7 @@ export function AreaManagement() {
 
       await refetch();
       setShowForm(false);
-      setFormData({ name: '', description: '' });
+      setFormData(createAreaFormData(null));
     } catch (submitError: unknown) {
       console.error('Failed to save area:', submitError);
       const parsedError = parseApiError(submitError);

@@ -36,7 +36,7 @@ import {
   type AccountFormData,
 } from '@/features/accounts/components/AccountFormModal';
 import { useAccountQuery } from '@/features/accounts/hooks/useAccountQuery';
-import { createApiErrorState, type ValidationErrors } from '@/utils/apiErrors';
+import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
 
 interface Props {
   employees: Employee[];
@@ -57,7 +57,7 @@ export function AccountManagement({ employees, roles }: Props) {
     setQueryParams,
     paginatedResult,
     loading,
-    error,
+    error: queryError,
     refetch,
   } = useAccountQuery();
 
@@ -72,15 +72,15 @@ export function AccountManagement({ employees, roles }: Props) {
 
   const { hasPermission } = usePermission();
 
-  const openCreateForm = () => {
-    setEditing(null);
-    setFormData(createAccountFormData(null));
+  const openForm = (item?: Account) => {
+    setEditing(item ?? null);
+    setFormData(createAccountFormData(item ?? null));
     setMutationError(null);
     setValidationErrors(null);
     setShowForm(true);
   };
 
-  const openEditForm = async (accountId: string) => {
+  const loadAndEditAccount = async (accountId: string) => {
     const listAccount = paginatedResult?.items.find((item) => item.accountId === accountId) || null;
     if (!listAccount) {
       setMutationError('Unable to load account details for editing.');
@@ -116,18 +116,12 @@ export function AccountManagement({ employees, roles }: Props) {
         roles: detail.roles,
       };
 
-      setEditing(accountToEdit);
-      setFormData(createAccountFormData(accountToEdit));
+      openForm(accountToEdit);
     } catch (loadError: unknown) {
-      const errorState = createApiErrorState(loadError, 'Unable to load account details. Please refresh and try again.');
-      setMutationError(errorState.message);
-      setValidationErrors(errorState.fieldErrors);
-      return;
+      const parsedError = parseApiError(loadError);
+      setMutationError(parsedError.message || 'Unable to load account details. Please refresh and try again.');
+      setValidationErrors(parsedError.fieldErrors);
     }
-
-    setMutationError(null);
-    setValidationErrors(null);
-    setShowForm(true);
   };
 
   const handleFormSubmit = async (formData: AccountFormData) => {
@@ -171,9 +165,9 @@ export function AccountManagement({ employees, roles }: Props) {
       await refetch();
     } catch (err: unknown) {
       console.error('Failed to save account:', err);
-      const errorState = createApiErrorState(err, 'Unable to save account. Please try again.');
-      setMutationError(errorState.message);
-      setValidationErrors(errorState.fieldErrors);
+      const parsedError = parseApiError(err);
+      setMutationError(parsedError.message || 'Unable to save account. Please try again.');
+      setValidationErrors(parsedError.fieldErrors);
     } finally {
       setIsMutating(false);
     }
@@ -186,9 +180,9 @@ export function AccountManagement({ employees, roles }: Props) {
       await accountsApi.deleteSingle(accountId);
       await refetch();
     } catch (err: unknown) {
-      const errorState = createApiErrorState(err, 'Unable to delete account. Please try again.');
-      setMutationError(errorState.message);
-      setValidationErrors(errorState.fieldErrors);
+      const parsedError = parseApiError(err);
+      setMutationError(parsedError.message || 'Unable to delete account. Please try again.');
+      setValidationErrors(parsedError.fieldErrors);
     }
   };
 
@@ -201,9 +195,9 @@ export function AccountManagement({ employees, roles }: Props) {
       }
       await refetch();
     } catch (err: unknown) {
-      const errorState = createApiErrorState(err, 'Unable to update account status. Please try again.');
-      setMutationError(errorState.message);
-      setValidationErrors(errorState.fieldErrors);
+      const parsedError = parseApiError(err);
+      setMutationError(parsedError.message || 'Unable to update account status. Please try again.');
+      setValidationErrors(parsedError.fieldErrors);
     }
   };
 
@@ -274,7 +268,7 @@ export function AccountManagement({ employees, roles }: Props) {
         </div>
         {hasPermission(Permissions.Account.Create) && (
           <button
-            onClick={openCreateForm}
+            onClick={() => openForm()}
             className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm"
           >
             <Plus className="w-5 h-5" />
@@ -326,10 +320,10 @@ export function AccountManagement({ employees, roles }: Props) {
       <AccountTable
         items={paginatedResult?.items || []}
         isLoading={isLoading}
-        error={error}
+        error={queryError}
         canEdit={hasPermission(Permissions.Account.Edit)}
         canDelete={hasPermission(Permissions.Account.Delete)}
-        onEdit={openEditForm}
+        onEdit={loadAndEditAccount}
         onLockToggle={(accountId) => {
           const account = paginatedResult?.items.find((item) => item.accountId === accountId);
           if (!account) return;

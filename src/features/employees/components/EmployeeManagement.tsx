@@ -27,7 +27,7 @@ import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
 import { EmployeeTable } from '@/features/employees/components/EmployeeTable';
-import { EmployeeFormModal, type EmployeeFormData } from '@/features/employees/components/EmployeeFormModal';
+import { EmployeeFormModal, createEmployeeFormData, type EmployeeFormData } from '@/features/employees/components/EmployeeFormModal';
 import { useEmployeeQuery } from '@/features/employees/hooks/useEmployeeQuery';
 
 interface Props {
@@ -40,15 +40,7 @@ export function EmployeeManagement({ departments, areas }: Props) {
   // Form states
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Employee | null>(null);
-  const [formData, setFormData] = useState<EmployeeFormData>({
-    empCode: '', 
-    fullName: '', 
-    phoneNumber: '', 
-    email: '', 
-    position: '',
-    department: '',
-    area: '',
-  });
+  const [formData, setFormData] = useState<EmployeeFormData>(createEmployeeFormData(null));
 
   // UI states
   const [isMutating, setIsMutating] = useState(false);
@@ -84,17 +76,7 @@ export function EmployeeManagement({ departments, areas }: Props) {
 
   const openForm = (item?: Employee) => {
     setEditing(item || null);
-    setFormData(item ? { 
-      empCode: item.empCode || '', 
-      fullName: item.fullName, 
-      phoneNumber: item.phoneNumber || '', 
-      email: item.email || '', 
-      position: item.position || '',
-      department: item.department || '',
-      area: item.area || '',
-    } : { 
-      empCode: '', fullName: '', phoneNumber: '', email: '', position: '', department: '', area: ''
-    });
+    setFormData(createEmployeeFormData(item ?? null));
     setQueryError(null);
     setMutationError(null);
     setValidationErrors(null);
@@ -138,7 +120,7 @@ export function EmployeeManagement({ departments, areas }: Props) {
       }
 
       setShowForm(false);
-      setFormData({ empCode: '', fullName: '', phoneNumber: '', email: '', position: '', department: '', area: '' });
+      setFormData(createEmployeeFormData(null));
       // Refresh data after submission
       await refetch();
     } catch (submitError: unknown) {

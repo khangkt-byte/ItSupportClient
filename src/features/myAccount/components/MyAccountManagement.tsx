@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { accountsApi } from '@/services/api/accounts';
 import { employeesApi } from '@/services/api/employees';
 import type { ChangePasswordDto, LoginHistoryDto, ProfileDto } from '@/types/data';
-import { createApiErrorState, getFieldErrorMessages } from '@/utils/apiErrors';
+import { parseApiError, getFieldErrorMessages } from '@/utils/apiErrors';
 import { ErrorAlert } from '@/components/common/ErrorAlert';
 import { FieldError } from '@/components/common/FieldError';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
@@ -70,8 +70,8 @@ export function MyAccountManagement() {
       setProfile(profileData);
       setLoginHistory(historyData);
     } catch (loadError: unknown) {
-      const errorState = createApiErrorState(loadError, 'Unable to load your account data. Please refresh and try again.');
-      setError(errorState.message);
+      const parsedError = parseApiError(loadError);
+      setError(parsedError.message || 'Unable to load your account data. Please refresh and try again.');
     } finally {
       setLoading(false);
     }
@@ -128,8 +128,8 @@ export function MyAccountManagement() {
       setPasswordFieldErrors({ currentPassword: [], newPassword: [], confirmPassword: [] });
       setSuccessMessage('Password changed successfully.');
     } catch (passwordError: unknown) {
-      const errorState = createApiErrorState(passwordError, 'Unable to change password. Please try again.');
-      const { fieldErrors } = errorState;
+      const parsedError = parseApiError(passwordError);
+      const { fieldErrors } = parsedError;
 
       // getFieldErrorMessages matches case-insensitively, so no casing aliases needed.
       // Only structural variants differ (plain key vs JSON-pointer prefix).
@@ -144,7 +144,7 @@ export function MyAccountManagement() {
         setPasswordFieldErrors({ currentPassword: currentPasswordErrors, newPassword: newPasswordErrors, confirmPassword: confirmPasswordErrors });
         setError('Please correct the highlighted password fields.');
       } else {
-        setError(errorState.message);
+        setError(parsedError.message || 'Unable to change password. Please try again.');
       }
     } finally {
       setPasswordSaving(false);
@@ -158,8 +158,8 @@ export function MyAccountManagement() {
       setLoginHistory(history);
       setHistoryPage(1);
     } catch (refreshError: unknown) {
-      const errorState = createApiErrorState(refreshError, 'Unable to refresh login history. Please try again.');
-      setError(errorState.message);
+      const parsedError = parseApiError(refreshError);
+      setError(parsedError.message || 'Unable to refresh login history. Please try again.');
     } finally {
       setHistoryRefreshing(false);
     }

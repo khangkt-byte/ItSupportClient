@@ -16,6 +16,17 @@ export interface IssueFormData {
   severity: string;
 }
 
+export function createIssueFormData(item: IssueDto | null): IssueFormData {
+  return item
+    ? {
+        name: item.name,
+        description: item.description || '',
+        category: item.category || '',
+        severity: item.severity?.toString() || '',
+      }
+    : { name: '', description: '', category: '', severity: '' };
+}
+
 interface IssueFormModalProps {
   isOpen: boolean;
   editing: IssueDto | null;

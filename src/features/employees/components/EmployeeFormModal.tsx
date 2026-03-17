@@ -21,6 +21,20 @@ export interface EmployeeFormData {
   area: string;
 }
 
+export function createEmployeeFormData(item: Employee | null): EmployeeFormData {
+  return item
+    ? {
+        empCode: item.empCode || '',
+        fullName: item.fullName,
+        phoneNumber: item.phoneNumber || '',
+        email: item.email || '',
+        position: item.position || '',
+        department: item.department || '',
+        area: item.area || '',
+      }
+    : { empCode: '', fullName: '', phoneNumber: '', email: '', position: '', department: '', area: '' };
+}
+
 interface EmployeeFormModalProps {
   isOpen: boolean;
   isSubmitting: boolean;

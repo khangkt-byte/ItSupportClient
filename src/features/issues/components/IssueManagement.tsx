@@ -15,7 +15,7 @@ import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 import { useIssueQuery } from '@/features/issues/hooks/useIssueQuery';
 import { IssueTable } from '@/features/issues/components/IssueTable';
-import { IssueFormModal, type IssueFormData } from '@/features/issues/components/IssueFormModal';
+import { IssueFormModal, createIssueFormData, type IssueFormData } from '@/features/issues/components/IssueFormModal';
 import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
 
 export function IssueManagement() {
@@ -23,12 +23,7 @@ export function IssueManagement() {
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<IssueDto | null>(null);
-  const [formData, setFormData] = useState<IssueFormData>({
-    name: '',
-    description: '',
-    category: '',
-    severity: '',
-  });
+  const [formData, setFormData] = useState<IssueFormData>(createIssueFormData(null));
   const [confirmDelete, setConfirmDelete] = useState<IssueDto | null>(null);
   const [isMutating, setIsMutating] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -43,7 +38,7 @@ export function IssueManagement() {
     error: queryError,
     paginatedResult,
     refetch,
-    setError,
+    setError: setQueryError,
   } = useIssueQuery();
 
   const isLoading = queryLoading || isMutating;
@@ -52,22 +47,8 @@ export function IssueManagement() {
     setEditing(item || null);
     setMutationError(null);
     setValidationErrors(null);
-    setError(null);
-    setFormData(
-      item
-        ? {
-            name: item.name,
-            description: item.description || '',
-            category: item.category || '',
-            severity: item.severity?.toString() || '',
-          }
-        : {
-            name: '',
-            description: '',
-            category: '',
-            severity: '',
-          }
-    );
+    setQueryError(null);
+    setFormData(createIssueFormData(item ?? null));
     setShowForm(true);
   };
 
@@ -75,7 +56,7 @@ export function IssueManagement() {
     setIsMutating(true);
     setMutationError(null);
     setValidationErrors(null);
-    setError(null);
+    setQueryError(null);
 
     const payload: CreateIssueDto | UpdateIssueDto = {
       name: nextFormData.name,
@@ -94,7 +75,7 @@ export function IssueManagement() {
       await refetch();
       setShowForm(false);
       setEditing(null);
-      setFormData({ name: '', description: '', category: '', severity: '' });
+      setFormData(createIssueFormData(null));
     } catch (submitError: unknown) {
       console.error('Failed to save issue:', submitError);
       const parsedError = parseApiError(submitError);

@@ -36,7 +36,7 @@ import {
   type RoleFormData,
 } from '@/features/roles/components/RoleFormModal';
 import { useRoleQuery } from '@/features/roles/hooks/useRoleQuery';
-import { createApiErrorState, type ValidationErrors } from '@/utils/apiErrors';
+import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
 
 export function RoleManagement() {
   const {
@@ -44,7 +44,7 @@ export function RoleManagement() {
     setQueryParams,
     paginatedResult,
     loading,
-    error,
+    error: queryError,
     refetch,
   } = useRoleQuery();
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -60,17 +60,9 @@ export function RoleManagement() {
 
   const { hasPermission } = usePermission();
 
-  const openCreateForm = () => {
-    setEditing(null);
-    setFormData(createRoleFormData(null));
-    setMutationError(null);
-    setValidationErrors(null);
-    setShowForm(true);
-  };
-
-  const openEditForm = (item: RoleDto) => {
-    setEditing(item);
-    setFormData(createRoleFormData(item));
+  const openForm = (item?: RoleDto) => {
+    setEditing(item ?? null);
+    setFormData(createRoleFormData(item ?? null));
     setMutationError(null);
     setValidationErrors(null);
     setShowForm(true);
@@ -100,9 +92,9 @@ export function RoleManagement() {
       setFormData(createRoleFormData(null));
     } catch (err: unknown) {
       console.error('Failed to save role:', err);
-      const errorState = createApiErrorState(err, 'Unable to save role. Please try again.');
-      setMutationError(errorState.message);
-      setValidationErrors(errorState.fieldErrors);
+      const parsedError = parseApiError(err);
+      setMutationError(parsedError.message || 'Unable to save role. Please try again.');
+      setValidationErrors(parsedError.fieldErrors);
     } finally {
       setIsMutating(false);
     }
@@ -118,9 +110,9 @@ export function RoleManagement() {
       await refetch();
       setConfirmDelete(null);
     } catch (err: unknown) {
-      const errorState = createApiErrorState(err, 'Unable to delete role. Please try again.');
-      setMutationError(errorState.message);
-      setValidationErrors(errorState.fieldErrors);
+      const parsedError = parseApiError(err);
+      setMutationError(parsedError.message || 'Unable to delete role. Please try again.');
+      setValidationErrors(parsedError.fieldErrors);
       setConfirmDelete(null);
     } finally {
       setDeleteLoading(false);
@@ -144,7 +136,7 @@ export function RoleManagement() {
         </div>
         {hasPermission(Permissions.Role.Create) && (
           <button
-            onClick={openCreateForm}
+            onClick={() => openForm()}
             className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm"
           >
             <Plus className="w-5 h-5" />
@@ -179,10 +171,10 @@ export function RoleManagement() {
       <RoleTable
         items={paginatedResult?.items || []}
         isLoading={isLoading}
-        error={error}
+        error={queryError}
         canEdit={hasPermission(Permissions.Role.Edit)}
         canDelete={hasPermission(Permissions.Role.Delete)}
-        onEdit={openEditForm}
+        onEdit={openForm}
         onDelete={setConfirmDelete}
       />
 

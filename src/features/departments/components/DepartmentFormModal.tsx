@@ -14,6 +14,12 @@ export interface DepartmentFormData {
   description: string;
 }
 
+export function createDepartmentFormData(item: Department | null): DepartmentFormData {
+  return item
+    ? { name: item.name, description: item.description || '' }
+    : { name: '', description: '' };
+}
+
 interface DepartmentFormModalProps {
   isOpen: boolean;
   editing: Department | null;

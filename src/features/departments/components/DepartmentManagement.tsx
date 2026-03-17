@@ -11,14 +11,14 @@ import { Permissions } from '@/config/permissions';
 import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
 import { useDepartmentQuery } from '@/features/departments/hooks/useDepartmentQuery';
 import { DepartmentTable } from '@/features/departments/components/DepartmentTable';
-import { DepartmentFormModal, type DepartmentFormData } from '@/features/departments/components/DepartmentFormModal';
+import { DepartmentFormModal, createDepartmentFormData, type DepartmentFormData } from '@/features/departments/components/DepartmentFormModal';
 
 export function DepartmentManagement() {
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Department | null>(null);
-  const [formData, setFormData] = useState<DepartmentFormData>({ name: '', description: '' });
+  const [formData, setFormData] = useState<DepartmentFormData>(createDepartmentFormData(null));
   const [confirmDelete, setConfirmDelete] = useState<Department | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isMutating, setIsMutating] = useState(false);
@@ -38,7 +38,7 @@ export function DepartmentManagement() {
 
   const openForm = (item?: Department) => {
     setEditing(item || null);
-    setFormData(item ? { name: item.name, description: item.description } : { name: '', description: '' });
+    setFormData(createDepartmentFormData(item ?? null));
     setQueryError(null);
     setMutationError(null);
     setValidationErrors(null);
@@ -68,7 +68,7 @@ export function DepartmentManagement() {
 
       await refetch();
       setShowForm(false);
-      setFormData({ name: '', description: '' });
+      setFormData(createDepartmentFormData(null));
     } catch (submitError: unknown) {
       console.error('Failed to save department:', submitError);
       const parsedError = parseApiError(submitError);
