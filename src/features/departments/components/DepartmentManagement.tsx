@@ -5,6 +5,7 @@ import { departmentsApi } from '@/services/api/departments';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
@@ -33,7 +34,6 @@ export function DepartmentManagement() {
     refetch,
   } = useDepartmentQuery();
   const isLoading = queryLoading || isMutating;
-  const tableError = showForm ? null : mutationError || queryError;
   const { hasPermission } = usePermission();
 
   const openForm = (item?: Department) => {
@@ -140,10 +140,17 @@ export function DepartmentManagement() {
         placeholder="Search by department name or description..."
         showResults={true}
       />
+      {mutationError && !showForm && (
+        <ErrorAlert
+          message={mutationError}
+          onDismiss={() => setMutationError(null)}
+        />
+      )}
+
 
       <DepartmentTable
         isLoading={isLoading}
-        error={tableError}
+        error={queryError}
         items={paginatedResult?.items || []}
         canEdit={hasPermission(Permissions.Department.Edit)}
         canDelete={hasPermission(Permissions.Department.Delete)}

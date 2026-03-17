@@ -23,6 +23,7 @@ import { Plus, User } from 'lucide-react';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 import { accountsApi } from '@/services/api/accounts';
 import { rolesApi } from '@/services/api/roles';
 import type { Account, Employee, RoleDto } from '@/types/data';
@@ -179,7 +180,6 @@ export function AccountManagement({ employees, roles }: Props) {
   };
 
   const isLoading = loading || isMutating;
-  const tableError = showForm ? null : mutationError || error;
 
   const handleDelete = async (accountId: string) => {
     try {
@@ -315,11 +315,18 @@ export function AccountManagement({ employees, roles }: Props) {
         placeholder="Search by username, email, or employee name..."
         showResults={true}
       />
+      {mutationError && !showForm && (
+        <ErrorAlert
+          message={mutationError}
+          onDismiss={() => setMutationError(null)}
+        />
+      )}
+
 
       <AccountTable
         items={paginatedResult?.items || []}
         isLoading={isLoading}
-        error={tableError}
+        error={error}
         canEdit={hasPermission(Permissions.Account.Edit)}
         canDelete={hasPermission(Permissions.Account.Delete)}
         onEdit={openEditForm}

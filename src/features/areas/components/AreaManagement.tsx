@@ -6,6 +6,7 @@ import { useAreaQuery } from '@/features/areas/hooks/useAreaQuery';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
@@ -34,7 +35,6 @@ export function AreaManagement() {
   const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
 
   const isLoading = queryLoading || isMutating;
-  const tableError = showForm ? null : mutationError || queryError;
 
   const { hasPermission } = usePermission();
 
@@ -138,10 +138,17 @@ export function AreaManagement() {
         placeholder="Search by area name or description..."
         showResults={true}
       />
+      {mutationError && !showForm && (
+        <ErrorAlert
+          message={mutationError}
+          onDismiss={() => setMutationError(null)}
+        />
+      )}
+
 
       <AreaTable
         isLoading={isLoading}
-        error={tableError}
+        error={queryError}
         items={paginatedResult?.items || []}
         canEdit={hasPermission(Permissions.Area.Edit)}
         canDelete={hasPermission(Permissions.Area.Delete)}

@@ -5,6 +5,7 @@ import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { Permissions } from '@/config/permissions';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 import { usePermission } from '@/hooks/usePermission';
 import {
   WorkLogFormModal,
@@ -56,8 +57,6 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
     refetch,
   });
 
-  const error = queryError || mutationError;
-  const setError = queryError ? setQueryError : setMutationError;
   const { hasPermission } = usePermission();
   const canCreate = hasPermission(Permissions.IssueLog.Create);
 
@@ -148,16 +147,23 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
         placeholder="Search by issue, operator, requester, department, or area..."
         showResults={true}
       />
+      {mutationError && !showForm && (
+        <ErrorAlert
+          message={mutationError}
+          onDismiss={() => setMutationError(null)}
+        />
+      )}
+
 
       <WorkLogTable
         paginatedResult={paginatedResult ?? { page: 1, pageSize: 20, totalCount: 0, totalPages: 0, hasPreviousPage: false, hasNextPage: false, items: [] }}
         isLoading={loading}
-        error={error}
+        error={queryError}
         onEdit={(log) => openForm(log)}
         onDelete={(id) => setConfirmDelete(id)}
       />
 
-      {paginatedResult && !loading && !error && (
+      {paginatedResult && !loading && (
         <PaginationBar
           page={paginatedResult.page}
           totalPages={paginatedResult.totalPages}
@@ -181,7 +187,7 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
         departments={departments}
         areas={areas}
         isSubmitting={submitting}
-        error={error}
+        error={mutationError}
         validationErrors={validationErrors}
         onChange={setFormData}
         onSubmit={handleSubmit}
@@ -192,7 +198,7 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
           setFormData(createWorkLogFormData(null));
         }}
         onClearError={() => {
-          setError(null);
+          setMutationError(null);
           setValidationErrors(null);
         }}
       />

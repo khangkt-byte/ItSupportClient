@@ -28,6 +28,7 @@ import type { RoleDto, RolesQueryParams } from '@/types/data';
 import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 import { RoleTable } from '@/features/roles/components/RoleTable';
 import {
   RoleFormModal,
@@ -127,7 +128,6 @@ export function RoleManagement() {
   };
 
   const isLoading = loading || isMutating;
-  const tableError = showForm ? null : mutationError || error;
 
   return (
     <div className="space-y-6">
@@ -168,11 +168,18 @@ export function RoleManagement() {
         placeholder="Search by role name or description..."
         showResults={true}
       />
+      {mutationError && !showForm && (
+        <ErrorAlert
+          message={mutationError}
+          onDismiss={() => setMutationError(null)}
+        />
+      )}
+
 
       <RoleTable
         items={paginatedResult?.items || []}
         isLoading={isLoading}
-        error={tableError}
+        error={error}
         canEdit={hasPermission(Permissions.Role.Edit)}
         canDelete={hasPermission(Permissions.Role.Delete)}
         onEdit={openEditForm}

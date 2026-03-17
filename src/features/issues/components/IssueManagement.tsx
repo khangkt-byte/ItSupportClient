@@ -3,6 +3,7 @@ import { Bug, Plus } from 'lucide-react';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 import type {
   CreateIssueDto,
   IssueDto,
@@ -46,7 +47,6 @@ export function IssueManagement() {
   } = useIssueQuery();
 
   const isLoading = queryLoading || isMutating;
-  const tableError = showForm ? null : mutationError || queryError;
 
   const openForm = (item?: IssueDto) => {
     setEditing(item || null);
@@ -164,11 +164,18 @@ export function IssueManagement() {
         placeholder="Search by issue name, category, or description..."
         showResults={true}
       />
+      {mutationError && !showForm && (
+        <ErrorAlert
+          message={mutationError}
+          onDismiss={() => setMutationError(null)}
+        />
+      )}
+
 
       <IssueTable
         items={paginatedResult?.items || []}
         isLoading={isLoading}
-        error={tableError}
+        error={queryError}
         canEdit={hasPermission(Permissions.Issue.Edit)}
         canDelete={hasPermission(Permissions.Issue.Delete)}
         onEdit={openForm}

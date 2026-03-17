@@ -22,6 +22,7 @@ import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import type { Employee, Department, AreaDto } from '@/types/data';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { PaginationBar } from '@/components/common/PaginationBar';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
@@ -69,7 +70,6 @@ export function EmployeeManagement({ departments, areas }: Props) {
     refetch,
   } = useEmployeeQuery();
   const isLoading = queryLoading || isMutating;
-  const tableError = showForm ? null : mutationError || queryError;
   const { hasPermission } = usePermission();
 
   // Handle department filter change
@@ -221,9 +221,16 @@ export function EmployeeManagement({ departments, areas }: Props) {
       />
 
       {/* Employees Table */}
+            {mutationError && !showForm && (
+              <ErrorAlert
+                message={mutationError}
+                onDismiss={() => setMutationError(null)}
+              />
+            )}
+
       <EmployeeTable
         isLoading={isLoading}
-        error={tableError}
+        error={queryError}
         items={paginatedResult?.items || []}
         canEdit={hasPermission(Permissions.Employee.Edit)}
         canDelete={hasPermission(Permissions.Employee.Delete)}
@@ -232,7 +239,7 @@ export function EmployeeManagement({ departments, areas }: Props) {
       />
 
       {/* Pagination Controls */}
-      {paginatedResult && !isLoading && !tableError && (
+      {paginatedResult && !isLoading && (
         <PaginationBar
           page={queryParams.page || 1}
           totalPages={paginatedResult.totalPages}
