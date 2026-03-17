@@ -52,7 +52,6 @@ Primary APIs:
 
 ### Naming Convention
 - Utility file: `apiErrors.ts` (canonical name)
-- Backward-compatibility shim: `apiValidation.ts` (re-export only)
 - Error state object shape:
   - `message`: normalized user message
   - `fieldErrors`: field-level validation dictionary
