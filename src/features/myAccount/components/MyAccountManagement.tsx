@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { accountsApi } from '@/services/api/accounts';
 import { employeesApi } from '@/services/api/employees';
 import type { ChangePasswordDto, LoginHistoryDto, ProfileDto } from '@/types/data';
-import { createApiErrorState } from '@/utils/apiErrors';
+import { createApiErrorState, getFieldErrorMessages } from '@/utils/apiErrors';
 import { ErrorAlert } from '@/components/common/ErrorAlert';
 import { FieldError } from '@/components/common/FieldError';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
@@ -129,7 +129,23 @@ export function MyAccountManagement() {
       setSuccessMessage('Password changed successfully.');
     } catch (passwordError: unknown) {
       const errorState = createApiErrorState(passwordError, 'Unable to change password. Please try again.');
-      setError(errorState.message);
+      const { fieldErrors } = errorState;
+
+      // getFieldErrorMessages matches case-insensitively, so no casing aliases needed.
+      // Only structural variants differ (plain key vs JSON-pointer prefix).
+      const pointerOf = (field: string) => [`/${field}`, `$.${field}`];
+      const currentPasswordErrors = getFieldErrorMessages(fieldErrors, 'currentPassword', pointerOf('currentPassword'));
+      const newPasswordErrors     = getFieldErrorMessages(fieldErrors, 'newPassword',     pointerOf('newPassword'));
+      const confirmPasswordErrors = getFieldErrorMessages(fieldErrors, 'confirmPassword', pointerOf('confirmPassword'));
+
+      const hasFieldErrors = currentPasswordErrors.length > 0 || newPasswordErrors.length > 0 || confirmPasswordErrors.length > 0;
+
+      if (hasFieldErrors) {
+        setPasswordFieldErrors({ currentPassword: currentPasswordErrors, newPassword: newPasswordErrors, confirmPassword: confirmPasswordErrors });
+        setError('Please correct the highlighted password fields.');
+      } else {
+        setError(errorState.message);
+      }
     } finally {
       setPasswordSaving(false);
     }
