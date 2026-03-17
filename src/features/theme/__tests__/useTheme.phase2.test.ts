@@ -5,121 +5,121 @@ import { useTheme } from '../hooks/useTheme';
 export const allThemes = ['light', 'dark', ...Object.keys(palettes)] as const;
 
 describe('Theme Validation - Phase 2', () => {
-  describe('Semantic tokens', () => {
-    it('returns valid semantic tokens for all themes', () => {
-      allThemes.forEach((theme) => {
-        const { result } = renderHook(() => useTheme());
+    describe('Semantic tokens', () => {
+        it('returns valid semantic tokens for all themes', () => {
+            allThemes.forEach((theme) => {
+                const { result } = renderHook(() => useTheme());
 
-        act(() => {
-          result.current.changeTheme(theme as any);
+                act(() => {
+                    result.current.changeTheme(theme as any);
+                });
+
+                const tokens = result.current.getSemanticTokens();
+                expect(tokens).not.toBeNull();
+                expect(tokens?.success).toMatch(/^#[0-9A-F]{6}$/i);
+                expect(tokens?.error).toMatch(/^#[0-9A-F]{6}$/i);
+                expect(tokens?.warning).toMatch(/^#[0-9A-F]{6}$/i);
+                expect(tokens?.info).toMatch(/^#[0-9A-F]{6}$/i);
+                expect(tokens?.disabled).toMatch(/^#[0-9A-F]{6}$/i);
+            });
+        });
+    });
+
+    describe('Theme switching', () => {
+        it('switches between all themes successfully', () => {
+            const { result } = renderHook(() => useTheme());
+
+            allThemes.forEach((theme) => {
+                act(() => {
+                    result.current.changeTheme(theme as any);
+                });
+
+                expect(result.current.theme).toBe(theme);
+            });
         });
 
-        const tokens = result.current.getSemanticTokens();
-        expect(tokens).not.toBeNull();
-        expect(tokens?.success).toMatch(/^#[0-9A-F]{6}$/i);
-        expect(tokens?.error).toMatch(/^#[0-9A-F]{6}$/i);
-        expect(tokens?.warning).toMatch(/^#[0-9A-F]{6}$/i);
-        expect(tokens?.info).toMatch(/^#[0-9A-F]{6}$/i);
-        expect(tokens?.disabled).toMatch(/^#[0-9A-F]{6}$/i);
-      });
+        it('syncs data-theme attribute when theme changes', () => {
+            const { result } = renderHook(() => useTheme());
+
+            allThemes.forEach((theme) => {
+                act(() => {
+                    result.current.changeTheme(theme as any);
+                });
+
+                expect(document.documentElement.getAttribute('data-theme')).toBe(theme);
+                expect(document.body.getAttribute('data-theme')).toBe(theme);
+            });
+        });
     });
-  });
 
-  describe('Theme switching', () => {
-    it('switches between all themes successfully', () => {
-      const { result } = renderHook(() => useTheme());
+    describe('Color values', () => {
+        it('uses expected semantic colors in light and dark mode', () => {
+            const { result } = renderHook(() => useTheme());
 
-      allThemes.forEach((theme) => {
-        act(() => {
-          result.current.changeTheme(theme as any);
+            act(() => {
+                result.current.changeTheme('light');
+            });
+            expect(result.current.getSemanticTokens()?.success).toBe('#22c55e');
+
+            act(() => {
+                result.current.changeTheme('dark');
+            });
+            expect(result.current.getSemanticTokens()?.success).toBe('#4ade80');
         });
 
-        expect(result.current.theme).toBe(theme);
-      });
+        it('keeps semantic token shape for all brand themes', () => {
+            const brandThemes = Object.keys(palettes) as BrandTheme[];
+
+            brandThemes.forEach((theme) => {
+                const { result } = renderHook(() => useTheme());
+
+                act(() => {
+                    result.current.changeTheme(theme);
+                });
+
+                const tokens = result.current.getSemanticTokens();
+                expect(tokens).toHaveProperty('success');
+                expect(tokens).toHaveProperty('error');
+                expect(tokens).toHaveProperty('warning');
+                expect(tokens).toHaveProperty('info');
+            });
+        });
     });
 
-    it('syncs data-theme attribute when theme changes', () => {
-      const { result } = renderHook(() => useTheme());
-
-      allThemes.forEach((theme) => {
-        act(() => {
-          result.current.changeTheme(theme as any);
+    describe('Persistence and performance', () => {
+        beforeEach(() => {
+            localStorage.clear();
         });
 
-        expect(document.documentElement.getAttribute('data-theme')).toBe(theme);
-        expect(document.body.getAttribute('data-theme')).toBe(theme);
-      });
-    });
-  });
+        it('persists theme selection to localStorage', () => {
+            const { result } = renderHook(() => useTheme());
 
-  describe('Color values', () => {
-    it('uses expected semantic colors in light and dark mode', () => {
-      const { result } = renderHook(() => useTheme());
+            // Ensure first iteration is not a no-op on initial light theme.
+            act(() => {
+                result.current.changeTheme('dark');
+            });
 
-      act(() => {
-        result.current.changeTheme('light');
-      });
-      expect(result.current.getSemanticTokens()?.success).toBe('#22c55e');
+            allThemes.forEach((theme) => {
+                act(() => {
+                    result.current.changeTheme(theme as any);
+                });
 
-      act(() => {
-        result.current.changeTheme('dark');
-      });
-      expect(result.current.getSemanticTokens()?.success).toBe('#4ade80');
-    });
-
-    it('keeps semantic token shape for all brand themes', () => {
-      const brandThemes = Object.keys(palettes) as BrandTheme[];
-
-      brandThemes.forEach((theme) => {
-        const { result } = renderHook(() => useTheme());
-
-        act(() => {
-          result.current.changeTheme(theme);
+                expect(localStorage.getItem('theme')).toBe(theme);
+            });
         });
 
-        const tokens = result.current.getSemanticTokens();
-        expect(tokens).toHaveProperty('success');
-        expect(tokens).toHaveProperty('error');
-        expect(tokens).toHaveProperty('warning');
-        expect(tokens).toHaveProperty('info');
-      });
-    });
-  });
+        it('changes themes within budget in test environment', () => {
+            const { result } = renderHook(() => useTheme());
 
-  describe('Persistence and performance', () => {
-    beforeEach(() => {
-      localStorage.clear();
-    });
+            allThemes.forEach((theme) => {
+                const start = performance.now();
 
-    it('persists theme selection to localStorage', () => {
-      const { result } = renderHook(() => useTheme());
+                act(() => {
+                    result.current.changeTheme(theme as any);
+                });
 
-      // Ensure first iteration is not a no-op on initial light theme.
-      act(() => {
-        result.current.changeTheme('dark');
-      });
-
-      allThemes.forEach((theme) => {
-        act(() => {
-          result.current.changeTheme(theme as any);
+                expect(performance.now() - start).toBeLessThan(100);
+            });
         });
-
-        expect(localStorage.getItem('theme')).toBe(theme);
-      });
     });
-
-    it('changes themes within budget in test environment', () => {
-      const { result } = renderHook(() => useTheme());
-
-      allThemes.forEach((theme) => {
-        const start = performance.now();
-
-        act(() => {
-          result.current.changeTheme(theme as any);
-        });
-
-        expect(performance.now() - start).toBeLessThan(100);
-      });
-    });
-  });
 });
