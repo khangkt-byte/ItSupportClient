@@ -4,7 +4,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useTheme } from './useTheme';
-import type { Theme } from './useTheme';
+import type { Theme } from '@/features/theme/types/themeTypes';
 
 /**
  * Hook for managing theme preview functionality

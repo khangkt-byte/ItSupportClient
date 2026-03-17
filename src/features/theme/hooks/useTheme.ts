@@ -33,20 +33,20 @@ import {
   isValidBrandColor,
   isValidTheme,
   resolveSystemAppearance,
-} from '@/features/theme/hooks/themeHelpers';
+} from '@/features/theme/utils/themeHelpers';
 import type {
   Appearance,
   BrandColorTheme,
   Theme,
   UseThemeReturn,
-} from '@/features/theme/hooks/themeTypes';
+} from '@/features/theme/types/themeTypes';
 
 export type {
   Appearance,
   BrandColorTheme,
   Theme,
   UseThemeReturn,
-} from '@/features/theme/hooks/themeTypes';
+} from '@/features/theme/types/themeTypes';
 
 /**
  * Custom hook for theme management
