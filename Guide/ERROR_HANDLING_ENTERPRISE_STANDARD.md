@@ -87,6 +87,15 @@ For each module/hook:
 - Use retry hints (`retryAfter`, `retryable`) when available.
 - Treat `detail` as display text, not a parsing source for business logic.
 
+## Message Wording Standard (Phase 2)
+- Prefer `Unable to ...` over `Failed to ...` for user-facing fallback messages.
+- Keep fallback messages action-oriented and specific to the attempted operation.
+- Include a next action when useful:
+  - load/query flows: `Please refresh and try again.`
+  - mutation flows (create/update/delete): `Please try again.`
+  - import/validation flows: `Please check the file/data and try again.`
+- End fallback messages with a period.
+
 ## References
 - RFC 9457: Problem Details for HTTP APIs
   - https://datatracker.ietf.org/doc/html/rfc9457

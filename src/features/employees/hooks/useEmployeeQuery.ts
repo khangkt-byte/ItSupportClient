@@ -25,7 +25,7 @@ export function useEmployeeQuery() {
             setPaginatedResult(result);
         } catch (err) {
             console.error('Failed to fetch employees:', err);
-            setError(getApiErrorMessage(err, 'Failed to load employees'));
+            setError(getApiErrorMessage(err, 'Unable to load employees. Please refresh and try again.'));
             setPaginatedResult(null);
         } finally {
             setLoading(false);

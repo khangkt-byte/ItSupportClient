@@ -64,7 +64,7 @@ export function MyAccountManagement() {
       setProfile(profileData);
       setLoginHistory(historyData);
     } catch (loadError: unknown) {
-      const errorState = createApiErrorState(loadError, 'Failed to load your account data.');
+      const errorState = createApiErrorState(loadError, 'Unable to load your account data. Please refresh and try again.');
       setError(errorState.message);
     } finally {
       setLoading(false);
@@ -106,7 +106,7 @@ export function MyAccountManagement() {
       setPasswordForm(INITIAL_PASSWORD_FORM);
       setSuccessMessage('Password changed successfully.');
     } catch (passwordError: unknown) {
-      const errorState = createApiErrorState(passwordError, 'Failed to change password.');
+      const errorState = createApiErrorState(passwordError, 'Unable to change password. Please try again.');
       setError(errorState.message);
     } finally {
       setPasswordSaving(false);
@@ -120,7 +120,7 @@ export function MyAccountManagement() {
       setLoginHistory(history);
       setHistoryPage(1);
     } catch (refreshError: unknown) {
-      const errorState = createApiErrorState(refreshError, 'Failed to refresh login history.');
+      const errorState = createApiErrorState(refreshError, 'Unable to refresh login history. Please try again.');
       setError(errorState.message);
     } finally {
       setHistoryRefreshing(false);

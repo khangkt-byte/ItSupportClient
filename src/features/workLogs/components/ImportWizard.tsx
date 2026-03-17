@@ -97,7 +97,7 @@ export function ImportWizard({
       setValidationResult(result);
       setStep(2);
     } catch (err) {
-      setError(getApiErrorMessage(err, 'Validation failed'));
+      setError(getApiErrorMessage(err, 'Unable to validate the file. Please check the data and try again.'));
     } finally {
       setValidating(false);
     }
@@ -126,7 +126,7 @@ export function ImportWizard({
         onImportComplete(result.importedLogs as WorkLog[]);
       }
     } catch (err) {
-      setError(getApiErrorMessage(err, 'Import failed'));
+      setError(getApiErrorMessage(err, 'Unable to import work logs. Please try again.'));
     } finally {
       setImporting(false);
     }

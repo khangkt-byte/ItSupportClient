@@ -72,7 +72,7 @@ export function DepartmentManagement() {
     } catch (submitError: unknown) {
       console.error('Failed to save department:', submitError);
       const parsedError = parseApiError(submitError);
-      setMutationError(parsedError.message || 'Failed to save department');
+      setMutationError(parsedError.message || 'Unable to save department. Please try again.');
       setValidationErrors(parsedError.fieldErrors);
     } finally {
       setIsMutating(false);
@@ -92,7 +92,7 @@ export function DepartmentManagement() {
     } catch (deleteError: unknown) {
       console.error('Failed to delete department:', deleteError);
       const parsedError = parseApiError(deleteError);
-      setMutationError(parsedError.message || 'Failed to delete department');
+      setMutationError(parsedError.message || 'Unable to delete department. Please try again.');
       setConfirmDelete(null);
     } finally {
       setDeleteLoading(false);

@@ -23,7 +23,7 @@ export function useRoleQuery() {
             setPaginatedResult(result);
         } catch (error) {
             console.error('Failed to fetch roles:', error);
-            setError(getApiErrorMessage(error, 'Failed to load roles'));
+            setError(getApiErrorMessage(error, 'Unable to load roles. Please refresh and try again.'));
             setPaginatedResult(null);
         } finally {
             setLoading(false);

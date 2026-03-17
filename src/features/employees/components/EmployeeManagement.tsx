@@ -144,7 +144,7 @@ export function EmployeeManagement({ departments, areas }: Props) {
     } catch (submitError: unknown) {
       console.error('Failed to save employee:', submitError);
       const parsedError = parseApiError(submitError);
-      setMutationError(parsedError.message || `Failed to ${editing ? 'update' : 'create'} employee`);
+      setMutationError(parsedError.message || 'Unable to save employee. Please try again.');
       setValidationErrors(parsedError.fieldErrors);
     } finally {
       setIsMutating(false);
@@ -164,7 +164,7 @@ export function EmployeeManagement({ departments, areas }: Props) {
     } catch (deleteError: unknown) {
       console.error('Failed to delete employee:', deleteError);
       const parsedError = parseApiError(deleteError);
-      setMutationError(parsedError.message || 'Failed to delete employee');
+      setMutationError(parsedError.message || 'Unable to delete employee. Please try again.');
     } finally {
       setDeleteLoading(false);
     }

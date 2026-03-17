@@ -213,7 +213,7 @@ function isTimeoutFailure(error: unknown): boolean {
     return error instanceof Error && (error.name === 'AbortError' || /timeout/i.test(error.message));
 }
 
-export function normalizeApiError(error: unknown, fallbackMessage = 'Request failed'): NormalizedApiError {
+export function normalizeApiError(error: unknown, fallbackMessage = 'Unable to complete the request. Please try again.'): NormalizedApiError {
     const fallback = getFallbackMessage(error, fallbackMessage);
     const networkError = isNetworkFailure(error);
     const timeoutError = isTimeoutFailure(error);

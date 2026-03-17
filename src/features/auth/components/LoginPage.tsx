@@ -33,7 +33,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         setPassword('');
       }
     } catch (err) {
-      setError('Login failed. Please try again.');
+      setError('Unable to sign in. Please try again.');
       setPassword('');
     } finally {
       setIsLoading(false);

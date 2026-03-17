@@ -35,7 +35,7 @@ export function useWorkLogSummary(enabled: boolean = true) {
             });
         } catch (summaryError) {
             console.error('Failed to fetch work log summary:', summaryError);
-            setError(getApiErrorMessage(summaryError, 'Failed to load work log summary'));
+            setError(getApiErrorMessage(summaryError, 'Unable to load work log summary. Please refresh and try again.'));
         } finally {
             setLoading(false);
         }

@@ -24,7 +24,7 @@ export function useAccountQuery() {
             setPaginatedResult(result);
         } catch (error) {
             console.error('Failed to fetch accounts:', error);
-            setError(getApiErrorMessage(error, 'Failed to load accounts'));
+            setError(getApiErrorMessage(error, 'Unable to load accounts. Please refresh and try again.'));
             setPaginatedResult(null);
         } finally {
             setLoading(false);

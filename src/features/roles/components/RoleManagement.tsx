@@ -99,7 +99,7 @@ export function RoleManagement() {
       setFormData(createRoleFormData(null));
     } catch (err: unknown) {
       console.error('Failed to save role:', err);
-      const errorState = createApiErrorState(err, 'Failed to save role. Please try again.');
+      const errorState = createApiErrorState(err, 'Unable to save role. Please try again.');
       setMutationError(errorState.message);
       setValidationErrors(errorState.fieldErrors);
     } finally {
@@ -117,7 +117,7 @@ export function RoleManagement() {
       await refetch();
       setConfirmDelete(null);
     } catch (err: unknown) {
-      const errorState = createApiErrorState(err, 'Failed to delete role.');
+      const errorState = createApiErrorState(err, 'Unable to delete role. Please try again.');
       setMutationError(errorState.message);
       setValidationErrors(errorState.fieldErrors);
       setConfirmDelete(null);

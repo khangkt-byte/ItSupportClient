@@ -72,7 +72,7 @@ export function AreaManagement() {
     } catch (submitError: unknown) {
       console.error('Failed to save area:', submitError);
       const parsedError = parseApiError(submitError);
-      setMutationError(parsedError.message || 'Failed to save area');
+      setMutationError(parsedError.message || 'Unable to save area. Please try again.');
       setValidationErrors(parsedError.fieldErrors);
     } finally {
       setIsMutating(false);
@@ -92,7 +92,7 @@ export function AreaManagement() {
     } catch (deleteError: unknown) {
       console.error('Failed to delete area:', deleteError);
       const parsedError = parseApiError(deleteError);
-      setMutationError(parsedError.message || 'Failed to delete area');
+      setMutationError(parsedError.message || 'Unable to delete area. Please try again.');
       setConfirmDelete(null);
     } finally {
       setDeleteLoading(false);

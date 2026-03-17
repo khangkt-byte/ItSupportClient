@@ -23,7 +23,7 @@ export function useAreaQuery() {
             setPaginatedResult(result);
         } catch (err) {
             console.error('Failed to fetch areas:', err);
-            setError(getApiErrorMessage(err, 'Failed to load areas'));
+            setError(getApiErrorMessage(err, 'Unable to load areas. Please refresh and try again.'));
             setPaginatedResult(null);
         } finally {
             setLoading(false);

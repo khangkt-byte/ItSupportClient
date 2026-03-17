@@ -23,7 +23,7 @@ export function useDepartmentQuery() {
             setPaginatedResult(result);
         } catch (err) {
             console.error('Failed to fetch departments:', err);
-            setError(getApiErrorMessage(err, 'Failed to load departments'));
+            setError(getApiErrorMessage(err, 'Unable to load departments. Please refresh and try again.'));
             setPaginatedResult(null);
         } finally {
             setLoading(false);

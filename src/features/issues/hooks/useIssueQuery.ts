@@ -23,7 +23,7 @@ export function useIssueQuery() {
             setPaginatedResult(result);
         } catch (err) {
             console.error('Failed to fetch issues:', err);
-            setError(getApiErrorMessage(err, 'Failed to load issues'));
+            setError(getApiErrorMessage(err, 'Unable to load issues. Please refresh and try again.'));
             setPaginatedResult(null);
         } finally {
             setLoading(false);

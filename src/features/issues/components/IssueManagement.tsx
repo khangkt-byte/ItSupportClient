@@ -98,7 +98,7 @@ export function IssueManagement() {
     } catch (submitError: unknown) {
       console.error('Failed to save issue:', submitError);
       const parsedError = parseApiError(submitError);
-      setMutationError(parsedError.message || 'Failed to save issue');
+      setMutationError(parsedError.message || 'Unable to save issue. Please try again.');
       setValidationErrors(parsedError.fieldErrors);
     } finally {
       setIsMutating(false);
@@ -116,7 +116,7 @@ export function IssueManagement() {
     } catch (deleteError: unknown) {
       console.error('Failed to delete issue:', deleteError);
       const parsedError = parseApiError(deleteError);
-      setMutationError(parsedError.message || 'Failed to delete issue');
+      setMutationError(parsedError.message || 'Unable to delete issue. Please try again.');
       setConfirmDelete(null);
     } finally {
       setDeleteLoading(false);

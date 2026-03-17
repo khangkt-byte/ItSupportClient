@@ -118,7 +118,7 @@ export function AccountManagement({ employees, roles }: Props) {
       setEditing(accountToEdit);
       setFormData(createAccountFormData(accountToEdit));
     } catch (loadError: unknown) {
-      const errorState = createApiErrorState(loadError, 'Unable to load account details for editing.');
+      const errorState = createApiErrorState(loadError, 'Unable to load account details. Please refresh and try again.');
       setMutationError(errorState.message);
       setValidationErrors(errorState.fieldErrors);
       return;
@@ -170,7 +170,7 @@ export function AccountManagement({ employees, roles }: Props) {
       await refetch();
     } catch (err: unknown) {
       console.error('Failed to save account:', err);
-      const errorState = createApiErrorState(err, 'Failed to save account. Please try again.');
+      const errorState = createApiErrorState(err, 'Unable to save account. Please try again.');
       setMutationError(errorState.message);
       setValidationErrors(errorState.fieldErrors);
     } finally {
@@ -186,7 +186,7 @@ export function AccountManagement({ employees, roles }: Props) {
       await accountsApi.deleteSingle(accountId);
       await refetch();
     } catch (err: unknown) {
-      const errorState = createApiErrorState(err, 'Failed to delete account.');
+      const errorState = createApiErrorState(err, 'Unable to delete account. Please try again.');
       setMutationError(errorState.message);
       setValidationErrors(errorState.fieldErrors);
     }
@@ -201,7 +201,7 @@ export function AccountManagement({ employees, roles }: Props) {
       }
       await refetch();
     } catch (err: unknown) {
-      const errorState = createApiErrorState(err, 'Failed to update account status.');
+      const errorState = createApiErrorState(err, 'Unable to update account status. Please try again.');
       setMutationError(errorState.message);
       setValidationErrors(errorState.fieldErrors);
     }

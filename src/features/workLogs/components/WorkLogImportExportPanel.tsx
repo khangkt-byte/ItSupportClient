@@ -50,7 +50,7 @@ export function WorkLogImportExportPanel({
       setCurrentImportFile(file);
       setShowImportDialog(true);
     } catch (error) {
-      setImportError(getApiErrorMessage(error, 'Failed to validate Excel file'));
+      setImportError(getApiErrorMessage(error, 'Unable to validate the Excel file. Please check the file and try again.'));
     } finally {
       setImporting(false);
       if (fileInputRef.current) {
@@ -80,7 +80,7 @@ export function WorkLogImportExportPanel({
       setCurrentImportFile(null);
       setDuplicateHandling('Skip');
     } catch (error) {
-      setImportError(getApiErrorMessage(error, 'Failed to import Excel file'));
+      setImportError(getApiErrorMessage(error, 'Unable to import the Excel file. Please try again.'));
     } finally {
       setImporting(false);
     }

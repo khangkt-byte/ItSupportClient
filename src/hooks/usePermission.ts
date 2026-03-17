@@ -39,7 +39,7 @@ export function usePermission() {
       setPermissions(perms);
       setError(null);
     } catch (err) {
-      const errorState = createApiErrorState(err, 'Failed to load permissions.');
+      const errorState = createApiErrorState(err, 'Unable to load permissions. Please refresh and try again.');
       setError(errorState.message);
       console.error('[Permission] Failed to load permissions:', err);
     } finally {
