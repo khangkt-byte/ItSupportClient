@@ -9,6 +9,7 @@ export { accountsApi } from './accounts';
 export { departmentsApi } from './departments';
 export { issuesApi } from './issues';
 export { causesApi } from './causes';
+export { dashboardApi } from './dashboard';
 
 // Export API client and utilities
 export { apiClient, API_BASE_URL, buildQueryString } from './common';

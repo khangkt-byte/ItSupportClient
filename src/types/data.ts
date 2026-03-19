@@ -529,6 +529,41 @@ export interface ImportResultDto {
   summary: string | null;
 }
 
+// Dashboard
+export interface DashboardOverviewDto {
+  totalIssueLogs: number;
+  issueLogsToday: number;
+  openIssueLogs: number;
+  resolvedIssueLogs: number;
+  totalDepartments: number;
+  totalEmployees: number;
+  totalAccounts: number;
+  activeSessions: number;
+}
+
+export interface DashboardTrendPointDto {
+  date: string;
+  count: number;
+}
+
+export interface DashboardStatusBreakdownDto {
+  status: string;
+  count: number;
+}
+
+export interface DashboardDepartmentIssueDto {
+  dptId: number;
+  departmentName: string;
+  count: number;
+}
+
+export interface DashboardSummaryDto {
+  overview: DashboardOverviewDto;
+  trendLast7Days: DashboardTrendPointDto[];
+  statusBreakdown: DashboardStatusBreakdownDto[];
+  topDepartments: DashboardDepartmentIssueDto[];
+}
+
 // Legacy types for backward compatibility
 export type WorkStatus = 'pending' | 'in-progress' | 'resolved' | 'cancelled';
 
