@@ -530,6 +530,9 @@ export interface ImportResultDto {
 }
 
 // Dashboard
+export type DashboardPeriod = 0 | 1 | 2;
+export type DashboardTrendGroupBy = 0 | 1;
+
 export interface DashboardOverviewDto {
   totalIssueLogs: number;
   issueLogsToday: number;
@@ -542,7 +545,9 @@ export interface DashboardOverviewDto {
 }
 
 export interface DashboardTrendPointDto {
-  date: string;
+  periodStart?: string;
+  date?: string;
+  label: string;
   count: number;
 }
 
@@ -557,9 +562,29 @@ export interface DashboardDepartmentIssueDto {
   count: number;
 }
 
+export interface DashboardSummaryFilterDto {
+  period?: DashboardPeriod;
+  groupBy?: DashboardTrendGroupBy;
+  timezone: string;
+  fromDate?: string;
+  toDate?: string;
+  monthOffset?: number;
+}
+
+export interface DashboardSummaryQueryParams {
+  period?: DashboardPeriod;
+  fromDate?: string;
+  toDate?: string;
+  timezone?: string;
+  groupBy?: DashboardTrendGroupBy;
+  monthOffset?: number;
+}
+
 export interface DashboardSummaryDto {
   overview: DashboardOverviewDto;
-  trendLast7Days: DashboardTrendPointDto[];
+  filter?: DashboardSummaryFilterDto;
+  trend: DashboardTrendPointDto[];
+  trendLast7Days?: DashboardTrendPointDto[];
   statusBreakdown: DashboardStatusBreakdownDto[];
   topDepartments: DashboardDepartmentIssueDto[];
 }

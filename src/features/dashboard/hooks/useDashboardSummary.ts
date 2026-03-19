@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { dashboardApi } from '@/services/api';
 import type {
     DashboardDepartmentIssueDto,
+    DashboardSummaryFilterDto,
     DashboardOverviewDto,
+    DashboardSummaryQueryParams,
     DashboardStatusBreakdownDto,
     DashboardSummaryDto,
     DashboardTrendPointDto,
@@ -33,7 +35,9 @@ const normalizeTrend = (trend?: DashboardTrendPointDto[]): DashboardTrendPointDt
     if (!Array.isArray(trend)) return [];
 
     return trend.map(item => ({
-        date: item.date,
+        periodStart: item.periodStart || item.date,
+        date: item.date || item.periodStart,
+        label: item.label || item.periodStart || item.date || '-',
         count: toNumber(item.count),
     }));
 };
@@ -57,14 +61,27 @@ const normalizeTopDepartments = (items?: DashboardDepartmentIssueDto[]): Dashboa
     }));
 };
 
+const normalizeFilter = (filter?: Partial<DashboardSummaryFilterDto>): DashboardSummaryFilterDto => ({
+    period: filter?.period,
+    groupBy: filter?.groupBy,
+    timezone: filter?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+    fromDate: filter?.fromDate,
+    toDate: filter?.toDate,
+    monthOffset: filter?.monthOffset === undefined || filter?.monthOffset === null
+        ? undefined
+        : toNumber(filter?.monthOffset),
+});
+
 const normalizeSummary = (summary: DashboardSummaryDto): DashboardSummaryDto => ({
     overview: normalizeOverview(summary?.overview),
+    filter: normalizeFilter(summary?.filter),
+    trend: normalizeTrend(summary?.trend),
     trendLast7Days: normalizeTrend(summary?.trendLast7Days),
     statusBreakdown: normalizeStatusBreakdown(summary?.statusBreakdown),
     topDepartments: normalizeTopDepartments(summary?.topDepartments),
 });
 
-export function useDashboardSummary(enabled: boolean = true) {
+export function useDashboardSummary(enabled: boolean = true, params: DashboardSummaryQueryParams = {}) {
     const [summary, setSummary] = useState<DashboardSummaryDto | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -77,7 +94,7 @@ export function useDashboardSummary(enabled: boolean = true) {
         try {
             setLoading(true);
             setError(null);
-            const result = await dashboardApi.getSummary();
+            const result = await dashboardApi.getSummary(params);
             setSummary(normalizeSummary(result));
         } catch (summaryError) {
             console.error('Failed to fetch dashboard summary:', summaryError);
@@ -86,7 +103,7 @@ export function useDashboardSummary(enabled: boolean = true) {
         } finally {
             setLoading(false);
         }
-    }, [enabled]);
+    }, [enabled, params]);
 
     useEffect(() => {
         void fetchSummary();

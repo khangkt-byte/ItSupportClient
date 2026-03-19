@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { LogOut } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, XAxis, YAxis } from 'recharts';
-import type { User } from '@/types/data';
+import type { DashboardSummaryQueryParams, User } from '@/types/data';
 import { useDataManager } from '@/hooks/useDataManager';
 import { WorkLogManagement } from '@/features/workLogs/components/WorkLogManagement';
 import { useDashboardSummary } from '@/features/dashboard/hooks';
@@ -62,18 +62,320 @@ const toStatusLabel = (value: string): string => {
     .join(' ');
 };
 
+type DashboardFilterMode = 'day' | 'month' | 'range';
+type DashboardPreset = 'today' | 'last7' | 'thisMonth' | 'lastMonth' | 'allTime' | 'custom';
+
+const DASHBOARD_PERIOD = {
+  day: 0,
+  month: 1,
+  range: 2,
+} as const;
+
+const DASHBOARD_GROUP_BY = {
+  day: 0,
+  month: 1,
+} as const;
+
+const FILTER_QUERY_KEYS = {
+  mode: 'dbMode',
+  day: 'dbDay',
+  month: 'dbMonth',
+  from: 'dbFrom',
+  to: 'dbTo',
+  preset: 'dbPreset',
+} as const;
+
+const ALL_TIME_START = '2000-01-01';
+
+const formatDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const formatMonth = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  return `${year}-${month}`;
+};
+
+const getMonthBounds = (monthValue: string): { fromDate: string; toDate: string } => {
+  const [yearString, monthString] = monthValue.split('-');
+  const year = Number(yearString);
+  const month = Number(monthString);
+
+  if (!year || !month) {
+    const today = formatDate(new Date());
+    return { fromDate: today, toDate: today };
+  }
+
+  const monthStart = new Date(year, month - 1, 1);
+  const monthEnd = new Date(year, month, 0);
+
+  return {
+    fromDate: formatDate(monthStart),
+    toDate: formatDate(monthEnd),
+  };
+};
+
+const getMonthOffset = (monthValue: string): number => {
+  const [yearString, monthString] = monthValue.split('-');
+  const year = Number(yearString);
+  const month = Number(monthString);
+
+  if (!year || !month) {
+    return 0;
+  }
+
+  const now = new Date();
+  return ((year - now.getFullYear()) * 12) + ((month - 1) - now.getMonth());
+};
+
+const getDayDifference = (fromDate: string, toDate: string): number => {
+  const start = new Date(fromDate);
+  const end = new Date(toDate);
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return 0;
+  }
+
+  const ms = end.getTime() - start.getTime();
+  return Math.floor(ms / (24 * 60 * 60 * 1000));
+};
+
+const isValidDateString = (value: string): boolean => {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+
+  const parsed = new Date(value);
+  return !Number.isNaN(parsed.getTime());
+};
+
+const isValidMonthString = (value: string): boolean => /^\d{4}-\d{2}$/.test(value);
+
+const getRelativeMonthValue = (offset: number): string => {
+  const base = new Date();
+  base.setDate(1);
+  base.setMonth(base.getMonth() + offset);
+  return formatMonth(base);
+};
+
+const formatMonthLabel = (value: string): string => {
+  const [yearString, monthString] = value.split('-');
+  return `${monthString}/${yearString}`;
+};
+
+const parseUrlFilterState = (defaults: {
+  filterMode: DashboardFilterMode;
+  dayDate: string;
+  monthValue: string;
+  rangeFrom: string;
+  rangeTo: string;
+  preset: DashboardPreset;
+}) => {
+  if (typeof window === 'undefined') {
+    return defaults;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const mode = params.get(FILTER_QUERY_KEYS.mode);
+  const day = params.get(FILTER_QUERY_KEYS.day);
+  const month = params.get(FILTER_QUERY_KEYS.month);
+  const from = params.get(FILTER_QUERY_KEYS.from);
+  const to = params.get(FILTER_QUERY_KEYS.to);
+  const preset = params.get(FILTER_QUERY_KEYS.preset);
+
+  const parsedMode: DashboardFilterMode =
+    mode === 'day' || mode === 'month' || mode === 'range' ? mode : defaults.filterMode;
+
+  const parsedPreset: DashboardPreset =
+    preset === 'today' ||
+      preset === 'last7' ||
+      preset === 'thisMonth' ||
+      preset === 'lastMonth' ||
+      preset === 'allTime' ||
+      preset === 'custom'
+      ? preset
+      : defaults.preset;
+
+  return {
+    filterMode: parsedMode,
+    dayDate: day && isValidDateString(day) ? day : defaults.dayDate,
+    monthValue: month && isValidMonthString(month) ? month : defaults.monthValue,
+    rangeFrom: from && isValidDateString(from) ? from : defaults.rangeFrom,
+    rangeTo: to && isValidDateString(to) ? to : defaults.rangeTo,
+    preset: parsedPreset,
+  };
+};
+
 export function AdminDashboard({ user, onLogout, currentView }: Props) {
   const dataManager = useDataManager();
-  const dashboardSummary = useDashboardSummary(currentView === 'admin');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
+  const timezone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC', []);
+  const today = useMemo(() => formatDate(new Date()), []);
+  const defaultRangeFrom = useMemo(() => formatDate(new Date(Date.now() - (6 * 24 * 60 * 60 * 1000))), []);
+  const currentMonthValue = useMemo(() => formatMonth(new Date()), []);
+  const lastMonthValue = useMemo(() => getRelativeMonthValue(-1), []);
+
+  const initialFilterState = useMemo(
+    () => parseUrlFilterState({
+      filterMode: 'month',
+      dayDate: today,
+      monthValue: currentMonthValue,
+      rangeFrom: defaultRangeFrom,
+      rangeTo: today,
+      preset: 'thisMonth',
+    }),
+    [currentMonthValue, defaultRangeFrom, today],
+  );
+
+  const [filterMode, setFilterMode] = useState<DashboardFilterMode>(initialFilterState.filterMode);
+  const [dayDate, setDayDate] = useState(initialFilterState.dayDate);
+  const [monthValue, setMonthValue] = useState(initialFilterState.monthValue);
+  const [rangeFrom, setRangeFrom] = useState(initialFilterState.rangeFrom);
+  const [rangeTo, setRangeTo] = useState(initialFilterState.rangeTo);
+  const [activePreset, setActivePreset] = useState<DashboardPreset>(initialFilterState.preset);
+
+  const monthOptions = useMemo(() => {
+    const options: Array<{ value: string; label: string }> = [];
+    for (let offset = 0; offset >= -24; offset -= 1) {
+      const value = getRelativeMonthValue(offset);
+      options.push({ value, label: formatMonthLabel(value) });
+    }
+
+    if (monthValue && !options.some(option => option.value === monthValue)) {
+      options.unshift({ value: monthValue, label: formatMonthLabel(monthValue) });
+    }
+
+    return options;
+  }, [monthValue]);
+
+  const handleApplyPreset = (preset: DashboardPreset) => {
+    if (preset === 'today') {
+      setFilterMode('day');
+      setDayDate(today);
+      setActivePreset('today');
+      return;
+    }
+
+    if (preset === 'last7') {
+      setFilterMode('range');
+      setRangeFrom(defaultRangeFrom);
+      setRangeTo(today);
+      setActivePreset('last7');
+      return;
+    }
+
+    if (preset === 'thisMonth') {
+      setFilterMode('month');
+      setMonthValue(currentMonthValue);
+      setActivePreset('thisMonth');
+      return;
+    }
+
+    if (preset === 'lastMonth') {
+      setFilterMode('month');
+      setMonthValue(lastMonthValue);
+      setActivePreset('lastMonth');
+      return;
+    }
+
+    if (preset === 'allTime') {
+      setFilterMode('range');
+      setRangeFrom(ALL_TIME_START);
+      setRangeTo(today);
+      setActivePreset('allTime');
+      return;
+    }
+
+    setActivePreset('custom');
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    params.set(FILTER_QUERY_KEYS.mode, filterMode);
+    params.set(FILTER_QUERY_KEYS.preset, activePreset);
+
+    if (filterMode === 'day') {
+      params.set(FILTER_QUERY_KEYS.day, dayDate);
+      params.delete(FILTER_QUERY_KEYS.month);
+      params.delete(FILTER_QUERY_KEYS.from);
+      params.delete(FILTER_QUERY_KEYS.to);
+    } else if (filterMode === 'month') {
+      params.set(FILTER_QUERY_KEYS.month, monthValue);
+      params.delete(FILTER_QUERY_KEYS.day);
+      params.delete(FILTER_QUERY_KEYS.from);
+      params.delete(FILTER_QUERY_KEYS.to);
+    } else {
+      params.set(FILTER_QUERY_KEYS.from, rangeFrom);
+      params.set(FILTER_QUERY_KEYS.to, rangeTo);
+      params.delete(FILTER_QUERY_KEYS.day);
+      params.delete(FILTER_QUERY_KEYS.month);
+    }
+
+    const nextQuery = params.toString();
+    const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ''}${window.location.hash}`;
+    window.history.replaceState(null, '', nextUrl);
+  }, [activePreset, dayDate, filterMode, monthValue, rangeFrom, rangeTo]);
+
+  const dashboardQueryParams = useMemo<DashboardSummaryQueryParams>(() => {
+    if (filterMode === 'day') {
+      return {
+        period: DASHBOARD_PERIOD.day,
+        fromDate: dayDate,
+        toDate: dayDate,
+        timezone,
+        groupBy: DASHBOARD_GROUP_BY.day,
+      };
+    }
+
+    if (filterMode === 'month') {
+      const bounds = getMonthBounds(monthValue);
+      return {
+        period: DASHBOARD_PERIOD.month,
+        fromDate: bounds.fromDate,
+        toDate: bounds.toDate,
+        timezone,
+        groupBy: DASHBOARD_GROUP_BY.day,
+        monthOffset: getMonthOffset(monthValue),
+      };
+    }
+
+    const normalizedFrom = rangeFrom <= rangeTo ? rangeFrom : rangeTo;
+    const normalizedTo = rangeFrom <= rangeTo ? rangeTo : rangeFrom;
+    const dayDifference = getDayDifference(normalizedFrom, normalizedTo);
+
+    return {
+      period: DASHBOARD_PERIOD.range,
+      fromDate: normalizedFrom,
+      toDate: normalizedTo,
+      timezone,
+      groupBy: dayDifference > 31 ? DASHBOARD_GROUP_BY.month : DASHBOARD_GROUP_BY.day,
+    };
+  }, [dayDate, filterMode, monthValue, rangeFrom, rangeTo, timezone]);
+
+  const dashboardSummary = useDashboardSummary(currentView === 'admin', dashboardQueryParams);
+
   const trendData = useMemo(
-    () => (dashboardSummary.summary?.trendLast7Days || []).map(item => ({
-      ...item,
-      dateLabel: item.date ? new Date(item.date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }) : '-',
-    })),
-    [dashboardSummary.summary?.trendLast7Days],
+    () => {
+      const trendPoints = dashboardSummary.summary?.trend?.length
+        ? dashboardSummary.summary.trend
+        : (dashboardSummary.summary?.trendLast7Days || []);
+
+      return trendPoints.map(item => ({
+        ...item,
+        dateLabel: item.label || item.periodStart || item.date || '-',
+      }));
+    },
+    [dashboardSummary.summary?.trend, dashboardSummary.summary?.trendLast7Days],
   );
 
   const statusData = useMemo(
@@ -110,6 +412,163 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
         return (
           <div>
             <h1 className="text-2xl font-semibold mb-5 text-foreground">Admin Dashboard</h1>
+
+            <section className="bg-card border border-border rounded-lg p-4 md:p-5 mb-4">
+              <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 flex-1">
+                  <div>
+                    <label className="block text-sm text-muted-foreground mb-1">Period</label>
+                    <select
+                      value={filterMode}
+                      onChange={(event) => {
+                        setFilterMode(event.target.value as DashboardFilterMode);
+                        setActivePreset('custom');
+                      }}
+                      className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    >
+                      <option value="day">Day</option>
+                      <option value="month">Month</option>
+                      <option value="range">Date Range</option>
+                    </select>
+                  </div>
+
+                  {filterMode === 'day' && (
+                    <div>
+                      <label className="block text-sm text-muted-foreground mb-1">Date</label>
+                      <input
+                        type="date"
+                        value={dayDate}
+                        onChange={(event) => {
+                          setDayDate(event.target.value);
+                          setActivePreset('custom');
+                        }}
+                        className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                      />
+                    </div>
+                  )}
+
+                  {filterMode === 'month' && (
+                    <div>
+                      <label className="block text-sm text-muted-foreground mb-1">Month</label>
+                      <select
+                        value={monthValue}
+                        onChange={(event) => {
+                          setMonthValue(event.target.value);
+                          setActivePreset('custom');
+                        }}
+                        className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                      >
+                        {monthOptions.map(option => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {filterMode === 'range' && (
+                    <>
+                      <div>
+                        <label className="block text-sm text-muted-foreground mb-1">From</label>
+                        <input
+                          type="date"
+                          value={rangeFrom}
+                          onChange={(event) => {
+                            setRangeFrom(event.target.value);
+                            setActivePreset('custom');
+                          }}
+                          className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-muted-foreground mb-1">To</label>
+                        <input
+                          type="date"
+                          value={rangeTo}
+                          onChange={(event) => {
+                            setRangeTo(event.target.value);
+                            setActivePreset('custom');
+                          }}
+                          className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => void dashboardSummary.refetch()}
+                  disabled={dashboardSummary.loading}
+                  className="h-9 px-3 rounded-md border border-border bg-background hover:bg-accent text-sm inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {dashboardSummary.loading && <LoadingSpinner size="sm" tone="current" />}
+                  {dashboardSummary.loading ? 'Refreshing...' : 'Refresh Summary'}
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                Timezone: {timezone}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleApplyPreset('today')}
+                  className={`h-8 px-3 rounded-md border text-xs transition-colors ${
+                    activePreset === 'today'
+                      ? 'bg-primary-600 text-primary-foreground border-primary-600'
+                      : 'bg-background border-border hover:bg-accent'
+                  }`}
+                >
+                  Today
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleApplyPreset('last7')}
+                  className={`h-8 px-3 rounded-md border text-xs transition-colors ${
+                    activePreset === 'last7'
+                      ? 'bg-primary-600 text-primary-foreground border-primary-600'
+                      : 'bg-background border-border hover:bg-accent'
+                  }`}
+                >
+                  Last 7 days
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleApplyPreset('thisMonth')}
+                  className={`h-8 px-3 rounded-md border text-xs transition-colors ${
+                    activePreset === 'thisMonth'
+                      ? 'bg-primary-600 text-primary-foreground border-primary-600'
+                      : 'bg-background border-border hover:bg-accent'
+                  }`}
+                >
+                  This month
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleApplyPreset('lastMonth')}
+                  className={`h-8 px-3 rounded-md border text-xs transition-colors ${
+                    activePreset === 'lastMonth'
+                      ? 'bg-primary-600 text-primary-foreground border-primary-600'
+                      : 'bg-background border-border hover:bg-accent'
+                  }`}
+                >
+                  Last month
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleApplyPreset('allTime')}
+                  className={`h-8 px-3 rounded-md border text-xs transition-colors ${
+                    activePreset === 'allTime'
+                      ? 'bg-primary-600 text-primary-foreground border-primary-600'
+                      : 'bg-background border-border hover:bg-accent'
+                  }`}
+                >
+                  All time
+                </button>
+              </div>
+            </section>
+
             {dashboardSummary.error && (
               <ErrorAlert
                 className="mb-4"
@@ -160,23 +619,11 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
               </div>
             </div>
 
-            <div className="mt-4 flex justify-start">
-              <button
-                type="button"
-                onClick={() => void dashboardSummary.refetch()}
-                disabled={dashboardSummary.loading}
-                className="h-9 px-3 rounded-md border border-border bg-background hover:bg-accent text-sm inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {dashboardSummary.loading && <LoadingSpinner size="sm" tone="current" />}
-                {dashboardSummary.loading ? 'Refreshing...' : 'Refresh Summary'}
-              </button>
-            </div>
-
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4">
               <section className="bg-card border border-border rounded-lg p-5 space-y-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground">Issue Log Trend (7 days)</h2>
-                  <p className="text-sm text-muted-foreground">Daily incident volume in the last 7 days.</p>
+                  <h2 className="text-lg font-semibold text-foreground">Issue Log Trend</h2>
+                  <p className="text-sm text-muted-foreground">Incident trend for the selected period.</p>
                 </div>
 
                 {trendData.length === 0 ? (
