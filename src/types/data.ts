@@ -51,6 +51,11 @@ export interface IssuesQueryParams extends QueryParams {
   // Future: Add issue-specific filters
 }
 
+// Causes
+export interface CausesQueryParams extends QueryParams {
+  issueId?: number | null; // Filter by issue
+}
+
 // Work Logs (Issue Logs)
 export interface WorkLogsQueryParams extends QueryParams {
   status?: string | null; // Filter by status (pending, in-progress, resolved, cancelled)

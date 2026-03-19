@@ -6,17 +6,9 @@ import type {
   CreateCauseDto,
   UpdateCauseDto,
   PaginatedResult,
-  QueryParams,
+  CausesQueryParams,
   BulkDeleteResultDto,
 } from '@/types/data';
-
-/**
- * Query parameters for causes list endpoint
- * Extends the generic QueryParams with causes-specific filtering
- */
-export interface CausesQueryParams extends QueryParams {
-  issueId?: number;
-}
 
 export const causesApi = {
   /**

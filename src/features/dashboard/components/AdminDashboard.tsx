@@ -11,6 +11,7 @@ import { AccountManagement } from '@/features/accounts/components/AccountManagem
 import { MyAccountManagement } from '@/features/myAccount/components/MyAccountManagement';
 import { RoleManagement } from '@/features/roles/components/RoleManagement';
 import { IssueManagement } from '@/features/issues/components/IssueManagement';
+import { CauseManagement } from '@/features/causes/components/CauseManagement';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { LoadingState } from '@/components/common/LoadingState';
 
@@ -94,6 +95,10 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
       case 'issues':
         return (
           <IssueManagement />
+        );
+      case 'causes':
+        return (
+          <CauseManagement />
         );
       case 'departments':
         return <DepartmentManagement />;
