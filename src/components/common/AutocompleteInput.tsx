@@ -13,6 +13,7 @@ export interface Suggestion {
 interface Props {
   value: string;
   onChange: (value: string) => void;
+  onFocus?: () => void;
   onSelect?: (suggestion: Suggestion | null) => void;
   selectedSuggestion: Suggestion | null;
   suggestions: Suggestion[];
@@ -29,6 +30,7 @@ interface Props {
 export function AutocompleteInput({
   value,
   onChange,
+  onFocus,
   onSelect,
   selectedSuggestion,
   suggestions,
@@ -77,9 +79,8 @@ export function AutocompleteInput({
   };
 
   const handleFocus = () => {
-    if (suggestions.length > 0) {
-      setShowSuggestions(true);
-    }
+    setShowSuggestions(true);
+    onFocus?.();
   };
 
   const handleSelectSuggestion = (suggestion: Suggestion) => {

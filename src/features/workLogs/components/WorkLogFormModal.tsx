@@ -99,6 +99,8 @@ export function WorkLogFormModal({
   const [selectedCause, setSelectedCause] = useState<Suggestion | null>(null);
   const [loadingIssueSuggestions, setLoadingIssueSuggestions] = useState(false);
   const [loadingCauseSuggestions, setLoadingCauseSuggestions] = useState(false);
+  const [issueFocusVersion, setIssueFocusVersion] = useState(0);
+  const [causeFocusVersion, setCauseFocusVersion] = useState(0);
   const { hasPermission } = usePermission();
   const canSubmit = hasPermission(editing ? Permissions.IssueLog.Edit : Permissions.IssueLog.Create);
   const reportDateErrors = getFieldErrorMessages(validationErrors, 'ReportDate');
@@ -140,6 +142,28 @@ export function WorkLogFormModal({
     setIssueSuggestions([]);
     setCauseSuggestions([]);
   }, [isOpen, editing]);
+
+  const mapIssueSuggestions = (results: Awaited<ReturnType<typeof issuesApi.getSuggestions>>): Suggestion[] => {
+    return results
+      .map((issue) => ({
+        id: issue.issId,
+        name: issue.name,
+        description: issue.description || '',
+        usageCount: issue.usageCount,
+      }))
+      .sort((a, b) => b.usageCount - a.usageCount);
+  };
+
+  const mapCauseSuggestions = (results: Awaited<ReturnType<typeof causesApi.getSuggestions>>): Suggestion[] => {
+    return results
+      .map((cause) => ({
+        id: cause.causeId,
+        name: cause.name,
+        description: cause.description || '',
+        usageCount: cause.usageCount,
+      }))
+      .sort((a, b) => b.usageCount - a.usageCount);
+  };
 
   const itEmployees = useMemo(
     () => employees.filter((emp) => emp.department === 'IT' && !emp.deleteDate),
@@ -185,23 +209,14 @@ export function WorkLogFormModal({
   );
 
   useEffect(() => {
-    const fetchIssueSuggestions = async () => {
-      if (formData.issue.length < 2) {
-        setIssueSuggestions([]);
-        return;
-      }
+    if (!isOpen) return;
 
+    const fetchIssueSuggestions = async () => {
       setLoadingIssueSuggestions(true);
       try {
-        const results = await issuesApi.getSuggestions(formData.issue);
-        setIssueSuggestions(
-          results.map((issue) => ({
-            id: issue.issId,
-            name: issue.name,
-            description: issue.description || '',
-            usageCount: issue.usageCount,
-          }))
-        );
+        const trimmedSearch = formData.issue.trim();
+        const results = await issuesApi.getSuggestions(trimmedSearch || undefined);
+        setIssueSuggestions(mapIssueSuggestions(results));
       } catch (fetchError) {
         console.error('Failed to fetch issue suggestions:', fetchError);
         setIssueSuggestions([]);
@@ -212,46 +227,32 @@ export function WorkLogFormModal({
 
     const timeoutId = setTimeout(fetchIssueSuggestions, 300);
     return () => clearTimeout(timeoutId);
-  }, [formData.issue]);
+  }, [formData.issue, isOpen, issueFocusVersion]);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     const loadCausesForIssue = async () => {
+      const trimmedSearch = formData.cause.trim();
+
       if (!selectedIssue) {
-        if (formData.cause.length >= 2) {
-          setLoadingCauseSuggestions(true);
-          try {
-            const results = await causesApi.getSuggestions(undefined, formData.cause);
-            setCauseSuggestions(
-              results.map((cause) => ({
-                id: cause.causeId,
-                name: cause.name,
-                description: cause.description || '',
-                usageCount: cause.usageCount,
-              }))
-            );
-          } catch (fetchError) {
-            console.error('Failed to fetch cause suggestions:', fetchError);
-            setCauseSuggestions([]);
-          } finally {
-            setLoadingCauseSuggestions(false);
-          }
-        } else {
+        setLoadingCauseSuggestions(true);
+        try {
+          const results = await causesApi.getSuggestions(undefined, trimmedSearch || undefined);
+          setCauseSuggestions(mapCauseSuggestions(results));
+        } catch (fetchError) {
+          console.error('Failed to fetch cause suggestions:', fetchError);
           setCauseSuggestions([]);
+        } finally {
+          setLoadingCauseSuggestions(false);
         }
         return;
       }
 
       setLoadingCauseSuggestions(true);
       try {
-        const results = await causesApi.getSuggestions(selectedIssue.id);
-        setCauseSuggestions(
-          results.map((cause) => ({
-            id: cause.causeId,
-            name: cause.name,
-            description: cause.description || '',
-            usageCount: cause.usageCount,
-          }))
-        );
+        const results = await causesApi.getSuggestions(selectedIssue.id, trimmedSearch || undefined);
+        setCauseSuggestions(mapCauseSuggestions(results));
       } catch (fetchError) {
         console.error('Failed to fetch cause suggestions:', fetchError);
         setCauseSuggestions([]);
@@ -261,28 +262,12 @@ export function WorkLogFormModal({
     };
 
     void loadCausesForIssue();
-  }, [selectedIssue, formData.cause]);
+  }, [selectedIssue, formData.cause, isOpen, causeFocusVersion]);
 
-  const handleIssueSelect = async (suggestion: Suggestion | null) => {
+  const handleIssueSelect = (suggestion: Suggestion | null) => {
     setSelectedIssue(suggestion);
-    if (suggestion) {
-      try {
-        const results = await causesApi.getSuggestions(suggestion.id);
-        setCauseSuggestions(
-          results.map((cause) => ({
-            id: cause.causeId,
-            name: cause.name,
-            description: cause.description || '',
-            usageCount: cause.usageCount,
-          }))
-        );
-      } catch (fetchError) {
-        console.error('Failed to fetch causes for issue:', fetchError);
-        setCauseSuggestions([]);
-      }
-    } else {
-      setCauseSuggestions([]);
-    }
+    setSelectedCause(null);
+    setCauseFocusVersion((prev) => prev + 1);
   };
 
   const handleCauseSelect = (suggestion: Suggestion | null) => {
@@ -445,13 +430,14 @@ export function WorkLogFormModal({
             <AutocompleteInput
               value={formData.issue}
               onChange={(value) => onChange({ ...formData, issue: value })}
+              onFocus={() => setIssueFocusVersion((prev) => prev + 1)}
               onSelect={handleIssueSelect}
               selectedSuggestion={selectedIssue}
               suggestions={issueSuggestions}
               loading={loadingIssueSuggestions}
               label="Issue Description"
               required
-              placeholder="Start typing to see suggestions from knowledge base..."
+              placeholder="Click or type to see most common issues first..."
               suggestionHeader=""
               hasError={issueErrors.length > 0}
             />
@@ -459,12 +445,13 @@ export function WorkLogFormModal({
             <AutocompleteInput
               value={formData.cause}
               onChange={(value) => onChange({ ...formData, cause: value })}
+              onFocus={() => setCauseFocusVersion((prev) => prev + 1)}
               onSelect={handleCauseSelect}
               selectedSuggestion={selectedCause}
               suggestions={causeSuggestions}
               loading={loadingCauseSuggestions}
               label="Cause"
-              placeholder={selectedIssue ? `Common causes for "${selectedIssue.name}"...` : 'Start typing to see suggestions...'}
+              placeholder={selectedIssue ? `Common causes for "${selectedIssue.name}" (top used first)...` : 'Click or type to see common causes...'}
               suggestionHeader={selectedIssue ? `Common Causes for "${selectedIssue.name}"` : 'Suggested Causes'}
               hasError={causeErrors.length > 0}
             />
