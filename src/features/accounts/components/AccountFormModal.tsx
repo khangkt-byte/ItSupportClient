@@ -17,6 +17,7 @@ export interface AccountFormData {
   employeeId: string;
   username: string;
   password: string;
+  confirmPassword: string;
   selectedRoleIds: number[];
   selectedClaimIds: number[];
 }
@@ -40,6 +41,7 @@ export function createAccountFormData(editing: Account | null): AccountFormData 
       employeeId: editing.employeeId,
       username: editing.username,
       password: '',
+      confirmPassword: '',
       selectedRoleIds: editing.roles?.map((role) => role.roleId) || [],
       selectedClaimIds: [],
     };
@@ -49,6 +51,7 @@ export function createAccountFormData(editing: Account | null): AccountFormData 
     employeeId: '',
     username: '',
     password: '',
+    confirmPassword: '',
     selectedRoleIds: [],
     selectedClaimIds: [],
   };
@@ -74,6 +77,7 @@ export function AccountFormModal({
   const [isLoadingClaims, setIsLoadingClaims] = useState(false);
   const [dataLoadError, setDataLoadError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -155,16 +159,20 @@ export function AccountFormModal({
 
   const employeeErrors = getFieldErrorMessages(validationErrors, 'EmpId', ['EmployeeId']);
   const usernameErrors = getFieldErrorMessages(validationErrors, 'Username');
-  const passwordErrors = getFieldErrorMessages(validationErrors, 'Password');
+  const passwordErrors = getFieldErrorMessages(validationErrors, 'Password', ['NewPassword']);
+  const confirmPasswordErrors = getFieldErrorMessages(validationErrors, 'ConfirmPassword');
   const generalValidationMessages = getGeneralValidationMessages(validationErrors, [
     'EmpId',
     'EmployeeId',
     'Username',
     'Password',
+    'NewPassword',
+    'ConfirmPassword',
   ]);
   const hasEmployeeError = employeeErrors.length > 0;
   const hasUsernameError = usernameErrors.length > 0;
   const hasPasswordError = passwordErrors.length > 0;
+  const hasConfirmPasswordError = confirmPasswordErrors.length > 0;
 
   if (!isOpen) return null;
 
@@ -260,7 +268,7 @@ export function AccountFormModal({
 
             <div>
               <label className="block text-sm font-medium text-muted-foreground mb-1">
-                Password {!editing && <span className="text-red-500">*</span>}
+                {editing ? 'New Password' : 'Password'} {!editing && <span className="text-red-500">*</span>}
               </label>
               <div className="relative">
                 <input
@@ -286,6 +294,35 @@ export function AccountFormModal({
               </div>
               <FieldError messages={passwordErrors} />
               {editing && <p className="text-xs text-muted-foreground mt-1">Leave empty to keep current password</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
+                {editing ? 'Confirm New Password' : 'Confirm Password'} {!editing && <span className="text-red-500">*</span>}
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  required={!editing || Boolean(formData.password)}
+                  value={formData.confirmPassword}
+                  onChange={(e) => onChange((prev) => ({ ...prev, confirmPassword: e.target.value }))}
+                  placeholder={editing ? 'Confirm new password' : 'Confirm password'}
+                  className={`w-full px-3 py-2 pr-10 border rounded-lg focus:ring-2 bg-card text-foreground placeholder-placeholder transition-colors ${
+                    hasConfirmPasswordError
+                      ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                      : 'border-input focus:ring-primary-500 focus:border-transparent'
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              <FieldError messages={confirmPasswordErrors} />
             </div>
 
             <div className="flex gap-3 pt-4">

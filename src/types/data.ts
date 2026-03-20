@@ -283,12 +283,15 @@ export interface CreateAccountDto {
   empId: string; // UUID - Fixed: was employeeId
   username: string;
   password: string;
+  confirmPassword: string;
   roleIds?: number[] | null;
 }
 
 export interface UpdateAccountDto {
   username?: string | null;
   isLocked?: boolean | null;
+  newPassword?: string | null;
+  confirmPassword?: string | null;
 }
 
 export interface ChangePasswordDto {
