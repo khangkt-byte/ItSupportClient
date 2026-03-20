@@ -5,7 +5,7 @@ import type {
   UpdateRoleDto,
   ClaimDto,
   PaginatedResult,
-  QueryParams,
+  RolesQueryParams,
   BulkDeleteResultDto,
 } from '@/types/data';
 

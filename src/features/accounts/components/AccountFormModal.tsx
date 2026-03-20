@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Save, User, X } from 'lucide-react';
+import { Save, User, X, Eye, EyeOff } from 'lucide-react';
 import { ErrorAlert } from '@/components/common/ErrorAlert';
 import { FieldError } from '@/components/common/FieldError';
 import { PermissionEditor } from '@/components/common/PermissionEditor';
@@ -28,7 +28,7 @@ interface AccountFormModalProps {
   isSubmitting: boolean;
   error: string | null;
   validationErrors: ValidationErrors | null;
-  onChange: (formData: AccountFormData) => void;
+  onChange: React.Dispatch<React.SetStateAction<AccountFormData>>;
   onSubmit: (formData: AccountFormData) => Promise<void>;
   onClose: () => void;
   onClearError: () => void;
@@ -73,6 +73,7 @@ export function AccountFormModal({
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [isLoadingClaims, setIsLoadingClaims] = useState(false);
   const [dataLoadError, setDataLoadError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -139,7 +140,7 @@ export function AccountFormModal({
     });
 
     if (matchedEmployee) {
-      onChange({ ...formData, employeeId: matchedEmployee.empId });
+      onChange((prev) => ({ ...prev, employeeId: matchedEmployee.empId }));
     }
   }, [isOpen, editing, formData, availableEmployees, onChange]);
 
@@ -219,7 +220,7 @@ export function AccountFormModal({
               <select
                 required
                 value={formData.employeeId}
-                onChange={(e) => onChange({ ...formData, employeeId: e.target.value })}
+                onChange={(e) => onChange((prev) => ({ ...prev, employeeId: e.target.value }))}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 bg-card text-foreground placeholder-placeholder transition-colors ${
                   hasEmployeeError
                     ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
@@ -246,7 +247,7 @@ export function AccountFormModal({
                 type="text"
                 required
                 value={formData.username}
-                onChange={(e) => onChange({ ...formData, username: e.target.value })}
+                onChange={(e) => onChange((prev) => ({ ...prev, username: e.target.value }))}
                 placeholder="Enter username"
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 bg-card text-foreground placeholder-placeholder transition-colors ${
                   hasUsernameError
@@ -261,18 +262,28 @@ export function AccountFormModal({
               <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Password {!editing && <span className="text-red-500">*</span>}
               </label>
-              <input
-                type="password"
-                required={!editing}
-                value={formData.password}
-                onChange={(e) => onChange({ ...formData, password: e.target.value })}
-                placeholder={editing ? 'Leave empty to keep current password' : 'Enter password'}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 bg-card text-foreground placeholder-placeholder transition-colors ${
-                  hasPasswordError
-                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
-                    : 'border-input focus:ring-primary-500 focus:border-transparent'
-                }`}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required={!editing}
+                  value={formData.password}
+                  onChange={(e) => onChange((prev) => ({ ...prev, password: e.target.value }))}
+                  placeholder={editing ? 'Leave empty to keep current password' : 'Enter password'}
+                  className={`w-full px-3 py-2 pr-10 border rounded-lg focus:ring-2 bg-card text-foreground placeholder-placeholder transition-colors ${
+                    hasPasswordError
+                      ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                      : 'border-input focus:ring-primary-500 focus:border-transparent'
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
               <FieldError messages={passwordErrors} />
               {editing && <p className="text-xs text-muted-foreground mt-1">Leave empty to keep current password</p>}
             </div>
@@ -303,10 +314,10 @@ export function AccountFormModal({
                 availableRoles={availableRoles}
                 availableClaims={availableClaims}
                 onRolesChange={(roleIds) =>
-                  onChange({ ...formData, selectedRoleIds: roleIds })
+                  onChange((prev) => ({ ...prev, selectedRoleIds: roleIds }))
                 }
                 onClaimsChange={(claimIds) =>
-                  onChange({ ...formData, selectedClaimIds: claimIds })
+                  onChange((prev) => ({ ...prev, selectedClaimIds: claimIds }))
                 }
               />
             )}

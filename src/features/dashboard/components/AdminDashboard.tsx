@@ -721,17 +721,6 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleApplyPreset('allTime')}
-                  className={`h-8 px-3 rounded-md border text-xs transition-colors ${
-                    activePreset === 'allTime'
-                      ? 'bg-primary-600 text-primary-foreground border-primary-600'
-                      : 'bg-background border-border hover:bg-accent'
-                  }`}
-                >
-                  All time
-                </button>
-                <button
-                  type="button"
                   onClick={() => handleApplyPreset('thisYear')}
                   className={`h-8 px-3 rounded-md border text-xs transition-colors ${
                     activePreset === 'thisYear'
@@ -751,6 +740,17 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
                   }`}
                 >
                   Last year
+                </button>
+                                <button
+                  type="button"
+                  onClick={() => handleApplyPreset('allTime')}
+                  className={`h-8 px-3 rounded-md border text-xs transition-colors ${
+                    activePreset === 'allTime'
+                      ? 'bg-primary-600 text-primary-foreground border-primary-600'
+                      : 'bg-background border-border hover:bg-accent'
+                  }`}
+                >
+                  All time
                 </button>
               </div>
             </section>
