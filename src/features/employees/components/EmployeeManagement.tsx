@@ -19,103 +19,116 @@ import { useState } from 'react';
 import { Plus, User } from 'lucide-react';
 import { employeesApi } from '@/services/api/employees';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
-import type { Employee, Department, AreaDto, EmployeesQueryParams } from '@/types/data';
+import type { Employee, Department, AreaDto } from '@/types/data';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { PaginationBar } from '@/components/common/PaginationBar';
-import { EmployeeTable } from './EmployeeTable';
-import { EmployeeFormModal, type EmployeeFormData } from './EmployeeFormModal';
-import { useEmployeeQuery } from '../hooks/useEmployeeQuery';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
+import { usePermission } from '@/hooks/usePermission';
+import { Permissions } from '@/config/permissions';
+import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
+import { EmployeeTable } from '@/features/employees/components/EmployeeTable';
+import { EmployeeFormModal, createEmployeeFormData, type EmployeeFormData } from '@/features/employees/components/EmployeeFormModal';
+import { useEmployeeQuery } from '@/features/employees/hooks/useEmployeeQuery';
 
 interface Props {
-  data: Employee[];
-  setData: (items: Employee[]) => void;
   departments: Department[];
   areas: AreaDto[];
 }
 
-export function EmployeeManagement({ data, setData, departments, areas }: Props) {
-  void data;
-  void setData;
-  void areas;
-
-  // Server-side query parameters
-  const [queryParams, setQueryParams] = useState<EmployeesQueryParams>({
-    page: 1,
-    pageSize: 10,
-    search: '',
-    sortBy: 'fullName',
-    isDescending: false,
-    dptId: null, // null = all departments
-    areaId: null, // null = all areas
-  });
+export function EmployeeManagement({ departments, areas }: Props) {
 
   // Form states
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Employee | null>(null);
-  const [formData, setFormData] = useState<EmployeeFormData>({
-    empCode: '', 
-    fullName: '', 
-    phoneNumber: '', 
-    email: '', 
-    position: '',
-    department: '',
-    area: '',
-  });
+  const [formData, setFormData] = useState<EmployeeFormData>(createEmployeeFormData(null, departments, areas));
+  const [isFormLoading, setIsFormLoading] = useState(false);
 
   // UI states
   const [isMutating, setIsMutating] = useState(false);
+  const [mutationError, setMutationError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Employee | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
 
   // Additional filter state for UI
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
 
-  const { loading: queryLoading, error, setError, paginatedResult, fetchEmployees } = useEmployeeQuery(queryParams);
+  const {
+    queryParams,
+    setQueryParams,
+    loading: queryLoading,
+    error: queryError,
+    setError: setQueryError,
+    paginatedResult,
+    refetch,
+  } = useEmployeeQuery();
   const isLoading = queryLoading || isMutating;
+  const { hasPermission } = usePermission();
 
   // Handle department filter change
   const handleDepartmentFilterChange = (value: string) => {
     setDepartmentFilter(value);
-    setQueryParams({
-      ...queryParams,
+    setQueryParams((prev) => ({
+      ...prev,
       dptId: value === 'all' ? null : parseInt(value),
       page: 1,
-    });
+    }));
   };
 
-  const openForm = (item?: Employee) => {
-    setEditing(item || null);
-    setFormData(item ? { 
-      empCode: item.empCode || '', 
-      fullName: item.fullName, 
-      phoneNumber: item.phoneNumber || '', 
-      email: item.email || '', 
-      position: item.position || '',
-      department: item.department || '',
-      area: item.area || '',
-    } : { 
-      empCode: '', fullName: '', phoneNumber: '', email: '', position: '', department: '', area: ''
-    });
-    setShowForm(true);
+  const openForm = async (item?: Employee) => {
+    setQueryError(null);
+    setMutationError(null);
+    setValidationErrors(null);
+
+    if (!item) {
+      setIsFormLoading(false);
+      setEditing(null);
+      setFormData(createEmployeeFormData(null, departments, areas));
+      setShowForm(true);
+      return;
+    }
+
+    try {
+      setShowForm(true);
+      setIsFormLoading(true);
+      setEditing(item);
+      const detail = await employeesApi.getById(item.empId);
+      const hydratedEmployee: Employee = {
+        ...item,
+        ...detail,
+        department: departments.find((dept) => dept.dptId === detail.dptId)?.name || '',
+        area: areas.find((area) => area.areaId === detail.areaId)?.name || '',
+      };
+
+      setEditing(hydratedEmployee);
+      setFormData(createEmployeeFormData(hydratedEmployee, departments, areas));
+    } catch (openFormError: unknown) {
+      console.error('Failed to load employee details:', openFormError);
+      const parsedError = parseApiError(openFormError);
+      setMutationError(parsedError.message || 'Unable to load employee details. Please try again.');
+    } finally {
+      setIsFormLoading(false);
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (nextFormData: EmployeeFormData) => {
     try {
       setIsMutating(true);
-      setError(null);
+      setQueryError(null);
+      setMutationError(null);
+      setValidationErrors(null);
 
       // Find department and area IDs from names
-      const selectedDept = departments.find((dept) => dept.name === formData.department);
-      const selectedArea = areas.find((area) => area.name === formData.area);
+      const selectedDept = departments.find((dept) => dept.name === nextFormData.department);
+      const selectedArea = areas.find((area) => area.name === nextFormData.area);
 
       if (editing) {
         // Update existing employee
         const updateData = {
-          fullName: formData.fullName,
-          phoneNumber: formData.phoneNumber || null,
-          email: formData.email || null,
-          position: formData.position || null,
+          fullName: nextFormData.fullName,
+          phoneNumber: nextFormData.phoneNumber || null,
+          email: nextFormData.email || null,
+          position: nextFormData.position || null,
           dptId: selectedDept?.dptId,
           areaId: selectedArea?.areaId,
         };
@@ -123,11 +136,11 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       } else {
         // Create new employee
         const createData = {
-          empCode: formData.empCode || null,
-          fullName: formData.fullName,
-          phoneNumber: formData.phoneNumber || null,
-          email: formData.email || null,
-          position: formData.position || null,
+          empCode: nextFormData.empCode || null,
+          fullName: nextFormData.fullName,
+          phoneNumber: nextFormData.phoneNumber || null,
+          email: nextFormData.email || null,
+          position: nextFormData.position || null,
           dptId: selectedDept?.dptId,
           areaId: selectedArea?.areaId,
         };
@@ -135,12 +148,14 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       }
 
       setShowForm(false);
-      setFormData({ empCode: '', fullName: '', phoneNumber: '', email: '', position: '', department: '', area: '' });
+      setFormData(createEmployeeFormData(null, departments, areas));
       // Refresh data after submission
-      await fetchEmployees();
-    } catch (err) {
-      console.error('Failed to save employee:', err);
-      setError(`Failed to ${editing ? 'update' : 'create'} employee. Please try again.`);
+      await refetch();
+    } catch (submitError: unknown) {
+      console.error('Failed to save employee:', submitError);
+      const parsedError = parseApiError(submitError);
+      setMutationError(parsedError.message || 'Unable to save employee. Please try again.');
+      setValidationErrors(parsedError.fieldErrors);
     } finally {
       setIsMutating(false);
     }
@@ -150,14 +165,16 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
     if (!confirmDelete) return;
     try {
       setDeleteLoading(true);
-      setError(null);
+      setQueryError(null);
+      setMutationError(null);
       await employeesApi.deleteSingle(confirmDelete.empId);
       setConfirmDelete(null);
       // Refresh data after deletion
-      await fetchEmployees();
-    } catch (err) {
-      console.error('Failed to delete employee:', err);
-      setError('Failed to delete employee. Please try again.');
+      await refetch();
+    } catch (deleteError: unknown) {
+      console.error('Failed to delete employee:', deleteError);
+      const parsedError = parseApiError(deleteError);
+      setMutationError(parsedError.message || 'Unable to delete employee. Please try again.');
     } finally {
       setDeleteLoading(false);
     }
@@ -176,13 +193,16 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
             Manage employee profiles with search, filter, and sorting controls
           </p>
         </div>
-        <button
-          onClick={() => openForm()}
-          className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm"
-        >
-          <Plus className="w-5 h-5" />
-          Add Employee
-        </button>
+        {hasPermission(Permissions.Employee.Create) && (
+          <button
+            onClick={() => void openForm()}
+            disabled={isLoading}
+            className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm"
+          >
+            <Plus className="w-5 h-5" />
+            Add Employee
+          </button>
+        )}
       </div>
 
       {/* Search, Filter, Sort Bar */}
@@ -211,16 +231,25 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       />
 
       {/* Employees Table */}
+            {mutationError && !showForm && (
+              <ErrorAlert
+                message={mutationError}
+                onDismiss={() => setMutationError(null)}
+              />
+            )}
+
       <EmployeeTable
-        loading={isLoading}
-        error={showForm ? null : error}
+        isLoading={isLoading}
+        error={queryError}
         items={paginatedResult?.items || []}
-        onEdit={(item) => openForm(item as Employee)}
+        canEdit={hasPermission(Permissions.Employee.Edit)}
+        canDelete={hasPermission(Permissions.Employee.Delete)}
+        onEdit={(item) => void openForm(item as Employee)}
         onDelete={(item) => setConfirmDelete(item as Employee)}
       />
 
       {/* Pagination Controls */}
-      {paginatedResult && !isLoading && !error && (
+      {paginatedResult && !isLoading && (
         <PaginationBar
           page={queryParams.page || 1}
           totalPages={paginatedResult.totalPages}
@@ -239,12 +268,23 @@ export function EmployeeManagement({ data, setData, departments, areas }: Props)
       {/* Form Modal */}
       <EmployeeFormModal
         isOpen={showForm}
-        loading={isLoading}
+        isSubmitting={isMutating}
+        isLoadingData={isFormLoading}
         editing={editing}
+        error={mutationError}
+        validationErrors={validationErrors}
         formData={formData}
         onChange={setFormData}
         onSubmit={handleSubmit}
-        onClose={() => setShowForm(false)}
+        onClose={() => {
+          if (isLoading) return;
+          setIsFormLoading(false);
+          setShowForm(false);
+        }}
+        onClearError={() => {
+          setMutationError(null);
+          setValidationErrors(null);
+        }}
         departments={departments}
         areas={areas}
       />

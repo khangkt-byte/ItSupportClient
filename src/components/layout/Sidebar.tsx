@@ -16,8 +16,7 @@ interface MenuItem {
 
 export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
-  const { accessibilityMode, setAccessibilityMode, prefersReducedMotion } = useTheme();
-  const [isAccessibilityOpen, setIsAccessibilityOpen] = useState(false);
+  const { prefersReducedMotion } = useTheme();
 
   // Expand sidebar by default on large screens
   useEffect(() => {
@@ -35,6 +34,8 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
   const adminMenuItems: MenuItem[] = [
     { id: 'admin', label: 'Dashboard', icon: 'dashboard' },
     { id: 'workLogs', label: 'Work Logs', icon: 'insert_chart' },
+    { id: 'issues', label: 'Issues', icon: 'bug_report' },
+    { id: 'causes', label: 'Causes', icon: 'warning' },
     { id: 'employees', label: 'Employees', icon: 'group' },
     { id: 'departments', label: 'Departments', icon: 'business' },
     { id: 'areas', label: 'Areas', icon: 'location_on' },
@@ -118,49 +119,22 @@ export function Sidebar({ currentView, onNavigate, userRole }: SidebarProps) {
           {/* New Theme Selector Component */}
           <ThemeSelector collapsed={collapsed} />
 
-          {/* Accessibility Mode Button */}
+          {!collapsed && prefersReducedMotion && (
+            <p className="text-xs text-muted-foreground px-1">Reduced motion enabled</p>
+          )}
+
           <button
-            onClick={() => setIsAccessibilityOpen(!isAccessibilityOpen)}
-            className="w-full min-h-12 rounded-lg flex items-center border-none px-3.75 whitespace-nowrap transition-all duration-300 hover:bg-(--sidebar-color-hover-secondary) bg-(--sidebar-color-bg-secondary) text-(--sidebar-color-text-primary)"
-            title="Accessibility options"
+            onClick={() => onNavigate('my-account')}
+            className={`w-full min-h-12 rounded-lg flex items-center border-none px-3.75 whitespace-nowrap transition-all duration-300 ${currentView === 'my-account' ? 'text-primary-foreground bg-(--sidebar-color-hover-primary)' : 'hover:bg-(--sidebar-color-hover-secondary) bg-(--sidebar-color-bg-secondary) text-(--sidebar-color-text-primary)'}`}
+            title="My account"
           >
             <div className="flex gap-2.5 items-center flex-1">
-              <span className="material-symbols-rounded">accessibility</span>
+              <span className="material-symbols-rounded">manage_accounts</span>
               <span className={`text-base transition-opacity duration-300 ${collapsed ? 'opacity-0 w-0 overflow-hidden absolute' : 'opacity-100'}`}>
-                Accessibility
+                My Account
               </span>
             </div>
           </button>
-
-          {/* Accessibility Options Dropdown */}
-          {isAccessibilityOpen && !collapsed && (
-            <div className="bg-(--sidebar-color-bg-secondary) rounded-lg p-3 space-y-2 border border-(--sidebar-color-border-hr) hidden md:block">
-              <p className="text-xs font-semibold text-(--sidebar-color-text-primary) mb-2">Contrast Mode:</p>
-              <button
-                onClick={() => setAccessibilityMode('default')}
-                className={`w-full px-3 py-2 rounded text-sm font-medium transition-all text-left ${
-                  accessibilityMode === 'default'
-                    ? 'bg-primary-600 text-primary-foreground'
-                    : 'bg-secondary text-foreground hover:bg-secondary/80'
-                }`}
-              >
-                ✓ Normal
-              </button>
-              <button
-                onClick={() => setAccessibilityMode('highContrast')}
-                className={`w-full px-3 py-2 rounded text-sm font-medium transition-all text-left ${
-                  accessibilityMode === 'highContrast'
-                    ? 'bg-primary-600 text-primary-foreground'
-                    : 'bg-secondary text-foreground hover:bg-secondary/80'
-                }`}
-              >
-                ⊕ High Contrast (AA+)
-              </button>
-              {prefersReducedMotion && (
-                <p className="text-xs text-muted-foreground mt-2">✓ Reduced motion enabled</p>
-              )}
-            </div>
-          )}
         </div>
       </aside>
     </>

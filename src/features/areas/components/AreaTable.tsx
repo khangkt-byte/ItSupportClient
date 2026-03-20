@@ -1,34 +1,27 @@
-import { Edit, MapPin, Trash2, AlertCircle } from 'lucide-react';
+import { Edit, MapPin, Trash2 } from 'lucide-react';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 import type { AreaDto } from '@/types/data';
+import { LoadingState } from '@/components/common/LoadingState';
 
 interface Props {
   isLoading: boolean;
   error: string | null;
   items: AreaDto[];
+  canEdit: boolean;
+  canDelete: boolean;
   onEdit: (item: AreaDto) => void;
   onDelete: (item: AreaDto) => void;
 }
 
-export function AreaTable({ isLoading, error, items, onEdit, onDelete }: Props) {
+export function AreaTable({ isLoading, error, items, canEdit, canDelete, onEdit, onDelete }: Props) {
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
       {isLoading && (
-        <div className="flex items-center justify-center py-12">
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
-            <p className="text-muted-foreground">Loading areas...</p>
-          </div>
-        </div>
+        <LoadingState className="py-12" spinnerSize="md" label="Loading areas..." />
       )}
 
       {error && !isLoading && (
-        <div className="p-4 bg-error-background border border-error-border flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
-          <div className="flex-1">
-            <p className="font-medium text-error-foreground">Error</p>
-            <p className="text-sm text-error-foreground">{error}</p>
-          </div>
-        </div>
+        <ErrorAlert message={error} className="m-4" />
       )}
 
       {!isLoading && !error && (
@@ -56,20 +49,24 @@ export function AreaTable({ isLoading, error, items, onEdit, onDelete }: Props) 
                   </td>
                   <td className="px-6 py-4 text-sm text-right">
                     <div className="inline-flex items-center gap-2">
-                      <button
-                        onClick={() => onEdit(item)}
-                        className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors"
-                        title="Edit area"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => onDelete(item)}
-                        className="text-error-foreground inline-flex items-center justify-center hover:text-error-foreground transition-colors"
-                        title="Delete area"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {canEdit && (
+                        <button
+                          onClick={() => onEdit(item)}
+                          className="text-primary-600 inline-flex items-center justify-center hover:text-primary-800 transition-colors"
+                          title="Edit area"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          onClick={() => onDelete(item)}
+                          className="text-error-foreground inline-flex items-center justify-center hover:text-error-foreground transition-colors"
+                          title="Delete area"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

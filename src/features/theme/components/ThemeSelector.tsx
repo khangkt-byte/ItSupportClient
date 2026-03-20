@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { ChevronRight, ChevronDown, RotateCcw, Eye, Sun, Moon, MonitorSmartphone, CheckCircle } from 'lucide-react';
 import { useTheme } from '@/features/theme/hooks/useTheme';
-import type { Theme, Appearance, BrandColorTheme } from '@/features/theme/hooks/useTheme';
+import type { Appearance, BrandColorTheme } from '@/features/theme/hooks/useTheme';
 import { palettes } from '@/constants/palettes';
 import {
   Dialog,
@@ -207,15 +207,10 @@ export function ThemeSelector({ collapsed = false }: ThemeSelectorProps) {
 
   // Get semantic colors for current theme
   // Note: Semantic colors are determined by appearance (light/dark), not brand
-  const getSemanticColors = useCallback((themeValue: Theme): SemanticColorInfo[] => {
+  const getSemanticColors = useCallback((): SemanticColorInfo[] => {
     const getCSSVariable = (varName: string): string => {
       return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
     };
-
-    // Temporarily apply appearance to get semantic colors
-    const originalAppearance = document.documentElement.getAttribute('data-appearance');
-    const tempAppearance = resolvedAppearance; // Use current resolved appearance
-    document.documentElement.setAttribute('data-appearance', tempAppearance);
 
     const colors: SemanticColorInfo[] = [
       { name: 'Success', value: getCSSVariable('--color-success'), usage: 'Completed, Valid' },
@@ -224,17 +219,12 @@ export function ThemeSelector({ collapsed = false }: ThemeSelectorProps) {
       { name: 'Info', value: getCSSVariable('--color-info'), usage: 'In Progress' },
     ];
 
-    // Restore original
-    if (originalAppearance) {
-      document.documentElement.setAttribute('data-appearance', originalAppearance);
-    }
-
     return colors;
-  }, [resolvedAppearance]);
+  }, []);
 
   const semanticColors = useMemo(
-    () => getSemanticColors(currentTheme),
-    [currentTheme, getSemanticColors]
+    () => (isOpen && showSemanticColors ? getSemanticColors() : []),
+    [isOpen, showSemanticColors, getSemanticColors]
   );
 
   // Get display labels for sidebar button

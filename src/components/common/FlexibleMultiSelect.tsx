@@ -14,6 +14,8 @@ interface Props {
   label?: string;
   required?: boolean;
   allowCustom?: boolean;
+  disabled?: boolean;
+  hasError?: boolean;
 }
 
 export function FlexibleMultiSelect({
@@ -23,13 +25,15 @@ export function FlexibleMultiSelect({
   placeholder = 'Select or type...',
   label,
   required = false,
-  allowCustom = true
+  allowCustom = true,
+  disabled = false,
+  hasError = false,
 }: Props) {
   const [inputValue, setInputValue] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLUListElement>(null);
 
   // Filter suggestions based on input
   const filteredOptions = options.filter(
@@ -56,12 +60,14 @@ export function FlexibleMultiSelect({
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
     setInputValue(e.target.value);
     setShowSuggestions(true);
     setHighlightedIndex(-1);
   };
 
   const handleSelectOption = (value: string) => {
+    if (disabled) return;
     if (!values.includes(value)) {
       onChange([...values, value]);
     }
@@ -72,39 +78,52 @@ export function FlexibleMultiSelect({
   };
 
   const handleRemoveValue = (valueToRemove: string) => {
+    if (disabled) return;
     onChange(values.filter(v => v !== valueToRemove));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      
+    if (disabled) return;
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      if (showSuggestions && filteredOptions.length > 0) {
+        e.preventDefault();
+      }
+
       if (highlightedIndex >= 0 && filteredOptions[highlightedIndex]) {
-        // Select highlighted option
         handleSelectOption(filteredOptions[highlightedIndex].value);
-      } else if (inputValue.trim() && allowCustom) {
-        // Add custom value
+        return;
+      }
+
+      if (inputValue.trim() && allowCustom) {
         const trimmedValue = inputValue.trim();
         if (!values.includes(trimmedValue)) {
           onChange([...values, trimmedValue]);
         }
         setInputValue('');
         setShowSuggestions(false);
+        setHighlightedIndex(-1);
+        return;
+      }
+
+      // Tab without selection should allow normal focus shift
+      if (e.key === 'Tab') {
+        setShowSuggestions(false);
+        setHighlightedIndex(-1);
       }
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
       setShowSuggestions(true);
-      setHighlightedIndex(prev => 
+      setHighlightedIndex(prev =>
         prev < filteredOptions.length - 1 ? prev + 1 : prev
       );
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
+      setShowSuggestions(true);
       setHighlightedIndex(prev => (prev > 0 ? prev - 1 : -1));
     } else if (e.key === 'Escape') {
       setShowSuggestions(false);
       setHighlightedIndex(-1);
     } else if (e.key === 'Backspace' && !inputValue && values.length > 0) {
-      // Remove last value when backspace on empty input
       onChange(values.slice(0, -1));
     }
   };
@@ -115,8 +134,18 @@ export function FlexibleMultiSelect({
     }
   };
 
-  const handleInputBlur = () => {
-    // When user clicks outside, accept the custom input value
+  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const nextFocused = e.relatedTarget as Node | null;
+    const isStillInsideCombobox =
+      !!nextFocused &&
+      ((inputRef.current && inputRef.current.contains(nextFocused)) ||
+        (dropdownRef.current && dropdownRef.current.contains(nextFocused)));
+
+    if (isStillInsideCombobox) {
+      return;
+    }
+
+    // When user leaves the combobox entirely, accept the custom input value
     if (inputValue.trim() && allowCustom) {
       const trimmedValue = inputValue.trim();
       if (!values.includes(trimmedValue)) {
@@ -148,7 +177,13 @@ export function FlexibleMultiSelect({
 
       <div className="relative">
         {/* Selected values + Input */}
-        <div className="w-full min-h-10.5 px-3 py-2 border border-input rounded-lg bg-card flex flex-wrap gap-2 items-center focus-within:ring-2 focus-within:ring-primary-500 focus-within:border-transparent">
+        <div className={`w-full min-h-10.5 px-3 py-2 border rounded-lg bg-card flex flex-wrap gap-2 items-center focus-within:ring-2 ${
+          disabled ? 'bg-muted cursor-not-allowed opacity-50' : ''
+        } ${
+          hasError
+            ? 'border-error-border focus-within:ring-error-border/30 focus-within:border-error-border'
+            : 'border-input focus-within:ring-primary-500 focus-within:border-transparent'
+        }`}>
           {values.map((value) => {
             const option = options.find(opt => opt.value === value);
             const displayLabel = option ? option.label : value;
@@ -179,60 +214,68 @@ export function FlexibleMultiSelect({
             onFocus={handleFocus}
             onBlur={handleInputBlur}
             placeholder={values.length === 0 ? placeholder : ''}
-            className="flex-1 min-w-30 outline-none bg-transparent text-foreground placeholder-placeholder"
+            disabled={disabled}
+            className="flex-1 min-w-30 outline-none bg-transparent text-foreground placeholder-placeholder disabled:cursor-not-allowed"
           />
         </div>
 
         {/* Suggestions Dropdown */}
         {showSuggestions && (filteredOptions.length > 0 || (allowCustom && inputValue.trim())) && (
-          <div
+          <ul
             ref={dropdownRef}
-            className="absolute z-50 w-full mt-1 bg-card border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto"
+            role="listbox"
+            className="absolute z-50 w-full mt-1 bg-card border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto list-none p-0"
           >
             {/* Suggestions from list */}
             {filteredOptions.map((option, index) => (
-              <div
-                key={option.value}
-                onClick={() => handleSelectOption(option.value)}
-                className={`px-3 py-2 cursor-pointer transition-colors ${
-                  highlightedIndex === index
-                    ? 'bg-primary-100 dark:bg-primary-900'
-                    : 'hover:bg-accent'
-                }`}
-              >
-                <div className="text-sm text-foreground">{option.label}</div>
-              </div>
+              <li key={option.value} role="none">
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={highlightedIndex === index}
+                  onClick={() => handleSelectOption(option.value)}
+                  className={`block w-full px-3 py-2 text-left cursor-pointer transition-colors ${
+                    highlightedIndex === index
+                      ? 'bg-primary-100 dark:bg-primary-900 outline-none'
+                      : 'hover:bg-accent'
+                  }`}
+                >
+                  <span className="text-sm text-foreground">{option.label}</span>
+                </button>
+              </li>
             ))}
 
             {/* Custom value option */}
             {allowCustom && inputValue.trim() && !options.some(opt => opt.value.toLowerCase() === inputValue.trim().toLowerCase()) && (
-              <div
-                onClick={() => {
-                  const trimmedValue = inputValue.trim();
-                  if (!values.includes(trimmedValue)) {
-                    onChange([...values, trimmedValue]);
-                  }
-                  setInputValue('');
-                  setShowSuggestions(false);
-                }}
-                className="px-3 py-2 cursor-pointer border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-              >
-                <div className="flex items-center gap-2 text-sm">
-                  <Plus className="w-4 h-4 text-green-600 dark:text-green-400" />
-                  <span className="text-gray-700 dark:text-gray-300">
-                    Add custom: <strong>{inputValue.trim()}</strong>
-                  </span>
-                </div>
-              </div>
+              <li role="none">
+                <button
+                  type="button"
+                  role="option"
+                  onClick={() => {
+                    const trimmedValue = inputValue.trim();
+                    if (!values.includes(trimmedValue)) {
+                      onChange([...values, trimmedValue]);
+                    }
+                    setInputValue('');
+                    setShowSuggestions(false);
+                  }}
+                  className="block w-full px-3 py-2 text-left cursor-pointer border-t border-border bg-muted/50 hover:bg-accent transition-colors"
+                >
+                  <div className="flex items-center gap-2 text-sm">
+                    <Plus className="w-4 h-4 text-green-600" />
+                    <span>Add custom: <strong>{inputValue.trim()}</strong></span>
+                  </div>
+                </button>
+              </li>
             )}
 
             {/* Empty state */}
             {filteredOptions.length === 0 && (!allowCustom || !inputValue.trim()) && (
-              <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 text-center">
+              <li className="px-3 py-2 text-sm text-muted-foreground text-center">
                 No suggestions found
-              </div>
+              </li>
             )}
-          </div>
+          </ul>
         )}
       </div>
 

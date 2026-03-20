@@ -6,6 +6,7 @@
  */
 
 import { X, Trash2, Lock, Unlock, AlertCircle } from 'lucide-react';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 export type ConfirmAction = 'delete' | 'lock' | 'unlock' | 'logout' | 'custom';
 
@@ -122,7 +123,7 @@ export function ConfirmDialog({
           >
             {isLoading ? (
               <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <LoadingSpinner size="sm" tone="inverse" />
                 {loadingLabel || 'Processing...'}
               </>
             ) : (

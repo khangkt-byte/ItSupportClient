@@ -1,8 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, ChevronDown, ChevronUp, Save, Shield, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Save, Shield, X } from 'lucide-react';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
+import { FieldError } from '@/components/common/FieldError';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { rolesApi } from '@/services/api/roles';
 import type { ClaimDto, RoleDto } from '@/types/data';
 import { groupClaimsByCategory } from '@/features/roles/utils/claimGrouping';
+import {
+  getFieldErrorMessages,
+  getGeneralValidationMessages,
+  type ValidationErrors,
+} from '@/utils/apiErrors';
 
 export interface RoleFormData {
   name: string;
@@ -13,14 +21,17 @@ export interface RoleFormData {
 interface RoleFormModalProps {
   isOpen: boolean;
   editing: RoleDto | null;
+  formData: RoleFormData;
   error: string | null;
+  validationErrors: ValidationErrors | null;
   isSubmitting: boolean;
+  onChange: (formData: RoleFormData) => void;
   onSubmit: (formData: RoleFormData) => Promise<void>;
   onClose: () => void;
   onClearError: () => void;
 }
 
-function getInitialFormData(editing: RoleDto | null): RoleFormData {
+export function createRoleFormData(editing: RoleDto | null): RoleFormData {
   if (editing) {
     return {
       name: editing.name,
@@ -39,20 +50,21 @@ function getInitialFormData(editing: RoleDto | null): RoleFormData {
 export function RoleFormModal({
   isOpen,
   editing,
+  formData,
   error,
+  validationErrors,
   isSubmitting,
+  onChange,
   onSubmit,
   onClose,
   onClearError,
 }: RoleFormModalProps) {
-  const [formData, setFormData] = useState<RoleFormData>(getInitialFormData(editing));
   const [availableClaims, setAvailableClaims] = useState<ClaimDto[]>([]);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['Admin']));
 
   useEffect(() => {
     if (!isOpen) return;
 
-    setFormData(getInitialFormData(editing));
     setExpandedGroups(new Set(['Admin']));
   }, [isOpen, editing]);
 
@@ -85,12 +97,12 @@ export function RoleFormModal({
   };
 
   const toggleClaim = (claimId: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      selectedClaimIds: prev.selectedClaimIds.includes(claimId)
-        ? prev.selectedClaimIds.filter((id) => id !== claimId)
-        : [...prev.selectedClaimIds, claimId],
-    }));
+    onChange({
+      ...formData,
+      selectedClaimIds: formData.selectedClaimIds.includes(claimId)
+        ? formData.selectedClaimIds.filter((id) => id !== claimId)
+        : [...formData.selectedClaimIds, claimId],
+    });
   };
 
   const toggleAllInCategory = (category: string) => {
@@ -100,12 +112,12 @@ export function RoleFormModal({
     const categoryClaimIds = group.claims.map((claim) => claim.claimId);
     const allSelected = categoryClaimIds.every((id) => formData.selectedClaimIds.includes(id));
 
-    setFormData((prev) => ({
-      ...prev,
+    onChange({
+      ...formData,
       selectedClaimIds: allSelected
-        ? prev.selectedClaimIds.filter((id) => !categoryClaimIds.includes(id))
-        : [...new Set([...prev.selectedClaimIds, ...categoryClaimIds])],
-    }));
+        ? formData.selectedClaimIds.filter((id) => !categoryClaimIds.includes(id))
+        : [...new Set([...formData.selectedClaimIds, ...categoryClaimIds])],
+    });
   };
 
   const toggleExpandAll = () => {
@@ -121,10 +133,10 @@ export function RoleFormModal({
     availableClaims.every((claim) => formData.selectedClaimIds.includes(claim.claimId));
 
   const toggleSelectAllClaims = () => {
-    setFormData((prev) => ({
-      ...prev,
+    onChange({
+      ...formData,
       selectedClaimIds: areAllClaimsSelected ? [] : availableClaims.map((claim) => claim.claimId),
-    }));
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -132,11 +144,15 @@ export function RoleFormModal({
     await onSubmit(formData);
   };
 
+  const roleNameErrors = getFieldErrorMessages(validationErrors, 'Name');
+  const generalValidationMessages = getGeneralValidationMessages(validationErrors, ['Name']);
+  const hasRoleNameError = roleNameErrors.length > 0;
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-card rounded-lg max-w-4xl w-full my-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-card rounded-lg max-w-5xl w-full my-4 max-h-[90vh] overflow-y-auto">
         <div className="px-6 py-4 border-b border-border flex justify-between items-center sticky top-0 bg-card z-10">
           <div>
             <h3 className="text-lg font-semibold flex items-center gap-2 text-foreground">
@@ -157,16 +173,13 @@ export function RoleFormModal({
         </div>
 
         {error && (
-          <div className="mx-6 mt-4 p-4 bg-error-background border border-error-border rounded-lg flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
-            <div className="flex-1">
-              <p className="font-medium text-error-foreground">Error</p>
-              <p className="text-sm text-error-foreground mt-0.5">{error}</p>
-            </div>
-            <button onClick={onClearError} className="text-error-foreground hover:text-error-foreground transition-colors">
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+          <ErrorAlert
+            message={error}
+            details={generalValidationMessages}
+            onDismiss={onClearError}
+            dismissDisabled={isSubmitting}
+            className="mx-6 mt-4"
+          />
         )}
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -179,17 +192,22 @@ export function RoleFormModal({
                 type="text"
                 required
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) => onChange({ ...formData, name: e.target.value })}
                 placeholder="e.g., System Administrator"
-                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 bg-card text-foreground placeholder-placeholder transition-colors ${
+                  hasRoleNameError
+                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                }`}
               />
+              <FieldError messages={roleNameErrors} />
             </div>
             <div>
               <label className="block text-sm font-medium text-muted-foreground mb-1">Description</label>
               <input
                 type="text"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) => onChange({ ...formData, description: e.target.value })}
                 placeholder="Brief description of this role"
                 className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
               />
@@ -307,7 +325,7 @@ export function RoleFormModal({
             >
               {isSubmitting ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <LoadingSpinner size="sm" tone="inverse" />
                   Saving...
                 </>
               ) : (

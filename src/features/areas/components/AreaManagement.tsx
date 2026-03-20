@@ -1,95 +1,81 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { Plus, MapPin } from 'lucide-react';
-import type { Area, AreasQueryParams, PaginatedResult, AreaDto } from '@/types/data';
+import type { Area, AreasQueryParams } from '@/types/data';
 import { areasApi } from '@/services/api/areas';
+import { useAreaQuery } from '@/features/areas/hooks/useAreaQuery';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
-import { AreaTable } from './AreaTable';
-import { AreaFormModal, type AreaFormData } from './AreaFormModal';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
+import { usePermission } from '@/hooks/usePermission';
+import { Permissions } from '@/config/permissions';
+import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
+import { AreaTable } from '@/features/areas/components/AreaTable';
+import { AreaFormModal, createAreaFormData, type AreaFormData } from '@/features/areas/components/AreaFormModal';
 
-interface Props {
-  data: Area[];
-  setData: (items: Area[]) => void;
-}
-
-export function AreaManagement({ data, setData }: Props) {
-  void data;
-  const [queryParams, setQueryParams] = useState<AreasQueryParams>({
-    page: 1,
-    pageSize: 10,
-    search: '',
-    sortBy: 'name',
-    isDescending: false,
-  });
-  const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<AreaDto> | null>(null);
+export function AreaManagement() {
+  const {
+    queryParams,
+    setQueryParams,
+    paginatedResult,
+    loading: queryLoading,
+    error: queryError,
+    setError: setQueryError,
+    refetch,
+  } = useAreaQuery();
   const [areaFilter, setAreaFilter] = useState<string>('all');
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Area | null>(null);
-  const [formData, setFormData] = useState<AreaFormData>({ name: '', description: '' });
+  const [formData, setFormData] = useState<AreaFormData>(createAreaFormData(null));
   const [confirmDelete, setConfirmDelete] = useState<Area | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isMutating, setIsMutating] = useState(false);
+  const [mutationError, setMutationError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
 
-  const fetchAreas = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const result = await areasApi.getAll(queryParams);
-      setPaginatedResult(result);
-    } catch (err) {
-      console.error('Failed to fetch areas:', err);
-      setError('Failed to load areas');
-      setPaginatedResult(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [queryParams]);
+  const isLoading = queryLoading || isMutating;
 
-  const syncDataManagerAreas = useCallback(async () => {
-    const allAreas = await areasApi.getAll({ page: 1, pageSize: 1000, sortBy: 'name', isDescending: false });
-    setData(allAreas.items.map((area) => ({ ...area, id: String(area.areaId) } as Area)));
-  }, [setData]);
-
-  useEffect(() => {
-    fetchAreas();
-  }, [fetchAreas]);
+  const { hasPermission } = usePermission();
 
   const openForm = (item?: Area) => {
     setEditing(item || null);
-    setFormData(item ? { name: item.name, description: item.description || '' } : { name: '', description: '' });
-    setError(null);
+    setFormData(createAreaFormData(item ?? null));
+    setQueryError(null);
+    setMutationError(null);
+    setValidationErrors(null);
     setShowForm(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
+  const handleSubmit = async (nextFormData: AreaFormData) => {
+    setIsMutating(true);
+    setQueryError(null);
+    setMutationError(null);
+    setValidationErrors(null);
 
     try {
       if (editing) {
         await areasApi.update(editing.areaId, {
-          name: formData.name,
-          description: formData.description || null,
+          name: nextFormData.name,
+          description: nextFormData.description || null,
         });
       } else {
         await areasApi.create({
-          name: formData.name,
-          description: formData.description || null,
+          name: nextFormData.name,
+          description: nextFormData.description || null,
         });
       }
 
-      await Promise.all([fetchAreas(), syncDataManagerAreas()]);
+      await refetch();
       setShowForm(false);
-      setFormData({ name: '', description: '' });
-    } catch (err: any) {
-      console.error('Failed to save area:', err);
-      setError(err.message || 'Failed to save area. Please try again.');
+      setFormData(createAreaFormData(null));
+    } catch (submitError: unknown) {
+      console.error('Failed to save area:', submitError);
+      const parsedError = parseApiError(submitError);
+      setMutationError(parsedError.message || 'Unable to save area. Please try again.');
+      setValidationErrors(parsedError.fieldErrors);
     } finally {
-      setIsLoading(false);
+      setIsMutating(false);
     }
   };
 
@@ -98,11 +84,15 @@ export function AreaManagement({ data, setData }: Props) {
 
     try {
       setDeleteLoading(true);
+      setQueryError(null);
+      setMutationError(null);
       await areasApi.deleteSingle(confirmDelete.areaId);
-      await Promise.all([fetchAreas(), syncDataManagerAreas()]);
+      await refetch();
       setConfirmDelete(null);
-    } catch (err: any) {
-      alert(err.message || 'Failed to delete area');
+    } catch (deleteError: unknown) {
+      console.error('Failed to delete area:', deleteError);
+      const parsedError = parseApiError(deleteError);
+      setMutationError(parsedError.message || 'Unable to delete area. Please try again.');
       setConfirmDelete(null);
     } finally {
       setDeleteLoading(false);
@@ -121,10 +111,16 @@ export function AreaManagement({ data, setData }: Props) {
             Manage areas with searchable, sortable, and paginated data
           </p>
         </div>
-        <button onClick={() => openForm()} className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm">
-          <Plus className="w-5 h-5" />
-          Create Area
-        </button>
+        {hasPermission(Permissions.Area.Create) && (
+          <button
+            onClick={() => openForm()}
+            disabled={isLoading}
+            className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm"
+          >
+            <Plus className="w-5 h-5" />
+            Create Area
+          </button>
+        )}
       </div>
 
       <SearchFilterBar
@@ -142,11 +138,20 @@ export function AreaManagement({ data, setData }: Props) {
         placeholder="Search by area name or description..."
         showResults={true}
       />
+      {mutationError && !showForm && (
+        <ErrorAlert
+          message={mutationError}
+          onDismiss={() => setMutationError(null)}
+        />
+      )}
+
 
       <AreaTable
         isLoading={isLoading}
-        error={showForm ? null : error}
+        error={queryError}
         items={paginatedResult?.items || []}
+        canEdit={hasPermission(Permissions.Area.Edit)}
+        canDelete={hasPermission(Permissions.Area.Delete)}
         onEdit={(item) => openForm({ ...item, id: String(item.areaId) } as Area)}
         onDelete={(item) => setConfirmDelete({ ...item, id: String(item.areaId) } as Area)}
       />
@@ -171,10 +176,19 @@ export function AreaManagement({ data, setData }: Props) {
         isOpen={showForm}
         editing={editing}
         formData={formData}
-        isLoading={isLoading}
+        isSubmitting={isMutating}
+        error={mutationError}
+        validationErrors={validationErrors}
         onChange={setFormData}
         onSubmit={handleSubmit}
-        onClose={() => setShowForm(false)}
+        onClose={() => {
+          if (isLoading) return;
+          setShowForm(false);
+        }}
+        onClearError={() => {
+          setMutationError(null);
+          setValidationErrors(null);
+        }}
       />
 
       <ConfirmDialog

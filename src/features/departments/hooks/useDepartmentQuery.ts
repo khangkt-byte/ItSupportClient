@@ -1,8 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { DepartmentDto, DepartmentsQueryParams, PaginatedResult } from '@/types/data';
-import { departmentApi } from '@/services/api/departments';
+import { departmentsApi } from '@/services/api/departments';
+import { getApiErrorMessage } from '@/utils/apiErrors';
 
-export function useDepartmentQuery(queryParams: DepartmentsQueryParams) {
+export function useDepartmentQuery() {
+    const [queryParams, setQueryParams] = useState<DepartmentsQueryParams>({
+        page: 1,
+        pageSize: 10,
+        search: '',
+        sortBy: 'name',
+        isDescending: false,
+    });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<DepartmentDto> | null>(null);
@@ -11,11 +19,11 @@ export function useDepartmentQuery(queryParams: DepartmentsQueryParams) {
         try {
             setLoading(true);
             setError(null);
-            const result = await departmentApi.getAll(queryParams);
+            const result = await departmentsApi.getAll(queryParams);
             setPaginatedResult(result);
         } catch (err) {
             console.error('Failed to fetch departments:', err);
-            setError('Failed to load departments');
+            setError(getApiErrorMessage(err, 'Unable to load departments. Please refresh and try again.'));
             setPaginatedResult(null);
         } finally {
             setLoading(false);
@@ -23,14 +31,16 @@ export function useDepartmentQuery(queryParams: DepartmentsQueryParams) {
     }, [queryParams]);
 
     useEffect(() => {
-        fetchDepartments();
+        void fetchDepartments();
     }, [fetchDepartments]);
 
     return {
+        queryParams,
+        setQueryParams,
+        paginatedResult,
         loading,
         error,
         setError,
-        paginatedResult,
-        fetchDepartments,
+        refetch: fetchDepartments,
     };
 }

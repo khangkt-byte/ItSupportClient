@@ -1,0 +1,1 @@
+export { useIssueQuery } from './useIssueQuery';

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { rolesApi } from '@/services/api/roles';
 import type { PaginatedResult, RoleDto, RolesQueryParams } from '@/types/data';
+import { getApiErrorMessage } from '@/utils/apiErrors';
 
 export function useRoleQuery() {
     const [queryParams, setQueryParams] = useState<RolesQueryParams>({
@@ -11,21 +12,21 @@ export function useRoleQuery() {
         isDescending: false,
     });
     const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<RoleDto> | null>(null);
-    const [queryLoading, setQueryLoading] = useState(false);
-    const [queryError, setQueryError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchRoles = useCallback(async () => {
         try {
-            setQueryLoading(true);
-            setQueryError(null);
+            setLoading(true);
+            setError(null);
             const result = await rolesApi.getAll(queryParams);
             setPaginatedResult(result);
         } catch (error) {
             console.error('Failed to fetch roles:', error);
-            setQueryError('Failed to load roles');
+            setError(getApiErrorMessage(error, 'Unable to load roles. Please refresh and try again.'));
             setPaginatedResult(null);
         } finally {
-            setQueryLoading(false);
+            setLoading(false);
         }
     }, [queryParams]);
 
@@ -37,8 +38,9 @@ export function useRoleQuery() {
         queryParams,
         setQueryParams,
         paginatedResult,
-        queryLoading,
-        queryError,
-        fetchRoles,
+        loading,
+        error,
+        setError,
+        refetch: fetchRoles,
     };
 }

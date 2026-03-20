@@ -1,17 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Check } from 'lucide-react';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 export interface Suggestion {
   id: number; // Changed from string to number to match API
   name: string;
   description?: string;
   usageCount: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 interface Props {
   value: string;
   onChange: (value: string) => void;
+  onFocus?: () => void;
   onSelect?: (suggestion: Suggestion | null) => void;
   selectedSuggestion: Suggestion | null;
   suggestions: Suggestion[];
@@ -19,14 +21,17 @@ interface Props {
   placeholder?: string;
   label: string;
   required?: boolean;
+  disabled?: boolean;
   showKbIndicator?: boolean;
   suggestionHeader?: string;
   className?: string;
+  hasError?: boolean;
 }
 
 export function AutocompleteInput({
   value,
   onChange,
+  onFocus,
   onSelect,
   selectedSuggestion,
   suggestions,
@@ -34,9 +39,11 @@ export function AutocompleteInput({
   placeholder,
   label,
   required = false,
+  disabled = false,
   showKbIndicator = true,
   suggestionHeader = "💡 Suggested from Knowledge Base",
-  className = ''
+  className = '',
+  hasError = false,
 }: Props) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -61,6 +68,7 @@ export function AutocompleteInput({
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
     const newValue = e.target.value;
     onChange(newValue);
     
@@ -74,12 +82,13 @@ export function AutocompleteInput({
   };
 
   const handleFocus = () => {
-    if (suggestions.length > 0) {
-      setShowSuggestions(true);
-    }
+    if (disabled) return;
+    setShowSuggestions(true);
+    onFocus?.();
   };
 
   const handleSelectSuggestion = (suggestion: Suggestion) => {
+    if (disabled) return;
     onChange(suggestion.name);
     onSelect?.(suggestion);
     setShowSuggestions(false);
@@ -151,7 +160,12 @@ export function AutocompleteInput({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           required={required}
-          className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          disabled={disabled}
+          className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 ${
+            hasError
+              ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+              : 'border-input focus:ring-primary-500 focus:border-transparent'
+          }`}
         />
 
         {/* Suggestions Dropdown */}
@@ -204,7 +218,7 @@ export function AutocompleteInput({
         {/* Loading indicator */}
         {loading && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+            <LoadingSpinner size="sm" />
           </div>
         )}
       </div>

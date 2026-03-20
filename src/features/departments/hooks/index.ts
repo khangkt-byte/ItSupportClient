@@ -1,0 +1,1 @@
+export { useDepartmentQuery } from './useDepartmentQuery';

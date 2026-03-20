@@ -1,8 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { employeesApi } from '@/services/api/employees';
 import type { EmployeesQueryParams, ListEmployeeDto, PaginatedResult } from '@/types/data';
+import { getApiErrorMessage } from '@/utils/apiErrors';
 
-export function useEmployeeQuery(queryParams: EmployeesQueryParams) {
+export function useEmployeeQuery() {
+    const [queryParams, setQueryParams] = useState<EmployeesQueryParams>({
+        page: 1,
+        pageSize: 10,
+        search: '',
+        sortBy: 'fullName',
+        isDescending: false,
+        dptId: null,
+        areaId: null,
+    });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<ListEmployeeDto> | null>(null);
@@ -15,7 +25,7 @@ export function useEmployeeQuery(queryParams: EmployeesQueryParams) {
             setPaginatedResult(result);
         } catch (err) {
             console.error('Failed to fetch employees:', err);
-            setError('Failed to load employees');
+            setError(getApiErrorMessage(err, 'Unable to load employees. Please refresh and try again.'));
             setPaginatedResult(null);
         } finally {
             setLoading(false);
@@ -23,14 +33,16 @@ export function useEmployeeQuery(queryParams: EmployeesQueryParams) {
     }, [queryParams]);
 
     useEffect(() => {
-        fetchEmployees();
+        void fetchEmployees();
     }, [fetchEmployees]);
 
     return {
+        queryParams,
+        setQueryParams,
+        paginatedResult,
         loading,
         error,
         setError,
-        paginatedResult,
-        fetchEmployees,
+        refetch: fetchEmployees,
     };
 }

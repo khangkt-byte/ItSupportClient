@@ -1,45 +1,56 @@
 import { useRef, useState } from 'react';
-import { Download, FileSpreadsheet, Loader2, Upload, X } from 'lucide-react';
+import { Download, FileSpreadsheet, Upload, X } from 'lucide-react';
 import type { Area, Department, DuplicateHandling, Employee, ImportValidationResult, WorkLog } from '@/types/data';
 import { exportWorkLogsToExcel, validateImportedWorkLogs, importWorkLogsFromExcel, downloadExcelTemplate } from '@/utils/excelUtils';
+import { workLogsApi } from '@/services/api';
+import { mapIssueLogToWorkLog } from '@/features/workLogs/hooks/useWorkLogQuery';
 import { ImportValidation } from '@/features/workLogs/components/ImportValidation';
 import { ImportWizard } from '@/features/workLogs/components/ImportWizard';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { getApiErrorMessage } from '@/utils/apiErrors';
 
 interface WorkLogImportExportPanelProps {
-  data: WorkLog[];
-  setData: (logs: WorkLog[]) => void;
+  /** Current page items — used by ImportWizard for client-side duplicate detection. */
+  currentItems: WorkLog[];
+  /** Reload the work log list from the server. */
+  refetch: () => Promise<void>;
   employees: Employee[];
   departments: Department[];
   areas: Area[];
 }
 
 export function WorkLogImportExportPanel({
-  data,
-  setData,
+  currentItems,
+  refetch,
   employees,
   departments,
   areas,
 }: WorkLogImportExportPanelProps) {
   const [importing, setImporting] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [showImportWizard, setShowImportWizard] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [validationResult, setValidationResult] = useState<ImportValidationResult | null>(null);
   const [duplicateHandling, setDuplicateHandling] = useState<DuplicateHandling>('Skip');
   const [currentImportFile, setCurrentImportFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importSuccess, setImportSuccess] = useState<string | null>(null);
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setImportError(null);
+    setImportSuccess(null);
     setImporting(true);
     try {
-      const validation = await validateImportedWorkLogs(file, data);
+      const validation = await validateImportedWorkLogs(file, currentItems);
       setValidationResult(validation);
       setCurrentImportFile(file);
       setShowImportDialog(true);
     } catch (error) {
-      alert('Failed to validate Excel file: ' + (error as Error).message);
+      setImportError(getApiErrorMessage(error, 'Unable to validate the Excel file. Please check the file and try again.'));
     } finally {
       setImporting(false);
       if (fileInputRef.current) {
@@ -51,6 +62,7 @@ export function WorkLogImportExportPanel({
   const handleConfirmImport = async () => {
     if (!currentImportFile || !validationResult) return;
 
+    setImportError(null);
     setImporting(true);
     try {
       const importedLogs = await importWorkLogsFromExcel(
@@ -59,33 +71,16 @@ export function WorkLogImportExportPanel({
         validationResult
       );
 
-      if (importedLogs && importedLogs.length > 0) {
-        if (duplicateHandling === 'Update') {
-          const updatedData = [...data];
-          importedLogs.forEach((newLog: WorkLog) => {
-            const existingIndex = updatedData.findIndex((log) => log.id === newLog.id);
-            if (existingIndex >= 0) {
-              updatedData[existingIndex] = { ...updatedData[existingIndex], ...newLog } as WorkLog;
-            } else {
-              updatedData.push(newLog as WorkLog);
-            }
-          });
-          setData(updatedData);
-        } else {
-          setData([...data, ...(importedLogs as WorkLog[])]);
-        }
-
-        alert(`Successfully imported ${importedLogs.length} work log(s)`);
-      } else {
-        alert('No work logs were imported');
-      }
+      const count = importedLogs?.length ?? 0;
+      await refetch();
+      setImportSuccess(count > 0 ? `Successfully imported ${count} work log(s)` : 'No work logs were imported');
 
       setShowImportDialog(false);
       setValidationResult(null);
       setCurrentImportFile(null);
       setDuplicateHandling('Skip');
     } catch (error) {
-      alert('Failed to import Excel file: ' + (error as Error).message);
+      setImportError(getApiErrorMessage(error, 'Unable to import the Excel file. Please try again.'));
     } finally {
       setImporting(false);
     }
@@ -96,6 +91,7 @@ export function WorkLogImportExportPanel({
     setValidationResult(null);
     setCurrentImportFile(null);
     setDuplicateHandling('Skip');
+    setImportError(null);
   };
 
   return (
@@ -104,11 +100,29 @@ export function WorkLogImportExportPanel({
         <h3 className="text-lg font-semibold mb-4 text-foreground">Excel Import/Export</h3>
         <div className="grid grid-cols-3 gap-4">
           <button
-            onClick={() => exportWorkLogsToExcel(data)}
-            className="px-4 py-3 bg-primary-600 text-primary-foreground rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-2"
+            onClick={async () => {
+              setExporting(true);
+              try {
+                const result = await workLogsApi.getAll({ page: 1, pageSize: 10000 });
+                exportWorkLogsToExcel(result.items.map(mapIssueLogToWorkLog));
+              } finally {
+                setExporting(false);
+              }
+            }}
+            disabled={exporting}
+            className="px-4 py-3 bg-primary-600 text-primary-foreground rounded-lg hover:bg-primary-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Download className="w-5 h-5" />
-            Export to Excel
+            {exporting ? (
+              <>
+                <LoadingSpinner size="sm" tone="current" className="w-5 h-5" />
+                Exporting...
+              </>
+            ) : (
+              <>
+                <Download className="w-5 h-5" />
+                Export to Excel
+              </>
+            )}
           </button>
           <button
             onClick={() => setShowImportWizard(true)}
@@ -117,7 +131,7 @@ export function WorkLogImportExportPanel({
           >
             {importing ? (
               <>
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <LoadingSpinner size="sm" tone="current" className="w-5 h-5" />
                 Importing...
               </>
             ) : (
@@ -142,6 +156,15 @@ export function WorkLogImportExportPanel({
           className="hidden"
           accept=".xlsx, .xls"
         />
+        {(importError || importSuccess) && (
+          <div className={`mt-4 p-3 rounded-md text-sm border ${
+            importError
+              ? 'bg-destructive/10 text-destructive border-destructive/20'
+              : 'bg-success-background text-success-foreground border-success-border'
+          }`}>
+            {importError || importSuccess}
+          </div>
+        )}
         <p className="text-sm text-muted-foreground mt-4">
           <strong>Note:</strong> The Excel template follows your existing work log format with columns: Report Date,
           Operators (comma-separated for multiple), Requesters (comma-separated for multiple, optional), Department,
@@ -158,6 +181,11 @@ export function WorkLogImportExportPanel({
                 <X className="w-6 h-6" />
               </button>
             </div>
+            {importError && (
+              <div className="px-6 py-3 bg-destructive/10 text-destructive border-b border-destructive/20 text-sm">
+                {importError}
+              </div>
+            )}
             <div className="p-6">
               <ImportValidation
                 validationResult={validationResult}
@@ -173,12 +201,12 @@ export function WorkLogImportExportPanel({
 
       {showImportWizard && (
         <ImportWizard
-          existingWorkLogs={data}
+          existingWorkLogs={currentItems}
           employees={employees}
           departments={departments}
           areas={areas}
-          onImportComplete={(logs) => {
-            setData([...data, ...logs]);
+          onImportComplete={async () => {
+            await refetch();
             setShowImportWizard(false);
           }}
           onClose={() => setShowImportWizard(false)}

@@ -18,23 +18,27 @@
  * - GET /api/roles/claims - Get all available claims
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { Plus, User } from 'lucide-react';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 import { accountsApi } from '@/services/api/accounts';
 import { rolesApi } from '@/services/api/roles';
 import type { Account, Employee, RoleDto } from '@/types/data';
 import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 import { AccountTable } from '@/features/accounts/components/AccountTable';
-import { AccountFormModal, type AccountFormData } from '@/features/accounts/components/AccountFormModal';
+import {
+  AccountFormModal,
+  createAccountFormData,
+  type AccountFormData,
+} from '@/features/accounts/components/AccountFormModal';
 import { useAccountQuery } from '@/features/accounts/hooks/useAccountQuery';
+import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
 
 interface Props {
-  data: Account[];
-  setData: (items: Account[]) => void;
   employees: Employee[];
   roles: RoleDto[];
 }
@@ -47,103 +51,88 @@ type ConfirmState = {
   isLocked: boolean;
 } | null;
 
-export function AccountManagement({ data, setData, employees, roles }: Props) {
+export function AccountManagement({ employees, roles }: Props) {
   const {
     queryParams,
     setQueryParams,
     paginatedResult,
-    queryLoading,
-    queryError,
-    fetchAccounts,
+    loading,
+    error: queryError,
+    setError: setQueryError,
+    refetch,
   } = useAccountQuery();
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Account | null>(null);
+  const [formData, setFormData] = useState<AccountFormData>(createAccountFormData(null));
   const [isMutating, setIsMutating] = useState(false);
   const [mutationError, setMutationError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
   const [confirmState, setConfirmState] = useState<ConfirmState>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const { hasPermission } = usePermission();
 
-  // Ensure roles display is accurate by fetching account details if needed
-  useEffect(() => {
-    const missingRoles = data.filter(item => {
-      const hasRoles = (item as { roles?: RoleDto[] | null }).roles;
-      return !hasRoles && item.role === 'employee';
-    });
-
-    if (missingRoles.length === 0) return;
-
-    let isMounted = true;
-
-    const loadAccountRoles = async () => {
-      const updates = await Promise.all(
-        missingRoles.map(async (item) => {
-          try {
-            const detail = await accountsApi.getById(item.accountId);
-            const roles = detail.roles || null;
-            const roleDisplay = roles && roles.length > 0
-              ? roles.map(role => role.name).join(', ')
-              : 'No Role';
-            return { id: item.id, roles, roleDisplay };
-          } catch {
-            return null;
-          }
-        })
-      );
-
-      if (!isMounted) return;
-
-      const validUpdates = updates.filter(Boolean) as Array<{ id: string; roles: RoleDto[] | null; roleDisplay: string }>;
-      if (validUpdates.length === 0) return;
-
-      setData(
-        data.map((item) => {
-          const update = validUpdates.find((u) => u.id === item.id);
-          if (!update) return item;
-          return { ...item, roles: update.roles, role: update.roleDisplay };
-        })
-      );
-    };
-
-    void loadAccountRoles();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [data, setData]);
-
-  const openCreateForm = () => {
-    setEditing(null);
+  const openForm = (item?: Account) => {
+    setQueryError(null);
+    setEditing(item ?? null);
+    setFormData(createAccountFormData(item ?? null));
     setMutationError(null);
+    setValidationErrors(null);
     setShowForm(true);
   };
 
-  const openEditForm = (accountId: string) => {
-    const account = data.find((item) => item.accountId === accountId) || null;
-    if (!account) {
+  const loadAndEditAccount = async (accountId: string) => {
+    const listAccount = paginatedResult?.items.find((item) => item.accountId === accountId) || null;
+    if (!listAccount) {
       setMutationError('Unable to load account details for editing.');
+      setValidationErrors(null);
       return;
     }
 
-    setEditing(account);
-    setMutationError(null);
-    setShowForm(true);
+    try {
+      const detail = await accountsApi.getById(accountId);
+      const matchedEmployee = employees.find(
+        (employee) =>
+          employee.empCode === listAccount.empCode ||
+          employee.fullName === listAccount.empName
+      );
+
+      const accountToEdit: Account = {
+        id: detail.accountId,
+        accountId: detail.accountId,
+        username: detail.username,
+        empName: detail.empName,
+        empCode: detail.empCode,
+        isLocked: detail.isLocked,
+        lastLoginAt: detail.lastLoginAt,
+        createdAt: detail.createdAt,
+        role:
+          detail.roles && detail.roles.length > 0
+            ? detail.roles.map((role) => role.name).join(', ')
+            : 'No Role',
+        password: '',
+        employeeId: matchedEmployee?.employeeId || detail.accountId,
+        employeeName: detail.empName,
+        employeeCode: detail.empCode,
+        roles: detail.roles,
+      };
+
+      openForm(accountToEdit);
+    } catch (loadError: unknown) {
+      const parsedError = parseApiError(loadError);
+      setMutationError(parsedError.message || 'Unable to load account details. Please refresh and try again.');
+      setValidationErrors(parsedError.fieldErrors);
+    }
   };
 
   const handleFormSubmit = async (formData: AccountFormData) => {
     setIsMutating(true);
+    setQueryError(null);
     setMutationError(null);
+    setValidationErrors(null);
 
     try {
-      const employee = employees.find((e) => e.employeeId === formData.employeeId);
-
-      const selectedRoles = roles.filter(role => formData.selectedRoleIds.includes(role.roleId));
-      const roleDisplay = selectedRoles.length > 0
-        ? selectedRoles.map(role => role.name).join(', ')
-        : 'No Role';
-
       if (editing) {
         await accountsApi.update(editing.accountId, {
           username: formData.username,
@@ -157,14 +146,6 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
             claimIds: formData.selectedClaimIds
           });
         }
-
-        setData(
-          data.map((i) =>
-            i.id === editing.id
-              ? { ...i, username: formData.username, roles: selectedRoles, role: roleDisplay }
-              : i
-          )
-        );
       } else {
         const created = await accountsApi.create({
           empId: formData.employeeId,
@@ -179,72 +160,49 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
             claimIds: formData.selectedClaimIds
           });
         }
-
-        setData([
-          ...data,
-          {
-            id: created.accountId,
-            accountId: created.accountId,
-            employeeId: formData.employeeId,
-            username: formData.username,
-            password: '', // Don't store password locally
-            role: roleDisplay,
-            roles: selectedRoles,
-            empName: employee?.fullName || '',
-            empCode: employee?.empCode || null,
-            employeeName: employee?.fullName || '',
-            employeeCode: employee?.empCode || null,
-            isLocked: false,
-            lastLoginAt: null,
-            createdAt: new Date().toISOString(),
-            deleteDate: null
-          }
-        ]);
       }
 
       setShowForm(false);
       setEditing(null);
-      await fetchAccounts();
+      setFormData(createAccountFormData(null));
+      await refetch();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to save account. Please try again.';
       console.error('Failed to save account:', err);
-      setMutationError(message);
+      const parsedError = parseApiError(err);
+      setMutationError(parsedError.message || 'Unable to save account. Please try again.');
+      setValidationErrors(parsedError.fieldErrors);
     } finally {
       setIsMutating(false);
     }
   };
 
-  const isLoading = queryLoading || isMutating;
-  const tableError = showForm ? null : mutationError || queryError;
+  const isLoading = loading || isMutating;
 
   const handleDelete = async (accountId: string) => {
+    setQueryError(null);
     try {
       await accountsApi.deleteSingle(accountId);
-      setData(data.filter((i) => i.accountId !== accountId));
-      await fetchAccounts();
+      await refetch();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to delete account';
-      alert(message);
+      const parsedError = parseApiError(err);
+      setMutationError(parsedError.message || 'Unable to delete account. Please try again.');
+      setValidationErrors(parsedError.fieldErrors);
     }
   };
 
   const handleLockToggle = async (accountId: string, isLocked: boolean) => {
+    setQueryError(null);
     try {
       if (isLocked) {
         await accountsApi.unlock(accountId);
       } else {
         await accountsApi.lock(accountId);
       }
-
-      setData(
-        data.map((i) =>
-          i.accountId === accountId ? { ...i, isLocked: !i.isLocked } : i
-        )
-      );
-      await fetchAccounts();
+      await refetch();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to update account status';
-      alert(message);
+      const parsedError = parseApiError(err);
+      setMutationError(parsedError.message || 'Unable to update account status. Please try again.');
+      setValidationErrors(parsedError.fieldErrors);
     }
   };
 
@@ -315,7 +273,7 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
         </div>
         {hasPermission(Permissions.Account.Create) && (
           <button
-            onClick={openCreateForm}
+            onClick={() => openForm()}
             className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm"
           >
             <Plus className="w-5 h-5" />
@@ -356,14 +314,21 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
         placeholder="Search by username, email, or employee name..."
         showResults={true}
       />
+      {mutationError && !showForm && (
+        <ErrorAlert
+          message={mutationError}
+          onDismiss={() => setMutationError(null)}
+        />
+      )}
+
 
       <AccountTable
         items={paginatedResult?.items || []}
         isLoading={isLoading}
-        error={tableError}
+        error={queryError}
         canEdit={hasPermission(Permissions.Account.Edit)}
         canDelete={hasPermission(Permissions.Account.Delete)}
-        onEdit={openEditForm}
+        onEdit={loadAndEditAccount}
         onLockToggle={(accountId) => {
           const account = paginatedResult?.items.find((item) => item.accountId === accountId);
           if (!account) return;
@@ -392,16 +357,24 @@ export function AccountManagement({ data, setData, employees, roles }: Props) {
       <AccountFormModal
         isOpen={showForm}
         editing={editing}
+        formData={formData}
         employees={employees}
         roles={roles}
         isSubmitting={isMutating}
         error={mutationError}
+        validationErrors={validationErrors}
+        onChange={setFormData}
         onSubmit={handleFormSubmit}
         onClose={() => {
           setShowForm(false);
           setEditing(null);
+          setFormData(createAccountFormData(null));
+          setValidationErrors(null);
         }}
-        onClearError={() => setMutationError(null)}
+        onClearError={() => {
+          setMutationError(null);
+          setValidationErrors(null);
+        }}
       />
 
       <ConfirmDialog

@@ -11,7 +11,7 @@
  * - Microsoft MSAL React Guards: https://learn.microsoft.com/en-us/entra/msal/react/getting-started#protecting-components
  */
 
-import React, { ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { usePermission } from '@/hooks/usePermission';
 
 /**

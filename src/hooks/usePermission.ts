@@ -12,6 +12,7 @@
 
 import { useState, useEffect } from 'react';
 import { authApi } from '@/services/api/auth';
+import { createApiErrorState } from '@/utils/apiErrors';
 
 /**
  * Permission checking hook
@@ -25,7 +26,7 @@ import { authApi } from '@/services/api/auth';
 export function usePermission() {
   const [permissions, setPermissions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadPermissions();
@@ -38,7 +39,8 @@ export function usePermission() {
       setPermissions(perms);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to load permissions'));
+      const errorState = createApiErrorState(err, 'Unable to load permissions. Please refresh and try again.');
+      setError(errorState.message);
       console.error('[Permission] Failed to load permissions:', err);
     } finally {
       setIsLoading(false);

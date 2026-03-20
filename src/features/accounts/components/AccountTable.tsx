@@ -1,5 +1,7 @@
-import { AlertCircle, Edit, Lock, Shield, Trash2, Unlock, User } from 'lucide-react';
+import { Edit, Lock, Trash2, Unlock, User } from 'lucide-react';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 import type { ListAccountDto } from '@/types/data';
+import { LoadingState } from '@/components/common/LoadingState';
 
 interface AccountTableProps {
   items: ListAccountDto[];
@@ -25,22 +27,11 @@ export function AccountTable({
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
       {isLoading && (
-        <div className="flex items-center justify-center py-12">
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
-            <p className="text-muted-foreground">Loading accounts...</p>
-          </div>
-        </div>
+        <LoadingState className="py-12" spinnerSize="md" label="Loading accounts..." />
       )}
 
       {error && !isLoading && (
-        <div className="p-4 bg-error-background border border-error-border flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
-          <div className="flex-1">
-            <p className="font-medium text-error-foreground">Error</p>
-            <p className="text-sm text-error-foreground">{error}</p>
-          </div>
-        </div>
+        <ErrorAlert message={error} className="m-4" />
       )}
 
       {!isLoading && !error && (
@@ -51,7 +42,7 @@ export function AccountTable({
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Employee Code</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Username</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Roles</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Permissions</th>
               <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Actions</th>
             </tr>
           </thead>
@@ -82,8 +73,7 @@ export function AccountTable({
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <span className="px-2 py-1 text-xs rounded bg-primary-100 text-primary-700 flex items-center gap-1 w-fit">
-                      <Shield className="w-3 h-3" />
-                      {((item as { roleCount?: number }).roleCount || 0)} roles
+                      {((item as { totalClaims?: number }).totalClaims ?? 0)} {((item as { totalClaims?: number }).totalClaims ?? 0) !== 1 ? 'permissions' : 'permission'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-right">

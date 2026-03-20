@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react';
 import { workLogsApi } from '@/services/api';
 import { workLogToCreateDto } from '@/utils/workLogAdapter';
-import type { Area, Department, IssueLogDto, WorkLog, WorkStatus } from '@/types/data';
+import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
+import type { Area, Department, WorkLog, WorkStatus } from '@/types/data';
 
 export interface WorkLogMutationFormData {
     reportDate: string;
@@ -18,52 +19,33 @@ export interface WorkLogMutationFormData {
 }
 
 interface UseWorkLogMutationsParams {
-    data: WorkLog[];
-    setData: (logs: WorkLog[]) => void;
-    currentUser: string;
     departments: Department[];
     areas: Area[];
-}
-
-function mapIssueLogDtoToWorkLog(dto: IssueLogDto, formData: WorkLogMutationFormData): WorkLog {
-    return {
-        ...dto,
-        id: dto.issLogId,
-        reportDate: dto.dateReported,
-        operators: formData.operators,
-        requesters: formData.requesters,
-        department: formData.department,
-        area: formData.area,
-        issue: dto.issueDescription,
-        cause: dto.cause || '',
-        fixDescription: dto.resolution || '',
-        permanentFix: dto.permanentFix || '',
-        note: dto.notes || '',
-        status: (dto.status as WorkStatus) || 'pending',
-    };
+    /** Called after every successful create / update / delete to reload the list. */
+    refetch: () => Promise<void>;
 }
 
 export function useWorkLogMutations({
-    data,
-    setData,
-    currentUser,
     departments,
     areas,
+    refetch,
 }: UseWorkLogMutationsParams) {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [validationErrors, setValidationErrors] = useState<ValidationErrors | null>(null);
 
     const submitWorkLog = useCallback(
         async (formData: WorkLogMutationFormData, editing: WorkLog | null): Promise<boolean> => {
             setSubmitting(true);
             setError(null);
+            setValidationErrors(null);
 
             try {
                 const dept = departments.find((item) => item.name === formData.department);
                 const area = areas.find((item) => item.name === formData.area);
 
                 const workLogData: Partial<WorkLog> = {
-                    operators: [formData.operators[0] || currentUser],
+                    operators: formData.operators,
                     requesters: formData.requesters,
                     dptId: dept?.dptId,
                     areaId: area?.areaId,
@@ -80,60 +62,48 @@ export function useWorkLogMutations({
 
                 if (editing) {
                     await workLogsApi.update(editing.id, createDto);
-
-                    const updatedWorkLog: WorkLog = {
-                        ...editing,
-                        reportDate: createDto.dateReported,
-                        operators: formData.operators,
-                        requesters: formData.requesters,
-                        department: formData.department,
-                        area: formData.area,
-                        issue: formData.issue,
-                        cause: formData.cause,
-                        fixDescription: formData.fixDescription,
-                        permanentFix: formData.permanentFix,
-                        note: formData.note,
-                        status: formData.status,
-                    };
-
-                    setData(data.map((item) => (item.id === editing.id ? updatedWorkLog : item)));
                 } else {
-                    const created = await workLogsApi.create(createDto);
-                    const newWorkLog = mapIssueLogDtoToWorkLog(created, formData);
-                    setData([newWorkLog, ...data]);
+                    await workLogsApi.create(createDto);
                 }
 
+                await refetch();
                 return true;
             } catch (mutationError) {
                 console.error('Failed to submit work log:', mutationError);
-                setError('Failed to submit work log. Please try again.');
+                const parsedError = parseApiError(mutationError);
+                setError(parsedError.message || 'Unable to submit work log. Please try again.');
+                setValidationErrors(parsedError.fieldErrors);
                 return false;
             } finally {
                 setSubmitting(false);
             }
         },
-        [areas, currentUser, data, departments, setData]
+        [areas, departments, refetch]
     );
 
     const deleteWorkLog = useCallback(
         async (workLogId: string): Promise<boolean> => {
             try {
                 await workLogsApi.deleteSingle(workLogId);
-                setData(data.filter((item) => item.id !== workLogId));
+                await refetch();
                 return true;
             } catch (mutationError) {
                 console.error('Failed to delete work log:', mutationError);
-                setError('Failed to delete work log. Please try again.');
+                const parsedError = parseApiError(mutationError);
+                setError(parsedError.message || 'Unable to delete work log. Please try again.');
+                setValidationErrors(parsedError.fieldErrors);
                 return false;
             }
         },
-        [data, setData]
+        [refetch]
     );
 
     return {
         submitting,
         error,
+        validationErrors,
         setError,
+        setValidationErrors,
         submitWorkLog,
         deleteWorkLog,
     };

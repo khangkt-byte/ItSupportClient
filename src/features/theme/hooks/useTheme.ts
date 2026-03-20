@@ -1,31 +1,28 @@
 /**
  * Theme Management Hook
  *
- * Custom React hook for managing application themes with full accessibility support.
- * Implements Material Design 3 color system and WCAG 2.1 Level AA standards.
+ * Custom React hook for managing application themes.
+ * Implements a token-driven Material Design 3 color system.
  *
  * @module useTheme
  * @description
- * Manages theme state, persistence, and accessibility modes. Supports:
+ * Manages theme state and persistence. Supports:
  * - Theme switching (light, dark, brand themes)
  * - localStorage persistence
- * - System preference detection (prefers-color-scheme, prefers-contrast)
+ * - System preference detection (prefers-color-scheme)
  * - Reduced motion awareness
  * - Custom event dispatching
  * - Semantic tokens
  *
  * @reference
  * - React Hooks: https://react.dev/reference/react/hooks
- * - WCAG 2.1: https://www.w3.org/WAI/WCAG21/quickref/
  * - Material Design 3: https://m3.material.io/
  * - MDN prefers-color-scheme: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme
- * - MDN prefers-contrast: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-contrast
  * - MDN prefers-reduced-motion: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion
  *
  * @example
- * const { theme, changeTheme, accessibilityMode } = useTheme();
+ * const { theme, changeTheme } = useTheme();
  * changeTheme('brand-purple');
- * setAccessibilityMode('highContrast');
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -36,22 +33,20 @@ import {
   isValidBrandColor,
   isValidTheme,
   resolveSystemAppearance,
-} from '@/features/theme/hooks/themeHelpers';
+} from '@/features/theme/utils/themeHelpers';
 import type {
-  AccessibilityMode,
   Appearance,
   BrandColorTheme,
   Theme,
   UseThemeReturn,
-} from '@/features/theme/hooks/themeTypes';
+} from '@/features/theme/types/themeTypes';
 
 export type {
-  AccessibilityMode,
   Appearance,
   BrandColorTheme,
   Theme,
   UseThemeReturn,
-} from '@/features/theme/hooks/themeTypes';
+} from '@/features/theme/types/themeTypes';
 
 /**
  * Custom hook for theme management
@@ -62,7 +57,7 @@ export type {
  * @description
  * This hook provides complete theme management with:
  * 1. Multi-theme support (light, dark, 10 brand themes)
- * 2. Accessibility-first approach (high contrast, reduced motion)
+ * 2. Motion-aware transitions
  * 3. localStorage persistence
  * 4. System preference detection
  * 5. Semantic tokens generation
@@ -100,6 +95,10 @@ export type {
  * ```
  */
 export const useTheme = (): UseThemeReturn => {
+  const THEME_TRANSITION_MS = 150;
+  const THEME_TRANSITION_DOM_LIMIT = 1400;
+  const VIEW_TRANSITION_DOM_LIMIT = 900;
+
   // NEW: Combinatorial state (Option A)
   const [appearance, setAppearanceState] = useState<Appearance>('auto');
   const [brandColor, setBrandColorState] = useState<BrandColorTheme>('default');
@@ -107,9 +106,12 @@ export const useTheme = (): UseThemeReturn => {
 
   // Legacy state for backwards compatibility
   const [theme, setTheme] = useState<Theme>('light');
-  const [accessibilityMode, setAccessibilityMode] = useState<AccessibilityMode>('default');
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  type ViewTransitionDocument = Document & {
+    startViewTransition?: (updateCallback: () => void) => unknown;
+  };
 
   /**
    * Compute actual theme string from appearance + brand color combination
@@ -165,7 +167,6 @@ export const useTheme = (): UseThemeReturn => {
    * @param {Theme} nextTheme - Theme to apply (computed from appearance + brand)
    * @param {('light'|'dark')} currentAppearance - Resolved appearance value
    * @param {BrandColorTheme} currentBrand - Brand color selection
-   * @param {AccessibilityMode} [mode='default'] - Accessibility mode
    *
    * @reference
    * - HTML data attributes: https://developer.mozilla.org/en-US/docs/Learn/HTML/Howto/Use_data_attributes
@@ -179,25 +180,18 @@ export const useTheme = (): UseThemeReturn => {
     (
       nextTheme: Theme,
       currentAppearance: 'light' | 'dark',
-      currentBrand: BrandColorTheme,
-      mode: AccessibilityMode = 'default'
+      currentBrand: BrandColorTheme
     ) => {
       try {
-        // PERFORMANCE: Batch DOM operations in requestAnimationFrame
-        requestAnimationFrame(() => {
-          // NEW: Set combinatorial attributes
-          document.documentElement.setAttribute('data-appearance', currentAppearance);
-          document.body.setAttribute('data-appearance', currentAppearance);
-          document.documentElement.setAttribute('data-brand', currentBrand);
-          document.body.setAttribute('data-brand', currentBrand);
+        // Apply attributes immediately to avoid extra frame delay during theme toggles.
+        document.documentElement.setAttribute('data-appearance', currentAppearance);
+        document.body.setAttribute('data-appearance', currentAppearance);
+        document.documentElement.setAttribute('data-brand', currentBrand);
+        document.body.setAttribute('data-brand', currentBrand);
 
-          // Legacy: Set combined theme attribute for backwards compatibility
-          document.documentElement.setAttribute('data-theme', nextTheme);
-          document.body.setAttribute('data-theme', nextTheme);
-          document.documentElement.setAttribute('data-a11y', mode);
-          document.body.setAttribute('data-a11y', mode);
-        });
-
+        // Legacy: Set combined theme attribute for backwards compatibility
+        document.documentElement.setAttribute('data-theme', nextTheme);
+        document.body.setAttribute('data-theme', nextTheme);
         // Apply all CSS variables from design tokens (Phase 1 - Runtime Injection)
         // This handles primary palette + semantic tokens + foreground/background/border
         // ALL values sourced from palettes.ts via themeTokens.ts
@@ -208,6 +202,52 @@ export const useTheme = (): UseThemeReturn => {
       }
     },
     []
+  );
+
+  const triggerThemeTransition = useCallback(() => {
+    if (prefersReducedMotion) {
+      return;
+    }
+
+    document.documentElement.classList.add('theme-transition');
+
+    if (transitionTimeoutRef.current) {
+      clearTimeout(transitionTimeoutRef.current);
+    }
+
+    transitionTimeoutRef.current = setTimeout(() => {
+      document.documentElement.classList.remove('theme-transition');
+      transitionTimeoutRef.current = null;
+    }, THEME_TRANSITION_MS);
+  }, [prefersReducedMotion, THEME_TRANSITION_MS]);
+
+  const runThemeMutation = useCallback(
+    (mutation: () => void) => {
+      if (prefersReducedMotion) {
+        mutation();
+        return;
+      }
+
+      // Skip animation paths on large trees to avoid expensive full-page snapshots/repaints.
+      const nodeCount = document.body?.getElementsByTagName('*').length ?? 0;
+      if (nodeCount > THEME_TRANSITION_DOM_LIMIT) {
+        mutation();
+        return;
+      }
+
+      const doc = document as ViewTransitionDocument;
+
+      if (typeof doc.startViewTransition === 'function' && nodeCount <= VIEW_TRANSITION_DOM_LIMIT) {
+        doc.startViewTransition(() => {
+          mutation();
+        });
+        return;
+      }
+
+      triggerThemeTransition();
+      mutation();
+    },
+    [prefersReducedMotion, triggerThemeTransition, THEME_TRANSITION_DOM_LIMIT, VIEW_TRANSITION_DOM_LIMIT]
   );
 
   /**
@@ -226,8 +266,6 @@ export const useTheme = (): UseThemeReturn => {
     // Load saved preferences (NEW: appearance + brandColor stored separately)
     const rawSavedAppearance = localStorage.getItem('appearance');
     const rawSavedBrandColor = localStorage.getItem('brandColor');
-    const savedAccessibility = localStorage.getItem('a11y') as AccessibilityMode | null;
-
     // Fallback: Check legacy 'theme' for migration
     const savedTheme = localStorage.getItem('theme') as Theme | null;
 
@@ -268,10 +306,8 @@ export const useTheme = (): UseThemeReturn => {
     setBrandColorState(initialBrandColor);
     setResolvedAppearance(actualAppearance);
     setTheme(computedTheme);
-    setAccessibilityMode(savedAccessibility || 'default');
-
     // Apply to DOM
-    applyTheme(computedTheme, actualAppearance, initialBrandColor, savedAccessibility || 'default');
+    applyTheme(computedTheme, actualAppearance, initialBrandColor);
   }, [applyTheme, computeTheme]);
 
   /**
@@ -295,7 +331,7 @@ export const useTheme = (): UseThemeReturn => {
       if (appearance === 'auto') {
         const computedTheme = computeTheme(appearance, brandColor, systemResolvedAppearance);
         setTheme(computedTheme);
-        applyTheme(computedTheme, systemResolvedAppearance, brandColor, accessibilityMode);
+        applyTheme(computedTheme, systemResolvedAppearance, brandColor);
       }
     };
 
@@ -304,50 +340,28 @@ export const useTheme = (): UseThemeReturn => {
     return () => {
       colorSchemeMediaQuery.removeEventListener('change', handleColorSchemeChange);
     };
-  }, [appearance, brandColor, accessibilityMode, applyTheme, computeTheme]);
+  }, [appearance, brandColor, applyTheme, computeTheme]);
 
   /**
-   * Detect system accessibility preferences
+   * Detect reduced motion preference
    *
    * @reference
-   * - prefers-contrast: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-contrast
    * - prefers-reduced-motion: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion
    *
    * @internal
    */
   useEffect(() => {
-    // High contrast preference detection
-    const highContrastMediaQuery = window.matchMedia('(prefers-contrast: more)');
-    const prefersHighContrast = highContrastMediaQuery.matches;
-
-    if (prefersHighContrast) {
-      setAccessibilityMode('highContrast');
-      document.documentElement.setAttribute('data-a11y', 'highContrast');
-    }
-
-    // Reduced motion preference detection
     const reducedMotionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     const prefersReducedMotion = reducedMotionMediaQuery.matches;
     setPrefersReducedMotion(prefersReducedMotion);
-
-    // Handle changes in system preferences
-    const handleContrastChange = (e: MediaQueryListEvent) => {
-      const newMode: AccessibilityMode = e.matches ? 'highContrast' : 'default';
-      setAccessibilityMode(newMode);
-      document.documentElement.setAttribute('data-a11y', newMode);
-      localStorage.setItem('a11y', newMode);
-    };
 
     const handleReducedMotionChange = (e: MediaQueryListEvent) => {
       setPrefersReducedMotion(e.matches);
     };
 
-    // Modern browsers use addEventListener, older ones use addListener
-    highContrastMediaQuery.addEventListener('change', handleContrastChange);
     reducedMotionMediaQuery.addEventListener('change', handleReducedMotionChange);
 
     return () => {
-      highContrastMediaQuery.removeEventListener('change', handleContrastChange);
       reducedMotionMediaQuery.removeEventListener('change', handleReducedMotionChange);
     };
   }, []);
@@ -375,7 +389,7 @@ export const useTheme = (): UseThemeReturn => {
 
         setAppearanceState(newAppearance);
         setTheme(computedTheme);
-        applyTheme(computedTheme, actualAppearance, brandColor, accessibilityMode);
+        applyTheme(computedTheme, actualAppearance, brandColor);
       }
 
       // NEW: Handle brand color changes
@@ -390,7 +404,7 @@ export const useTheme = (): UseThemeReturn => {
 
         setBrandColorState(newBrandColor);
         setTheme(computedTheme);
-        applyTheme(computedTheme, actualAppearance, newBrandColor, accessibilityMode);
+        applyTheme(computedTheme, actualAppearance, newBrandColor);
       }
 
       // Legacy: Handle theme changes (for backwards compatibility)
@@ -399,24 +413,17 @@ export const useTheme = (): UseThemeReturn => {
         if (isValidTheme(newTheme)) {
           const actualAppearance = getActualAppearance(appearance, resolvedAppearance);
           setTheme(newTheme);
-          applyTheme(newTheme, actualAppearance, brandColor, accessibilityMode);
+          applyTheme(newTheme, actualAppearance, brandColor);
         }
       }
 
-      // Accessibility mode changes
-      if (e.key === 'a11y' && e.newValue) {
-        const newMode = e.newValue as AccessibilityMode;
-        const actualAppearance = getActualAppearance(appearance, resolvedAppearance);
-        setAccessibilityMode(newMode);
-        applyTheme(theme, actualAppearance, brandColor, newMode);
-      }
     };
 
     window.addEventListener('storage', handleStorageChange);
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [theme, appearance, brandColor, resolvedAppearance, accessibilityMode, applyTheme, computeTheme]);
+  }, [theme, appearance, brandColor, resolvedAppearance, applyTheme, computeTheme]);
 
   /**
    * NEW: Set appearance independently (light/dark/auto)
@@ -459,24 +466,17 @@ export const useTheme = (): UseThemeReturn => {
       // Compute combined theme
       const computedTheme = computeTheme(newAppearance, brandColor, actualAppearance);
 
-      // Add transition animation if user allows motion
-      if (!prefersReducedMotion) {
-        document.documentElement.classList.add('theme-transition');
-
-        if (transitionTimeoutRef.current) {
-          clearTimeout(transitionTimeoutRef.current);
-        }
-
-        // PERFORMANCE: Reduced from 300ms to 150ms (matches CSS transition)
-        transitionTimeoutRef.current = setTimeout(() => {
-          document.documentElement.classList.remove('theme-transition');
-        }, 150);
+      // No-op when selection is unchanged to avoid redundant renders and DOM work.
+      if (newAppearance === appearance && computedTheme === theme) {
+        return;
       }
 
-      // Update state
-      setAppearanceState(newAppearance);
-      setTheme(computedTheme);
-      applyTheme(computedTheme, actualAppearance, brandColor, accessibilityMode);
+      runThemeMutation(() => {
+        // Update state
+        setAppearanceState(newAppearance);
+        setTheme(computedTheme);
+        applyTheme(computedTheme, actualAppearance, brandColor);
+      });
 
       // Persist to localStorage
       try {
@@ -511,7 +511,7 @@ export const useTheme = (): UseThemeReturn => {
         }
       }
     },
-    [brandColor, resolvedAppearance, accessibilityMode, prefersReducedMotion, applyTheme, computeTheme]
+    [appearance, theme, brandColor, resolvedAppearance, applyTheme, computeTheme, runThemeMutation]
   );
 
   /**
@@ -559,24 +559,17 @@ export const useTheme = (): UseThemeReturn => {
       // Compute combined theme
       const computedTheme = computeTheme(appearance, newBrandColor, actualAppearance);
 
-      // Add transition animation if user allows motion
-      if (!prefersReducedMotion) {
-        document.documentElement.classList.add('theme-transition');
-
-        if (transitionTimeoutRef.current) {
-          clearTimeout(transitionTimeoutRef.current);
-        }
-
-        // PERFORMANCE: Reduced from 300ms to 150ms (matches CSS transition)
-        transitionTimeoutRef.current = setTimeout(() => {
-          document.documentElement.classList.remove('theme-transition');
-        }, 150);
+      // No-op when selection is unchanged to avoid redundant renders and DOM work.
+      if (newBrandColor === brandColor && computedTheme === theme) {
+        return;
       }
 
-      // Update state
-      setBrandColorState(newBrandColor);
-      setTheme(computedTheme);
-      applyTheme(computedTheme, actualAppearance, newBrandColor, accessibilityMode);
+      runThemeMutation(() => {
+        // Update state
+        setBrandColorState(newBrandColor);
+        setTheme(computedTheme);
+        applyTheme(computedTheme, actualAppearance, newBrandColor);
+      });
 
       // Persist to localStorage
       try {
@@ -611,7 +604,7 @@ export const useTheme = (): UseThemeReturn => {
         }
       }
     },
-    [appearance, resolvedAppearance, accessibilityMode, prefersReducedMotion, applyTheme, computeTheme]
+    [appearance, theme, brandColor, resolvedAppearance, applyTheme, computeTheme, runThemeMutation]
   );
 
   /**
@@ -645,6 +638,10 @@ export const useTheme = (): UseThemeReturn => {
         return;
       }
 
+      if (newTheme === theme) {
+        return;
+      }
+
       // Convert legacy theme to appearance + brand color
       let newAppearance: Appearance;
       let newBrandColor: BrandColorTheme;
@@ -660,26 +657,13 @@ export const useTheme = (): UseThemeReturn => {
       // Resolve actual appearance
       const actualAppearance = getActualAppearance(newAppearance, resolvedAppearance);
 
-      // Add transition animation if user allows motion
-      if (!prefersReducedMotion) {
-        document.documentElement.classList.add('theme-transition');
-
-        // Clear any pending timeout
-        if (transitionTimeoutRef.current) {
-          clearTimeout(transitionTimeoutRef.current);
-        }
-
-        // Remove transition class after animation completes
-        transitionTimeoutRef.current = setTimeout(() => {
-          document.documentElement.classList.remove('theme-transition');
-        }, 300);
-      }
-
-      // Update state
-      setAppearanceState(newAppearance);
-      setBrandColorState(newBrandColor);
-      setTheme(newTheme);
-      applyTheme(newTheme, actualAppearance, newBrandColor, accessibilityMode);
+      runThemeMutation(() => {
+        // Update state
+        setAppearanceState(newAppearance);
+        setBrandColorState(newBrandColor);
+        setTheme(newTheme);
+        applyTheme(newTheme, actualAppearance, newBrandColor);
+      });
 
       // Persist to localStorage
       try {
@@ -698,7 +682,7 @@ export const useTheme = (): UseThemeReturn => {
               theme: newTheme,
               appearance: newAppearance,
               brandColor: newBrandColor,
-              accessibilityMode,
+
               timestamp: Date.now(),
             },
           })
@@ -707,39 +691,9 @@ export const useTheme = (): UseThemeReturn => {
         console.error('Failed to dispatch theme change event:', error);
       }
     },
-    [accessibilityMode, resolvedAppearance, prefersReducedMotion, applyTheme]
+    [theme, resolvedAppearance, applyTheme, runThemeMutation]
   );
 
-  /**
-   * Set accessibility mode
-   *
-   * @param {AccessibilityMode} mode - Mode to set
-   *
-   * @reference
-   * - WCAG 2.1 Contrast Enhanced: https://www.w3.org/TR/WCAG21/#contrast-enhanced
-   *
-   * @internal
-   */
-  const setAccessibilityModeHandler = useCallback(
-    (mode: AccessibilityMode) => {
-      // Resolve actual appearance
-      const actualAppearance = getActualAppearance(appearance, resolvedAppearance);
-
-      setAccessibilityMode(mode);
-      applyTheme(theme, actualAppearance, brandColor, mode);
-      localStorage.setItem('a11y', mode);
-
-      window.dispatchEvent(
-        new CustomEvent('a11ychange', {
-          detail: {
-            mode,
-            timestamp: Date.now(),
-          },
-        })
-      );
-    },
-    [theme, appearance, resolvedAppearance, brandColor, applyTheme]
-  );
 
   /**
    * Get semantic tokens for current theme
@@ -766,19 +720,10 @@ export const useTheme = (): UseThemeReturn => {
    * @internal
    */
   const getSemanticTokens = useCallback((): SemanticTokens | null => {
-    // Use centralized semantic token constants (Phase 1 - SSOT)
-    if (theme === 'light') {
-      return GLOBAL_SEMANTIC_TOKENS;
-    }
-
-    if (theme === 'dark') {
-      return DARK_SEMANTIC_TOKENS;
-    }
-
-    // Brand themes use semantic tokens from palettes
-    const palette = palettes[theme as BrandTheme];
-    return palette.semantic || GLOBAL_SEMANTIC_TOKENS;
-  }, [theme]);
+    // Semantic tokens are appearance-based, independent from brand palette.
+    const actualAppearance = getActualAppearance(appearance, resolvedAppearance);
+    return actualAppearance === 'dark' ? DARK_SEMANTIC_TOKENS : GLOBAL_SEMANTIC_TOKENS;
+  }, [appearance, resolvedAppearance]);
 
   /**
    * Get primary color of current theme
@@ -813,7 +758,7 @@ export const useTheme = (): UseThemeReturn => {
   }, [theme]);
 
   /**
-   * Reset theme and accessibility to defaults
+   * Reset theme preferences to defaults
    * NEW: Resets to auto appearance + default brand color
    *
    * @reference
@@ -828,12 +773,10 @@ export const useTheme = (): UseThemeReturn => {
     setBrandColorState('default');
     setResolvedAppearance(systemResolved);
     setTheme(systemResolved);
-    setAccessibilityMode('default');
-    applyTheme(systemResolved, systemResolved, 'default', 'default');
+    applyTheme(systemResolved, systemResolved, 'default');
     localStorage.removeItem('appearance');
     localStorage.removeItem('brandColor');
     localStorage.removeItem('theme'); // Legacy
-    localStorage.removeItem('a11y');
   }, [applyTheme]);
 
   // Cleanup on unmount
@@ -853,15 +796,12 @@ export const useTheme = (): UseThemeReturn => {
     // Legacy: For backwards compatibility
     theme,
     // Common state
-    accessibilityMode,
     prefersReducedMotion,
     // NEW: Combinatorial setters (Option A)
     setAppearance,
     setBrandColor,
     // Legacy: For backwards compatibility
     changeTheme,
-    // Common methods
-    setAccessibilityMode: setAccessibilityModeHandler,
     getSemanticTokens,
     getPrimaryColor,
     getSecondaryColor,

@@ -4,23 +4,22 @@ import type {
   AreaDto,
   ListAccountDto,
   RoleDto,
-  IssueLogDto,
-  PaginatedResult,
+  IssueDto,
   Area, // Area type
   Employee, // Employee type
   Account, // Account type
   Role, // Role type
-  WorkLog, // WorkLog type
+  Issue, // Issue type
   DepartmentDto
 } from '@/types/data';
 import { useState, useEffect } from 'react';
 import {
-  workLogsApi,
   employeesApi,
   areasApi,
   accountsApi,
   rolesApi,
-  departmentApi, // Updated: singular name
+  issuesApi,
+  departmentsApi,
 } from '@/services/api';
 
 function useApiData<T>(apiService: any) {
@@ -30,7 +29,7 @@ function useApiData<T>(apiService: any) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // For workLogs and other paginated APIs, request a large page size
+        // Request a large page size to load all lookup data (departments, areas, etc.)
         const result = await apiService.getAll({ page: 1, pageSize: 1000 });
         // Handle paginated results
         if (result && 'items' in result) {
@@ -55,12 +54,11 @@ function useApiData<T>(apiService: any) {
 
 export function useDataManager() {
   const employeesRaw = useApiData<ListEmployeeDto>(employeesApi);
-  const departmentsRaw = useApiData<DepartmentDto>(departmentApi);
+  const departmentsRaw = useApiData<DepartmentDto>(departmentsApi);
   const areasRaw = useApiData<AreaDto>(areasApi);
   const accountsRaw = useApiData<ListAccountDto>(accountsApi);
   const rolesRaw = useApiData<RoleDto>(rolesApi);
-  const workLogsRaw = useApiData<IssueLogDto>(workLogsApi);
-
+  const issuesRaw = useApiData<IssueDto>(issuesApi);
   // Transform DepartmentDto to Department
   const departments = {
     data: departmentsRaw.data.map(dept => ({
@@ -142,26 +140,16 @@ export function useDataManager() {
     loading: rolesRaw.loading
   };
 
-  // Transform IssueLogDto to WorkLog
-  const workLogs = {
-    data: workLogsRaw.data.map(log => ({
-      ...log,
-      id: log.issLogId,
-      reportDate: log.dateReported,
-      operators: log.operator ? [log.operator] : [],
-      requesters: log.requester ? [log.requester] : [],
-      department: log.departmentName || '',
-      area: log.areaName || '',
-      issue: log.issueDescription,
-      cause: log.cause || '',
-      fixDescription: log.resolution || '',
-      note: log.notes || '',
-      status: normalizeWorkStatus(log.status) // Normalize "In Progress" to "in-progress"
-    } as WorkLog)),
-    setData: (newData: WorkLog[]) => {
-      workLogsRaw.setData(newData as unknown as IssueLogDto[]);
+  // Transform IssueDto to Issue
+  const issues = {
+    data: issuesRaw.data.map(issue => ({
+      ...issue,
+      id: String(issue.issId)
+    } as Issue)),
+    setData: (newData: Issue[]) => {
+      issuesRaw.setData(newData as unknown as IssueDto[]);
     },
-    loading: workLogsRaw.loading
+    loading: issuesRaw.loading
   };
 
   return {
@@ -170,17 +158,6 @@ export function useDataManager() {
     areas,
     accounts,
     roles,
-    workLogs,
+    issues,
   };
-}
-
-// Normalize status from API format to UI format
-// API: "In Progress", "Resolved", etc.
-// UI: "in-progress", "resolved", etc.
-function normalizeWorkStatus(status: string | null | undefined): any {
-  if (!status) return 'pending';
-  return status
-    .toLowerCase()
-    .replace(/\s+/g, '-') // Replace spaces with hyphens
-    .trim();
 }

@@ -1,8 +1,16 @@
 import { useEffect, useState } from 'react';
-import { AlertCircle, Save, User, X } from 'lucide-react';
+import { Save, User, X } from 'lucide-react';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
+import { FieldError } from '@/components/common/FieldError';
 import { PermissionEditor } from '@/components/common/PermissionEditor';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { rolesApi } from '@/services/api/roles';
 import type { Account, ClaimDto, Employee, RoleDto } from '@/types/data';
+import {
+  getFieldErrorMessages,
+  getGeneralValidationMessages,
+  type ValidationErrors,
+} from '@/utils/apiErrors';
 
 export interface AccountFormData {
   employeeId: string;
@@ -15,16 +23,19 @@ export interface AccountFormData {
 interface AccountFormModalProps {
   isOpen: boolean;
   editing: Account | null;
+  formData: AccountFormData;
   employees: Employee[];
   roles: RoleDto[];
   isSubmitting: boolean;
   error: string | null;
+  validationErrors: ValidationErrors | null;
+  onChange: (formData: AccountFormData) => void;
   onSubmit: (formData: AccountFormData) => Promise<void>;
   onClose: () => void;
   onClearError: () => void;
 }
 
-function getInitialFormData(editing: Account | null): AccountFormData {
+export function createAccountFormData(editing: Account | null): AccountFormData {
   if (editing) {
     return {
       employeeId: editing.employeeId,
@@ -47,23 +58,24 @@ function getInitialFormData(editing: Account | null): AccountFormData {
 export function AccountFormModal({
   isOpen,
   editing,
+  formData,
   employees,
   roles,
   isSubmitting,
   error,
+  validationErrors,
+  onChange,
   onSubmit,
   onClose,
   onClearError,
 }: AccountFormModalProps) {
   const [formStep, setFormStep] = useState<'basic' | 'permissions'>('basic');
-  const [formData, setFormData] = useState<AccountFormData>(getInitialFormData(editing));
   const [availableClaims, setAvailableClaims] = useState<ClaimDto[]>([]);
 
   useEffect(() => {
     if (!isOpen) return;
 
     setFormStep('basic');
-    setFormData(getInitialFormData(editing));
   }, [isOpen, editing]);
 
   useEffect(() => {
@@ -91,6 +103,19 @@ export function AccountFormModal({
     await onSubmit(formData);
   };
 
+  const employeeErrors = getFieldErrorMessages(validationErrors, 'EmpId', ['EmployeeId']);
+  const usernameErrors = getFieldErrorMessages(validationErrors, 'Username');
+  const passwordErrors = getFieldErrorMessages(validationErrors, 'Password');
+  const generalValidationMessages = getGeneralValidationMessages(validationErrors, [
+    'EmpId',
+    'EmployeeId',
+    'Username',
+    'Password',
+  ]);
+  const hasEmployeeError = employeeErrors.length > 0;
+  const hasUsernameError = usernameErrors.length > 0;
+  const hasPasswordError = passwordErrors.length > 0;
+
   if (!isOpen) return null;
 
   return (
@@ -112,16 +137,13 @@ export function AccountFormModal({
         </div>
 
         {error && (
-          <div className="mx-6 mt-4 p-4 bg-error-background border border-error-border rounded-lg flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
-            <div className="flex-1">
-              <p className="font-medium text-error-foreground">Error</p>
-              <p className="text-sm text-error-foreground mt-0.5">{error}</p>
-            </div>
-            <button onClick={onClearError} className="text-error-foreground hover:text-error-foreground transition-colors">
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+          <ErrorAlert
+            message={error}
+            details={generalValidationMessages}
+            onDismiss={onClearError}
+            dismissDisabled={isSubmitting}
+            className="mx-6 mt-4"
+          />
         )}
 
         {formStep === 'basic' && (
@@ -133,8 +155,12 @@ export function AccountFormModal({
               <select
                 required
                 value={formData.employeeId}
-                onChange={(e) => setFormData({ ...formData, employeeId: e.target.value })}
-                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
+                onChange={(e) => onChange({ ...formData, employeeId: e.target.value })}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 bg-card text-foreground placeholder-placeholder transition-colors ${
+                  hasEmployeeError
+                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                }`}
                 disabled={!!editing}
               >
                 <option value="">Select employee...</option>
@@ -144,6 +170,7 @@ export function AccountFormModal({
                   </option>
                 ))}
               </select>
+              <FieldError messages={employeeErrors} />
               {editing && <p className="text-xs text-muted-foreground mt-1">Employee cannot be changed</p>}
             </div>
 
@@ -155,10 +182,15 @@ export function AccountFormModal({
                 type="text"
                 required
                 value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                onChange={(e) => onChange({ ...formData, username: e.target.value })}
                 placeholder="Enter username"
-                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 bg-card text-foreground placeholder-placeholder transition-colors ${
+                  hasUsernameError
+                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                }`}
               />
+              <FieldError messages={usernameErrors} />
             </div>
 
             <div>
@@ -169,10 +201,15 @@ export function AccountFormModal({
                 type="password"
                 required={!editing}
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) => onChange({ ...formData, password: e.target.value })}
                 placeholder={editing ? 'Leave empty to keep current password' : 'Enter password'}
-                className="w-full px-3 py-2 border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-card text-foreground placeholder-placeholder transition-colors"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 bg-card text-foreground placeholder-placeholder transition-colors ${
+                  hasPasswordError
+                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                }`}
               />
+              <FieldError messages={passwordErrors} />
               {editing && <p className="text-xs text-muted-foreground mt-1">Leave empty to keep current password</p>}
             </div>
 
@@ -195,10 +232,10 @@ export function AccountFormModal({
               availableRoles={roles}
               availableClaims={availableClaims}
               onRolesChange={(roleIds) =>
-                setFormData((prev) => ({ ...prev, selectedRoleIds: roleIds }))
+                onChange({ ...formData, selectedRoleIds: roleIds })
               }
               onClaimsChange={(claimIds) =>
-                setFormData((prev) => ({ ...prev, selectedClaimIds: claimIds }))
+                onChange({ ...formData, selectedClaimIds: claimIds })
               }
             />
 
@@ -214,7 +251,7 @@ export function AccountFormModal({
               >
                 {isSubmitting ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <LoadingSpinner size="sm" tone="inverse" />
                     Saving...
                   </>
                 ) : (

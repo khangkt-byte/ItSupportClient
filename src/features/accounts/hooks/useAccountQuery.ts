@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { accountsApi } from '@/services/api/accounts';
 import type { AccountsQueryParams, ListAccountDto, PaginatedResult } from '@/types/data';
+import { getApiErrorMessage } from '@/utils/apiErrors';
 
 export function useAccountQuery() {
     const [queryParams, setQueryParams] = useState<AccountsQueryParams>({
@@ -12,21 +13,21 @@ export function useAccountQuery() {
         isLocked: null,
     });
     const [paginatedResult, setPaginatedResult] = useState<PaginatedResult<ListAccountDto> | null>(null);
-    const [queryLoading, setQueryLoading] = useState(false);
-    const [queryError, setQueryError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchAccounts = useCallback(async () => {
         try {
-            setQueryLoading(true);
-            setQueryError(null);
+            setLoading(true);
+            setError(null);
             const result = await accountsApi.getAll(queryParams);
             setPaginatedResult(result);
         } catch (error) {
             console.error('Failed to fetch accounts:', error);
-            setQueryError('Failed to load accounts');
+            setError(getApiErrorMessage(error, 'Unable to load accounts. Please refresh and try again.'));
             setPaginatedResult(null);
         } finally {
-            setQueryLoading(false);
+            setLoading(false);
         }
     }, [queryParams]);
 
@@ -38,8 +39,9 @@ export function useAccountQuery() {
         queryParams,
         setQueryParams,
         paginatedResult,
-        queryLoading,
-        queryError,
-        fetchAccounts,
+        loading,
+        error,
+        setError,
+        refetch: fetchAccounts,
     };
 }

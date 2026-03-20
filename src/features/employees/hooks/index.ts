@@ -1,0 +1,1 @@
+export { useEmployeeQuery } from './useEmployeeQuery';

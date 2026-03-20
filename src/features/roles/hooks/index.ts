@@ -1,0 +1,1 @@
+export { useRoleQuery } from './useRoleQuery';

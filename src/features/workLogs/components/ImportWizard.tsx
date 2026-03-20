@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, X, AlertCircle, CheckCircle, AlertTriangle, FileSpreadsheet, ArrowLeft } from 'lucide-react';
+import { X, AlertCircle, CheckCircle, AlertTriangle, FileSpreadsheet, ArrowLeft } from 'lucide-react';
 import type { WorkLog, Employee, Department, Area } from '@/types/data';
 import { 
   validateWorkLogFile, 
@@ -7,11 +7,12 @@ import {
   type EnhancedValidationResult,
   type ImportOptions,
   type ImportResult,
-  type RowValidation,
   type FieldError
 } from '@/utils/enhancedExcelUtils';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { getApiErrorMessage } from '@/utils/apiErrors';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
 
 interface Props {
   existingWorkLogs: WorkLog[];
@@ -37,6 +38,7 @@ export function ImportWizard({
   const [validationResult, setValidationResult] = useState<EnhancedValidationResult | null>(null);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [importOptions, setImportOptions] = useState<ImportOptions>({
@@ -66,8 +68,9 @@ export function ImportWizard({
       const droppedFile = e.dataTransfer.files[0];
       if (droppedFile.name.endsWith('.xlsx') || droppedFile.name.endsWith('.xls')) {
         setFile(droppedFile);
+        setError(null);
       } else {
-        alert('Please upload an Excel file (.xlsx or .xls)');
+        setError('Please upload an Excel file (.xlsx or .xls)');
       }
     }
   };
@@ -82,6 +85,7 @@ export function ImportWizard({
   const handleValidate = async () => {
     if (!file) return;
 
+    setError(null);
     setValidating(true);
     try {
       const result = await validateWorkLogFile(
@@ -93,8 +97,8 @@ export function ImportWizard({
       );
       setValidationResult(result);
       setStep(2);
-    } catch (error) {
-      alert('Validation failed: ' + (error as Error).message);
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Unable to validate the file. Please check the data and try again.'));
     } finally {
       setValidating(false);
     }
@@ -122,14 +126,14 @@ export function ImportWizard({
       if (result.importedLogs.length > 0) {
         onImportComplete(result.importedLogs as WorkLog[]);
       }
-    } catch (error) {
-      alert('Import failed: ' + (error as Error).message);
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Unable to import work logs. Please try again.'));
     } finally {
       setImporting(false);
     }
   };
 
-  const applySuggestion = (rowNumber: number, fieldName: string, suggestedValue: string, suggestedId?: string) => {
+  const applySuggestion = (rowNumber: number, fieldName: string, _suggestedValue: string, suggestedId?: string) => {
     if (!validationResult) return;
 
     // Update manual mappings
@@ -185,6 +189,7 @@ export function ImportWizard({
         </div>
 
         <div className="p-6">
+          {error && <ErrorAlert message={error} className="mb-4" />}
           {/* STEP 1: UPLOAD & VALIDATE */}
           {step === 1 && (
             <div className="space-y-6">

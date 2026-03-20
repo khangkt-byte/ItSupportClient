@@ -1,12 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, Clock, Save, X } from 'lucide-react';
+import { Clock, Save, X } from 'lucide-react';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
+import { FieldError } from '@/components/common/FieldError';
 import type { Area, Department, Employee, WorkLog, WorkStatus } from '@/types/data';
 import { causesApi, issuesApi } from '@/services/api';
 import { SearchableCombobox } from '@/components/common/SearchableCombobox';
 import { FlexibleMultiSelect } from '@/components/common/FlexibleMultiSelect';
 import { AutocompleteInput, type Suggestion } from '@/components/common/AutocompleteInput';
-import { PermissionGuard } from '@/components/common/PermissionGuard';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Permissions } from '@/config/permissions';
+import { usePermission } from '@/hooks/usePermission';
+import {
+  getFieldErrorMessages,
+  getGeneralValidationMessages,
+  type ValidationErrors,
+} from '@/utils/apiErrors';
 
 export interface WorkLogFormData {
   reportDate: string;
@@ -25,18 +33,20 @@ export interface WorkLogFormData {
 interface WorkLogFormModalProps {
   isOpen: boolean;
   editing: WorkLog | null;
-  currentUser: string;
+  formData: WorkLogFormData;
   employees: Employee[];
   departments: Department[];
   areas: Area[];
-  submitting: boolean;
+  isSubmitting: boolean;
   error: string | null;
+  validationErrors: ValidationErrors | null;
+  onChange: (formData: WorkLogFormData) => void;
   onSubmit: (formData: WorkLogFormData) => Promise<void>;
   onClose: () => void;
   onClearError: () => void;
 }
 
-function getInitialFormData(editing: WorkLog | null): WorkLogFormData {
+export function createWorkLogFormData(editing: WorkLog | null): WorkLogFormData {
   if (editing) {
     return {
       reportDate: new Date(editing.reportDate).toISOString().slice(0, 10),
@@ -71,34 +81,91 @@ function getInitialFormData(editing: WorkLog | null): WorkLogFormData {
 export function WorkLogFormModal({
   isOpen,
   editing,
-  currentUser,
+  formData,
   employees,
   departments,
   areas,
-  submitting,
+  isSubmitting,
   error,
+  validationErrors,
+  onChange,
   onSubmit,
   onClose,
   onClearError,
 }: WorkLogFormModalProps) {
-  const [formData, setFormData] = useState<WorkLogFormData>(getInitialFormData(editing));
   const [issueSuggestions, setIssueSuggestions] = useState<Suggestion[]>([]);
   const [causeSuggestions, setCauseSuggestions] = useState<Suggestion[]>([]);
   const [selectedIssue, setSelectedIssue] = useState<Suggestion | null>(null);
   const [selectedCause, setSelectedCause] = useState<Suggestion | null>(null);
   const [loadingIssueSuggestions, setLoadingIssueSuggestions] = useState(false);
   const [loadingCauseSuggestions, setLoadingCauseSuggestions] = useState(false);
+  const [issueFocusVersion, setIssueFocusVersion] = useState(0);
+  const [causeFocusVersion, setCauseFocusVersion] = useState(0);
+  const { hasPermission } = usePermission();
+  const canSubmit = hasPermission(editing ? Permissions.IssueLog.Edit : Permissions.IssueLog.Create);
+  const reportDateErrors = getFieldErrorMessages(validationErrors, 'ReportDate');
+  const statusErrors = getFieldErrorMessages(validationErrors, 'Status');
+  const operatorErrors = getFieldErrorMessages(validationErrors, 'Operators', ['Operator', 'OperatorIds']);
+  const requesterErrors = getFieldErrorMessages(validationErrors, 'Requesters', ['Requester', 'RequesterIds']);
+  const departmentErrors = getFieldErrorMessages(validationErrors, 'Department', ['DepartmentId', 'DptId']);
+  const areaErrors = getFieldErrorMessages(validationErrors, 'Area', ['AreaId']);
+  const issueErrors = getFieldErrorMessages(validationErrors, 'Issue', ['IssueDescription']);
+  const causeErrors = getFieldErrorMessages(validationErrors, 'Cause');
+  const fixDescriptionErrors = getFieldErrorMessages(validationErrors, 'FixDescription');
+  const permanentFixErrors = getFieldErrorMessages(validationErrors, 'PermanentFix');
+  const noteErrors = getFieldErrorMessages(validationErrors, 'Note');
+  const validationMessages = getGeneralValidationMessages(validationErrors, [
+    'ReportDate',
+    'Status',
+    'Operators',
+    'Operator',
+    'OperatorIds',
+    'Requesters',
+    'Requester',
+    'RequesterIds',
+    'Department',
+    'DepartmentId',
+    'DptId',
+    'Area',
+    'AreaId',
+    'Issue',
+    'IssueDescription',
+    'Cause',
+    'FixDescription',
+    'PermanentFix',
+    'Note',
+  ]);
 
   useEffect(() => {
     if (!isOpen) return;
 
-    const nextData = getInitialFormData(editing);
-    setFormData(nextData);
     setSelectedIssue(null);
     setSelectedCause(null);
     setIssueSuggestions([]);
     setCauseSuggestions([]);
-  }, [isOpen, editing, currentUser]);
+  }, [isOpen, editing]);
+
+  const mapIssueSuggestions = (results: Awaited<ReturnType<typeof issuesApi.getSuggestions>>): Suggestion[] => {
+    return results
+      .map((issue) => ({
+        id: issue.issId,
+        name: issue.name,
+        description: issue.description || '',
+        usageCount: issue.usageCount,
+      }))
+      .sort((a, b) => b.usageCount - a.usageCount);
+  };
+
+  const mapCauseSuggestions = (results: Awaited<ReturnType<typeof causesApi.getSuggestions>>): Suggestion[] => {
+    return results
+      .map((cause) => ({
+        id: cause.causeId,
+        name: cause.name,
+        description: cause.description || '',
+        usageCount: cause.usageCount,
+      }))
+      .sort((a, b) => b.usageCount - a.usageCount);
+  };
 
   const itEmployees = useMemo(
     () => employees.filter((emp) => emp.department === 'IT' && !emp.deleteDate),
@@ -144,23 +211,14 @@ export function WorkLogFormModal({
   );
 
   useEffect(() => {
-    const fetchIssueSuggestions = async () => {
-      if (formData.issue.length < 2) {
-        setIssueSuggestions([]);
-        return;
-      }
+    if (!isOpen) return;
 
+    const fetchIssueSuggestions = async () => {
       setLoadingIssueSuggestions(true);
       try {
-        const results = await issuesApi.getSuggestions(formData.issue);
-        setIssueSuggestions(
-          results.map((issue) => ({
-            id: issue.issId,
-            name: issue.name,
-            description: issue.description || '',
-            usageCount: issue.usageCount,
-          }))
-        );
+        const trimmedSearch = formData.issue.trim();
+        const results = await issuesApi.getSuggestions(trimmedSearch || undefined);
+        setIssueSuggestions(mapIssueSuggestions(results));
       } catch (fetchError) {
         console.error('Failed to fetch issue suggestions:', fetchError);
         setIssueSuggestions([]);
@@ -171,46 +229,32 @@ export function WorkLogFormModal({
 
     const timeoutId = setTimeout(fetchIssueSuggestions, 300);
     return () => clearTimeout(timeoutId);
-  }, [formData.issue]);
+  }, [formData.issue, isOpen, issueFocusVersion]);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     const loadCausesForIssue = async () => {
+      const trimmedSearch = formData.cause.trim();
+
       if (!selectedIssue) {
-        if (formData.cause.length >= 2) {
-          setLoadingCauseSuggestions(true);
-          try {
-            const results = await causesApi.getSuggestions(undefined, formData.cause);
-            setCauseSuggestions(
-              results.map((cause) => ({
-                id: cause.causeId,
-                name: cause.name,
-                description: cause.description || '',
-                usageCount: cause.usageCount,
-              }))
-            );
-          } catch (fetchError) {
-            console.error('Failed to fetch cause suggestions:', fetchError);
-            setCauseSuggestions([]);
-          } finally {
-            setLoadingCauseSuggestions(false);
-          }
-        } else {
+        setLoadingCauseSuggestions(true);
+        try {
+          const results = await causesApi.getSuggestions(undefined, trimmedSearch || undefined);
+          setCauseSuggestions(mapCauseSuggestions(results));
+        } catch (fetchError) {
+          console.error('Failed to fetch cause suggestions:', fetchError);
           setCauseSuggestions([]);
+        } finally {
+          setLoadingCauseSuggestions(false);
         }
         return;
       }
 
       setLoadingCauseSuggestions(true);
       try {
-        const results = await causesApi.getSuggestions(selectedIssue.id);
-        setCauseSuggestions(
-          results.map((cause) => ({
-            id: cause.causeId,
-            name: cause.name,
-            description: cause.description || '',
-            usageCount: cause.usageCount,
-          }))
-        );
+        const results = await causesApi.getSuggestions(selectedIssue.id, trimmedSearch || undefined);
+        setCauseSuggestions(mapCauseSuggestions(results));
       } catch (fetchError) {
         console.error('Failed to fetch cause suggestions:', fetchError);
         setCauseSuggestions([]);
@@ -220,28 +264,12 @@ export function WorkLogFormModal({
     };
 
     void loadCausesForIssue();
-  }, [selectedIssue, formData.cause]);
+  }, [selectedIssue, formData.cause, isOpen, causeFocusVersion]);
 
-  const handleIssueSelect = async (suggestion: Suggestion | null) => {
+  const handleIssueSelect = (suggestion: Suggestion | null) => {
     setSelectedIssue(suggestion);
-    if (suggestion) {
-      try {
-        const results = await causesApi.getSuggestions(suggestion.id);
-        setCauseSuggestions(
-          results.map((cause) => ({
-            id: cause.causeId,
-            name: cause.name,
-            description: cause.description || '',
-            usageCount: cause.usageCount,
-          }))
-        );
-      } catch (fetchError) {
-        console.error('Failed to fetch causes for issue:', fetchError);
-        setCauseSuggestions([]);
-      }
-    } else {
-      setCauseSuggestions([]);
-    }
+    setSelectedCause(null);
+    setCauseFocusVersion((prev) => prev + 1);
   };
 
   const handleCauseSelect = (suggestion: Suggestion | null) => {
@@ -255,26 +283,26 @@ export function WorkLogFormModal({
 
   if (!isOpen) return null;
 
-  return (
-    <PermissionGuard
-      permission={editing ? Permissions.IssueLog.Edit : Permissions.IssueLog.Create}
-      fallback={
-        <div className="fixed inset-0 bg-overlay flex items-center justify-center z-60 p-4 overflow-y-auto h-screen w-screen">
-          <div className="bg-card rounded-lg p-6 max-w-sm text-center">
-            <h3 className="text-lg font-semibold text-error-foreground mb-2">Access Denied</h3>
-            <p className="text-muted-foreground mb-4">
-              You don't have permission to {editing ? 'edit' : 'create'} work logs.
-            </p>
-            <button
-              onClick={onClose}
-              className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80"
-            >
-              Close
-            </button>
-          </div>
+  if (!canSubmit) {
+    return (
+      <div className="fixed inset-0 bg-overlay flex items-center justify-center z-60 p-4 overflow-y-auto h-screen w-screen">
+        <div className="bg-card rounded-lg p-6 max-w-sm text-center">
+          <h3 className="text-lg font-semibold text-error-foreground mb-2">Access Denied</h3>
+          <p className="text-muted-foreground mb-4">
+            You don&apos;t have permission to {editing ? 'edit' : 'create'} work logs.
+          </p>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80"
+          >
+            Close
+          </button>
         </div>
-      }
-    >
+      </div>
+    );
+  }
+
+  return (
       <div className="fixed inset-0 bg-overlay flex items-center justify-center z-60 p-4 overflow-y-auto h-screen w-screen">
         <div className="bg-card rounded-lg max-w-6xl w-full my-4 max-h-[90vh] overflow-y-auto">
           <div className="px-6 py-4 border-b border-border flex justify-between items-center sticky top-0 bg-card z-10">
@@ -287,26 +315,19 @@ export function WorkLogFormModal({
                 Record issue details and assign operators/requesters
               </p>
             </div>
-            <button onClick={onClose} disabled={submitting} className="hover:text-muted-foreground transition-colors text-foreground disabled:opacity-50 disabled:cursor-not-allowed">
+            <button onClick={onClose} disabled={isSubmitting} className="hover:text-muted-foreground transition-colors text-foreground disabled:opacity-50 disabled:cursor-not-allowed">
               <X className="w-6 h-6" />
             </button>
           </div>
 
           {error && (
-            <div className="mx-6 mt-4 p-4 bg-error-background border border-error-border rounded-lg flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-error-foreground mt-0.5 shrink-0" />
-              <div className="flex-1">
-                <p className="font-medium text-error-foreground">Error</p>
-                <p className="text-sm text-error-foreground mt-0.5">{error}</p>
-              </div>
-              <button
-                onClick={onClearError}
-                disabled={submitting}
-                className="text-error-foreground hover:text-error-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+            <ErrorAlert
+              message={error}
+              details={validationMessages}
+              onDismiss={onClearError}
+              dismissDisabled={isSubmitting}
+              className="mx-6 mt-4"
+            />
           )}
 
           <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
@@ -319,9 +340,15 @@ export function WorkLogFormModal({
                   type="date"
                   required
                   value={formData.reportDate}
-                  onChange={(e) => setFormData({ ...formData, reportDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                  onChange={(e) => onChange({ ...formData, reportDate: e.target.value })}
+                  disabled={isSubmitting}
+                  className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground focus:ring-2 transition-colors ${
+                    reportDateErrors.length > 0
+                      ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                      : 'border-input focus:ring-primary-500 focus:border-transparent'
+                  }`}
                 />
+                <FieldError messages={reportDateErrors} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1 text-muted-foreground">
@@ -330,14 +357,20 @@ export function WorkLogFormModal({
                 <select
                   required
                   value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value as WorkStatus })}
-                  className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                  onChange={(e) => onChange({ ...formData, status: e.target.value as WorkStatus })}
+                  disabled={isSubmitting}
+                  className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground focus:ring-2 transition-colors ${
+                    statusErrors.length > 0
+                      ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                      : 'border-input focus:ring-primary-500 focus:border-transparent'
+                  }`}
                 >
                   <option value="pending">Pending</option>
                   <option value="in-progress">In Progress</option>
                   <option value="resolved">Resolved</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
+                <FieldError messages={statusErrors} />
               </div>
               <div className="col-span-2">
                 <label className="block text-sm font-medium mb-1 text-muted-foreground">
@@ -346,23 +379,29 @@ export function WorkLogFormModal({
                 <FlexibleMultiSelect
                   options={operatorOptions}
                   values={formData.operators}
-                  onChange={(values) => setFormData({ ...formData, operators: values })}
+                  onChange={(values) => onChange({ ...formData, operators: values })}
                   placeholder="Select IT operators or type custom name..."
                   label=""
                   required
                   allowCustom
+                  disabled={isSubmitting}
+                  hasError={operatorErrors.length > 0}
                 />
+                <FieldError messages={operatorErrors} />
               </div>
               <div className="col-span-2">
                 <label className="block text-sm font-medium mb-1 text-muted-foreground">Requesters</label>
                 <FlexibleMultiSelect
                   options={requesterOptions}
                   values={formData.requesters}
-                  onChange={(values) => setFormData({ ...formData, requesters: values })}
+                  onChange={(values) => onChange({ ...formData, requesters: values })}
                   placeholder="Select requesters or type custom name..."
                   label=""
                   allowCustom
+                  disabled={isSubmitting}
+                  hasError={requesterErrors.length > 0}
                 />
+                <FieldError messages={requesterErrors} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1 text-muted-foreground">
@@ -371,10 +410,13 @@ export function WorkLogFormModal({
                 <SearchableCombobox
                   options={departmentOptions}
                   value={formData.department}
-                  onChange={(value) => setFormData({ ...formData, department: value })}
+                  onChange={(value) => onChange({ ...formData, department: value })}
                   placeholder="Select department..."
                   required
+                  disabled={isSubmitting}
+                  hasError={departmentErrors.length > 0}
                 />
+                <FieldError messages={departmentErrors} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1 text-muted-foreground">
@@ -383,74 +425,103 @@ export function WorkLogFormModal({
                 <SearchableCombobox
                   options={areaOptions}
                   value={formData.area}
-                  onChange={(value) => setFormData({ ...formData, area: value })}
+                  onChange={(value) => onChange({ ...formData, area: value })}
                   placeholder="Select area..."
                   required
+                  disabled={isSubmitting}
+                  hasError={areaErrors.length > 0}
                 />
+                <FieldError messages={areaErrors} />
               </div>
             </div>
 
             <AutocompleteInput
               value={formData.issue}
-              onChange={(value) => setFormData({ ...formData, issue: value })}
+              onChange={(value) => onChange({ ...formData, issue: value })}
+              onFocus={() => setIssueFocusVersion((prev) => prev + 1)}
               onSelect={handleIssueSelect}
               selectedSuggestion={selectedIssue}
               suggestions={issueSuggestions}
               loading={loadingIssueSuggestions}
               label="Issue Description"
               required
-              placeholder="Start typing to see suggestions from knowledge base..."
+              disabled={isSubmitting}
+              placeholder="Click or type to see most common issues first..."
               suggestionHeader=""
+              hasError={issueErrors.length > 0}
             />
+            <FieldError messages={issueErrors} />
             <AutocompleteInput
               value={formData.cause}
-              onChange={(value) => setFormData({ ...formData, cause: value })}
+              onChange={(value) => onChange({ ...formData, cause: value })}
+              onFocus={() => setCauseFocusVersion((prev) => prev + 1)}
               onSelect={handleCauseSelect}
               selectedSuggestion={selectedCause}
               suggestions={causeSuggestions}
               loading={loadingCauseSuggestions}
               label="Cause"
-              placeholder={selectedIssue ? `Common causes for "${selectedIssue.name}"...` : 'Start typing to see suggestions...'}
+              disabled={isSubmitting}
+              placeholder={selectedIssue ? `Common causes for "${selectedIssue.name}" (top used first)...` : 'Click or type to see common causes...'}
               suggestionHeader={selectedIssue ? `Common Causes for "${selectedIssue.name}"` : 'Suggested Causes'}
+              hasError={causeErrors.length > 0}
             />
+            <FieldError messages={causeErrors} />
 
             <div>
               <label className="block text-sm font-medium mb-1 text-muted-foreground">Fix Description</label>
               <textarea
                 value={formData.fixDescription}
-                onChange={(e) => setFormData({ ...formData, fixDescription: e.target.value })}
+                onChange={(e) => onChange({ ...formData, fixDescription: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
+                disabled={isSubmitting}
+                className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 transition-colors resize-none ${
+                  fixDescriptionErrors.length > 0
+                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                }`}
               />
+              <FieldError messages={fixDescriptionErrors} />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1 text-muted-foreground">Permanent Fix</label>
               <textarea
                 value={formData.permanentFix}
-                onChange={(e) => setFormData({ ...formData, permanentFix: e.target.value })}
+                onChange={(e) => onChange({ ...formData, permanentFix: e.target.value })}
                 rows={2}
-                className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
+                disabled={isSubmitting}
+                className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 transition-colors resize-none ${
+                  permanentFixErrors.length > 0
+                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                }`}
               />
+              <FieldError messages={permanentFixErrors} />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1 text-muted-foreground">Note</label>
               <textarea
                 value={formData.note}
-                onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                onChange={(e) => onChange({ ...formData, note: e.target.value })}
                 rows={2}
-                className="w-full px-3 py-2 border border-input rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors resize-none"
+                disabled={isSubmitting}
+                className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 transition-colors resize-none ${
+                  noteErrors.length > 0
+                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                }`}
               />
+              <FieldError messages={noteErrors} />
             </div>
 
             <div className="flex gap-3">
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={isSubmitting}
                 className="btn-primary flex-1 px-4 py-2 flex items-center justify-center gap-2"
               >
-                {submitting ? (
+                {isSubmitting ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <LoadingSpinner size="sm" tone="inverse" />
                     Saving...
                   </>
                 ) : (
@@ -463,8 +534,8 @@ export function WorkLogFormModal({
               <button
                 type="button"
                 onClick={onClose}
-                disabled={submitting}
-                className="btn-secondary flex-1 px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isSubmitting}
+                className="btn-secondary flex-1 px-4 py-2"
               >
                 Cancel
               </button>
@@ -472,6 +543,5 @@ export function WorkLogFormModal({
           </form>
         </div>
       </div>
-    </PermissionGuard>
   );
 }

@@ -46,6 +46,16 @@ export interface RolesQueryParams extends QueryParams {
   // Future: Add role-specific filters
 }
 
+// Issues
+export interface IssuesQueryParams extends QueryParams {
+  // Future: Add issue-specific filters
+}
+
+// Causes
+export interface CausesQueryParams extends QueryParams {
+  issueId?: number | null; // Filter by issue
+}
+
 // Work Logs (Issue Logs)
 export interface WorkLogsQueryParams extends QueryParams {
   status?: string | null; // Filter by status (pending, in-progress, resolved, cancelled)
@@ -259,6 +269,7 @@ export interface ListAccountDto {
   isLocked: boolean;
   lastLoginAt: string | null;
   createdAt: string;
+  totalClaims?: number;
 }
 
 export interface CreateAccountDto {
@@ -519,6 +530,66 @@ export interface ImportResultDto {
   summary: string | null;
 }
 
+// Dashboard
+export type DashboardPeriod = 0 | 1 | 2 | 3;
+export type DashboardTrendGroupBy = 0 | 1;
+
+export interface DashboardOverviewDto {
+  totalIssueLogs: number;
+  issueLogsToday: number;
+  openIssueLogs: number;
+  resolvedIssueLogs: number;
+  totalDepartments: number;
+  totalEmployees: number;
+  totalAccounts: number;
+  activeSessions: number;
+}
+
+export interface DashboardTrendPointDto {
+  periodStart?: string;
+  date?: string;
+  label: string;
+  count: number;
+}
+
+export interface DashboardStatusBreakdownDto {
+  status: string;
+  count: number;
+}
+
+export interface DashboardDepartmentIssueDto {
+  dptId: number;
+  departmentName: string;
+  count: number;
+}
+
+export interface DashboardSummaryFilterDto {
+  period?: DashboardPeriod;
+  groupBy?: DashboardTrendGroupBy;
+  timezone: string;
+  fromDate?: string;
+  toDate?: string;
+  monthOffset?: number;
+}
+
+export interface DashboardSummaryQueryParams {
+  period?: DashboardPeriod;
+  fromDate?: string;
+  toDate?: string;
+  timezone?: string;
+  groupBy?: DashboardTrendGroupBy;
+  monthOffset?: number;
+}
+
+export interface DashboardSummaryDto {
+  overview: DashboardOverviewDto;
+  filter?: DashboardSummaryFilterDto;
+  trend: DashboardTrendPointDto[];
+  trendLast7Days?: DashboardTrendPointDto[];
+  statusBreakdown: DashboardStatusBreakdownDto[];
+  topDepartments: DashboardDepartmentIssueDto[];
+}
+
 // Legacy types for backward compatibility
 export type WorkStatus = 'pending' | 'in-progress' | 'resolved' | 'cancelled';
 
@@ -557,6 +628,7 @@ export type Account = ListAccountDto & {
   roles?: RoleDto[] | null;
   deleteDate?: string | null
 };
+export type Issue = IssueDto & { id: string };
 export type Area = AreaDto & { id: string };
 export type Device = { id: string; name: string; brand: string; model: string; serialNumber: string; deviceType: string; description: string };
 export type DeviceType = { id: string; name: string; description: string };

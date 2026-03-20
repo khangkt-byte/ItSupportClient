@@ -1,68 +1,80 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Clock, Plus } from 'lucide-react';
-import type { Area, Department, Employee, WorkLog, WorkLogsQueryParams } from '@/types/data';
+import type { Area, Department, Employee, WorkLog } from '@/types/data';
 import { SearchFilterBar } from '@/components/common/SearchFilterBar';
 import { PaginationBar } from '@/components/common/PaginationBar';
-import { PermissionGuard } from '@/components/common/PermissionGuard';
 import { Permissions } from '@/config/permissions';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
-import { WorkLogFormModal, type WorkLogFormData } from '@/features/workLogs/components/WorkLogFormModal';
+import { ErrorAlert } from '@/components/common/ErrorAlert';
+import { usePermission } from '@/hooks/usePermission';
+import {
+  WorkLogFormModal,
+  createWorkLogFormData,
+  type WorkLogFormData,
+} from '@/features/workLogs/components/WorkLogFormModal';
 import { WorkLogImportExportPanel } from '@/features/workLogs/components/WorkLogImportExportPanel';
 import { WorkLogTable } from '@/features/workLogs/components/WorkLogTable';
-import { useFilteredWorkLogs } from '@/features/workLogs/hooks/useFilteredWorkLogs';
+import { useWorkLogQuery } from '@/features/workLogs/hooks/useWorkLogQuery';
 import { useWorkLogMutations } from '@/features/workLogs/hooks/useWorkLogMutations';
 
 interface Props {
-  data: WorkLog[];
-  setData: (logs: WorkLog[]) => void;
-  currentUser: string;
-  loading?: boolean;
   employees: Employee[];
   departments: Department[];
   areas: Area[];
 }
 
-export function WorkLogManagement({ data, setData, currentUser, employees, departments, areas, loading }: Props) {
-  const [isLoading, setIsLoading] = useState<boolean>(!!loading);
-  const [queryParams, setQueryParams] = useState<WorkLogsQueryParams>({
-    page: 1,
-    pageSize: 20,
-    search: '',
-    sortBy: 'reportDate',
-    isDescending: true,
-    status: null,
-  });
+export function WorkLogManagement({ employees, departments, areas }: Props) {
+  const {
+    queryParams,
+    setQueryParams,
+    paginatedResult,
+    loading,
+    error: queryError,
+    setError: setQueryError,
+    refetch,
+  } = useWorkLogQuery();
+
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<WorkLog | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [formData, setFormData] = useState<WorkLogFormData>(createWorkLogFormData(null));
+  const [confirmDelete, setConfirmDelete] = useState<WorkLog | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const paginatedResult = useFilteredWorkLogs(data, queryParams);
+
   const {
     submitting,
-    error,
-    setError,
+    error: mutationError,
+    validationErrors,
+    setError: setMutationError,
+    setValidationErrors,
     submitWorkLog,
     deleteWorkLog,
   } = useWorkLogMutations({
-    data,
-    setData,
-    currentUser,
     departments,
     areas,
+    refetch,
   });
 
+  const { hasPermission } = usePermission();
+  const canCreate = hasPermission(Permissions.IssueLog.Create);
+
   const openForm = (log?: WorkLog) => {
-    setError(null);
-    setEditing(log || null);
+    setQueryError(null);
+    setMutationError(null);
+    setValidationErrors(null);
+    const nextEditing = log || null;
+    setEditing(nextEditing);
+    setFormData(createWorkLogFormData(nextEditing));
     setShowForm(true);
   };
 
   const handleSubmit = async (formData: WorkLogFormData) => {
+    setQueryError(null);
     const success = await submitWorkLog(formData, editing);
     if (success) {
       setShowForm(false);
       setEditing(null);
+      setFormData(createWorkLogFormData(null));
     }
   };
 
@@ -71,18 +83,13 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
 
     setDeleteLoading(true);
     try {
-      const success = await deleteWorkLog(confirmDelete);
-      if (success) {
-        setConfirmDelete(null);
-      }
+      setQueryError(null);
+      const success = await deleteWorkLog(confirmDelete.id);
+      if (success) setConfirmDelete(null);
     } finally {
       setDeleteLoading(false);
     }
   };
-
-  useEffect(() => {
-    setIsLoading(!!loading);
-  }, [loading]);
 
   return (
     <div className="space-y-6">
@@ -96,26 +103,23 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
             Track and manage issue logs with consistent filtering, sorting, and pagination
           </p>
         </div>
-        <PermissionGuard 
-          permission={Permissions.IssueLog.Create}
-          fallback={
-            <button disabled className="btn-primary px-4 py-2 flex items-center gap-2 opacity-50">
-              <Plus className="w-5 h-5" />New Work Log
-            </button>
-          }
-        >
+        {canCreate ? (
           <button onClick={() => openForm()} className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm">
             <Plus className="w-5 h-5" />New Work Log
           </button>
-        </PermissionGuard>
+        ) : (
+          <button disabled className="btn-primary px-4 py-2 flex items-center gap-2 opacity-50">
+            <Plus className="w-5 h-5" />New Work Log
+          </button>
+        )}
       </div>
 
 
 
       <SearchFilterBar
         queryParams={queryParams}
-        onQueryChange={(params) => setQueryParams(params as WorkLogsQueryParams)}
-        paginatedResult={paginatedResult}
+        onQueryChange={setQueryParams}
+        paginatedResult={paginatedResult ?? undefined}
         filterOptions={[
           { label: 'All Status', value: 'all' },
           { label: 'Pending', value: 'pending' },
@@ -144,16 +148,23 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
         placeholder="Search by issue, operator, requester, department, or area..."
         showResults={true}
       />
+      {mutationError && !showForm && (
+        <ErrorAlert
+          message={mutationError}
+          onDismiss={() => setMutationError(null)}
+        />
+      )}
+
 
       <WorkLogTable
-        paginatedResult={paginatedResult}
-        isLoading={isLoading}
-        error={error}
+        paginatedResult={paginatedResult ?? { page: 1, pageSize: 20, totalCount: 0, totalPages: 0, hasPreviousPage: false, hasNextPage: false, items: [] }}
+        isLoading={loading}
+        error={queryError}
         onEdit={(log) => openForm(log)}
-        onDelete={(id) => setConfirmDelete(id)}
+        onDelete={setConfirmDelete}
       />
 
-      {paginatedResult && !isLoading && !error && (
+      {paginatedResult && !loading && (
         <PaginationBar
           page={paginatedResult.page}
           totalPages={paginatedResult.totalPages}
@@ -172,24 +183,30 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
       <WorkLogFormModal
         isOpen={showForm}
         editing={editing}
-        currentUser={currentUser}
+        formData={formData}
         employees={employees}
         departments={departments}
         areas={areas}
-        submitting={submitting}
-        error={error}
+        isSubmitting={submitting}
+        error={mutationError}
+        validationErrors={validationErrors}
+        onChange={setFormData}
         onSubmit={handleSubmit}
         onClose={() => {
           if (submitting) return;
           setShowForm(false);
           setEditing(null);
+          setFormData(createWorkLogFormData(null));
         }}
-        onClearError={() => setError(null)}
+        onClearError={() => {
+          setMutationError(null);
+          setValidationErrors(null);
+        }}
       />
 
       <WorkLogImportExportPanel
-        data={data}
-        setData={setData}
+        currentItems={paginatedResult?.items ?? []}
+        refetch={refetch}
         employees={employees}
         departments={departments}
         areas={areas}
@@ -206,7 +223,7 @@ export function WorkLogManagement({ data, setData, currentUser, employees, depar
         loadingLabel="Deleting..."
         action="delete"
         title="Delete work log"
-        description="Are you sure you want to delete this work log? This action cannot be undone."
+        description={`Are you sure you want to delete "${confirmDelete?.issue}"? This action cannot be undone.`}
       />
     </div>
   );

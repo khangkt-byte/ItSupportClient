@@ -23,7 +23,7 @@
  * - React Testing Best Practices: https://react.dev/learn/testing
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { useTheme } from '@/features/theme/hooks/useTheme';
 import { palettes, BrandTheme } from '@/constants/palettes';
 import { getContrastRatio } from '@/utils/colorMath';
@@ -34,6 +34,7 @@ interface PerformanceMetrics {
   cssVariableUpdateTime: number;
   rerenderTime: number;
   totalTime: number;
+  sampleCount?: number;
 }
 
 interface ColorContrastResult {
@@ -50,6 +51,8 @@ interface CombinationTestResult {
   performanceMs: number;
 }
 
+const PRIMARY_TONES = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950'] as const;
+
 export const ThemeValidationTest: React.FC = () => {
   const { 
     appearance,
@@ -57,8 +60,6 @@ export const ThemeValidationTest: React.FC = () => {
     resolvedAppearance,
     setAppearance,
     setBrandColor,
-    accessibilityMode,
-    setAccessibilityMode,
     getSemanticTokens,
     getPrimaryColor,
     prefersReducedMotion,
@@ -69,6 +70,7 @@ export const ThemeValidationTest: React.FC = () => {
   const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics | null>(null);
   const [showAllCombinations, setShowAllCombinations] = useState(false);
   const [testedCombinations, setTestedCombinations] = useState<CombinationTestResult[]>([]);
+  const performanceHistoryRef = useRef<PerformanceMetrics[]>([]);
 
   // All available options
   const appearanceOptions: ('light' | 'dark' | 'auto')[] = ['light', 'dark', 'auto'];
@@ -76,6 +78,56 @@ export const ThemeValidationTest: React.FC = () => {
   
   // Total combinations: 3 appearances × 11 brands = 33 (auto counts as either light or dark)
   const totalCombinations = 2 * brandOptions.length; // light × 11 + dark × 11 = 22 unique states
+
+  const withBenchmarkMode = useCallback((mutation: () => void) => {
+    const root = document.documentElement;
+    root.classList.add('theme-benchmarking');
+    mutation();
+
+    // Keep transition suppression for two frames to avoid skew from delayed animation styles.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        root.classList.remove('theme-benchmarking');
+      });
+    });
+  }, []);
+
+  const median = (values: number[]): number => {
+    if (values.length === 0) {
+      return 0;
+    }
+
+    const sorted = [...values].sort((a, b) => a - b);
+    const center = Math.floor(sorted.length / 2);
+
+    if (sorted.length % 2 === 0) {
+      return (sorted[center - 1] + sorted[center]) / 2;
+    }
+
+    return sorted[center];
+  };
+
+  const medianDefined = (values: Array<number | undefined>): number | undefined => {
+    const filtered = values.filter((value): value is number => value !== undefined);
+    if (filtered.length === 0) {
+      return undefined;
+    }
+    return median(filtered);
+  };
+
+  const commitPerformanceMetrics = useCallback((next: PerformanceMetrics) => {
+    const recent = [...performanceHistoryRef.current, next].slice(-5);
+    performanceHistoryRef.current = recent;
+
+    setPerformanceMetrics({
+      appearanceChangeTime: medianDefined(recent.map(metric => metric.appearanceChangeTime)),
+      brandColorChangeTime: medianDefined(recent.map(metric => metric.brandColorChangeTime)),
+      cssVariableUpdateTime: median(recent.map(metric => metric.cssVariableUpdateTime)),
+      rerenderTime: median(recent.map(metric => metric.rerenderTime)),
+      totalTime: median(recent.map(metric => metric.totalTime)),
+      sampleCount: recent.length,
+    });
+  }, []);
 
   /**
    * Measure appearance change performance
@@ -87,20 +139,21 @@ export const ThemeValidationTest: React.FC = () => {
   const measureAppearanceChange = useCallback((targetAppearance: 'light' | 'dark' | 'auto') => {
     const startTime = performance.now();
     performance.mark('appearance-change-start');
-    
-    setAppearance(targetAppearance);
-    
-    // Measure after CSS variables update (next animation frame)
+
+    withBenchmarkMode(() => {
+      setAppearance(targetAppearance);
+    });
+
+    const cssUpdateEnd = performance.now();
+
+    // Measure after re-render on second animation frame.
     requestAnimationFrame(() => {
-      const cssUpdateEnd = performance.now();
-      
-      // Measure after re-render (second animation frame)
       requestAnimationFrame(() => {
         const endTime = performance.now();
         performance.mark('appearance-change-end');
         performance.measure('appearance-change', 'appearance-change-start', 'appearance-change-end');
-        
-        setPerformanceMetrics({
+
+        commitPerformanceMetrics({
           appearanceChangeTime: cssUpdateEnd - startTime,
           cssVariableUpdateTime: cssUpdateEnd - startTime,
           rerenderTime: endTime - cssUpdateEnd,
@@ -108,7 +161,7 @@ export const ThemeValidationTest: React.FC = () => {
         });
       });
     });
-  }, [setAppearance]);
+  }, [setAppearance, withBenchmarkMode, commitPerformanceMetrics]);
 
   /**
    * Measure brand color change performance
@@ -119,18 +172,20 @@ export const ThemeValidationTest: React.FC = () => {
   const measureBrandColorChange = useCallback((targetBrand: string) => {
     const startTime = performance.now();
     performance.mark('brand-change-start');
-    
-    setBrandColor(targetBrand as any);
-    
+
+    withBenchmarkMode(() => {
+      setBrandColor(targetBrand as any);
+    });
+
+    const cssUpdateEnd = performance.now();
+
     requestAnimationFrame(() => {
-      const cssUpdateEnd = performance.now();
-      
       requestAnimationFrame(() => {
         const endTime = performance.now();
         performance.mark('brand-change-end');
         performance.measure('brand-change', 'brand-change-start', 'brand-change-end');
-        
-        setPerformanceMetrics({
+
+        commitPerformanceMetrics({
           brandColorChangeTime: cssUpdateEnd - startTime,
           cssVariableUpdateTime: cssUpdateEnd - startTime,
           rerenderTime: endTime - cssUpdateEnd,
@@ -138,7 +193,7 @@ export const ThemeValidationTest: React.FC = () => {
         });
       });
     });
-  }, [setBrandColor]);
+  }, [setBrandColor, withBenchmarkMode, commitPerformanceMetrics]);
 
   /**
    * Measure combinatorial theme change
@@ -150,38 +205,37 @@ export const ThemeValidationTest: React.FC = () => {
    */
   const measureCombinationChange = useCallback(
     (targetAppearance: 'light' | 'dark' | 'auto', targetBrand: string) => {
-      // CRITICAL FIX: Apply theme IMMEDIATELY (don't wait for performance measurement)
-      // Force update even if theme is already the same (for testing purposes)
-      setAppearance(targetAppearance);
-      setBrandColor(targetBrand as any);
-      
-      // Start performance measurement AFTER theme is applied
       const startTime = performance.now();
       performance.mark('combination-change-start');
-      
+
+      withBenchmarkMode(() => {
+        setAppearance(targetAppearance);
+        setBrandColor(targetBrand as any);
+      });
+
+      const cssUpdateEnd = performance.now();
+
       requestAnimationFrame(() => {
-        const cssUpdateEnd = performance.now();
-        
         requestAnimationFrame(() => {
           const endTime = performance.now();
           const totalMs = endTime - startTime;
-          
+
           performance.mark('combination-change-end');
           performance.measure('combination-change', 'combination-change-start', 'combination-change-end');
-          
-          setPerformanceMetrics({
+
+          commitPerformanceMetrics({
             appearanceChangeTime: totalMs / 2, // Estimate (both happen together)
             brandColorChangeTime: totalMs / 2,
             cssVariableUpdateTime: cssUpdateEnd - startTime,
             rerenderTime: endTime - cssUpdateEnd,
             totalTime: totalMs,
           });
-          
+
           // Track tested combination
           // Read actual resolved appearance from DOM (in case 'auto' mode)
-          const actualAppearance = document.documentElement.getAttribute('data-appearance') as 'light' | 'dark' || 
+          const actualAppearance = document.documentElement.getAttribute('data-appearance') as 'light' | 'dark' ||
                                   (targetAppearance === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : targetAppearance);
-          
+
           setTestedCombinations(prev => [
             ...prev.filter(c => !(c.appearance === actualAppearance && c.brand === targetBrand)),
             {
@@ -195,7 +249,7 @@ export const ThemeValidationTest: React.FC = () => {
         });
       });
     },
-    [setAppearance, setBrandColor] // REMOVED resolvedAppearance from deps to prevent stale closure
+    [setAppearance, setBrandColor, withBenchmarkMode, commitPerformanceMetrics]
   );
 
   /**
@@ -220,18 +274,54 @@ export const ThemeValidationTest: React.FC = () => {
     };
   };
 
-  /**
-   * Get CSS variable value from document
-   */
-  const getCSSVariable = (varName: string): string => {
-    return getComputedStyle(document.documentElement)
-      .getPropertyValue(varName)
-      .trim();
-  };
-
   // Get current semantic tokens
   const tokens = getSemanticTokens();
   const primaryColor = getPrimaryColor();
+
+  const cssSnapshot = useMemo(() => {
+    if (typeof window === 'undefined') {
+      return {
+        semantic: {} as Record<string, string>,
+        semanticBg: {} as Record<string, string>,
+        semanticFg: {} as Record<string, string>,
+        primary: {} as Record<string, string>,
+        background: '#ffffff',
+      };
+    }
+
+    const styles = getComputedStyle(document.documentElement);
+    const semanticKeys = tokens ? Object.keys(tokens) : [];
+
+    const semantic = semanticKeys.reduce<Record<string, string>>((acc, key) => {
+      acc[key] = styles.getPropertyValue(`--color-${key}`).trim();
+      return acc;
+    }, {});
+
+    const semanticBg = semanticKeys.reduce<Record<string, string>>((acc, key) => {
+      acc[key] = styles.getPropertyValue(`--color-${key}-background`).trim();
+      return acc;
+    }, {});
+
+    const semanticFg = semanticKeys.reduce<Record<string, string>>((acc, key) => {
+      acc[key] = styles.getPropertyValue(`--color-${key}-foreground`).trim();
+      return acc;
+    }, {});
+
+    const background = styles.getPropertyValue('--color-background').trim() || (resolvedAppearance === 'dark' ? '#111827' : '#ffffff');
+
+    const primary = PRIMARY_TONES.reduce<Record<string, string>>((acc, tone) => {
+      acc[tone] = styles.getPropertyValue(`--color-primary-${tone}`).trim();
+      return acc;
+    }, {});
+
+    return {
+      semantic,
+      semanticBg,
+      semanticFg,
+      primary,
+      background,
+    };
+  }, [tokens, appearance, resolvedAppearance, brandColor]);
 
   /**
    * Status badge component for testing
@@ -333,19 +423,11 @@ export const ThemeValidationTest: React.FC = () => {
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Accessibility</h3>
-            <p className="text-lg font-bold text-gray-900 dark:text-gray-100 capitalize mb-2">
-              {accessibilityMode === 'highContrast' ? 'High Contrast' : 'Default'}
-            </p>
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Motion</h3>
             <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
               Motion: {prefersReducedMotion ? '⚠️ Reduced' : '✅ Normal'}
             </p>
-            <button
-              onClick={() => setAccessibilityMode(accessibilityMode === 'default' ? 'highContrast' : 'default')}
-              className="w-full px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-sm"
-            >
-              Toggle High Contrast
-            </button>
+            <p className="text-sm text-gray-500 dark:text-gray-400">High contrast mode has been removed.</p>
           </div>
         </div>
 
@@ -404,6 +486,7 @@ export const ThemeValidationTest: React.FC = () => {
             </div>
             <div className="mt-4 text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 p-3 rounded">
               <strong>Performance Standards:</strong> 60fps = 16.67ms/frame | Good = &lt;50ms | WCAG timing guidelines
+              {performanceMetrics.sampleCount ? ` | Median of last ${performanceMetrics.sampleCount} samples` : ''}
             </div>
           </div>
         )}
@@ -603,10 +686,8 @@ export const ThemeValidationTest: React.FC = () => {
               {/* Token Colors Display with WCAG Testing */}
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 {Object.entries(tokens).map(([key, value]) => {
-                  const bgVar = `--color-${key}-background`;
-                  const fgVar = `--color-${key}-foreground`;
-                  const bg = getCSSVariable(bgVar) || 'hsl(var(--background))';
-                  const fg = getCSSVariable(fgVar) || value;
+                  const bg = cssSnapshot.semanticBg[key] || cssSnapshot.background;
+                  const fg = cssSnapshot.semanticFg[key] || value;
                   
                   // Calculate contrast (WCAG 2.1 standard)
                   const contrast = calculateContrast(fg, bg);
@@ -675,7 +756,7 @@ export const ThemeValidationTest: React.FC = () => {
                     <div key={key} className="bg-gray-50 dark:bg-gray-900 p-3 rounded">
                       <span className="text-gray-600 dark:text-gray-400">--color-{key}:</span>{' '}
                       <span className="text-gray-900 dark:text-gray-100 font-bold">
-                        {getCSSVariable(`--color-${key}`) || '❌ Not set'}
+                        {cssSnapshot.semantic[key] || '❌ Not set'}
                       </span>
                     </div>
                   ))}
@@ -691,8 +772,8 @@ export const ThemeValidationTest: React.FC = () => {
                   These variables should change when brand color changes, but remain unchanged when appearance changes
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 font-mono text-xs">
-                  {['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950'].map(tone => {
-                    const value = getCSSVariable(`--color-primary-${tone}`);
+                  {PRIMARY_TONES.map(tone => {
+                    const value = cssSnapshot.primary[tone];
                     return (
                       <div key={tone} className="bg-gray-50 dark:bg-gray-900 p-3 rounded">
                         <span className="text-gray-600 dark:text-gray-400">--color-primary-{tone}:</span>{' '}

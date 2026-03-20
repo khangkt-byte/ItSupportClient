@@ -1,0 +1,1 @@
+export { useAreaQuery } from './useAreaQuery';

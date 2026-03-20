@@ -69,6 +69,7 @@ export function ThemeScheduler() {
     const [latitude, setLatitude] = useState(51.5074);
     const [longitude, setLongitude] = useState(-0.1278);
     const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+    const [locationError, setLocationError] = useState<string | null>(null);
 
     // Format time for display
     const formatTime = (date: Date): string => {
@@ -80,6 +81,7 @@ export function ThemeScheduler() {
 
     // Get user location
     const getCurrentLocation = async () => {
+        setLocationError(null);
         setIsLoadingLocation(true);
         try {
             const position = await new Promise<GeolocationPosition>((resolve, reject) => {
@@ -104,7 +106,7 @@ export function ThemeScheduler() {
             }
         } catch (error) {
             console.error('Failed to get location:', error);
-            alert('Unable to get your location. Please check permissions.');
+            setLocationError('Unable to get your location. Please check permissions.');
         } finally {
             setIsLoadingLocation(false);
         }
@@ -314,7 +316,9 @@ export function ThemeScheduler() {
                                             <MapPin className="w-4 h-4" />
                                             {isLoadingLocation ? 'Getting location...' : 'Use Current Location'}
                                         </Button>
-
+                                        {locationError && (
+                                            <p className="text-sm text-red-600">{locationError}</p>
+                                        )}
                                         <div className="grid grid-cols-2 gap-3">
                                             <div>
                                                 <label className="text-sm font-medium text-gray-700 block mb-2">
