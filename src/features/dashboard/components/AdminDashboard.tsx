@@ -5,6 +5,7 @@ import type { DashboardSummaryQueryParams, User } from '@/types/data';
 import { useDataManager } from '@/hooks/useDataManager';
 import { WorkLogManagement } from '@/features/workLogs/components/WorkLogManagement';
 import { useDashboardSummary } from '@/features/dashboard/hooks';
+import { workLogsApi } from '@/services/api/workLogs';
 import { EmployeeManagement } from '@/features/employees/components/EmployeeManagement';
 import { DepartmentManagement } from '@/features/departments/components/DepartmentManagement';
 import { AreaManagement } from '@/features/areas/components/AreaManagement';
@@ -34,14 +35,14 @@ interface Props {
 const trendChartConfig = {
   count: {
     label: 'Issue Logs',
-    color: '#4f7cff',
+    color: 'var(--color-primary-600)',
   },
 } satisfies ChartConfig;
 
 const statusChartConfig = {
   count: {
     label: 'Count',
-    color: '#4f7cff',
+    color: 'var(--color-primary-600)',
   },
 } satisfies ChartConfig;
 
@@ -62,13 +63,14 @@ const toStatusLabel = (value: string): string => {
     .join(' ');
 };
 
-type DashboardFilterMode = 'day' | 'month' | 'range';
-type DashboardPreset = 'today' | 'last7' | 'thisMonth' | 'lastMonth' | 'allTime' | 'custom';
+type DashboardFilterMode = 'day' | 'month' | 'range' | 'allTime' | 'year';
+type DashboardPreset = 'today' | 'last7' | 'thisMonth' | 'lastMonth' | 'allTime' | 'thisYear' | 'lastYear' | 'custom';
 
 const DASHBOARD_PERIOD = {
   day: 0,
   month: 1,
   range: 2,
+  allTime: 3,
 } as const;
 
 const DASHBOARD_GROUP_BY = {
@@ -80,12 +82,26 @@ const FILTER_QUERY_KEYS = {
   mode: 'dbMode',
   day: 'dbDay',
   month: 'dbMonth',
+  year: 'dbYear',
   from: 'dbFrom',
   to: 'dbTo',
   preset: 'dbPreset',
 } as const;
 
-const ALL_TIME_START = '2000-01-01';
+const MONTH_ITEMS = [
+  { value: '01', label: 'January' },
+  { value: '02', label: 'February' },
+  { value: '03', label: 'March' },
+  { value: '04', label: 'April' },
+  { value: '05', label: 'May' },
+  { value: '06', label: 'June' },
+  { value: '07', label: 'July' },
+  { value: '08', label: 'August' },
+  { value: '09', label: 'September' },
+  { value: '10', label: 'October' },
+  { value: '11', label: 'November' },
+  { value: '12', label: 'December' },
+];
 
 const formatDate = (date: Date): string => {
   const year = date.getFullYear();
@@ -162,15 +178,11 @@ const getRelativeMonthValue = (offset: number): string => {
   return formatMonth(base);
 };
 
-const formatMonthLabel = (value: string): string => {
-  const [yearString, monthString] = value.split('-');
-  return `${monthString}/${yearString}`;
-};
-
 const parseUrlFilterState = (defaults: {
   filterMode: DashboardFilterMode;
   dayDate: string;
   monthValue: string;
+  yearValue: number;
   rangeFrom: string;
   rangeTo: string;
   preset: DashboardPreset;
@@ -183,12 +195,13 @@ const parseUrlFilterState = (defaults: {
   const mode = params.get(FILTER_QUERY_KEYS.mode);
   const day = params.get(FILTER_QUERY_KEYS.day);
   const month = params.get(FILTER_QUERY_KEYS.month);
+  const year = params.get(FILTER_QUERY_KEYS.year);
   const from = params.get(FILTER_QUERY_KEYS.from);
   const to = params.get(FILTER_QUERY_KEYS.to);
   const preset = params.get(FILTER_QUERY_KEYS.preset);
 
   const parsedMode: DashboardFilterMode =
-    mode === 'day' || mode === 'month' || mode === 'range' ? mode : defaults.filterMode;
+    mode === 'day' || mode === 'month' || mode === 'range' || mode === 'allTime' || mode === 'year' ? mode : defaults.filterMode;
 
   const parsedPreset: DashboardPreset =
     preset === 'today' ||
@@ -196,6 +209,8 @@ const parseUrlFilterState = (defaults: {
       preset === 'thisMonth' ||
       preset === 'lastMonth' ||
       preset === 'allTime' ||
+      preset === 'thisYear' ||
+      preset === 'lastYear' ||
       preset === 'custom'
       ? preset
       : defaults.preset;
@@ -204,6 +219,7 @@ const parseUrlFilterState = (defaults: {
     filterMode: parsedMode,
     dayDate: day && isValidDateString(day) ? day : defaults.dayDate,
     monthValue: month && isValidMonthString(month) ? month : defaults.monthValue,
+    yearValue: year && /^\d{4}$/.test(year) ? Number(year) : defaults.yearValue,
     rangeFrom: from && isValidDateString(from) ? from : defaults.rangeFrom,
     rangeTo: to && isValidDateString(to) ? to : defaults.rangeTo,
     preset: parsedPreset,
@@ -220,39 +236,81 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
   const defaultRangeFrom = useMemo(() => formatDate(new Date(Date.now() - (6 * 24 * 60 * 60 * 1000))), []);
   const currentMonthValue = useMemo(() => formatMonth(new Date()), []);
   const lastMonthValue = useMemo(() => getRelativeMonthValue(-1), []);
+  const currentYear = useMemo(() => new Date().getFullYear(), []);
 
   const initialFilterState = useMemo(
     () => parseUrlFilterState({
       filterMode: 'month',
       dayDate: today,
       monthValue: currentMonthValue,
+      yearValue: currentYear,
       rangeFrom: defaultRangeFrom,
       rangeTo: today,
       preset: 'thisMonth',
     }),
-    [currentMonthValue, defaultRangeFrom, today],
+    [currentMonthValue, currentYear, defaultRangeFrom, today],
   );
 
   const [filterMode, setFilterMode] = useState<DashboardFilterMode>(initialFilterState.filterMode);
   const [dayDate, setDayDate] = useState(initialFilterState.dayDate);
   const [monthValue, setMonthValue] = useState(initialFilterState.monthValue);
+  const [yearValue, setYearValue] = useState(initialFilterState.yearValue);
   const [rangeFrom, setRangeFrom] = useState(initialFilterState.rangeFrom);
   const [rangeTo, setRangeTo] = useState(initialFilterState.rangeTo);
   const [activePreset, setActivePreset] = useState<DashboardPreset>(initialFilterState.preset);
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
+  const [loadingAvailableYears, setLoadingAvailableYears] = useState(false);
 
-  const monthOptions = useMemo(() => {
-    const options: Array<{ value: string; label: string }> = [];
-    for (let offset = 0; offset >= -24; offset -= 1) {
-      const value = getRelativeMonthValue(offset);
-      options.push({ value, label: formatMonthLabel(value) });
-    }
+  // Load available years from work logs on component mount
+  useEffect(() => {
+    const loadAvailableYears = async () => {
+      setLoadingAvailableYears(true);
+      try {
+        const yearsSet = new Set<number>();
+        let page = 1;
+        let hasMore = true;
 
-    if (monthValue && !options.some(option => option.value === monthValue)) {
-      options.unshift({ value: monthValue, label: formatMonthLabel(monthValue) });
-    }
+        while (hasMore) {
+          const result = await workLogsApi.getAll({ page, pageSize: 500 });
+          result.items.forEach(item => {
+            if (item.dateReported) {
+              const year = new Date(item.dateReported).getFullYear();
+              yearsSet.add(year);
+            }
+          });
 
-    return options;
+          hasMore = result.hasNextPage;
+          page += 1;
+        }
+
+        const sortedYears = Array.from(yearsSet).sort((a, b) => b - a);
+        setAvailableYears(sortedYears);
+      } catch (error) {
+        console.error('Failed to load available years:', error);
+      } finally {
+        setLoadingAvailableYears(false);
+      }
+    };
+
+    loadAvailableYears();
+  }, []);
+
+  // Extract month and year parts from monthValue
+  const monthParts = useMemo(() => {
+    const [yearString, monthString] = monthValue.split('-');
+    return {
+      year: Number(yearString),
+      month: monthString,
+    };
   }, [monthValue]);
+
+  // Auto-correct month year if not in available list
+  useEffect(() => {
+    if (availableYears.length > 0 && monthParts.year && !availableYears.includes(monthParts.year)) {
+      const correctedYear = availableYears[0];
+      setMonthValue(`${correctedYear}-${monthParts.month}`);
+    }
+  }, [availableYears, monthParts.year, monthParts.month]);
 
   const handleApplyPreset = (preset: DashboardPreset) => {
     if (preset === 'today') {
@@ -285,10 +343,22 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
     }
 
     if (preset === 'allTime') {
-      setFilterMode('range');
-      setRangeFrom(ALL_TIME_START);
-      setRangeTo(today);
+      setFilterMode('allTime');
       setActivePreset('allTime');
+      return;
+    }
+
+    if (preset === 'thisYear') {
+      setFilterMode('year');
+      setYearValue(currentYear);
+      setActivePreset('thisYear');
+      return;
+    }
+
+    if (preset === 'lastYear') {
+      setFilterMode('year');
+      setYearValue(currentYear - 1);
+      setActivePreset('lastYear');
       return;
     }
 
@@ -307,11 +377,25 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
     if (filterMode === 'day') {
       params.set(FILTER_QUERY_KEYS.day, dayDate);
       params.delete(FILTER_QUERY_KEYS.month);
+      params.delete(FILTER_QUERY_KEYS.year);
       params.delete(FILTER_QUERY_KEYS.from);
       params.delete(FILTER_QUERY_KEYS.to);
     } else if (filterMode === 'month') {
       params.set(FILTER_QUERY_KEYS.month, monthValue);
       params.delete(FILTER_QUERY_KEYS.day);
+      params.delete(FILTER_QUERY_KEYS.year);
+      params.delete(FILTER_QUERY_KEYS.from);
+      params.delete(FILTER_QUERY_KEYS.to);
+    } else if (filterMode === 'year') {
+      params.set(FILTER_QUERY_KEYS.year, yearValue.toString());
+      params.delete(FILTER_QUERY_KEYS.day);
+      params.delete(FILTER_QUERY_KEYS.month);
+      params.delete(FILTER_QUERY_KEYS.from);
+      params.delete(FILTER_QUERY_KEYS.to);
+    } else if (filterMode === 'allTime') {
+      params.delete(FILTER_QUERY_KEYS.day);
+      params.delete(FILTER_QUERY_KEYS.month);
+      params.delete(FILTER_QUERY_KEYS.year);
       params.delete(FILTER_QUERY_KEYS.from);
       params.delete(FILTER_QUERY_KEYS.to);
     } else {
@@ -319,12 +403,13 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
       params.set(FILTER_QUERY_KEYS.to, rangeTo);
       params.delete(FILTER_QUERY_KEYS.day);
       params.delete(FILTER_QUERY_KEYS.month);
+      params.delete(FILTER_QUERY_KEYS.year);
     }
 
     const nextQuery = params.toString();
     const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ''}${window.location.hash}`;
     window.history.replaceState(null, '', nextUrl);
-  }, [activePreset, dayDate, filterMode, monthValue, rangeFrom, rangeTo]);
+  }, [activePreset, dayDate, filterMode, monthValue, yearValue, rangeFrom, rangeTo]);
 
   const dashboardQueryParams = useMemo<DashboardSummaryQueryParams>(() => {
     if (filterMode === 'day') {
@@ -349,6 +434,26 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
       };
     }
 
+    if (filterMode === 'allTime') {
+      return {
+        period: DASHBOARD_PERIOD.allTime,
+        timezone,
+        groupBy: DASHBOARD_GROUP_BY.month,
+      };
+    }
+
+    if (filterMode === 'year') {
+      const yearStart = `${yearValue}-01-01`;
+      const yearEnd = `${yearValue}-12-31`;
+      return {
+        period: DASHBOARD_PERIOD.range,
+        fromDate: yearStart,
+        toDate: yearEnd,
+        timezone,
+        groupBy: DASHBOARD_GROUP_BY.month,
+      };
+    }
+
     const normalizedFrom = rangeFrom <= rangeTo ? rangeFrom : rangeTo;
     const normalizedTo = rangeFrom <= rangeTo ? rangeTo : rangeFrom;
     const dayDifference = getDayDifference(normalizedFrom, normalizedTo);
@@ -360,7 +465,7 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
       timezone,
       groupBy: dayDifference > 31 ? DASHBOARD_GROUP_BY.month : DASHBOARD_GROUP_BY.day,
     };
-  }, [dayDate, filterMode, monthValue, rangeFrom, rangeTo, timezone]);
+  }, [dayDate, filterMode, monthValue, yearValue, rangeFrom, rangeTo, timezone]);
 
   const dashboardSummary = useDashboardSummary(currentView === 'admin', dashboardQueryParams);
 
@@ -406,7 +511,7 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
   // Map currentView to the appropriate component
   const renderContent = () => {
     switch (currentView) {
-      case 'admin':
+      case 'admin': {
         const overview = dashboardSummary.summary?.overview;
 
         return (
@@ -428,6 +533,7 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
                     >
                       <option value="day">Day</option>
                       <option value="month">Month</option>
+                      <option value="year">Year</option>
                       <option value="range">Date Range</option>
                     </select>
                   </div>
@@ -448,22 +554,48 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
                   )}
 
                   {filterMode === 'month' && (
-                    <div>
-                      <label className="block text-sm text-muted-foreground mb-1">Month</label>
-                      <select
-                        value={monthValue}
-                        onChange={(event) => {
-                          setMonthValue(event.target.value);
-                          setActivePreset('custom');
-                        }}
-                        className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
-                      >
-                        {monthOptions.map(option => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm text-muted-foreground mb-1">Month</label>
+                        <select
+                          value={monthParts.month}
+                          onChange={(event) => {
+                            const newMonth = event.target.value;
+                            setMonthValue(`${monthParts.year}-${newMonth}`);
+                            setActivePreset('custom');
+                          }}
+                          className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                        >
+                          {MONTH_ITEMS.map(item => (
+                            <option key={item.value} value={item.value}>
+                              {item.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm text-muted-foreground mb-1">Year</label>
+                        <select
+                          value={monthParts.year}
+                          onChange={(event) => {
+                            const newYear = event.target.value;
+                            setMonthValue(`${newYear}-${monthParts.month}`);
+                            setActivePreset('custom');
+                          }}
+                          disabled={loadingAvailableYears}
+                          className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {availableYears.length === 0 ? (
+                            <option value={monthParts.year}>{monthParts.year || 'No years available'}</option>
+                          ) : (
+                            availableYears.map(year => (
+                              <option key={year} value={year}>
+                                {year}
+                              </option>
+                            ))
+                          )}
+                        </select>
+                      </div>
                     </div>
                   )}
 
@@ -494,6 +626,38 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
                         />
                       </div>
                     </>
+                  )}
+
+                  {filterMode === 'allTime' && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">All available records</p>
+                    </div>
+                  )}
+
+                  {filterMode === 'year' && (
+                    <div>
+                      <label className="block text-sm text-muted-foreground mb-1">Year</label>
+                      <select
+                        value={yearValue}
+                        onChange={(event) => {
+                          const newYear = Number(event.target.value);
+                          setYearValue(newYear);
+                          setActivePreset('custom');
+                        }}
+                        disabled={loadingAvailableYears}
+                        className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {availableYears.length === 0 ? (
+                          <option value={yearValue}>{yearValue || 'No years available'}</option>
+                        ) : (
+                          availableYears.map(year => (
+                            <option key={year} value={year}>
+                              {year}
+                            </option>
+                          ))
+                        )}
+                      </select>
+                    </div>
                   )}
                 </div>
 
@@ -565,6 +729,28 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
                   }`}
                 >
                   All time
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleApplyPreset('thisYear')}
+                  className={`h-8 px-3 rounded-md border text-xs transition-colors ${
+                    activePreset === 'thisYear'
+                      ? 'bg-primary-600 text-primary-foreground border-primary-600'
+                      : 'bg-background border-border hover:bg-accent'
+                  }`}
+                >
+                  This year
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleApplyPreset('lastYear')}
+                  className={`h-8 px-3 rounded-md border text-xs transition-colors ${
+                    activePreset === 'lastYear'
+                      ? 'bg-primary-600 text-primary-foreground border-primary-600'
+                      : 'bg-background border-border hover:bg-accent'
+                  }`}
+                >
+                  Last year
                 </button>
               </div>
             </section>
@@ -667,7 +853,7 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
                         {statusData.map((item) => (
                           <Cell
                             key={item.status}
-                            fill={STATUS_COLORS[item.status.toLowerCase()] || '#4f7cff'}
+                            fill={STATUS_COLORS[item.status.toLowerCase()] || 'var(--color-primary-600)'}
                           />
                         ))}
                       </Bar>
@@ -678,6 +864,7 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
             </div>
           </div>
         );
+      }
       case 'workLogs':
         return (
           <WorkLogManagement

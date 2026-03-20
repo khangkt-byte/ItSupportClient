@@ -530,7 +530,7 @@ export interface ImportResultDto {
 }
 
 // Dashboard
-export type DashboardPeriod = 0 | 1 | 2;
+export type DashboardPeriod = 0 | 1 | 2 | 3;
 export type DashboardTrendGroupBy = 0 | 1;
 
 export interface DashboardOverviewDto {
