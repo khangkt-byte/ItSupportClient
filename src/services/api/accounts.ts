@@ -1,6 +1,8 @@
 import { apiClient, buildQueryString } from './common';
 import type {
   AccountDto,
+  AccountRolesDto,
+  AccountClaimsDto,
   ListAccountDto,
   CreateAccountDto,
   UpdateAccountDto,
@@ -99,6 +101,22 @@ export const accountsApi = {
    */
   async unlock(id: string): Promise<AccountDto> {
     return apiClient.post<AccountDto>(`/api/accounts/${id}/unlock`);
+  },
+
+  /**
+   * Assign roles to account
+   * POST /api/accounts/{id}/assign-roles
+   */
+  async assignRoles(id: string, roleIds: number[]): Promise<AccountRolesDto> {
+    return apiClient.post<AccountRolesDto>(`/api/accounts/${id}/assign-roles`, roleIds);
+  },
+
+  /**
+   * Assign direct claims to account
+   * POST /api/accounts/{id}/assign-claims
+   */
+  async assignClaims(id: string, claimIds: number[]): Promise<AccountClaimsDto> {
+    return apiClient.post<AccountClaimsDto>(`/api/accounts/${id}/assign-claims`, claimIds);
   },
 
   /**

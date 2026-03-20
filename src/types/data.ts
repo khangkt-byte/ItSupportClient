@@ -109,6 +109,12 @@ export interface AccountRolesDto {
   roles: RoleDto[];
 }
 
+export interface AccountClaimsDto {
+  accountId: string; // UUID
+  username: string;
+  claims: ClaimDto[];
+}
+
 export interface AssignRolesDto {
   accountId: string; // UUID
   roleIds: number[];
@@ -259,6 +265,7 @@ export interface AccountDto {
   createdAt: string;
   updatedAt: string | null;
   roles: RoleDto[] | null;
+  claims: ClaimDto[] | null;
 }
 
 export interface ListAccountDto {

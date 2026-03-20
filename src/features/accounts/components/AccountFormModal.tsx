@@ -4,8 +4,9 @@ import { ErrorAlert } from '@/components/common/ErrorAlert';
 import { FieldError } from '@/components/common/FieldError';
 import { PermissionEditor } from '@/components/common/PermissionEditor';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { employeesApi } from '@/services/api/employees';
 import { rolesApi } from '@/services/api/roles';
-import type { Account, ClaimDto, Employee, RoleDto } from '@/types/data';
+import type { Account, ClaimDto, ListEmployeeDto, RoleDto } from '@/types/data';
 import {
   getFieldErrorMessages,
   getGeneralValidationMessages,
@@ -24,8 +25,6 @@ interface AccountFormModalProps {
   isOpen: boolean;
   editing: Account | null;
   formData: AccountFormData;
-  employees: Employee[];
-  roles: RoleDto[];
   isSubmitting: boolean;
   error: string | null;
   validationErrors: ValidationErrors | null;
@@ -59,8 +58,6 @@ export function AccountFormModal({
   isOpen,
   editing,
   formData,
-  employees,
-  roles,
   isSubmitting,
   error,
   validationErrors,
@@ -70,29 +67,81 @@ export function AccountFormModal({
   onClearError,
 }: AccountFormModalProps) {
   const [formStep, setFormStep] = useState<'basic' | 'permissions'>('basic');
+  const [availableEmployees, setAvailableEmployees] = useState<ListEmployeeDto[]>([]);
+  const [availableRoles, setAvailableRoles] = useState<RoleDto[]>([]);
   const [availableClaims, setAvailableClaims] = useState<ClaimDto[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  const [isLoadingClaims, setIsLoadingClaims] = useState(false);
+  const [dataLoadError, setDataLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
 
     setFormStep('basic');
+    setDataLoadError(null);
   }, [isOpen, editing]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const loadData = async () => {
+      setIsLoadingData(true);
+
+      try {
+        const [employeesResult, rolesResult] = await Promise.all([
+          employeesApi.getAll({ page: 1, pageSize: 1000 }),
+          rolesApi.getAll({ page: 1, pageSize: 1000 }),
+        ]);
+
+        setAvailableEmployees(employeesResult.items || []);
+        setAvailableRoles(rolesResult.items || []);
+      } catch (loadError) {
+        console.error('Failed to load account form data:', loadError);
+        setAvailableEmployees([]);
+        setAvailableRoles([]);
+        setDataLoadError('Failed to load employees/roles. Please retry.');
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    void loadData();
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen || formStep !== 'permissions') return;
 
     const loadClaims = async () => {
+      setIsLoadingClaims(true);
+
       try {
         const claims = await rolesApi.getClaims();
         setAvailableClaims(claims);
       } catch (loadError) {
         console.error('Failed to load claims:', loadError);
         setAvailableClaims([]);
+        setDataLoadError('Failed to load claims. Please retry.');
+      } finally {
+        setIsLoadingClaims(false);
       }
     };
 
     void loadClaims();
   }, [isOpen, formStep]);
+
+  useEffect(() => {
+    if (!isOpen || !editing || formData.employeeId || availableEmployees.length === 0) return;
+
+    const matchedEmployee = availableEmployees.find((emp) => {
+      const matchByCode = Boolean(editing.empCode) && emp.empCode === editing.empCode;
+      const matchByName = emp.fullName === editing.empName;
+      return matchByCode || matchByName;
+    });
+
+    if (matchedEmployee) {
+      onChange({ ...formData, employeeId: matchedEmployee.empId });
+    }
+  }, [isOpen, editing, formData, availableEmployees, onChange]);
 
   const handleBasicInfoSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,7 +195,22 @@ export function AccountFormModal({
           />
         )}
 
+        {dataLoadError && (
+          <ErrorAlert
+            message={dataLoadError}
+            onDismiss={() => setDataLoadError(null)}
+            dismissDisabled={isSubmitting || isLoadingData || isLoadingClaims}
+            className="mx-6 mt-4"
+          />
+        )}
+
         {formStep === 'basic' && (
+          isLoadingData ? (
+            <div className="p-10 flex flex-col items-center justify-center gap-3 text-center">
+              <LoadingSpinner size="md" tone="current" />
+              <p className="text-sm text-muted-foreground">Loading employees and roles...</p>
+            </div>
+          ) : (
           <form onSubmit={handleBasicInfoSubmit} className="p-6 space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">
@@ -164,9 +228,9 @@ export function AccountFormModal({
                 disabled={!!editing}
               >
                 <option value="">Select employee...</option>
-                {employees.map((emp) => (
-                  <option key={emp.id} value={emp.employeeId}>
-                    {emp.employeeId} - {emp.fullName}
+                {availableEmployees.map((emp) => (
+                  <option key={emp.empId} value={emp.empId}>
+                    {(emp.empCode || emp.empId)} - {emp.fullName}
                   </option>
                 ))}
               </select>
@@ -222,22 +286,30 @@ export function AccountFormModal({
               </button>
             </div>
           </form>
+          )
         )}
 
         {formStep === 'permissions' && (
           <div className="p-6 space-y-6">
-            <PermissionEditor
-              selectedRoleIds={formData.selectedRoleIds}
-              selectedClaimIds={formData.selectedClaimIds}
-              availableRoles={roles}
-              availableClaims={availableClaims}
-              onRolesChange={(roleIds) =>
-                onChange({ ...formData, selectedRoleIds: roleIds })
-              }
-              onClaimsChange={(claimIds) =>
-                onChange({ ...formData, selectedClaimIds: claimIds })
-              }
-            />
+            {isLoadingData || isLoadingClaims ? (
+              <div className="py-12 flex flex-col items-center justify-center gap-3 text-center">
+                <LoadingSpinner size="md" tone="current" />
+                <p className="text-sm text-muted-foreground">Loading permissions...</p>
+              </div>
+            ) : (
+              <PermissionEditor
+                selectedRoleIds={formData.selectedRoleIds}
+                selectedClaimIds={formData.selectedClaimIds}
+                availableRoles={availableRoles}
+                availableClaims={availableClaims}
+                onRolesChange={(roleIds) =>
+                  onChange({ ...formData, selectedRoleIds: roleIds })
+                }
+                onClaimsChange={(claimIds) =>
+                  onChange({ ...formData, selectedClaimIds: claimIds })
+                }
+              />
+            )}
 
             <div className="flex gap-3 pt-4 border-t border-border">
               <button type="button" onClick={() => setFormStep('basic')} disabled={isSubmitting} className="btn-secondary px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed">

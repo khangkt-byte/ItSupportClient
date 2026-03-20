@@ -14,7 +14,8 @@
  * - POST /api/accounts - Create account
  * - PUT /api/accounts/{id} - Update account
  * - DELETE /api/accounts/{id} - Delete account
- * - POST /api/roles/assign - Assign roles to account
+ * - POST /api/accounts/{id}/assign-roles - Assign roles to account
+ * - POST /api/accounts/{id}/assign-claims - Assign direct claims to account
  * - GET /api/roles/claims - Get all available claims
  */
 
@@ -25,8 +26,7 @@ import { PaginationBar } from '@/components/common/PaginationBar';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { ErrorAlert } from '@/components/common/ErrorAlert';
 import { accountsApi } from '@/services/api/accounts';
-import { rolesApi } from '@/services/api/roles';
-import type { Account, Employee, RoleDto } from '@/types/data';
+import type { Account } from '@/types/data';
 import { usePermission } from '@/hooks/usePermission';
 import { Permissions } from '@/config/permissions';
 import { AccountTable } from '@/features/accounts/components/AccountTable';
@@ -38,11 +38,6 @@ import {
 import { useAccountQuery } from '@/features/accounts/hooks/useAccountQuery';
 import { parseApiError, type ValidationErrors } from '@/utils/apiErrors';
 
-interface Props {
-  employees: Employee[];
-  roles: RoleDto[];
-}
-
 type ConfirmAction = 'delete' | 'lock' | 'unlock';
 type ConfirmState = {
   action: ConfirmAction;
@@ -51,7 +46,7 @@ type ConfirmState = {
   isLocked: boolean;
 } | null;
 
-export function AccountManagement({ employees, roles }: Props) {
+export function AccountManagement() {
   const {
     queryParams,
     setQueryParams,
@@ -92,11 +87,6 @@ export function AccountManagement({ employees, roles }: Props) {
 
     try {
       const detail = await accountsApi.getById(accountId);
-      const matchedEmployee = employees.find(
-        (employee) =>
-          employee.empCode === listAccount.empCode ||
-          employee.fullName === listAccount.empName
-      );
 
       const accountToEdit: Account = {
         id: detail.accountId,
@@ -112,7 +102,7 @@ export function AccountManagement({ employees, roles }: Props) {
             ? detail.roles.map((role) => role.name).join(', ')
             : 'No Role',
         password: '',
-        employeeId: matchedEmployee?.employeeId || detail.accountId,
+        employeeId: '',
         employeeName: detail.empName,
         employeeCode: detail.empCode,
         roles: detail.roles,
@@ -133,19 +123,12 @@ export function AccountManagement({ employees, roles }: Props) {
     setValidationErrors(null);
 
     try {
+      let targetAccountId = editing?.accountId;
+
       if (editing) {
         await accountsApi.update(editing.accountId, {
           username: formData.username,
-          ...(formData.password && { password: formData.password })
         });
-
-        if (formData.selectedRoleIds.length > 0 || formData.selectedClaimIds.length > 0) {
-          await rolesApi.assignRolesAndClaims({
-            accountId: editing.accountId,
-            roleIds: formData.selectedRoleIds,
-            claimIds: formData.selectedClaimIds
-          });
-        }
       } else {
         const created = await accountsApi.create({
           empId: formData.employeeId,
@@ -153,13 +136,14 @@ export function AccountManagement({ employees, roles }: Props) {
           password: formData.password
         });
 
-        if (formData.selectedRoleIds.length > 0 || formData.selectedClaimIds.length > 0) {
-          await rolesApi.assignRolesAndClaims({
-            accountId: created.accountId,
-            roleIds: formData.selectedRoleIds,
-            claimIds: formData.selectedClaimIds
-          });
-        }
+        targetAccountId = created.accountId;
+      }
+
+      if (targetAccountId) {
+        await Promise.all([
+          accountsApi.assignRoles(targetAccountId, formData.selectedRoleIds),
+          accountsApi.assignClaims(targetAccountId, formData.selectedClaimIds),
+        ]);
       }
 
       setShowForm(false);
@@ -358,8 +342,6 @@ export function AccountManagement({ employees, roles }: Props) {
         isOpen={showForm}
         editing={editing}
         formData={formData}
-        employees={employees}
-        roles={roles}
         isSubmitting={isMutating}
         error={mutationError}
         validationErrors={validationErrors}

@@ -893,12 +893,7 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
       case 'areas':
         return <AreaManagement />;
       case 'accounts':
-        return (
-          <AccountManagement
-            employees={dataManager.employees.data}
-            roles={dataManager.roles.data}
-          />
-        );
+        return <AccountManagement />;
       case 'my-account':
         return <MyAccountManagement />;
       case 'roles':
