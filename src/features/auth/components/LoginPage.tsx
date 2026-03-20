@@ -3,6 +3,7 @@ import { Eye, EyeOff, FileText } from 'lucide-react';
 import { ErrorAlert } from '@/components/common/ErrorAlert';
 import { FieldError } from '@/components/common/FieldError';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { authApi } from '@/services/api/auth';
 import type { LoginResponse } from '@/features/auth/types/auth';
 
 interface LoginPageProps {
@@ -19,6 +20,11 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotIdentifier, setForgotIdentifier] = useState('');
+  const [forgotError, setForgotError] = useState('');
+  const [forgotSuccess, setForgotSuccess] = useState('');
+  const [isSendingForgot, setIsSendingForgot] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,13 +58,35 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     }
   };
 
+  const handleForgotPassword = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    setForgotError('');
+    setForgotSuccess('');
+
+    if (!forgotIdentifier.trim()) {
+      setForgotError('Please enter your email or username.');
+      return;
+    }
+
+    setIsSendingForgot(true);
+    try {
+      await authApi.forgotPassword(forgotIdentifier.trim());
+      setForgotSuccess('If this account exists, a password reset link has been sent. Please check your email.');
+      setForgotIdentifier('');
+    } catch {
+      setForgotError('Unable to process forgot password request. Please try again.');
+    } finally {
+      setIsSendingForgot(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-primary-50 to-indigo-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
-        <div className="bg-card rounded-2xl shadow-xl p-8">
+        <div className="bg-card border border-border rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-primary-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <FileText className="w-10 h-10 text-primary-foreground" />
+              <FileText className="w-10 h-10 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-foreground">IT Support System</h1>
             <p className="text-muted-foreground mt-2">Sign in to access your account</p>
@@ -81,10 +109,10 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                   }
                 }}
                 required
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 bg-card text-foreground placeholder-muted-foreground ${
                   fieldErrors.username.length > 0
                     ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
-                    : 'border-input focus:ring-primary-500 focus:border-transparent'
+                    : 'border-border focus:ring-primary-500 focus:border-primary-500'
                 }`}
                 placeholder="Enter your username"
               />
@@ -108,17 +136,17 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                     }
                   }}
                   required
-                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:outline-none focus:ring-2 ${
+                  className={`w-full px-4 py-3 pr-12 border rounded-lg focus:outline-none focus:ring-2 bg-card text-foreground placeholder-muted-foreground ${
                     fieldErrors.password.length > 0
                       ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
-                      : 'border-input focus:ring-primary-500 focus:border-transparent'
+                      : 'border-border focus:ring-primary-500 focus:border-primary-500'
                   }`}
                   placeholder="Enter your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-placeholder hover:text-muted-foreground z-10"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground z-10 transition-colors"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -126,6 +154,68 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               </div>
               <FieldError messages={fieldErrors.password} />
             </div>
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowForgotPassword((prev) => !prev);
+                  setForgotError('');
+                  setForgotSuccess('');
+                }}
+                className="text-sm text-primary-600 hover:text-primary-700 transition-colors"
+              >
+                Forgot password?
+              </button>
+            </div>
+
+            {showForgotPassword && (
+              <div className="rounded-lg border border-border bg-accent/40 p-4 space-y-3">
+                <p className="text-sm text-foreground font-medium">Reset your password</p>
+                <p className="text-xs text-muted-foreground">Enter your email or username to receive a reset link.</p>
+
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    value={forgotIdentifier}
+                    onChange={(e) => setForgotIdentifier(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        void handleForgotPassword(e);
+                      }
+                    }}
+                    placeholder="Email or username"
+                    className="w-full px-4 py-2.5 border border-border rounded-lg bg-card text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  />
+
+                  {forgotError && <ErrorAlert message={forgotError} />}
+
+                  {forgotSuccess && (
+                    <div className="rounded-lg border border-success-border bg-success-background p-3 text-success-foreground text-sm">
+                      {forgotSuccess}
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      void handleForgotPassword(e);
+                    }}
+                    disabled={isSendingForgot}
+                    className="w-full bg-secondary text-secondary-foreground py-2.5 rounded-lg hover:bg-accent transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+                  >
+                    {isSendingForgot ? (
+                      <>
+                        <LoadingSpinner size="sm" tone="current" />
+                        Sending...
+                      </>
+                    ) : (
+                      'Send reset link'
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
 
             {error && <ErrorAlert message={error} />}
 
@@ -145,8 +235,8 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             </button>
           </form>
 
-          <div className="mt-6 p-4 bg-muted rounded-lg">
-            <p className="text-xs text-muted-foreground font-medium mb-2">Demo Credentials:</p>
+          <div className="mt-6 p-4 bg-accent border border-border rounded-lg">
+            <p className="text-xs text-foreground font-medium mb-2">Demo Credentials:</p>
             <div className="text-xs text-muted-foreground space-y-1">
               <p><strong>Admin:</strong> admin / admin123</p>
               <p><strong>Employee:</strong> employee / employee123</p>
