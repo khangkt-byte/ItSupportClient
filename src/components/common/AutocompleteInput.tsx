@@ -7,7 +7,7 @@ export interface Suggestion {
   name: string;
   description?: string;
   usageCount: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 interface Props {
@@ -21,6 +21,7 @@ interface Props {
   placeholder?: string;
   label: string;
   required?: boolean;
+  disabled?: boolean;
   showKbIndicator?: boolean;
   suggestionHeader?: string;
   className?: string;
@@ -38,6 +39,7 @@ export function AutocompleteInput({
   placeholder,
   label,
   required = false,
+  disabled = false,
   showKbIndicator = true,
   suggestionHeader = "💡 Suggested from Knowledge Base",
   className = '',
@@ -66,6 +68,7 @@ export function AutocompleteInput({
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
     const newValue = e.target.value;
     onChange(newValue);
     
@@ -79,11 +82,13 @@ export function AutocompleteInput({
   };
 
   const handleFocus = () => {
+    if (disabled) return;
     setShowSuggestions(true);
     onFocus?.();
   };
 
   const handleSelectSuggestion = (suggestion: Suggestion) => {
+    if (disabled) return;
     onChange(suggestion.name);
     onSelect?.(suggestion);
     setShowSuggestions(false);
@@ -155,6 +160,7 @@ export function AutocompleteInput({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           required={required}
+          disabled={disabled}
           className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 ${
             hasError
               ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'

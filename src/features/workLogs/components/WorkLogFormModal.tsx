@@ -105,8 +105,8 @@ export function WorkLogFormModal({
   const canSubmit = hasPermission(editing ? Permissions.IssueLog.Edit : Permissions.IssueLog.Create);
   const reportDateErrors = getFieldErrorMessages(validationErrors, 'ReportDate');
   const statusErrors = getFieldErrorMessages(validationErrors, 'Status');
-  const operatorErrors = getFieldErrorMessages(validationErrors, 'Operators', ['OperatorIds']);
-  const requesterErrors = getFieldErrorMessages(validationErrors, 'Requesters', ['RequesterIds']);
+  const operatorErrors = getFieldErrorMessages(validationErrors, 'Operators', ['Operator', 'OperatorIds']);
+  const requesterErrors = getFieldErrorMessages(validationErrors, 'Requesters', ['Requester', 'RequesterIds']);
   const departmentErrors = getFieldErrorMessages(validationErrors, 'Department', ['DepartmentId', 'DptId']);
   const areaErrors = getFieldErrorMessages(validationErrors, 'Area', ['AreaId']);
   const issueErrors = getFieldErrorMessages(validationErrors, 'Issue', ['IssueDescription']);
@@ -118,8 +118,10 @@ export function WorkLogFormModal({
     'ReportDate',
     'Status',
     'Operators',
+    'Operator',
     'OperatorIds',
     'Requesters',
+    'Requester',
     'RequesterIds',
     'Department',
     'DepartmentId',
@@ -287,7 +289,7 @@ export function WorkLogFormModal({
         <div className="bg-card rounded-lg p-6 max-w-sm text-center">
           <h3 className="text-lg font-semibold text-error-foreground mb-2">Access Denied</h3>
           <p className="text-muted-foreground mb-4">
-            You don't have permission to {editing ? 'edit' : 'create'} work logs.
+            You don&apos;t have permission to {editing ? 'edit' : 'create'} work logs.
           </p>
           <button
             onClick={onClose}
@@ -339,6 +341,7 @@ export function WorkLogFormModal({
                   required
                   value={formData.reportDate}
                   onChange={(e) => onChange({ ...formData, reportDate: e.target.value })}
+                  disabled={isSubmitting}
                   className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground focus:ring-2 transition-colors ${
                     reportDateErrors.length > 0
                       ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
@@ -355,6 +358,7 @@ export function WorkLogFormModal({
                   required
                   value={formData.status}
                   onChange={(e) => onChange({ ...formData, status: e.target.value as WorkStatus })}
+                  disabled={isSubmitting}
                   className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground focus:ring-2 transition-colors ${
                     statusErrors.length > 0
                       ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
@@ -380,6 +384,7 @@ export function WorkLogFormModal({
                   label=""
                   required
                   allowCustom
+                  disabled={isSubmitting}
                   hasError={operatorErrors.length > 0}
                 />
                 <FieldError messages={operatorErrors} />
@@ -393,6 +398,7 @@ export function WorkLogFormModal({
                   placeholder="Select requesters or type custom name..."
                   label=""
                   allowCustom
+                  disabled={isSubmitting}
                   hasError={requesterErrors.length > 0}
                 />
                 <FieldError messages={requesterErrors} />
@@ -407,6 +413,7 @@ export function WorkLogFormModal({
                   onChange={(value) => onChange({ ...formData, department: value })}
                   placeholder="Select department..."
                   required
+                  disabled={isSubmitting}
                   hasError={departmentErrors.length > 0}
                 />
                 <FieldError messages={departmentErrors} />
@@ -421,6 +428,7 @@ export function WorkLogFormModal({
                   onChange={(value) => onChange({ ...formData, area: value })}
                   placeholder="Select area..."
                   required
+                  disabled={isSubmitting}
                   hasError={areaErrors.length > 0}
                 />
                 <FieldError messages={areaErrors} />
@@ -437,6 +445,7 @@ export function WorkLogFormModal({
               loading={loadingIssueSuggestions}
               label="Issue Description"
               required
+              disabled={isSubmitting}
               placeholder="Click or type to see most common issues first..."
               suggestionHeader=""
               hasError={issueErrors.length > 0}
@@ -451,6 +460,7 @@ export function WorkLogFormModal({
               suggestions={causeSuggestions}
               loading={loadingCauseSuggestions}
               label="Cause"
+              disabled={isSubmitting}
               placeholder={selectedIssue ? `Common causes for "${selectedIssue.name}" (top used first)...` : 'Click or type to see common causes...'}
               suggestionHeader={selectedIssue ? `Common Causes for "${selectedIssue.name}"` : 'Suggested Causes'}
               hasError={causeErrors.length > 0}
@@ -463,6 +473,7 @@ export function WorkLogFormModal({
                 value={formData.fixDescription}
                 onChange={(e) => onChange({ ...formData, fixDescription: e.target.value })}
                 rows={3}
+                disabled={isSubmitting}
                 className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 transition-colors resize-none ${
                   fixDescriptionErrors.length > 0
                     ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
@@ -477,6 +488,7 @@ export function WorkLogFormModal({
                 value={formData.permanentFix}
                 onChange={(e) => onChange({ ...formData, permanentFix: e.target.value })}
                 rows={2}
+                disabled={isSubmitting}
                 className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 transition-colors resize-none ${
                   permanentFixErrors.length > 0
                     ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
@@ -491,6 +503,7 @@ export function WorkLogFormModal({
                 value={formData.note}
                 onChange={(e) => onChange({ ...formData, note: e.target.value })}
                 rows={2}
+                disabled={isSubmitting}
                 className={`w-full px-3 py-2 border rounded-lg bg-card text-foreground placeholder-placeholder focus:ring-2 transition-colors resize-none ${
                   noteErrors.length > 0
                     ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
@@ -522,7 +535,7 @@ export function WorkLogFormModal({
                 type="button"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="btn-secondary flex-1 px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-secondary flex-1 px-4 py-2"
               >
                 Cancel
               </button>

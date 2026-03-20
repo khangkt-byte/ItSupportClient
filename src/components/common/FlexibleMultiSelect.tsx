@@ -14,6 +14,7 @@ interface Props {
   label?: string;
   required?: boolean;
   allowCustom?: boolean;
+  disabled?: boolean;
   hasError?: boolean;
 }
 
@@ -25,6 +26,7 @@ export function FlexibleMultiSelect({
   label,
   required = false,
   allowCustom = true,
+  disabled = false,
   hasError = false,
 }: Props) {
   const [inputValue, setInputValue] = useState('');
@@ -58,12 +60,14 @@ export function FlexibleMultiSelect({
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
     setInputValue(e.target.value);
     setShowSuggestions(true);
     setHighlightedIndex(-1);
   };
 
   const handleSelectOption = (value: string) => {
+    if (disabled) return;
     if (!values.includes(value)) {
       onChange([...values, value]);
     }
@@ -74,10 +78,12 @@ export function FlexibleMultiSelect({
   };
 
   const handleRemoveValue = (valueToRemove: string) => {
+    if (disabled) return;
     onChange(values.filter(v => v !== valueToRemove));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (disabled) return;
     if (e.key === 'Enter' || e.key === 'Tab') {
       if (showSuggestions && filteredOptions.length > 0) {
         e.preventDefault();
@@ -172,6 +178,8 @@ export function FlexibleMultiSelect({
       <div className="relative">
         {/* Selected values + Input */}
         <div className={`w-full min-h-10.5 px-3 py-2 border rounded-lg bg-card flex flex-wrap gap-2 items-center focus-within:ring-2 ${
+          disabled ? 'bg-muted cursor-not-allowed opacity-50' : ''
+        } ${
           hasError
             ? 'border-error-border focus-within:ring-error-border/30 focus-within:border-error-border'
             : 'border-input focus-within:ring-primary-500 focus-within:border-transparent'
@@ -206,7 +214,8 @@ export function FlexibleMultiSelect({
             onFocus={handleFocus}
             onBlur={handleInputBlur}
             placeholder={values.length === 0 ? placeholder : ''}
-            className="flex-1 min-w-30 outline-none bg-transparent text-foreground placeholder-placeholder"
+            disabled={disabled}
+            className="flex-1 min-w-30 outline-none bg-transparent text-foreground placeholder-placeholder disabled:cursor-not-allowed"
           />
         </div>
 
