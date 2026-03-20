@@ -152,7 +152,7 @@ export function RoleFormModal({
 
   return (
     <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-card rounded-lg max-w-4xl w-full my-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-card rounded-lg max-w-5xl w-full my-4 max-h-[90vh] overflow-y-auto">
         <div className="px-6 py-4 border-b border-border flex justify-between items-center sticky top-0 bg-card z-10">
           <div>
             <h3 className="text-lg font-semibold flex items-center gap-2 text-foreground">

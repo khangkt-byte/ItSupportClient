@@ -269,6 +269,7 @@ export interface ListAccountDto {
   isLocked: boolean;
   lastLoginAt: string | null;
   createdAt: string;
+  totalClaims?: number;
 }
 
 export interface CreateAccountDto {

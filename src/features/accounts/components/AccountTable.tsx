@@ -1,4 +1,4 @@
-import { Edit, Lock, Shield, Trash2, Unlock, User } from 'lucide-react';
+import { Edit, Lock, Trash2, Unlock, User } from 'lucide-react';
 import { ErrorAlert } from '@/components/common/ErrorAlert';
 import type { ListAccountDto } from '@/types/data';
 import { LoadingState } from '@/components/common/LoadingState';
@@ -42,7 +42,7 @@ export function AccountTable({
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Employee Code</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Username</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Roles</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Permissions</th>
               <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Actions</th>
             </tr>
           </thead>
@@ -73,8 +73,7 @@ export function AccountTable({
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <span className="px-2 py-1 text-xs rounded bg-primary-100 text-primary-700 flex items-center gap-1 w-fit">
-                      <Shield className="w-3 h-3" />
-                      {((item as { roleCount?: number }).roleCount || 0)} roles
+                      {((item as { totalClaims?: number }).totalClaims ?? 0)} {((item as { totalClaims?: number }).totalClaims ?? 0) !== 1 ? 'permissions' : 'permission'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-right">
