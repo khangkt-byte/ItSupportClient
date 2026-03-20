@@ -126,14 +126,22 @@ export function AccountManagement() {
       let targetAccountId = editing?.accountId;
 
       if (editing) {
-        await accountsApi.update(editing.accountId, {
+        const updatePayload: Parameters<typeof accountsApi.update>[1] = {
           username: formData.username,
-        });
+        };
+
+        if (formData.password) {
+          updatePayload.newPassword = formData.password;
+          updatePayload.confirmPassword = formData.confirmPassword;
+        }
+
+        await accountsApi.update(editing.accountId, updatePayload);
       } else {
         const created = await accountsApi.create({
           empId: formData.employeeId,
           username: formData.username,
-          password: formData.password
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
         });
 
         targetAccountId = created.accountId;

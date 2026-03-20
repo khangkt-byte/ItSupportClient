@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { accountsApi } from '@/services/api/accounts';
 import { employeesApi } from '@/services/api/employees';
 import type { ChangePasswordDto, LoginHistoryDto, ProfileDto } from '@/types/data';
@@ -40,6 +41,11 @@ export function MyAccountManagement() {
   const [loginHistory, setLoginHistory] = useState<LoginHistoryDto[]>([]);
 
   const [passwordForm, setPasswordForm] = useState<PasswordFormState>(INITIAL_PASSWORD_FORM);
+  const [showPasswordFields, setShowPasswordFields] = useState<Record<keyof PasswordFormState, boolean>>({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  });
   const [historyStatusFilter, setHistoryStatusFilter] = useState<LoginHistoryStatusFilter>('all');
   const [historyPage, setHistoryPage] = useState(1);
 
@@ -272,46 +278,76 @@ export function MyAccountManagement() {
           <div className="space-y-3">
             <div>
               <label className="block text-sm text-muted-foreground mb-1">Current Password</label>
-              <input
-                type="password"
-                value={passwordForm.currentPassword}
-                onChange={(event) => handlePasswordFieldChange('currentPassword', event.target.value)}
-                className={`w-full h-10 rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 ${
-                  passwordFieldErrors.currentPassword.length > 0
-                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
-                    : 'border-input focus:ring-primary-500 focus:border-transparent'
-                }`}
-              />
+              <div className="relative">
+                <input
+                  type={showPasswordFields.currentPassword ? 'text' : 'password'}
+                  value={passwordForm.currentPassword}
+                  onChange={(event) => handlePasswordFieldChange('currentPassword', event.target.value)}
+                  className={`w-full h-10 rounded-md border bg-background px-3 pr-10 text-sm focus:outline-none focus:ring-2 ${
+                    passwordFieldErrors.currentPassword.length > 0
+                      ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                      : 'border-input focus:ring-primary-500 focus:border-transparent'
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordFields((prev) => ({ ...prev, currentPassword: !prev.currentPassword }))}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors z-10"
+                  aria-label={showPasswordFields.currentPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPasswordFields.currentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
               <FieldError messages={passwordFieldErrors.currentPassword} />
             </div>
 
             <div>
               <label className="block text-sm text-muted-foreground mb-1">New Password</label>
-              <input
-                type="password"
-                value={passwordForm.newPassword}
-                onChange={(event) => handlePasswordFieldChange('newPassword', event.target.value)}
-                className={`w-full h-10 rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 ${
-                  passwordFieldErrors.newPassword.length > 0
-                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
-                    : 'border-input focus:ring-primary-500 focus:border-transparent'
-                }`}
-              />
+              <div className="relative">
+                <input
+                  type={showPasswordFields.newPassword ? 'text' : 'password'}
+                  value={passwordForm.newPassword}
+                  onChange={(event) => handlePasswordFieldChange('newPassword', event.target.value)}
+                  className={`w-full h-10 rounded-md border bg-background px-3 pr-10 text-sm focus:outline-none focus:ring-2 ${
+                    passwordFieldErrors.newPassword.length > 0
+                      ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                      : 'border-input focus:ring-primary-500 focus:border-transparent'
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordFields((prev) => ({ ...prev, newPassword: !prev.newPassword }))}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors z-10"
+                  aria-label={showPasswordFields.newPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPasswordFields.newPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
               <FieldError messages={passwordFieldErrors.newPassword} />
             </div>
 
             <div>
               <label className="block text-sm text-muted-foreground mb-1">Confirm New Password</label>
-              <input
-                type="password"
-                value={passwordForm.confirmPassword}
-                onChange={(event) => handlePasswordFieldChange('confirmPassword', event.target.value)}
-                className={`w-full h-10 rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 ${
-                  passwordFieldErrors.confirmPassword.length > 0
-                    ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
-                    : 'border-input focus:ring-primary-500 focus:border-transparent'
-                }`}
-              />
+              <div className="relative">
+                <input
+                  type={showPasswordFields.confirmPassword ? 'text' : 'password'}
+                  value={passwordForm.confirmPassword}
+                  onChange={(event) => handlePasswordFieldChange('confirmPassword', event.target.value)}
+                  className={`w-full h-10 rounded-md border bg-background px-3 pr-10 text-sm focus:outline-none focus:ring-2 ${
+                    passwordFieldErrors.confirmPassword.length > 0
+                      ? 'border-error-border focus:ring-error-border/30 focus:border-error-border'
+                      : 'border-input focus:ring-primary-500 focus:border-transparent'
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordFields((prev) => ({ ...prev, confirmPassword: !prev.confirmPassword }))}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors z-10"
+                  aria-label={showPasswordFields.confirmPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPasswordFields.confirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
               <FieldError messages={passwordFieldErrors.confirmPassword} />
             </div>
           </div>
