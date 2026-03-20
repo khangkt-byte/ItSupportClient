@@ -868,7 +868,6 @@ export function AdminDashboard({ user, onLogout, currentView }: Props) {
       case 'workLogs':
         return (
           <WorkLogManagement
-            currentUser={user.fullName}
             employees={dataManager.employees.data}
             departments={dataManager.departments.data}
             areas={dataManager.areas.data}

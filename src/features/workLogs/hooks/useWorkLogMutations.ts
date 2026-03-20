@@ -19,7 +19,6 @@ export interface WorkLogMutationFormData {
 }
 
 interface UseWorkLogMutationsParams {
-    currentUser: string;
     departments: Department[];
     areas: Area[];
     /** Called after every successful create / update / delete to reload the list. */
@@ -27,7 +26,6 @@ interface UseWorkLogMutationsParams {
 }
 
 export function useWorkLogMutations({
-    currentUser,
     departments,
     areas,
     refetch,
@@ -47,7 +45,7 @@ export function useWorkLogMutations({
                 const area = areas.find((item) => item.name === formData.area);
 
                 const workLogData: Partial<WorkLog> = {
-                    operators: [formData.operators[0] || currentUser],
+                    operators: formData.operators,
                     requesters: formData.requesters,
                     dptId: dept?.dptId,
                     areaId: area?.areaId,
@@ -80,7 +78,7 @@ export function useWorkLogMutations({
                 setSubmitting(false);
             }
         },
-        [areas, currentUser, departments, refetch]
+        [areas, departments, refetch]
     );
 
     const deleteWorkLog = useCallback(

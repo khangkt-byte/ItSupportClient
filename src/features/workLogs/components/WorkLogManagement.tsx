@@ -18,13 +18,12 @@ import { useWorkLogQuery } from '@/features/workLogs/hooks/useWorkLogQuery';
 import { useWorkLogMutations } from '@/features/workLogs/hooks/useWorkLogMutations';
 
 interface Props {
-  currentUser: string;
   employees: Employee[];
   departments: Department[];
   areas: Area[];
 }
 
-export function WorkLogManagement({ currentUser, employees, departments, areas }: Props) {
+export function WorkLogManagement({ employees, departments, areas }: Props) {
   const {
     queryParams,
     setQueryParams,
@@ -51,7 +50,6 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
     submitWorkLog,
     deleteWorkLog,
   } = useWorkLogMutations({
-    currentUser,
     departments,
     areas,
     refetch,
@@ -225,7 +223,7 @@ export function WorkLogManagement({ currentUser, employees, departments, areas }
         loadingLabel="Deleting..."
         action="delete"
         title="Delete work log"
-        description={`Are you sure you want to delete \"${confirmDelete?.issue}\"? This action cannot be undone.`}
+        description={`Are you sure you want to delete "${confirmDelete?.issue}"? This action cannot be undone.`}
       />
     </div>
   );
