@@ -21,7 +21,11 @@ export interface EmployeeFormData {
   area: string;
 }
 
-export function createEmployeeFormData(item: Employee | null): EmployeeFormData {
+export function createEmployeeFormData(
+  item: Employee | null,
+  departments: Department[] = [],
+  areas: AreaDto[] = [],
+): EmployeeFormData {
   return item
     ? {
         empCode: item.empCode || '',
@@ -29,8 +33,8 @@ export function createEmployeeFormData(item: Employee | null): EmployeeFormData 
         phoneNumber: item.phoneNumber || '',
         email: item.email || '',
         position: item.position || '',
-        department: item.department || '',
-        area: item.area || '',
+        department: item.department || departments.find((dept) => dept.dptId === item.dptId)?.name || '',
+        area: item.area || areas.find((area) => area.areaId === item.areaId)?.name || '',
       }
     : { empCode: '', fullName: '', phoneNumber: '', email: '', position: '', department: '', area: '' };
 }
@@ -38,6 +42,7 @@ export function createEmployeeFormData(item: Employee | null): EmployeeFormData 
 interface EmployeeFormModalProps {
   isOpen: boolean;
   isSubmitting: boolean;
+  isLoadingData: boolean;
   editing: Employee | null;
   error: string | null;
   validationErrors: ValidationErrors | null;
@@ -53,6 +58,7 @@ interface EmployeeFormModalProps {
 export function EmployeeFormModal({
   isOpen,
   isSubmitting,
+  isLoadingData,
   editing,
   error,
   validationErrors,
@@ -64,8 +70,6 @@ export function EmployeeFormModal({
   departments,
   areas,
 }: EmployeeFormModalProps) {
-  if (!isOpen) return null;
-
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await onSubmit(formData);
@@ -111,12 +115,14 @@ export function EmployeeFormModal({
     [areas]
   );
 
+  if (!isOpen) return null;
+
   return (
     <div className="fixed inset-0 bg-overlay flex items-center justify-center z-50 p-4 overflow-y-auto">
       <div className="bg-card rounded-lg max-w-2xl w-full my-4 max-h-[90vh] overflow-y-auto">
         <div className="px-6 py-4 border-b border-border flex justify-between items-center sticky top-0 bg-card z-10">
           <h3 className="text-lg font-semibold text-foreground">{editing ? 'Edit' : 'Add'} Employee</h3>
-          <button onClick={onClose} disabled={isSubmitting} className="hover:text-muted-foreground transition-colors text-foreground disabled:opacity-50 disabled:cursor-not-allowed">
+          <button onClick={onClose} disabled={isSubmitting || isLoadingData} className="hover:text-muted-foreground transition-colors text-foreground disabled:opacity-50 disabled:cursor-not-allowed">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -125,10 +131,16 @@ export function EmployeeFormModal({
             message={error}
             details={generalValidationMessages}
             onDismiss={onClearError}
-            dismissDisabled={isSubmitting}
+            dismissDisabled={isSubmitting || isLoadingData}
             className="mx-6 mt-4"
           />
         )}
+        {isLoadingData ? (
+          <div className="p-10 flex flex-col items-center justify-center gap-3 text-center">
+            <LoadingSpinner size="md" tone="current" />
+            <p className="text-sm text-muted-foreground">Loading employee details...</p>
+          </div>
+        ) : (
         <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -246,6 +258,7 @@ export function EmployeeFormModal({
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );

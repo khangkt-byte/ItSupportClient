@@ -40,7 +40,8 @@ export function EmployeeManagement({ departments, areas }: Props) {
   // Form states
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Employee | null>(null);
-  const [formData, setFormData] = useState<EmployeeFormData>(createEmployeeFormData(null));
+  const [formData, setFormData] = useState<EmployeeFormData>(createEmployeeFormData(null, departments, areas));
+  const [isFormLoading, setIsFormLoading] = useState(false);
 
   // UI states
   const [isMutating, setIsMutating] = useState(false);
@@ -74,13 +75,40 @@ export function EmployeeManagement({ departments, areas }: Props) {
     }));
   };
 
-  const openForm = (item?: Employee) => {
-    setEditing(item || null);
-    setFormData(createEmployeeFormData(item ?? null));
+  const openForm = async (item?: Employee) => {
     setQueryError(null);
     setMutationError(null);
     setValidationErrors(null);
-    setShowForm(true);
+
+    if (!item) {
+      setIsFormLoading(false);
+      setEditing(null);
+      setFormData(createEmployeeFormData(null, departments, areas));
+      setShowForm(true);
+      return;
+    }
+
+    try {
+      setShowForm(true);
+      setIsFormLoading(true);
+      setEditing(item);
+      const detail = await employeesApi.getById(item.empId);
+      const hydratedEmployee: Employee = {
+        ...item,
+        ...detail,
+        department: departments.find((dept) => dept.dptId === detail.dptId)?.name || '',
+        area: areas.find((area) => area.areaId === detail.areaId)?.name || '',
+      };
+
+      setEditing(hydratedEmployee);
+      setFormData(createEmployeeFormData(hydratedEmployee, departments, areas));
+    } catch (openFormError: unknown) {
+      console.error('Failed to load employee details:', openFormError);
+      const parsedError = parseApiError(openFormError);
+      setMutationError(parsedError.message || 'Unable to load employee details. Please try again.');
+    } finally {
+      setIsFormLoading(false);
+    }
   };
 
   const handleSubmit = async (nextFormData: EmployeeFormData) => {
@@ -120,7 +148,7 @@ export function EmployeeManagement({ departments, areas }: Props) {
       }
 
       setShowForm(false);
-      setFormData(createEmployeeFormData(null));
+      setFormData(createEmployeeFormData(null, departments, areas));
       // Refresh data after submission
       await refetch();
     } catch (submitError: unknown) {
@@ -167,7 +195,7 @@ export function EmployeeManagement({ departments, areas }: Props) {
         </div>
         {hasPermission(Permissions.Employee.Create) && (
           <button
-            onClick={() => openForm()}
+            onClick={() => void openForm()}
             disabled={isLoading}
             className="btn-primary px-4 py-2 flex items-center gap-2 shadow-sm"
           >
@@ -216,7 +244,7 @@ export function EmployeeManagement({ departments, areas }: Props) {
         items={paginatedResult?.items || []}
         canEdit={hasPermission(Permissions.Employee.Edit)}
         canDelete={hasPermission(Permissions.Employee.Delete)}
-        onEdit={(item) => openForm(item as Employee)}
+        onEdit={(item) => void openForm(item as Employee)}
         onDelete={(item) => setConfirmDelete(item as Employee)}
       />
 
@@ -241,6 +269,7 @@ export function EmployeeManagement({ departments, areas }: Props) {
       <EmployeeFormModal
         isOpen={showForm}
         isSubmitting={isMutating}
+        isLoadingData={isFormLoading}
         editing={editing}
         error={mutationError}
         validationErrors={validationErrors}
@@ -249,6 +278,7 @@ export function EmployeeManagement({ departments, areas }: Props) {
         onSubmit={handleSubmit}
         onClose={() => {
           if (isLoading) return;
+          setIsFormLoading(false);
           setShowForm(false);
         }}
         onClearError={() => {
