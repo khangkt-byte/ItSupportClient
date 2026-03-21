@@ -140,7 +140,7 @@ export function WorkLogManagement({ employees, departments, areas }: Props) {
           { label: 'Report Date', value: 'reportDate' },
           { label: 'Issue', value: 'issue' },
           { label: 'Status', value: 'status' },
-          { label: 'Department', value: 'department' },
+          { label: 'Department', value: 'departmentName' },
           { label: 'Area', value: 'area' },
           { label: 'Operator', value: 'operator' },
           { label: 'Requester', value: 'requester' },
