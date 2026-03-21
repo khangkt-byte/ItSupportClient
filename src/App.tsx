@@ -10,6 +10,9 @@ import type { LoginResponse } from '@/features/auth/types/auth';
 const LoginPage = lazy(() =>
   import('@/features/auth/components/LoginPage').then(m => ({ default: m.LoginPage }))
 );
+const ResetPasswordPage = lazy(() =>
+  import('@/features/auth/components/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage }))
+);
 const AdminDashboard = lazy(() =>
   import('@/features/dashboard/components/AdminDashboard').then(m => ({ default: m.AdminDashboard }))
 );
@@ -41,8 +44,17 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentView, setCurrentView] = useState<string>('');
   const [securityError, setSecurityError] = useState<string | null>(null);
+  const [isResetPasswordPage, setIsResetPasswordPage] = useState(false);
 
   useEffect(() => {
+    // Check if we're on the reset-password page
+    const path = window.location.pathname;
+    if (path === '/reset-password') {
+      setIsResetPasswordPage(true);
+      setIsLoading(false);
+      return;
+    }
+
     initializeApp();
   }, []);
 
@@ -174,6 +186,17 @@ export default function App() {
           <p className="text-muted-foreground">{securityError}</p>
         </div>
       </div>
+    );
+  }
+
+  // Show reset password page if on /reset-password route
+  if (isResetPasswordPage) {
+    return (
+      <Suspense fallback={<LoadingState className="min-h-screen bg-muted" />}>
+        <ResetPasswordPage onResetSuccess={() => {
+          window.location.href = '/login';
+        }} />
+      </Suspense>
     );
   }
 
